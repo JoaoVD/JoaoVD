@@ -1,0 +1,211 @@
+<html>
+<head>
+  <title>sea.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          sea.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* This feature allows the distribution of a Node.js application conveniently to a</span>
+ <span class="s0">* system that does not have Node.js installed.</span>
+ <span class="s0">*</span>
+ <span class="s0">* Node.js supports the creation of [single executable applications](https://github.com/nodejs/single-executable) by allowing</span>
+ <span class="s0">* the injection of a blob prepared by Node.js, which can contain a bundled script,</span>
+ <span class="s0">* into the `node` binary. During start up, the program checks if anything has been</span>
+ <span class="s0">* injected. If the blob is found, it executes the script in the blob. Otherwise</span>
+ <span class="s0">* Node.js operates as it normally does.</span>
+ <span class="s0">*</span>
+ <span class="s0">* The single executable application feature currently only supports running a</span>
+ <span class="s0">* single embedded script using the `CommonJS` module system.</span>
+ <span class="s0">*</span>
+ <span class="s0">* Users can create a single executable application from their bundled script</span>
+ <span class="s0">* with the `node` binary itself and any tool which can inject resources into the</span>
+ <span class="s0">* binary.</span>
+ <span class="s0">*</span>
+ <span class="s0">* Here are the steps for creating a single executable application using one such</span>
+ <span class="s0">* tool, [postject](https://github.com/nodejs/postject):</span>
+ <span class="s0">*</span>
+ <span class="s0">* 1. Create a JavaScript file:</span>
+ <span class="s0">* ```bash</span>
+ <span class="s0">* echo 'console.log(`Hello, ${process.argv[2]}!`);' &gt; hello.js</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* 2. Create a configuration file building a blob that can be injected into the</span>
+ <span
+   class="s0">* single executable application (see `Generating single executable preparation blobs` for details):</span>
+ <span class="s0">* ```bash</span>
+ <span class="s0">* echo '{ &quot;main&quot;: &quot;hello.js&quot;, &quot;output&quot;: &quot;sea-prep.blob&quot; }' &gt; sea-config.json</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* 3. Generate the blob to be injected:</span>
+ <span class="s0">* ```bash</span>
+ <span class="s0">* node --experimental-sea-config sea-config.json</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* 4. Create a copy of the `node` executable and name it according to your needs:</span>
+ <span class="s0">*    * On systems other than Windows:</span>
+ <span class="s0">* ```bash</span>
+ <span class="s0">* cp $(command -v node) hello</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*    * On Windows:</span>
+ <span class="s0">* ```text</span>
+ <span class="s0">* node -e &quot;require('fs').copyFileSync(process.execPath, 'hello.exe')&quot;</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* The `.exe` extension is necessary.</span>
+ <span class="s0">* 5. Remove the signature of the binary (macOS and Windows only):</span>
+ <span class="s0">*    * On macOS:</span>
+ <span class="s0">* ```bash</span>
+ <span class="s0">* codesign --remove-signature hello</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*    * On Windows (optional):</span>
+ <span class="s0">* [signtool](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool) can be used from the installed [Windows SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/).</span>
+ <span class="s0">* If this step is</span>
+ <span class="s0">* skipped, ignore any signature-related warning from postject.</span>
+ <span class="s0">* ```powershell</span>
+ <span class="s0">* signtool remove /s hello.exe</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* 6. Inject the blob into the copied binary by running `postject` with</span>
+ <span class="s0">* the following options:</span>
+ <span class="s0">*    * `hello` / `hello.exe` \- The name of the copy of the `node` executable</span>
+ <span class="s0">*    created in step 4.</span>
+ <span class="s0">*    * `NODE_SEA_BLOB` \- The name of the resource / note / section in the binary</span>
+ <span class="s0">*    where the contents of the blob will be stored.</span>
+ <span class="s0">*    * `sea-prep.blob` \- The name of the blob created in step 1.</span>
+ <span class="s0">*    * `--sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2` \- The [fuse](https://www.electronjs.org/docs/latest/tutorial/fuses) used by the Node.js project to detect if a file has been</span>
+ <span class="s0">* injected.</span>
+ <span class="s0">*    * `--macho-segment-name NODE_SEA` (only needed on macOS) - The name of the</span>
+ <span class="s0">*    segment in the binary where the contents of the blob will be</span>
+ <span class="s0">*    stored.</span>
+ <span class="s0">* To summarize, here is the required command for each platform:</span>
+ <span class="s0">*    * On Linux:</span>
+ <span class="s0">*    ```bash</span>
+ <span class="s0">*    npx postject hello NODE_SEA_BLOB sea-prep.blob \</span>
+ <span class="s0">*        --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2</span>
+ <span class="s0">*    ```</span>
+ <span class="s0">*    * On Windows - PowerShell:</span>
+ <span class="s0">*    ```powershell</span>
+ <span class="s0">*    npx postject hello.exe NODE_SEA_BLOB sea-prep.blob `</span>
+ <span class="s0">*        --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2</span>
+ <span class="s0">*    ```</span>
+ <span class="s0">*    * On Windows - Command Prompt:</span>
+ <span class="s0">*    ```text</span>
+ <span class="s0">*    npx postject hello.exe NODE_SEA_BLOB sea-prep.blob ^</span>
+ <span class="s0">*        --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2</span>
+ <span class="s0">*    ```</span>
+ <span class="s0">*    * On macOS:</span>
+ <span class="s0">*    ```bash</span>
+ <span class="s0">*    npx postject hello NODE_SEA_BLOB sea-prep.blob \</span>
+ <span class="s0">*        --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 \</span>
+ <span class="s0">*        --macho-segment-name NODE_SEA</span>
+ <span class="s0">*    ```</span>
+ <span class="s0">* 7. Sign the binary (macOS and Windows only):</span>
+ <span class="s0">*    * On macOS:</span>
+ <span class="s0">* ```bash</span>
+ <span class="s0">* codesign --sign - hello</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*    * On Windows (optional):</span>
+ <span class="s0">* A certificate needs to be present for this to work. However, the unsigned</span>
+ <span class="s0">* binary would still be runnable.</span>
+ <span class="s0">* ```powershell</span>
+ <span class="s0">* signtool sign /fd SHA256 hello.exe</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* 8. Run the binary:</span>
+ <span class="s0">*    * On systems other than Windows</span>
+ <span class="s0">* ```console</span>
+ <span class="s0">* $ ./hello world</span>
+ <span class="s0">* Hello, world!</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*    * On Windows</span>
+ <span class="s0">* ```console</span>
+ <span class="s0">* $ .\hello.exe world</span>
+ <span class="s0">* Hello, world!</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.7.0, v18.16.0</span>
+ <span class="s0">* </span><span class="s1">@experimental</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/src/node_sea.cc)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:sea&quot; </span><span class="s4">{</span>
+    <span class="s2">type AssetKey </span><span class="s4">= </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.12.0</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">Whether this script is running inside a single-executable application.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">isSea</span><span class="s4">(): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This method can be used to retrieve the assets configured to be bundled into the</span>
+     <span class="s0">* single-executable application at build time.</span>
+     <span class="s0">* An error is thrown when no matching asset can be found.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.12.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getAsset</span><span class="s4">(</span><span
+    class="s2">key</span><span class="s4">: </span><span class="s2">AssetKey</span><span class="s4">): </span><span
+    class="s2">ArrayBuffer</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">getAsset</span><span class="s4">(</span><span
+    class="s2">key</span><span class="s4">: </span><span class="s2">AssetKey</span><span class="s4">, </span><span
+    class="s2">encoding</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">string</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Similar to `sea.getAsset()`, but returns the result in a [`Blob`](https://developer.mozilla.org/en-US/docs/Web/API/Blob).</span>
+     <span class="s0">* An error is thrown when no matching asset can be found.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.12.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getAssetAsBlob</span><span class="s4">(</span><span
+    class="s2">key</span><span class="s4">: </span><span class="s2">AssetKey</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: {</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}): </span><span class="s2">Blob</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This method can be used to retrieve the assets configured to be bundled into the</span>
+     <span class="s0">* single-executable application at build time.</span>
+     <span class="s0">* An error is thrown when no matching asset can be found.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Unlike `sea.getRawAsset()` or `sea.getAssetAsBlob()`, this method does not</span>
+     <span class="s0">* return a copy. Instead, it returns the raw asset bundled inside the executable.</span>
+     <span class="s0">*</span>
+     <span class="s0">* For now, users should avoid writing to the returned array buffer. If the</span>
+     <span class="s0">* injected section is not marked as writable or not aligned properly,</span>
+     <span class="s0">* writes to the returned array buffer is likely to result in a crash.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.12.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getRawAsset</span><span class="s4">(</span><span
+    class="s2">key</span><span class="s4">: </span><span class="s2">AssetKey</span><span class="s4">): </span><span
+    class="s2">ArrayBuffer</span><span class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

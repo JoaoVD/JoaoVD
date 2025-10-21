@@ -1,0 +1,141 @@
+<html>
+<head>
+  <title>bench.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          bench.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">const </span><span class="s1">max </span><span class="s3">= </span><span class="s4">1000000</span>
+<span class="s2">const </span><span class="s1">fastqueue </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./'</span><span class="s3">)(</span><span
+    class="s1">worker</span><span class="s3">, </span><span class="s4">1</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">promisify </span><span
+    class="s3">} = </span><span class="s1">require</span><span class="s3">(</span><span class="s0">'util'</span><span
+    class="s3">)</span>
+<span class="s2">const </span><span class="s1">immediate </span><span class="s3">= </span><span
+    class="s1">promisify</span><span class="s3">(</span><span class="s1">setImmediate</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">qPromise </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'./'</span><span class="s3">).</span><span class="s1">promise</span><span
+    class="s3">(</span><span class="s1">immediate</span><span class="s3">, </span><span class="s4">1</span><span
+    class="s3">)</span>
+<span class="s2">const </span><span class="s1">async </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'async'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">neo </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'neo-async'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">asyncqueue </span><span class="s3">= </span><span class="s1">async</span><span
+    class="s3">.</span><span class="s1">queue</span><span class="s3">(</span><span class="s1">worker</span><span
+    class="s3">, </span><span class="s4">1</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">neoqueue </span><span class="s3">= </span><span
+    class="s1">neo</span><span class="s3">.</span><span class="s1">queue</span><span class="s3">(</span><span
+    class="s1">worker</span><span class="s3">, </span><span class="s4">1</span><span class="s3">)</span>
+
+<span class="s2">function </span><span class="s1">bench </span><span class="s3">(</span><span
+    class="s1">func</span><span class="s3">, </span><span class="s1">done</span><span class="s3">) {</span>
+  <span class="s2">const </span><span class="s1">key </span><span class="s3">= </span><span class="s1">max </span><span
+    class="s3">+ </span><span class="s0">'*' </span><span class="s3">+ </span><span class="s1">func</span><span
+    class="s3">.</span><span class="s1">name</span>
+  <span class="s2">let </span><span class="s1">count </span><span class="s3">= -</span><span class="s4">1</span>
+
+  <span class="s1">console</span><span class="s3">.</span><span class="s1">time</span><span class="s3">(</span><span
+    class="s1">key</span><span class="s3">)</span>
+  <span class="s1">end</span><span class="s3">()</span>
+
+  <span class="s2">function </span><span class="s1">end </span><span class="s3">() {</span>
+    <span class="s2">if </span><span class="s3">(++</span><span class="s1">count </span><span
+    class="s3">&lt; </span><span class="s1">max</span><span class="s3">) {</span>
+      <span class="s1">func</span><span class="s3">(</span><span class="s1">end</span><span class="s3">)</span>
+    <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+      <span class="s1">console</span><span class="s3">.</span><span class="s1">timeEnd</span><span
+    class="s3">(</span><span class="s1">key</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">done</span><span class="s3">) {</span>
+        <span class="s1">done</span><span class="s3">()</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">benchFastQ </span><span class="s3">(</span><span
+    class="s1">done</span><span class="s3">) {</span>
+  <span class="s1">fastqueue</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s4">42</span><span class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">benchAsyncQueue </span><span class="s3">(</span><span
+    class="s1">done</span><span class="s3">) {</span>
+  <span class="s1">asyncqueue</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s4">42</span><span class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">benchNeoQueue </span><span class="s3">(</span><span
+    class="s1">done</span><span class="s3">) {</span>
+  <span class="s1">neoqueue</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s4">42</span><span class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">worker </span><span class="s3">(</span><span
+    class="s1">arg</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">) {</span>
+  <span class="s1">setImmediate</span><span class="s3">(</span><span class="s1">cb</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">benchSetImmediate </span><span class="s3">(</span><span
+    class="s1">cb</span><span class="s3">) {</span>
+  <span class="s1">worker</span><span class="s3">(</span><span class="s4">42</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">benchFastQPromise </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+  <span class="s1">qPromise</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s4">42</span><span class="s3">).</span><span class="s1">then</span><span class="s3">(</span><span class="s2">function </span><span
+    class="s3">() { </span><span class="s1">done</span><span class="s3">() }, </span><span class="s1">done</span><span
+    class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">runBench </span><span class="s3">(</span><span
+    class="s1">done</span><span class="s3">) {</span>
+  <span class="s1">async</span><span class="s3">.</span><span class="s1">eachSeries</span><span class="s3">([</span>
+    <span class="s1">benchSetImmediate</span><span class="s3">,</span>
+    <span class="s1">benchFastQ</span><span class="s3">,</span>
+    <span class="s1">benchNeoQueue</span><span class="s3">,</span>
+    <span class="s1">benchAsyncQueue</span><span class="s3">,</span>
+    <span class="s1">benchFastQPromise</span>
+  <span class="s3">], </span><span class="s1">bench</span><span class="s3">, </span><span class="s1">done</span><span
+    class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s1">runBench</span><span class="s3">(</span><span class="s1">runBench</span><span class="s3">)</span>
+</pre>
+</body>
+</html>

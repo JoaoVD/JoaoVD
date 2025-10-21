@@ -1,0 +1,120 @@
+<html>
+<head>
+  <title>mode.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          mode.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">module</span><span class="s1">.</span><span class="s0">exports </span><span
+  class="s1">= </span><span class="s0">isexe</span>
+<span class="s0">isexe</span><span class="s1">.</span><span class="s0">sync </span><span class="s1">= </span><span
+    class="s0">sync</span>
+
+<span class="s2">var </span><span class="s0">fs </span><span class="s1">= </span><span class="s0">require</span><span
+    class="s1">(</span><span class="s3">'fs'</span><span class="s1">)</span>
+
+<span class="s2">function </span><span class="s0">isexe </span><span class="s1">(</span><span
+    class="s0">path</span><span class="s1">, </span><span class="s0">options</span><span class="s1">, </span><span
+    class="s0">cb</span><span class="s1">) {</span>
+  <span class="s0">fs</span><span class="s1">.</span><span class="s0">stat</span><span class="s1">(</span><span
+    class="s0">path</span><span class="s1">, </span><span class="s2">function </span><span class="s1">(</span><span
+    class="s0">er</span><span class="s1">, </span><span class="s0">stat</span><span class="s1">) {</span>
+    <span class="s0">cb</span><span class="s1">(</span><span class="s0">er</span><span class="s1">, </span><span
+    class="s0">er </span><span class="s1">? </span><span class="s2">false </span><span class="s1">: </span><span
+    class="s0">checkStat</span><span class="s1">(</span><span class="s0">stat</span><span class="s1">, </span><span
+    class="s0">options</span><span class="s1">))</span>
+  <span class="s1">})</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">sync </span><span class="s1">(</span><span class="s0">path</span><span
+    class="s1">, </span><span class="s0">options</span><span class="s1">) {</span>
+  <span class="s2">return </span><span class="s0">checkStat</span><span class="s1">(</span><span
+    class="s0">fs</span><span class="s1">.</span><span class="s0">statSync</span><span class="s1">(</span><span
+    class="s0">path</span><span class="s1">), </span><span class="s0">options</span><span class="s1">)</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">checkStat </span><span class="s1">(</span><span class="s0">stat</span><span
+    class="s1">, </span><span class="s0">options</span><span class="s1">) {</span>
+  <span class="s2">return </span><span class="s0">stat</span><span class="s1">.</span><span
+    class="s0">isFile</span><span class="s1">() &amp;&amp; </span><span class="s0">checkMode</span><span
+    class="s1">(</span><span class="s0">stat</span><span class="s1">, </span><span class="s0">options</span><span
+    class="s1">)</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">checkMode </span><span class="s1">(</span><span class="s0">stat</span><span
+    class="s1">, </span><span class="s0">options</span><span class="s1">) {</span>
+  <span class="s2">var </span><span class="s0">mod </span><span class="s1">= </span><span class="s0">stat</span><span
+    class="s1">.</span><span class="s0">mode</span>
+  <span class="s2">var </span><span class="s0">uid </span><span class="s1">= </span><span class="s0">stat</span><span
+    class="s1">.</span><span class="s0">uid</span>
+  <span class="s2">var </span><span class="s0">gid </span><span class="s1">= </span><span class="s0">stat</span><span
+    class="s1">.</span><span class="s0">gid</span>
+
+  <span class="s2">var </span><span class="s0">myUid </span><span class="s1">= </span><span
+    class="s0">options</span><span class="s1">.</span><span class="s0">uid </span><span class="s1">!== </span><span
+    class="s0">undefined </span><span class="s1">?</span>
+    <span class="s0">options</span><span class="s1">.</span><span class="s0">uid </span><span class="s1">: </span><span
+    class="s0">process</span><span class="s1">.</span><span class="s0">getuid </span><span class="s1">&amp;&amp; </span><span
+    class="s0">process</span><span class="s1">.</span><span class="s0">getuid</span><span class="s1">()</span>
+  <span class="s2">var </span><span class="s0">myGid </span><span class="s1">= </span><span
+    class="s0">options</span><span class="s1">.</span><span class="s0">gid </span><span class="s1">!== </span><span
+    class="s0">undefined </span><span class="s1">?</span>
+    <span class="s0">options</span><span class="s1">.</span><span class="s0">gid </span><span class="s1">: </span><span
+    class="s0">process</span><span class="s1">.</span><span class="s0">getgid </span><span class="s1">&amp;&amp; </span><span
+    class="s0">process</span><span class="s1">.</span><span class="s0">getgid</span><span class="s1">()</span>
+
+  <span class="s2">var </span><span class="s0">u </span><span class="s1">= </span><span class="s0">parseInt</span><span
+    class="s1">(</span><span class="s3">'100'</span><span class="s1">, </span><span class="s4">8</span><span class="s1">)</span>
+  <span class="s2">var </span><span class="s0">g </span><span class="s1">= </span><span class="s0">parseInt</span><span
+    class="s1">(</span><span class="s3">'010'</span><span class="s1">, </span><span class="s4">8</span><span class="s1">)</span>
+  <span class="s2">var </span><span class="s0">o </span><span class="s1">= </span><span class="s0">parseInt</span><span
+    class="s1">(</span><span class="s3">'001'</span><span class="s1">, </span><span class="s4">8</span><span class="s1">)</span>
+  <span class="s2">var </span><span class="s0">ug </span><span class="s1">= </span><span class="s0">u </span><span
+    class="s1">| </span><span class="s0">g</span>
+
+  <span class="s2">var </span><span class="s0">ret </span><span class="s1">= (</span><span class="s0">mod </span><span
+    class="s1">&amp; </span><span class="s0">o</span><span class="s1">) ||</span>
+    <span class="s1">(</span><span class="s0">mod </span><span class="s1">&amp; </span><span class="s0">g</span><span
+    class="s1">) &amp;&amp; </span><span class="s0">gid </span><span class="s1">=== </span><span
+    class="s0">myGid </span><span class="s1">||</span>
+    <span class="s1">(</span><span class="s0">mod </span><span class="s1">&amp; </span><span class="s0">u</span><span
+    class="s1">) &amp;&amp; </span><span class="s0">uid </span><span class="s1">=== </span><span
+    class="s0">myUid </span><span class="s1">||</span>
+    <span class="s1">(</span><span class="s0">mod </span><span class="s1">&amp; </span><span class="s0">ug</span><span
+    class="s1">) &amp;&amp; </span><span class="s0">myUid </span><span class="s1">=== </span><span class="s4">0</span>
+
+  <span class="s2">return </span><span class="s0">ret</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

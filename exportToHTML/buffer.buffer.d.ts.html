@@ -1,0 +1,571 @@
+<html>
+<head>
+  <title>buffer.buffer.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #6aab73;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          buffer.buffer.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">declare module </span><span class="s1">&quot;buffer&quot; </span><span class="s2">{</span>
+    <span class="s0">global </span><span class="s2">{</span>
+        <span class="s3">interface </span><span class="s0">BufferConstructor </span><span class="s2">{</span>
+            <span class="s4">// see ../buffer.d.ts for implementation shared with all TypeScript versions</span>
+
+            <span class="s5">/**</span>
+             <span class="s5">* Allocates a new buffer containing the given {str}.</span>
+             <span class="s5">*</span>
+             <span class="s5">* </span><span class="s6">@param </span><span
+    class="s5">str String to store in buffer.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">encoding encoding to use, optional.  Default is 'utf8'</span>
+             <span class="s5">* </span><span class="s6">@deprecated </span><span class="s5">since v10.0.0 - Use `Buffer.from(string[, encoding])` instead.</span>
+             <span class="s5">*/</span>
+            <span class="s3">new</span><span class="s2">(</span><span class="s0">str</span><span
+    class="s2">: </span><span class="s0">string</span><span class="s2">, </span><span class="s0">encoding</span><span
+    class="s2">?: </span><span class="s0">BufferEncoding</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Allocates a new buffer of {size} octets.</span>
+             <span class="s5">*</span>
+             <span class="s5">* </span><span class="s6">@param </span><span
+    class="s5">size count of octets to allocate.</span>
+             <span class="s5">* </span><span class="s6">@deprecated </span><span class="s5">since v10.0.0 - Use `Buffer.alloc()` instead (also see `Buffer.allocUnsafe()`).</span>
+             <span class="s5">*/</span>
+            <span class="s3">new</span><span class="s2">(</span><span class="s0">size</span><span
+    class="s2">: </span><span class="s0">number</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Allocates a new buffer containing the given {array} of octets.</span>
+             <span class="s5">*</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">array The octets to store.</span>
+             <span class="s5">* </span><span class="s6">@deprecated </span><span class="s5">since v10.0.0 - Use `Buffer.from(array)` instead.</span>
+             <span class="s5">*/</span>
+            <span class="s3">new</span><span class="s2">(</span><span class="s0">array</span><span
+    class="s2">: </span><span class="s0">ArrayLike</span><span class="s2">&lt;</span><span class="s0">number</span><span
+    class="s2">&gt;): </span><span class="s0">Buffer</span><span class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Produces a Buffer backed by the same allocated memory as</span>
+             <span class="s5">* the given {ArrayBuffer}/{SharedArrayBuffer}.</span>
+             <span class="s5">*</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">arrayBuffer The ArrayBuffer with which to share memory.</span>
+             <span class="s5">* </span><span class="s6">@deprecated </span><span class="s5">since v10.0.0 - Use `Buffer.from(arrayBuffer[, byteOffset[, length]])` instead.</span>
+             <span class="s5">*/</span>
+            <span class="s3">new</span><span class="s2">(</span><span class="s0">arrayBuffer</span><span
+    class="s2">: </span><span class="s0">ArrayBuffer </span><span class="s2">| </span><span
+    class="s0">SharedArrayBuffer</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Allocates a new `Buffer` using an `array` of bytes in the range `0` – `255`.</span>
+             <span class="s5">* Array entries outside that range will be truncated to fit into it.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* // Creates a new Buffer containing the UTF-8 bytes of the string 'buffer'.</span>
+             <span class="s5">* const buf = Buffer.from([0x62, 0x75, 0x66, 0x66, 0x65, 0x72]);</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* If `array` is an `Array`-like object (that is, one with a `length` property of</span>
+             <span class="s5">* type `number`), it is treated as if it is an array, unless it is a `Buffer` or</span>
+             <span class="s5">* a `Uint8Array`. This means all other `TypedArray` variants get treated as an</span>
+             <span class="s5">* `Array`. To create a `Buffer` from the bytes backing a `TypedArray`, use</span>
+             <span class="s5">* `Buffer.copyBytesFrom()`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* A `TypeError` will be thrown if `array` is not an `Array` or another type</span>
+             <span class="s5">* appropriate for `Buffer.from()` variants.</span>
+             <span class="s5">*</span>
+             <span class="s5">* `Buffer.from(array)` and `Buffer.from(string)` may also use the internal</span>
+             <span class="s5">* `Buffer` pool like `Buffer.allocUnsafe()` does.</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v5.10.0</span>
+             <span class="s5">*/</span>
+            <span class="s0">from</span><span class="s2">(</span><span class="s0">array</span><span class="s2">: </span><span
+    class="s0">WithImplicitCoercion</span><span class="s2">&lt;</span><span class="s0">ArrayLike</span><span class="s2">&lt;</span><span
+    class="s0">number</span><span class="s2">&gt;&gt;): </span><span class="s0">Buffer</span><span class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* This creates a view of the `ArrayBuffer` without copying the underlying</span>
+             <span class="s5">* memory. For example, when passed a reference to the `.buffer` property of a</span>
+             <span class="s5">* `TypedArray` instance, the newly created `Buffer` will share the same</span>
+             <span class="s5">* allocated memory as the `TypedArray`'s underlying `ArrayBuffer`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const arr = new Uint16Array(2);</span>
+             <span class="s5">*</span>
+             <span class="s5">* arr[0] = 5000;</span>
+             <span class="s5">* arr[1] = 4000;</span>
+             <span class="s5">*</span>
+             <span class="s5">* // Shares memory with `arr`.</span>
+             <span class="s5">* const buf = Buffer.from(arr.buffer);</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf);</span>
+             <span class="s5">* // Prints: &lt;Buffer 88 13 a0 0f&gt;</span>
+             <span class="s5">*</span>
+             <span class="s5">* // Changing the original Uint16Array changes the Buffer also.</span>
+             <span class="s5">* arr[1] = 6000;</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf);</span>
+             <span class="s5">* // Prints: &lt;Buffer 88 13 70 17&gt;</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* The optional `byteOffset` and `length` arguments specify a memory range within</span>
+             <span class="s5">* the `arrayBuffer` that will be shared by the `Buffer`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const ab = new ArrayBuffer(10);</span>
+             <span class="s5">* const buf = Buffer.from(ab, 0, 2);</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf.length);</span>
+             <span class="s5">* // Prints: 2</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* A `TypeError` will be thrown if `arrayBuffer` is not an `ArrayBuffer` or a</span>
+             <span class="s5">* `SharedArrayBuffer` or another type appropriate for `Buffer.from()`</span>
+             <span class="s5">* variants.</span>
+             <span class="s5">*</span>
+             <span class="s5">* It is important to remember that a backing `ArrayBuffer` can cover a range</span>
+             <span class="s5">* of memory that extends beyond the bounds of a `TypedArray` view. A new</span>
+             <span class="s5">* `Buffer` created using the `buffer` property of a `TypedArray` may extend</span>
+             <span class="s5">* beyond the range of the `TypedArray`:</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const arrA = Uint8Array.from([0x63, 0x64, 0x65, 0x66]); // 4 elements</span>
+             <span class="s5">* const arrB = new Uint8Array(arrA.buffer, 1, 2); // 2 elements</span>
+             <span class="s5">* console.log(arrA.buffer === arrB.buffer); // true</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf = Buffer.from(arrB.buffer);</span>
+             <span class="s5">* console.log(buf);</span>
+             <span class="s5">* // Prints: &lt;Buffer 63 64 65 66&gt;</span>
+             <span class="s5">* ```</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v5.10.0</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">arrayBuffer An `ArrayBuffer`, `SharedArrayBuffer`, for example the</span>
+             <span class="s5">* `.buffer` property of a `TypedArray`.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">byteOffset Index of first byte to expose. **Default:** `0`.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">length Number of bytes to expose. **Default:**</span>
+             <span class="s5">* `arrayBuffer.byteLength - byteOffset`.</span>
+             <span class="s5">*/</span>
+            <span class="s0">from</span><span class="s2">(</span>
+                <span class="s0">arrayBuffer</span><span class="s2">: </span><span
+    class="s0">WithImplicitCoercion</span><span class="s2">&lt;</span><span class="s0">ArrayBuffer </span><span
+    class="s2">| </span><span class="s0">SharedArrayBuffer</span><span class="s2">&gt;,</span>
+                <span class="s0">byteOffset</span><span class="s2">?: </span><span class="s0">number</span><span
+    class="s2">,</span>
+                <span class="s0">length</span><span class="s2">?: </span><span class="s0">number</span><span class="s2">,</span>
+            <span class="s2">): </span><span class="s0">Buffer</span><span class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Creates a new `Buffer` containing `string`. The `encoding` parameter identifies</span>
+             <span class="s5">* the character encoding to be used when converting `string` into bytes.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf1 = Buffer.from('this is a tést');</span>
+             <span class="s5">* const buf2 = Buffer.from('7468697320697320612074c3a97374', 'hex');</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf1.toString());</span>
+             <span class="s5">* // Prints: this is a tést</span>
+             <span class="s5">* console.log(buf2.toString());</span>
+             <span class="s5">* // Prints: this is a tést</span>
+             <span class="s5">* console.log(buf1.toString('latin1'));</span>
+             <span class="s5">* // Prints: this is a tÃ©st</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* A `TypeError` will be thrown if `string` is not a string or another type</span>
+             <span class="s5">* appropriate for `Buffer.from()` variants.</span>
+             <span class="s5">*</span>
+             <span class="s5">* `Buffer.from(string)` may also use the internal `Buffer` pool like</span>
+             <span class="s5">* `Buffer.allocUnsafe()` does.</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v5.10.0</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">string A string to encode.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">encoding The encoding of `string`. **Default:** `'utf8'`.</span>
+             <span class="s5">*/</span>
+            <span class="s0">from</span><span class="s2">(</span><span class="s0">string</span><span
+    class="s2">: </span><span class="s0">WithImplicitCoercion</span><span class="s2">&lt;</span><span
+    class="s0">string</span><span class="s2">&gt;, </span><span class="s0">encoding</span><span
+    class="s2">?: </span><span class="s0">BufferEncoding</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s0">from</span><span class="s2">(</span><span class="s0">arrayOrString</span><span
+    class="s2">: </span><span class="s0">WithImplicitCoercion</span><span class="s2">&lt;</span><span class="s0">ArrayLike</span><span
+    class="s2">&lt;</span><span class="s0">number</span><span class="s2">&gt; | </span><span
+    class="s0">string</span><span class="s2">&gt;): </span><span class="s0">Buffer</span><span class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Creates a new Buffer using the passed {data}</span>
+             <span class="s5">* </span><span class="s6">@param </span><span
+    class="s5">values to create a new Buffer</span>
+             <span class="s5">*/</span>
+            <span class="s0">of</span><span class="s2">(</span><span class="s0">...items</span><span
+    class="s2">: </span><span class="s0">number</span><span class="s2">[]): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Returns a new `Buffer` which is the result of concatenating all the `Buffer` instances in the `list` together.</span>
+             <span class="s5">*</span>
+             <span class="s5">* If the list has no items, or if the `totalLength` is 0, then a new zero-length `Buffer` is returned.</span>
+             <span class="s5">*</span>
+             <span class="s5">* If `totalLength` is not provided, it is calculated from the `Buffer` instances</span>
+             <span class="s5">* in `list` by adding their lengths.</span>
+             <span class="s5">*</span>
+             <span class="s5">* If `totalLength` is provided, it is coerced to an unsigned integer. If the</span>
+             <span class="s5">* combined length of the `Buffer`s in `list` exceeds `totalLength`, the result is</span>
+             <span class="s5">* truncated to `totalLength`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* // Create a single `Buffer` from a list of three `Buffer` instances.</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf1 = Buffer.alloc(10);</span>
+             <span class="s5">* const buf2 = Buffer.alloc(14);</span>
+             <span class="s5">* const buf3 = Buffer.alloc(18);</span>
+             <span class="s5">* const totalLength = buf1.length + buf2.length + buf3.length;</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(totalLength);</span>
+             <span class="s5">* // Prints: 42</span>
+             <span class="s5">*</span>
+             <span class="s5">* const bufA = Buffer.concat([buf1, buf2, buf3], totalLength);</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(bufA);</span>
+             <span class="s5">* // Prints: &lt;Buffer 00 00 00 00 ...&gt;</span>
+             <span class="s5">* console.log(bufA.length);</span>
+             <span class="s5">* // Prints: 42</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* `Buffer.concat()` may also use the internal `Buffer` pool like `Buffer.allocUnsafe()` does.</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v0.7.11</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">list List of `Buffer` or {</span><span
+    class="s6">@link </span><span class="s5">Uint8Array} instances to concatenate.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">totalLength Total length of the `Buffer` instances in `list` when concatenated.</span>
+             <span class="s5">*/</span>
+            <span class="s0">concat</span><span class="s2">(</span><span class="s0">list</span><span
+    class="s2">: </span><span class="s0">readonly Uint8Array</span><span class="s2">[], </span><span class="s0">totalLength</span><span
+    class="s2">?: </span><span class="s0">number</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Copies the underlying memory of `view` into a new `Buffer`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* const u16 = new Uint16Array([0, 0xffff]);</span>
+             <span class="s5">* const buf = Buffer.copyBytesFrom(u16, 1, 1);</span>
+             <span class="s5">* u16[1] = 0;</span>
+             <span class="s5">* console.log(buf.length); // 2</span>
+             <span class="s5">* console.log(buf[0]); // 255</span>
+             <span class="s5">* console.log(buf[1]); // 255</span>
+             <span class="s5">* ```</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v19.8.0</span>
+             <span class="s5">* </span><span class="s6">@param </span><span
+    class="s5">view The {TypedArray} to copy.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">[offset=0] The starting offset within `view`.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">[length=view.length - offset] The number of elements from `view` to copy.</span>
+             <span class="s5">*/</span>
+            <span class="s0">copyBytesFrom</span><span class="s2">(</span><span class="s0">view</span><span
+    class="s2">: </span><span class="s0">NodeJS</span><span class="s2">.</span><span class="s0">TypedArray</span><span
+    class="s2">, </span><span class="s0">offset</span><span class="s2">?: </span><span class="s0">number</span><span
+    class="s2">, </span><span class="s0">length</span><span class="s2">?: </span><span class="s0">number</span><span
+    class="s2">): </span><span class="s0">Buffer</span><span class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Allocates a new `Buffer` of `size` bytes. If `fill` is `undefined`, the`Buffer` will be zero-filled.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf = Buffer.alloc(5);</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf);</span>
+             <span class="s5">* // Prints: &lt;Buffer 00 00 00 00 00&gt;</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* If `size` is larger than {</span><span class="s6">@link </span><span class="s5">constants.MAX_LENGTH} or smaller than 0, `ERR_OUT_OF_RANGE` is thrown.</span>
+             <span class="s5">*</span>
+             <span class="s5">* If `fill` is specified, the allocated `Buffer` will be initialized by calling `buf.fill(fill)`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf = Buffer.alloc(5, 'a');</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf);</span>
+             <span class="s5">* // Prints: &lt;Buffer 61 61 61 61 61&gt;</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* If both `fill` and `encoding` are specified, the allocated `Buffer` will be</span>
+             <span class="s5">* initialized by calling `buf.fill(fill, encoding)`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf = Buffer.alloc(11, 'aGVsbG8gd29ybGQ=', 'base64');</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf);</span>
+             <span class="s5">* // Prints: &lt;Buffer 68 65 6c 6c 6f 20 77 6f 72 6c 64&gt;</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* Calling `Buffer.alloc()` can be measurably slower than the alternative `Buffer.allocUnsafe()` but ensures that the newly created `Buffer` instance</span>
+             <span class="s5">* contents will never contain sensitive data from previous allocations, including</span>
+             <span class="s5">* data that might not have been allocated for `Buffer`s.</span>
+             <span class="s5">*</span>
+             <span class="s5">* A `TypeError` will be thrown if `size` is not a number.</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v5.10.0</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">size The desired length of the new `Buffer`.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">[fill=0] A value to pre-fill the new `Buffer` with.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">[encoding='utf8'] If `fill` is a string, this is its encoding.</span>
+             <span class="s5">*/</span>
+            <span class="s0">alloc</span><span class="s2">(</span><span class="s0">size</span><span class="s2">: </span><span
+    class="s0">number</span><span class="s2">, </span><span class="s0">fill</span><span class="s2">?: </span><span
+    class="s0">string </span><span class="s2">| </span><span class="s0">Uint8Array </span><span
+    class="s2">| </span><span class="s0">number</span><span class="s2">, </span><span class="s0">encoding</span><span
+    class="s2">?: </span><span class="s0">BufferEncoding</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Allocates a new `Buffer` of `size` bytes. If `size` is larger than {</span><span
+    class="s6">@link </span><span
+    class="s5">constants.MAX_LENGTH} or smaller than 0, `ERR_OUT_OF_RANGE` is thrown.</span>
+             <span class="s5">*</span>
+             <span class="s5">* The underlying memory for `Buffer` instances created in this way is _not_</span>
+             <span class="s5">* _initialized_. The contents of the newly created `Buffer` are unknown and _may contain sensitive data_. Use `Buffer.alloc()` instead to initialize`Buffer` instances with zeroes.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf = Buffer.allocUnsafe(10);</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf);</span>
+             <span class="s5">* // Prints (contents may vary): &lt;Buffer a0 8b 28 3f 01 00 00 00 50 32&gt;</span>
+             <span class="s5">*</span>
+             <span class="s5">* buf.fill(0);</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf);</span>
+             <span class="s5">* // Prints: &lt;Buffer 00 00 00 00 00 00 00 00 00 00&gt;</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* A `TypeError` will be thrown if `size` is not a number.</span>
+             <span class="s5">*</span>
+             <span class="s5">* The `Buffer` module pre-allocates an internal `Buffer` instance of</span>
+             <span class="s5">* size `Buffer.poolSize` that is used as a pool for the fast allocation of new `Buffer` instances created using `Buffer.allocUnsafe()`, `Buffer.from(array)`,</span>
+             <span class="s5">* and `Buffer.concat()` only when `size` is less than `Buffer.poolSize &gt;&gt;&gt; 1` (floor of `Buffer.poolSize` divided by two).</span>
+             <span class="s5">*</span>
+             <span class="s5">* Use of this pre-allocated internal memory pool is a key difference between</span>
+             <span class="s5">* calling `Buffer.alloc(size, fill)` vs. `Buffer.allocUnsafe(size).fill(fill)`.</span>
+             <span class="s5">* Specifically, `Buffer.alloc(size, fill)` will _never_ use the internal `Buffer`pool, while `Buffer.allocUnsafe(size).fill(fill)`_will_ use the internal`Buffer` pool if `size` is less</span>
+             <span class="s5">* than or equal to half `Buffer.poolSize`. The</span>
+             <span class="s5">* difference is subtle but can be important when an application requires the</span>
+             <span class="s5">* additional performance that `Buffer.allocUnsafe()` provides.</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v5.10.0</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">size The desired length of the new `Buffer`.</span>
+             <span class="s5">*/</span>
+            <span class="s0">allocUnsafe</span><span class="s2">(</span><span class="s0">size</span><span
+    class="s2">: </span><span class="s0">number</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Allocates a new `Buffer` of `size` bytes. If `size` is larger than {</span><span
+    class="s6">@link </span><span class="s5">constants.MAX_LENGTH} or smaller than 0, `ERR_OUT_OF_RANGE` is thrown. A zero-length `Buffer` is created if</span>
+             <span class="s5">* `size` is 0.</span>
+             <span class="s5">*</span>
+             <span class="s5">* The underlying memory for `Buffer` instances created in this way is _not_</span>
+             <span class="s5">* _initialized_. The contents of the newly created `Buffer` are unknown and _may contain sensitive data_. Use `buf.fill(0)` to initialize</span>
+             <span class="s5">* such `Buffer` instances with zeroes.</span>
+             <span class="s5">*</span>
+             <span class="s5">* When using `Buffer.allocUnsafe()` to allocate new `Buffer` instances,</span>
+             <span class="s5">* allocations under 4 KiB are sliced from a single pre-allocated `Buffer`. This</span>
+             <span class="s5">* allows applications to avoid the garbage collection overhead of creating many</span>
+             <span class="s5">* individually allocated `Buffer` instances. This approach improves both</span>
+             <span class="s5">* performance and memory usage by eliminating the need to track and clean up as</span>
+             <span class="s5">* many individual `ArrayBuffer` objects.</span>
+             <span class="s5">*</span>
+             <span class="s5">* However, in the case where a developer may need to retain a small chunk of</span>
+             <span class="s5">* memory from a pool for an indeterminate amount of time, it may be appropriate</span>
+             <span class="s5">* to create an un-pooled `Buffer` instance using `Buffer.allocUnsafeSlow()` and</span>
+             <span class="s5">* then copying out the relevant bits.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* // Need to keep around a few small chunks of memory.</span>
+             <span class="s5">* const store = [];</span>
+             <span class="s5">*</span>
+             <span class="s5">* socket.on('readable', () =&gt; {</span>
+             <span class="s5">*   let data;</span>
+             <span class="s5">*   while (null !== (data = readable.read())) {</span>
+             <span class="s5">*     // Allocate for retained data.</span>
+             <span class="s5">*     const sb = Buffer.allocUnsafeSlow(10);</span>
+             <span class="s5">*</span>
+             <span class="s5">*     // Copy the data into the new allocation.</span>
+             <span class="s5">*     data.copy(sb, 0, 0, 10);</span>
+             <span class="s5">*</span>
+             <span class="s5">*     store.push(sb);</span>
+             <span class="s5">*   }</span>
+             <span class="s5">* });</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* A `TypeError` will be thrown if `size` is not a number.</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v5.12.0</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">size The desired length of the new `Buffer`.</span>
+             <span class="s5">*/</span>
+            <span class="s0">allocUnsafeSlow</span><span class="s2">(</span><span class="s0">size</span><span
+    class="s2">: </span><span class="s0">number</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+        <span class="s2">}</span>
+        <span class="s3">interface </span><span class="s0">Buffer </span><span class="s3">extends </span><span
+    class="s0">Uint8Array </span><span class="s2">{</span>
+            <span class="s4">// see ../buffer.d.ts for implementation shared with all TypeScript versions</span>
+
+            <span class="s5">/**</span>
+             <span class="s5">* Returns a new `Buffer` that references the same memory as the original, but</span>
+             <span class="s5">* offset and cropped by the `start` and `end` indices.</span>
+             <span class="s5">*</span>
+             <span class="s5">* This method is not compatible with the `Uint8Array.prototype.slice()`,</span>
+             <span
+               class="s5">* which is a superclass of `Buffer`. To copy the slice, use`Uint8Array.prototype.slice()`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf = Buffer.from('buffer');</span>
+             <span class="s5">*</span>
+             <span class="s5">* const copiedBuf = Uint8Array.prototype.slice.call(buf);</span>
+             <span class="s5">* copiedBuf[0]++;</span>
+             <span class="s5">* console.log(copiedBuf.toString());</span>
+             <span class="s5">* // Prints: cuffer</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf.toString());</span>
+             <span class="s5">* // Prints: buffer</span>
+             <span class="s5">*</span>
+             <span class="s5">* // With buf.slice(), the original buffer is modified.</span>
+             <span class="s5">* const notReallyCopiedBuf = buf.slice();</span>
+             <span class="s5">* notReallyCopiedBuf[0]++;</span>
+             <span class="s5">* console.log(notReallyCopiedBuf.toString());</span>
+             <span class="s5">* // Prints: cuffer</span>
+             <span class="s5">* console.log(buf.toString());</span>
+             <span class="s5">* // Also prints: cuffer (!)</span>
+             <span class="s5">* ```</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v0.3.0</span>
+             <span class="s5">* </span><span class="s6">@deprecated </span><span
+    class="s5">Use `subarray` instead.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">[start=0] Where the new `Buffer` will start.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">[end=buf.length] Where the new `Buffer` will end (not inclusive).</span>
+             <span class="s5">*/</span>
+            <span class="s0">slice</span><span class="s2">(</span><span class="s0">start</span><span
+    class="s2">?: </span><span class="s0">number</span><span class="s2">, </span><span class="s0">end</span><span
+    class="s2">?: </span><span class="s0">number</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+            <span class="s5">/**</span>
+             <span class="s5">* Returns a new `Buffer` that references the same memory as the original, but</span>
+             <span class="s5">* offset and cropped by the `start` and `end` indices.</span>
+             <span class="s5">*</span>
+             <span class="s5">* Specifying `end` greater than `buf.length` will return the same result as</span>
+             <span class="s5">* that of `end` equal to `buf.length`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* This method is inherited from [`TypedArray.prototype.subarray()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/subarray).</span>
+             <span class="s5">*</span>
+             <span class="s5">* Modifying the new `Buffer` slice will modify the memory in the original `Buffer`because the allocated memory of the two objects overlap.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* // Create a `Buffer` with the ASCII alphabet, take a slice, and modify one byte</span>
+             <span class="s5">* // from the original `Buffer`.</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf1 = Buffer.allocUnsafe(26);</span>
+             <span class="s5">*</span>
+             <span class="s5">* for (let i = 0; i &lt; 26; i++) {</span>
+             <span class="s5">*   // 97 is the decimal ASCII value for 'a'.</span>
+             <span class="s5">*   buf1[i] = i + 97;</span>
+             <span class="s5">* }</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf2 = buf1.subarray(0, 3);</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf2.toString('ascii', 0, buf2.length));</span>
+             <span class="s5">* // Prints: abc</span>
+             <span class="s5">*</span>
+             <span class="s5">* buf1[0] = 33;</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf2.toString('ascii', 0, buf2.length));</span>
+             <span class="s5">* // Prints: !bc</span>
+             <span class="s5">* ```</span>
+             <span class="s5">*</span>
+             <span class="s5">* Specifying negative indexes causes the slice to be generated relative to the</span>
+             <span class="s5">* end of `buf` rather than the beginning.</span>
+             <span class="s5">*</span>
+             <span class="s5">* ```js</span>
+             <span class="s5">* import { Buffer } from 'node:buffer';</span>
+             <span class="s5">*</span>
+             <span class="s5">* const buf = Buffer.from('buffer');</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf.subarray(-6, -1).toString());</span>
+             <span class="s5">* // Prints: buffe</span>
+             <span class="s5">* // (Equivalent to buf.subarray(0, 5).)</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf.subarray(-6, -2).toString());</span>
+             <span class="s5">* // Prints: buff</span>
+             <span class="s5">* // (Equivalent to buf.subarray(0, 4).)</span>
+             <span class="s5">*</span>
+             <span class="s5">* console.log(buf.subarray(-5, -2).toString());</span>
+             <span class="s5">* // Prints: uff</span>
+             <span class="s5">* // (Equivalent to buf.subarray(1, 4).)</span>
+             <span class="s5">* ```</span>
+             <span class="s5">* </span><span class="s6">@since </span><span class="s5">v3.0.0</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">[start=0] Where the new `Buffer` will start.</span>
+             <span class="s5">* </span><span class="s6">@param </span><span class="s5">[end=buf.length] Where the new `Buffer` will end (not inclusive).</span>
+             <span class="s5">*/</span>
+            <span class="s0">subarray</span><span class="s2">(</span><span class="s0">start</span><span
+    class="s2">?: </span><span class="s0">number</span><span class="s2">, </span><span class="s0">end</span><span
+    class="s2">?: </span><span class="s0">number</span><span class="s2">): </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+        <span class="s2">}</span>
+        <span class="s0">type NonSharedBuffer </span><span class="s2">= </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+        <span class="s0">type AllowSharedBuffer </span><span class="s2">= </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+    <span class="s2">}</span>
+    <span class="s5">/** </span><span class="s6">@deprecated </span><span class="s5">Use `Buffer.allocUnsafeSlow()` instead. */</span>
+    <span class="s3">var </span><span class="s0">SlowBuffer</span><span class="s2">: {</span>
+        <span class="s5">/** </span><span class="s6">@deprecated </span><span class="s5">Use `Buffer.allocUnsafeSlow()` instead. */</span>
+        <span class="s3">new</span><span class="s2">(</span><span class="s0">size</span><span class="s2">: </span><span
+    class="s0">number</span><span class="s2">): </span><span class="s0">Buffer</span><span class="s2">;</span>
+        <span class="s0">prototype</span><span class="s2">: </span><span class="s0">Buffer</span><span
+    class="s2">;</span>
+    <span class="s2">};</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

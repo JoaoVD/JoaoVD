@@ -1,0 +1,424 @@
+<html>
+<head>
+  <title>ini.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #42c3d4;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          ini.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">exports</span><span class="s1">.</span><span class="s0">parse </span><span
+  class="s1">= </span><span class="s0">exports</span><span class="s1">.</span><span class="s0">decode </span><span
+  class="s1">= </span><span class="s0">decode</span>
+
+<span class="s0">exports</span><span class="s1">.</span><span class="s0">stringify </span><span
+    class="s1">= </span><span class="s0">exports</span><span class="s1">.</span><span class="s0">encode </span><span
+    class="s1">= </span><span class="s0">encode</span>
+
+<span class="s0">exports</span><span class="s1">.</span><span class="s0">safe </span><span class="s1">= </span><span
+    class="s0">safe</span>
+<span class="s0">exports</span><span class="s1">.</span><span class="s0">unsafe </span><span class="s1">= </span><span
+    class="s0">unsafe</span>
+
+<span class="s2">var </span><span class="s0">eol </span><span class="s1">= </span><span class="s2">typeof </span><span
+    class="s0">process </span><span class="s1">!== </span><span class="s3">'undefined' </span><span class="s1">&amp;&amp;</span>
+  <span class="s0">process</span><span class="s1">.</span><span class="s0">platform </span><span
+    class="s1">=== </span><span class="s3">'win32' </span><span class="s1">? </span><span class="s3">'</span><span
+    class="s2">\r\n</span><span class="s3">' </span><span class="s1">: </span><span class="s3">'</span><span class="s2">\n</span><span
+    class="s3">'</span>
+
+<span class="s2">function </span><span class="s0">encode </span><span class="s1">(</span><span
+    class="s0">obj</span><span class="s1">, </span><span class="s0">opt</span><span class="s1">) {</span>
+  <span class="s2">var </span><span class="s0">children </span><span class="s1">= []</span>
+  <span class="s2">var </span><span class="s0">out </span><span class="s1">= </span><span class="s3">''</span>
+
+  <span class="s2">if </span><span class="s1">(</span><span class="s2">typeof </span><span class="s0">opt </span><span
+    class="s1">=== </span><span class="s3">'string'</span><span class="s1">) {</span>
+    <span class="s0">opt </span><span class="s1">= {</span>
+      <span class="s0">section</span><span class="s1">: </span><span class="s0">opt</span><span class="s1">,</span>
+      <span class="s0">whitespace</span><span class="s1">: </span><span class="s2">false</span><span class="s1">,</span>
+    <span class="s1">}</span>
+  <span class="s1">} </span><span class="s2">else </span><span class="s1">{</span>
+    <span class="s0">opt </span><span class="s1">= </span><span class="s0">opt </span><span class="s1">|| {}</span>
+    <span class="s0">opt</span><span class="s1">.</span><span class="s0">whitespace </span><span
+    class="s1">= </span><span class="s0">opt</span><span class="s1">.</span><span class="s0">whitespace </span><span
+    class="s1">=== </span><span class="s2">true</span>
+  <span class="s1">}</span>
+
+  <span class="s2">var </span><span class="s0">separator </span><span class="s1">= </span><span
+    class="s0">opt</span><span class="s1">.</span><span class="s0">whitespace </span><span class="s1">? </span><span
+    class="s3">' = ' </span><span class="s1">: </span><span class="s3">'='</span>
+
+  <span class="s0">Object</span><span class="s1">.</span><span class="s0">keys</span><span class="s1">(</span><span
+    class="s0">obj</span><span class="s1">).</span><span class="s0">forEach</span><span class="s1">(</span><span
+    class="s2">function </span><span class="s1">(</span><span class="s0">k</span><span class="s1">, </span><span
+    class="s0">_</span><span class="s1">, </span><span class="s0">__</span><span class="s1">) {</span>
+    <span class="s2">var </span><span class="s0">val </span><span class="s1">= </span><span class="s0">obj</span><span
+    class="s1">[</span><span class="s0">k</span><span class="s1">]</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">val </span><span
+    class="s1">&amp;&amp; </span><span class="s0">Array</span><span class="s1">.</span><span
+    class="s0">isArray</span><span class="s1">(</span><span class="s0">val</span><span class="s1">)) {</span>
+      <span class="s0">val</span><span class="s1">.</span><span class="s0">forEach</span><span class="s1">(</span><span
+    class="s2">function </span><span class="s1">(</span><span class="s0">item</span><span class="s1">) {</span>
+        <span class="s0">out </span><span class="s1">+= </span><span class="s0">safe</span><span
+    class="s1">(</span><span class="s0">k </span><span class="s1">+ </span><span class="s3">'[]'</span><span class="s1">) + </span><span
+    class="s0">separator </span><span class="s1">+ </span><span class="s0">safe</span><span class="s1">(</span><span
+    class="s0">item</span><span class="s1">) + </span><span class="s3">'</span><span class="s2">\n</span><span
+    class="s3">'</span>
+      <span class="s1">})</span>
+    <span class="s1">} </span><span class="s2">else if </span><span class="s1">(</span><span class="s0">val </span><span
+    class="s1">&amp;&amp; </span><span class="s2">typeof </span><span class="s0">val </span><span class="s1">=== </span><span
+    class="s3">'object'</span><span class="s1">)</span>
+      <span class="s0">children</span><span class="s1">.</span><span class="s0">push</span><span
+    class="s1">(</span><span class="s0">k</span><span class="s1">)</span>
+    <span class="s2">else</span>
+      <span class="s0">out </span><span class="s1">+= </span><span class="s0">safe</span><span class="s1">(</span><span
+    class="s0">k</span><span class="s1">) + </span><span class="s0">separator </span><span class="s1">+ </span><span
+    class="s0">safe</span><span class="s1">(</span><span class="s0">val</span><span class="s1">) + </span><span
+    class="s0">eol</span>
+  <span class="s1">})</span>
+
+  <span class="s2">if </span><span class="s1">(</span><span class="s0">opt</span><span class="s1">.</span><span
+    class="s0">section </span><span class="s1">&amp;&amp; </span><span class="s0">out</span><span
+    class="s1">.</span><span class="s0">length</span><span class="s1">)</span>
+    <span class="s0">out </span><span class="s1">= </span><span class="s3">'[' </span><span class="s1">+ </span><span
+    class="s0">safe</span><span class="s1">(</span><span class="s0">opt</span><span class="s1">.</span><span class="s0">section</span><span
+    class="s1">) + </span><span class="s3">']' </span><span class="s1">+ </span><span class="s0">eol </span><span
+    class="s1">+ </span><span class="s0">out</span>
+
+  <span class="s0">children</span><span class="s1">.</span><span class="s0">forEach</span><span class="s1">(</span><span
+    class="s2">function </span><span class="s1">(</span><span class="s0">k</span><span class="s1">, </span><span
+    class="s0">_</span><span class="s1">, </span><span class="s0">__</span><span class="s1">) {</span>
+    <span class="s2">var </span><span class="s0">nk </span><span class="s1">= </span><span
+    class="s0">dotSplit</span><span class="s1">(</span><span class="s0">k</span><span class="s1">).</span><span
+    class="s0">join</span><span class="s1">(</span><span class="s3">'</span><span class="s2">\\</span><span class="s3">.'</span><span
+    class="s1">)</span>
+    <span class="s2">var </span><span class="s0">section </span><span class="s1">= (</span><span
+    class="s0">opt</span><span class="s1">.</span><span class="s0">section </span><span class="s1">? </span><span
+    class="s0">opt</span><span class="s1">.</span><span class="s0">section </span><span class="s1">+ </span><span
+    class="s3">'.' </span><span class="s1">: </span><span class="s3">''</span><span class="s1">) + </span><span
+    class="s0">nk</span>
+    <span class="s2">var </span><span class="s0">child </span><span class="s1">= </span><span
+    class="s0">encode</span><span class="s1">(</span><span class="s0">obj</span><span class="s1">[</span><span
+    class="s0">k</span><span class="s1">], {</span>
+      <span class="s0">section</span><span class="s1">: </span><span class="s0">section</span><span class="s1">,</span>
+      <span class="s0">whitespace</span><span class="s1">: </span><span class="s0">opt</span><span
+    class="s1">.</span><span class="s0">whitespace</span><span class="s1">,</span>
+    <span class="s1">})</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">out</span><span class="s1">.</span><span
+    class="s0">length </span><span class="s1">&amp;&amp; </span><span class="s0">child</span><span
+    class="s1">.</span><span class="s0">length</span><span class="s1">)</span>
+      <span class="s0">out </span><span class="s1">+= </span><span class="s0">eol</span>
+
+    <span class="s0">out </span><span class="s1">+= </span><span class="s0">child</span>
+  <span class="s1">})</span>
+
+  <span class="s2">return </span><span class="s0">out</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">dotSplit </span><span class="s1">(</span><span
+    class="s0">str</span><span class="s1">) {</span>
+  <span class="s2">return </span><span class="s0">str</span><span class="s1">.</span><span
+    class="s0">replace</span><span class="s1">(</span><span class="s4">/\1/g</span><span class="s1">, </span><span
+    class="s3">'</span><span class="s2">\u0002</span><span class="s3">LITERAL</span><span class="s2">\\</span><span
+    class="s3">1LITERAL</span><span class="s2">\u0002</span><span class="s3">'</span><span class="s1">)</span>
+    <span class="s1">.</span><span class="s0">replace</span><span class="s1">(</span><span
+    class="s4">/\\\./g</span><span class="s1">, </span><span class="s3">'</span><span class="s2">\u0001</span><span
+    class="s3">'</span><span class="s1">)</span>
+    <span class="s1">.</span><span class="s0">split</span><span class="s1">(</span><span class="s4">/\./</span><span
+    class="s1">).</span><span class="s0">map</span><span class="s1">(</span><span class="s2">function </span><span
+    class="s1">(</span><span class="s0">part</span><span class="s1">) {</span>
+      <span class="s2">return </span><span class="s0">part</span><span class="s1">.</span><span
+    class="s0">replace</span><span class="s1">(</span><span class="s4">/\1/g</span><span class="s1">, </span><span
+    class="s3">'</span><span class="s2">\\</span><span class="s3">.'</span><span class="s1">)</span>
+        <span class="s1">.</span><span class="s0">replace</span><span class="s1">(</span><span class="s4">/\2LITERAL\\1LITERAL\2/g</span><span
+    class="s1">, </span><span class="s3">'</span><span class="s2">\u0001</span><span class="s3">'</span><span
+    class="s1">)</span>
+    <span class="s1">})</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">decode </span><span class="s1">(</span><span
+    class="s0">str</span><span class="s1">) {</span>
+  <span class="s2">var </span><span class="s0">out </span><span class="s1">= {}</span>
+  <span class="s2">var </span><span class="s0">p </span><span class="s1">= </span><span class="s0">out</span>
+  <span class="s2">var </span><span class="s0">section </span><span class="s1">= </span><span class="s2">null</span>
+  <span class="s5">//          section     |key      = value</span>
+  <span class="s2">var </span><span class="s0">re </span><span class="s1">= </span><span class="s4">/^\[([^\]]*)\]$|^([^=]+)(=(.*))?$/i</span>
+  <span class="s2">var </span><span class="s0">lines </span><span class="s1">= </span><span class="s0">str</span><span
+    class="s1">.</span><span class="s0">split</span><span class="s1">(</span><span class="s4">/[\r\n]+/g</span><span
+    class="s1">)</span>
+
+  <span class="s0">lines</span><span class="s1">.</span><span class="s0">forEach</span><span class="s1">(</span><span
+    class="s2">function </span><span class="s1">(</span><span class="s0">line</span><span class="s1">, </span><span
+    class="s0">_</span><span class="s1">, </span><span class="s0">__</span><span class="s1">) {</span>
+    <span class="s2">if </span><span class="s1">(!</span><span class="s0">line </span><span class="s1">|| </span><span
+    class="s0">line</span><span class="s1">.</span><span class="s0">match</span><span class="s1">(</span><span
+    class="s4">/^\s*[;#]/</span><span class="s1">))</span>
+      <span class="s2">return</span>
+    <span class="s2">var </span><span class="s0">match </span><span class="s1">= </span><span
+    class="s0">line</span><span class="s1">.</span><span class="s0">match</span><span class="s1">(</span><span
+    class="s0">re</span><span class="s1">)</span>
+    <span class="s2">if </span><span class="s1">(!</span><span class="s0">match</span><span class="s1">)</span>
+      <span class="s2">return</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">match</span><span class="s1">[</span><span
+    class="s6">1</span><span class="s1">] !== </span><span class="s0">undefined</span><span class="s1">) {</span>
+      <span class="s0">section </span><span class="s1">= </span><span class="s0">unsafe</span><span
+    class="s1">(</span><span class="s0">match</span><span class="s1">[</span><span class="s6">1</span><span class="s1">])</span>
+      <span class="s2">if </span><span class="s1">(</span><span class="s0">section </span><span
+    class="s1">=== </span><span class="s3">'__proto__'</span><span class="s1">) {</span>
+        <span class="s5">// not allowed</span>
+        <span class="s5">// keep parsing the section, but don't attach it.</span>
+        <span class="s0">p </span><span class="s1">= {}</span>
+        <span class="s2">return</span>
+      <span class="s1">}</span>
+      <span class="s0">p </span><span class="s1">= </span><span class="s0">out</span><span class="s1">[</span><span
+    class="s0">section</span><span class="s1">] = </span><span class="s0">out</span><span class="s1">[</span><span
+    class="s0">section</span><span class="s1">] || {}</span>
+      <span class="s2">return</span>
+    <span class="s1">}</span>
+    <span class="s2">var </span><span class="s0">key </span><span class="s1">= </span><span
+    class="s0">unsafe</span><span class="s1">(</span><span class="s0">match</span><span class="s1">[</span><span
+    class="s6">2</span><span class="s1">])</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">key </span><span class="s1">=== </span><span
+    class="s3">'__proto__'</span><span class="s1">)</span>
+      <span class="s2">return</span>
+    <span class="s2">var </span><span class="s0">value </span><span class="s1">= </span><span
+    class="s0">match</span><span class="s1">[</span><span class="s6">3</span><span class="s1">] ? </span><span
+    class="s0">unsafe</span><span class="s1">(</span><span class="s0">match</span><span class="s1">[</span><span
+    class="s6">4</span><span class="s1">]) : </span><span class="s2">true</span>
+    <span class="s2">switch </span><span class="s1">(</span><span class="s0">value</span><span class="s1">) {</span>
+      <span class="s2">case </span><span class="s3">'true'</span><span class="s1">:</span>
+      <span class="s2">case </span><span class="s3">'false'</span><span class="s1">:</span>
+      <span class="s2">case </span><span class="s3">'null'</span><span class="s1">: </span><span
+    class="s0">value </span><span class="s1">= </span><span class="s0">JSON</span><span class="s1">.</span><span
+    class="s0">parse</span><span class="s1">(</span><span class="s0">value</span><span class="s1">)</span>
+    <span class="s1">}</span>
+
+    <span class="s5">// Convert keys with '[]' suffix to an array</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">key</span><span class="s1">.</span><span
+    class="s0">length </span><span class="s1">&gt; </span><span class="s6">2 </span><span
+    class="s1">&amp;&amp; </span><span class="s0">key</span><span class="s1">.</span><span class="s0">slice</span><span
+    class="s1">(-</span><span class="s6">2</span><span class="s1">) === </span><span class="s3">'[]'</span><span
+    class="s1">) {</span>
+      <span class="s0">key </span><span class="s1">= </span><span class="s0">key</span><span class="s1">.</span><span
+    class="s0">substring</span><span class="s1">(</span><span class="s6">0</span><span class="s1">, </span><span
+    class="s0">key</span><span class="s1">.</span><span class="s0">length </span><span class="s1">- </span><span
+    class="s6">2</span><span class="s1">)</span>
+      <span class="s2">if </span><span class="s1">(</span><span class="s0">key </span><span class="s1">=== </span><span
+    class="s3">'__proto__'</span><span class="s1">)</span>
+        <span class="s2">return</span>
+      <span class="s2">if </span><span class="s1">(!</span><span class="s0">p</span><span class="s1">[</span><span
+    class="s0">key</span><span class="s1">])</span>
+        <span class="s0">p</span><span class="s1">[</span><span class="s0">key</span><span class="s1">] = []</span>
+      <span class="s2">else if </span><span class="s1">(!</span><span class="s0">Array</span><span
+    class="s1">.</span><span class="s0">isArray</span><span class="s1">(</span><span class="s0">p</span><span
+    class="s1">[</span><span class="s0">key</span><span class="s1">]))</span>
+        <span class="s0">p</span><span class="s1">[</span><span class="s0">key</span><span class="s1">] = [</span><span
+    class="s0">p</span><span class="s1">[</span><span class="s0">key</span><span class="s1">]]</span>
+    <span class="s1">}</span>
+
+    <span class="s5">// safeguard against resetting a previously defined</span>
+    <span class="s5">// array by accidentally forgetting the brackets</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">Array</span><span class="s1">.</span><span
+    class="s0">isArray</span><span class="s1">(</span><span class="s0">p</span><span class="s1">[</span><span
+    class="s0">key</span><span class="s1">]))</span>
+      <span class="s0">p</span><span class="s1">[</span><span class="s0">key</span><span class="s1">].</span><span
+    class="s0">push</span><span class="s1">(</span><span class="s0">value</span><span class="s1">)</span>
+    <span class="s2">else</span>
+      <span class="s0">p</span><span class="s1">[</span><span class="s0">key</span><span class="s1">] = </span><span
+    class="s0">value</span>
+  <span class="s1">})</span>
+
+  <span class="s5">// {a:{y:1},&quot;a.b&quot;:{x:2}} --&gt; {a:{y:1,b:{x:2}}}</span>
+  <span class="s5">// use a filter to return the keys that have to be deleted.</span>
+  <span class="s0">Object</span><span class="s1">.</span><span class="s0">keys</span><span class="s1">(</span><span
+    class="s0">out</span><span class="s1">).</span><span class="s0">filter</span><span class="s1">(</span><span
+    class="s2">function </span><span class="s1">(</span><span class="s0">k</span><span class="s1">, </span><span
+    class="s0">_</span><span class="s1">, </span><span class="s0">__</span><span class="s1">) {</span>
+    <span class="s2">if </span><span class="s1">(!</span><span class="s0">out</span><span class="s1">[</span><span
+    class="s0">k</span><span class="s1">] ||</span>
+      <span class="s2">typeof </span><span class="s0">out</span><span class="s1">[</span><span class="s0">k</span><span
+    class="s1">] !== </span><span class="s3">'object' </span><span class="s1">||</span>
+      <span class="s0">Array</span><span class="s1">.</span><span class="s0">isArray</span><span
+    class="s1">(</span><span class="s0">out</span><span class="s1">[</span><span class="s0">k</span><span
+    class="s1">]))</span>
+      <span class="s2">return false</span>
+
+    <span class="s5">// see if the parent section is also an object.</span>
+    <span class="s5">// if so, add it to that, and mark this one for deletion</span>
+    <span class="s2">var </span><span class="s0">parts </span><span class="s1">= </span><span class="s0">dotSplit</span><span
+    class="s1">(</span><span class="s0">k</span><span class="s1">)</span>
+    <span class="s2">var </span><span class="s0">p </span><span class="s1">= </span><span class="s0">out</span>
+    <span class="s2">var </span><span class="s0">l </span><span class="s1">= </span><span class="s0">parts</span><span
+    class="s1">.</span><span class="s0">pop</span><span class="s1">()</span>
+    <span class="s2">var </span><span class="s0">nl </span><span class="s1">= </span><span class="s0">l</span><span
+    class="s1">.</span><span class="s0">replace</span><span class="s1">(</span><span class="s4">/\\\./g</span><span
+    class="s1">, </span><span class="s3">'.'</span><span class="s1">)</span>
+    <span class="s0">parts</span><span class="s1">.</span><span class="s0">forEach</span><span class="s1">(</span><span
+    class="s2">function </span><span class="s1">(</span><span class="s0">part</span><span class="s1">, </span><span
+    class="s0">_</span><span class="s1">, </span><span class="s0">__</span><span class="s1">) {</span>
+      <span class="s2">if </span><span class="s1">(</span><span class="s0">part </span><span class="s1">=== </span><span
+    class="s3">'__proto__'</span><span class="s1">)</span>
+        <span class="s2">return</span>
+      <span class="s2">if </span><span class="s1">(!</span><span class="s0">p</span><span class="s1">[</span><span
+    class="s0">part</span><span class="s1">] || </span><span class="s2">typeof </span><span class="s0">p</span><span
+    class="s1">[</span><span class="s0">part</span><span class="s1">] !== </span><span class="s3">'object'</span><span
+    class="s1">)</span>
+        <span class="s0">p</span><span class="s1">[</span><span class="s0">part</span><span class="s1">] = {}</span>
+      <span class="s0">p </span><span class="s1">= </span><span class="s0">p</span><span class="s1">[</span><span
+    class="s0">part</span><span class="s1">]</span>
+    <span class="s1">})</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">p </span><span class="s1">=== </span><span
+    class="s0">out </span><span class="s1">&amp;&amp; </span><span class="s0">nl </span><span
+    class="s1">=== </span><span class="s0">l</span><span class="s1">)</span>
+      <span class="s2">return false</span>
+
+    <span class="s0">p</span><span class="s1">[</span><span class="s0">nl</span><span class="s1">] = </span><span
+    class="s0">out</span><span class="s1">[</span><span class="s0">k</span><span class="s1">]</span>
+    <span class="s2">return true</span>
+  <span class="s1">}).</span><span class="s0">forEach</span><span class="s1">(</span><span
+    class="s2">function </span><span class="s1">(</span><span class="s0">del</span><span class="s1">, </span><span
+    class="s0">_</span><span class="s1">, </span><span class="s0">__</span><span class="s1">) {</span>
+    <span class="s2">delete </span><span class="s0">out</span><span class="s1">[</span><span class="s0">del</span><span
+    class="s1">]</span>
+  <span class="s1">})</span>
+
+  <span class="s2">return </span><span class="s0">out</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">isQuoted </span><span class="s1">(</span><span
+    class="s0">val</span><span class="s1">) {</span>
+  <span class="s2">return </span><span class="s1">(</span><span class="s0">val</span><span class="s1">.</span><span
+    class="s0">charAt</span><span class="s1">(</span><span class="s6">0</span><span class="s1">) === </span><span
+    class="s3">'&quot;' </span><span class="s1">&amp;&amp; </span><span class="s0">val</span><span
+    class="s1">.</span><span class="s0">slice</span><span class="s1">(-</span><span class="s6">1</span><span class="s1">) === </span><span
+    class="s3">'&quot;'</span><span class="s1">) ||</span>
+    <span class="s1">(</span><span class="s0">val</span><span class="s1">.</span><span class="s0">charAt</span><span
+    class="s1">(</span><span class="s6">0</span><span class="s1">) === </span><span
+    class="s3">&quot;'&quot; </span><span class="s1">&amp;&amp; </span><span class="s0">val</span><span
+    class="s1">.</span><span class="s0">slice</span><span class="s1">(-</span><span class="s6">1</span><span class="s1">) === </span><span
+    class="s3">&quot;'&quot;</span><span class="s1">)</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">safe </span><span class="s1">(</span><span class="s0">val</span><span
+    class="s1">) {</span>
+  <span class="s2">return </span><span class="s1">(</span><span class="s2">typeof </span><span
+    class="s0">val </span><span class="s1">!== </span><span class="s3">'string' </span><span class="s1">||</span>
+    <span class="s0">val</span><span class="s1">.</span><span class="s0">match</span><span class="s1">(</span><span
+    class="s4">/[=\r\n]/</span><span class="s1">) ||</span>
+    <span class="s0">val</span><span class="s1">.</span><span class="s0">match</span><span class="s1">(</span><span
+    class="s4">/^\[/</span><span class="s1">) ||</span>
+    <span class="s1">(</span><span class="s0">val</span><span class="s1">.</span><span class="s0">length </span><span
+    class="s1">&gt; </span><span class="s6">1 </span><span class="s1">&amp;&amp;</span>
+     <span class="s0">isQuoted</span><span class="s1">(</span><span class="s0">val</span><span class="s1">)) ||</span>
+    <span class="s0">val </span><span class="s1">!== </span><span class="s0">val</span><span class="s1">.</span><span
+    class="s0">trim</span><span class="s1">())</span>
+    <span class="s1">? </span><span class="s0">JSON</span><span class="s1">.</span><span
+    class="s0">stringify</span><span class="s1">(</span><span class="s0">val</span><span class="s1">)</span>
+    <span class="s1">: </span><span class="s0">val</span><span class="s1">.</span><span class="s0">replace</span><span
+    class="s1">(</span><span class="s4">/;/g</span><span class="s1">, </span><span class="s3">'</span><span class="s2">\\</span><span
+    class="s3">;'</span><span class="s1">).</span><span class="s0">replace</span><span class="s1">(</span><span
+    class="s4">/#/g</span><span class="s1">, </span><span class="s3">'</span><span class="s2">\\</span><span class="s3">#'</span><span
+    class="s1">)</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">unsafe </span><span class="s1">(</span><span
+    class="s0">val</span><span class="s1">, </span><span class="s0">doUnesc</span><span class="s1">) {</span>
+  <span class="s0">val </span><span class="s1">= (</span><span class="s0">val </span><span class="s1">|| </span><span
+    class="s3">''</span><span class="s1">).</span><span class="s0">trim</span><span class="s1">()</span>
+  <span class="s2">if </span><span class="s1">(</span><span class="s0">isQuoted</span><span class="s1">(</span><span
+    class="s0">val</span><span class="s1">)) {</span>
+    <span class="s5">// remove the single quotes before calling JSON.parse</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">val</span><span class="s1">.</span><span
+    class="s0">charAt</span><span class="s1">(</span><span class="s6">0</span><span class="s1">) === </span><span
+    class="s3">&quot;'&quot;</span><span class="s1">)</span>
+      <span class="s0">val </span><span class="s1">= </span><span class="s0">val</span><span class="s1">.</span><span
+    class="s0">substr</span><span class="s1">(</span><span class="s6">1</span><span class="s1">, </span><span
+    class="s0">val</span><span class="s1">.</span><span class="s0">length </span><span class="s1">- </span><span
+    class="s6">2</span><span class="s1">)</span>
+
+    <span class="s2">try </span><span class="s1">{</span>
+      <span class="s0">val </span><span class="s1">= </span><span class="s0">JSON</span><span class="s1">.</span><span
+    class="s0">parse</span><span class="s1">(</span><span class="s0">val</span><span class="s1">)</span>
+    <span class="s1">} </span><span class="s2">catch </span><span class="s1">(</span><span class="s0">_</span><span
+    class="s1">) {}</span>
+  <span class="s1">} </span><span class="s2">else </span><span class="s1">{</span>
+    <span class="s5">// walk the val to find the first not-escaped ; character</span>
+    <span class="s2">var </span><span class="s0">esc </span><span class="s1">= </span><span class="s2">false</span>
+    <span class="s2">var </span><span class="s0">unesc </span><span class="s1">= </span><span class="s3">''</span>
+    <span class="s2">for </span><span class="s1">(</span><span class="s2">var </span><span class="s0">i </span><span
+    class="s1">= </span><span class="s6">0</span><span class="s1">, </span><span class="s0">l </span><span
+    class="s1">= </span><span class="s0">val</span><span class="s1">.</span><span class="s0">length</span><span
+    class="s1">; </span><span class="s0">i </span><span class="s1">&lt; </span><span class="s0">l</span><span
+    class="s1">; </span><span class="s0">i</span><span class="s1">++) {</span>
+      <span class="s2">var </span><span class="s0">c </span><span class="s1">= </span><span class="s0">val</span><span
+    class="s1">.</span><span class="s0">charAt</span><span class="s1">(</span><span class="s0">i</span><span class="s1">)</span>
+      <span class="s2">if </span><span class="s1">(</span><span class="s0">esc</span><span class="s1">) {</span>
+        <span class="s2">if </span><span class="s1">(</span><span class="s3">'</span><span class="s2">\\</span><span
+    class="s3">;#'</span><span class="s1">.</span><span class="s0">indexOf</span><span class="s1">(</span><span
+    class="s0">c</span><span class="s1">) !== -</span><span class="s6">1</span><span class="s1">)</span>
+          <span class="s0">unesc </span><span class="s1">+= </span><span class="s0">c</span>
+        <span class="s2">else</span>
+          <span class="s0">unesc </span><span class="s1">+= </span><span class="s3">'</span><span
+    class="s2">\\</span><span class="s3">' </span><span class="s1">+ </span><span class="s0">c</span>
+
+        <span class="s0">esc </span><span class="s1">= </span><span class="s2">false</span>
+      <span class="s1">} </span><span class="s2">else if </span><span class="s1">(</span><span
+    class="s3">';#'</span><span class="s1">.</span><span class="s0">indexOf</span><span class="s1">(</span><span
+    class="s0">c</span><span class="s1">) !== -</span><span class="s6">1</span><span class="s1">)</span>
+        <span class="s2">break</span>
+      <span class="s2">else if </span><span class="s1">(</span><span class="s0">c </span><span
+    class="s1">=== </span><span class="s3">'</span><span class="s2">\\</span><span class="s3">'</span><span
+    class="s1">)</span>
+        <span class="s0">esc </span><span class="s1">= </span><span class="s2">true</span>
+      <span class="s2">else</span>
+        <span class="s0">unesc </span><span class="s1">+= </span><span class="s0">c</span>
+    <span class="s1">}</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">esc</span><span class="s1">)</span>
+      <span class="s0">unesc </span><span class="s1">+= </span><span class="s3">'</span><span class="s2">\\</span><span
+    class="s3">'</span>
+
+    <span class="s2">return </span><span class="s0">unesc</span><span class="s1">.</span><span
+    class="s0">trim</span><span class="s1">()</span>
+  <span class="s1">}</span>
+  <span class="s2">return </span><span class="s0">val</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

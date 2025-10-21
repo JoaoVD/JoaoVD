@@ -1,0 +1,80 @@
+<html>
+<head>
+  <title>get-write-flag.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          get-write-flag.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// Get the appropriate flag to use for creating files</span>
+<span class="s0">// We use fmap on Windows platforms for files less than</span>
+<span class="s0">// 512kb.  This is a fairly low limit, but avoids making</span>
+<span class="s0">// things slower in some cases.  Since most of what this</span>
+<span class="s0">// library is used for is extracting tarballs of many</span>
+<span class="s0">// relatively small files in npm packages and the like,</span>
+<span class="s0">// it can be a big boost on Windows platforms.</span>
+<span class="s0">// Only supported in Node v12.9.0 and above.</span>
+<span class="s2">const </span><span class="s1">platform </span><span class="s3">= </span><span class="s1">process</span><span
+    class="s3">.</span><span class="s1">env</span><span class="s3">.</span><span
+    class="s1">__FAKE_PLATFORM__ </span><span class="s3">|| </span><span class="s1">process</span><span
+    class="s3">.</span><span class="s1">platform</span>
+<span class="s2">const </span><span class="s1">isWindows </span><span class="s3">= </span><span
+    class="s1">platform </span><span class="s3">=== </span><span class="s4">'win32'</span>
+<span class="s2">const </span><span class="s1">fs </span><span class="s3">= </span><span class="s1">global</span><span
+    class="s3">.</span><span class="s1">__FAKE_TESTING_FS__ </span><span class="s3">|| </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'fs'</span><span class="s3">)</span>
+
+<span class="s0">/* istanbul ignore next */</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">O_CREAT</span><span class="s3">, </span><span
+    class="s1">O_TRUNC</span><span class="s3">, </span><span class="s1">O_WRONLY</span><span class="s3">, </span><span
+    class="s1">UV_FS_O_FILEMAP </span><span class="s3">= </span><span class="s5">0 </span><span
+    class="s3">} = </span><span class="s1">fs</span><span class="s3">.</span><span class="s1">constants</span>
+
+<span class="s2">const </span><span class="s1">fMapEnabled </span><span class="s3">= </span><span
+    class="s1">isWindows </span><span class="s3">&amp;&amp; !!</span><span class="s1">UV_FS_O_FILEMAP</span>
+<span class="s2">const </span><span class="s1">fMapLimit </span><span class="s3">= </span><span
+    class="s5">512 </span><span class="s3">* </span><span class="s5">1024</span>
+<span class="s2">const </span><span class="s1">fMapFlag </span><span class="s3">= </span><span class="s1">UV_FS_O_FILEMAP </span><span
+    class="s3">| </span><span class="s1">O_TRUNC </span><span class="s3">| </span><span class="s1">O_CREAT </span><span
+    class="s3">| </span><span class="s1">O_WRONLY</span>
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= !</span><span
+    class="s1">fMapEnabled </span><span class="s3">? () =&gt; </span><span class="s4">'w'</span>
+  <span class="s3">: </span><span class="s1">size </span><span class="s3">=&gt; </span><span
+    class="s1">size </span><span class="s3">&lt; </span><span class="s1">fMapLimit </span><span
+    class="s3">? </span><span class="s1">fMapFlag </span><span class="s3">: </span><span class="s4">'w'</span>
+</pre>
+</body>
+</html>

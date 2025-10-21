@@ -1,0 +1,1652 @@
+<html>
+<head>
+  <title>unpack.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #7a7e85;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          unpack.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">// the PEND/UNPEND stuff tracks whether we're ready to emit end/close yet.</span>
+<span class="s2">// but the path reservations are required to avoid race conditions where</span>
+<span class="s2">// parallelized unpack ops may mess with one another, due to dependencies</span>
+<span class="s2">// (like a Link depending on its target) or destructive operations (like</span>
+<span class="s2">// clobbering an fs object to create one of a different type.)</span>
+
+<span class="s3">const </span><span class="s1">assert </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'assert'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">Parser </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./parse.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">fs </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'fs'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">fsm </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'fs-minipass'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'path'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">mkdir </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./mkdir.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">wc </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'./winchars.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">pathReservations </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'./path-reservations.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">stripAbsolutePath </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'./strip-absolute-path.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">normPath </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'./normalize-windows-path.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">stripSlash </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./strip-trailing-slashes.js'</span><span
+    class="s4">)</span>
+<span class="s3">const </span><span class="s1">normalize </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./normalize-unicode.js'</span><span
+    class="s4">)</span>
+
+<span class="s3">const </span><span class="s1">ONENTRY </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'onEntry'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">CHECKFS </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'checkFs'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">CHECKFS2 </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'checkFs2'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">PRUNECACHE </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'pruneCache'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ISREUSABLE </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'isReusable'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">MAKEFS </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'makeFs'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">FILE </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'file'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">DIRECTORY </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'directory'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">LINK </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'link'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">SYMLINK </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'symlink'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">HARDLINK </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'hardlink'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">UNSUPPORTED </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'unsupported'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">CHECKPATH </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'checkPath'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">MKDIR </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'mkdir'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ONERROR </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'onError'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">PENDING </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'pending'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">PEND </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'pend'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">UNPEND </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'unpend'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ENDED </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'ended'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">MAYBECLOSE </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'maybeClose'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">SKIP </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'skip'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">DOCHOWN </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'doChown'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">UID </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'uid'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">GID </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'gid'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">CHECKED_CWD </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'checkedCwd'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">crypto </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'crypto'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">getFlag </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./get-write-flag.js'</span><span
+    class="s4">)</span>
+<span class="s3">const </span><span class="s1">platform </span><span class="s4">= </span><span class="s1">process</span><span
+    class="s4">.</span><span class="s1">env</span><span class="s4">.</span><span
+    class="s1">TESTING_TAR_FAKE_PLATFORM </span><span class="s4">|| </span><span class="s1">process</span><span
+    class="s4">.</span><span class="s1">platform</span>
+<span class="s3">const </span><span class="s1">isWindows </span><span class="s4">= </span><span
+    class="s1">platform </span><span class="s4">=== </span><span class="s0">'win32'</span>
+<span class="s3">const </span><span class="s1">DEFAULT_MAX_DEPTH </span><span class="s4">= </span><span
+    class="s5">1024</span>
+
+<span class="s2">// Unlinks on Windows are not atomic.</span>
+<span class="s2">//</span>
+<span class="s2">// This means that if you have a file entry, followed by another</span>
+<span class="s2">// file entry with an identical name, and you cannot re-use the file</span>
+<span class="s2">// (because it's a hardlink, or because unlink:true is set, or it's</span>
+<span class="s2">// Windows, which does not have useful nlink values), then the unlink</span>
+<span class="s2">// will be committed to the disk AFTER the new file has been written</span>
+<span class="s2">// over the old one, deleting the new file.</span>
+<span class="s2">//</span>
+<span class="s2">// To work around this, on Windows systems, we rename the file and then</span>
+<span class="s2">// delete the renamed file.  It's a sloppy kludge, but frankly, I do not</span>
+<span class="s2">// know of a better way to do this, given windows' non-atomic unlink</span>
+<span class="s2">// semantics.</span>
+<span class="s2">//</span>
+<span class="s2">// See: https://github.com/npm/node-tar/issues/183</span>
+<span class="s2">/* istanbul ignore next */</span>
+<span class="s3">const </span><span class="s1">unlinkFile </span><span class="s4">= (</span><span class="s1">path</span><span
+    class="s4">, </span><span class="s1">cb</span><span class="s4">) =&gt; {</span>
+  <span class="s3">if </span><span class="s4">(!</span><span class="s1">isWindows</span><span class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">unlink</span><span class="s4">(</span><span class="s1">path</span><span class="s4">, </span><span
+    class="s1">cb</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">const </span><span class="s1">name </span><span class="s4">= </span><span
+    class="s1">path </span><span class="s4">+ </span><span class="s0">'.DELETE.' </span><span class="s4">+ </span><span
+    class="s1">crypto</span><span class="s4">.</span><span class="s1">randomBytes</span><span class="s4">(</span><span
+    class="s5">16</span><span class="s4">).</span><span class="s1">toString</span><span class="s4">(</span><span
+    class="s0">'hex'</span><span class="s4">)</span>
+  <span class="s1">fs</span><span class="s4">.</span><span class="s1">rename</span><span class="s4">(</span><span
+    class="s1">path</span><span class="s4">, </span><span class="s1">name</span><span class="s4">, </span><span
+    class="s1">er </span><span class="s4">=&gt; {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+      <span class="s3">return </span><span class="s1">cb</span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">)</span>
+    <span class="s4">}</span>
+    <span class="s1">fs</span><span class="s4">.</span><span class="s1">unlink</span><span class="s4">(</span><span
+    class="s1">name</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">)</span>
+  <span class="s4">})</span>
+<span class="s4">}</span>
+
+<span class="s2">/* istanbul ignore next */</span>
+<span class="s3">const </span><span class="s1">unlinkFileSync </span><span class="s4">= </span><span
+    class="s1">path </span><span class="s4">=&gt; {</span>
+  <span class="s3">if </span><span class="s4">(!</span><span class="s1">isWindows</span><span class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">fs</span><span class="s4">.</span><span class="s1">unlinkSync</span><span
+    class="s4">(</span><span class="s1">path</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">const </span><span class="s1">name </span><span class="s4">= </span><span
+    class="s1">path </span><span class="s4">+ </span><span class="s0">'.DELETE.' </span><span class="s4">+ </span><span
+    class="s1">crypto</span><span class="s4">.</span><span class="s1">randomBytes</span><span class="s4">(</span><span
+    class="s5">16</span><span class="s4">).</span><span class="s1">toString</span><span class="s4">(</span><span
+    class="s0">'hex'</span><span class="s4">)</span>
+  <span class="s1">fs</span><span class="s4">.</span><span class="s1">renameSync</span><span class="s4">(</span><span
+    class="s1">path</span><span class="s4">, </span><span class="s1">name</span><span class="s4">)</span>
+  <span class="s1">fs</span><span class="s4">.</span><span class="s1">unlinkSync</span><span class="s4">(</span><span
+    class="s1">name</span><span class="s4">)</span>
+<span class="s4">}</span>
+
+<span class="s2">// this.gid, entry.gid, this.processUid</span>
+<span class="s3">const </span><span class="s1">uint32 </span><span class="s4">= (</span><span class="s1">a</span><span
+    class="s4">, </span><span class="s1">b</span><span class="s4">, </span><span class="s1">c</span><span class="s4">) =&gt;</span>
+  <span class="s1">a </span><span class="s4">=== </span><span class="s1">a </span><span
+    class="s4">&gt;&gt;&gt; </span><span class="s5">0 </span><span class="s4">? </span><span class="s1">a</span>
+  <span class="s4">: </span><span class="s1">b </span><span class="s4">=== </span><span class="s1">b </span><span
+    class="s4">&gt;&gt;&gt; </span><span class="s5">0 </span><span class="s4">? </span><span class="s1">b</span>
+  <span class="s4">: </span><span class="s1">c</span>
+
+<span class="s2">// clear the cache if it's a case-insensitive unicode-squashing match.</span>
+<span class="s2">// we can't know if the current file system is case-sensitive or supports</span>
+<span class="s2">// unicode fully, so we check for similarity on the maximally compatible</span>
+<span class="s2">// representation.  Err on the side of pruning, since all it's doing is</span>
+<span class="s2">// preventing lstats, and it's not the end of the world if we get a false</span>
+<span class="s2">// positive.</span>
+<span class="s2">// Note that on windows, we always drop the entire cache whenever a</span>
+<span class="s2">// symbolic link is encountered, because 8.3 filenames are impossible</span>
+<span class="s2">// to reason about, and collisions are hazards rather than just failures.</span>
+<span class="s3">const </span><span class="s1">cacheKeyNormalize </span><span class="s4">= </span><span
+    class="s1">path </span><span class="s4">=&gt; </span><span class="s1">stripSlash</span><span
+    class="s4">(</span><span class="s1">normPath</span><span class="s4">(</span><span class="s1">normalize</span><span
+    class="s4">(</span><span class="s1">path</span><span class="s4">)))</span>
+  <span class="s4">.</span><span class="s1">toLowerCase</span><span class="s4">()</span>
+
+<span class="s3">const </span><span class="s1">pruneCache </span><span class="s4">= (</span><span
+    class="s1">cache</span><span class="s4">, </span><span class="s1">abs</span><span class="s4">) =&gt; {</span>
+  <span class="s1">abs </span><span class="s4">= </span><span class="s1">cacheKeyNormalize</span><span
+    class="s4">(</span><span class="s1">abs</span><span class="s4">)</span>
+  <span class="s3">for </span><span class="s4">(</span><span class="s3">const </span><span
+    class="s1">path of cache</span><span class="s4">.</span><span class="s1">keys</span><span class="s4">()) {</span>
+    <span class="s3">const </span><span class="s1">pnorm </span><span class="s4">= </span><span class="s1">cacheKeyNormalize</span><span
+    class="s4">(</span><span class="s1">path</span><span class="s4">)</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">pnorm </span><span class="s4">=== </span><span
+    class="s1">abs </span><span class="s4">|| </span><span class="s1">pnorm</span><span class="s4">.</span><span
+    class="s1">indexOf</span><span class="s4">(</span><span class="s1">abs </span><span class="s4">+ </span><span
+    class="s0">'/'</span><span class="s4">) === </span><span class="s5">0</span><span class="s4">) {</span>
+      <span class="s1">cache</span><span class="s4">.</span><span class="s1">delete</span><span class="s4">(</span><span
+    class="s1">path</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">dropCache </span><span class="s4">= </span><span class="s1">cache </span><span
+    class="s4">=&gt; {</span>
+  <span class="s3">for </span><span class="s4">(</span><span class="s3">const </span><span
+    class="s1">key of cache</span><span class="s4">.</span><span class="s1">keys</span><span class="s4">()) {</span>
+    <span class="s1">cache</span><span class="s4">.</span><span class="s1">delete</span><span class="s4">(</span><span
+    class="s1">key</span><span class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s3">class </span><span class="s1">Unpack </span><span class="s3">extends </span><span
+    class="s1">Parser </span><span class="s4">{</span>
+  <span class="s1">constructor </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">) {</span>
+    <span class="s3">if </span><span class="s4">(!</span><span class="s1">opt</span><span class="s4">) {</span>
+      <span class="s1">opt </span><span class="s4">= {}</span>
+    <span class="s4">}</span>
+
+    <span class="s1">opt</span><span class="s4">.</span><span class="s1">ondone </span><span class="s4">= </span><span
+    class="s1">_ </span><span class="s4">=&gt; {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">ENDED</span><span
+    class="s4">] = </span><span class="s3">true</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">MAYBECLOSE</span><span class="s4">]()</span>
+    <span class="s4">}</span>
+
+    <span class="s3">super</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">)</span>
+
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">CHECKED_CWD</span><span class="s4">] = </span><span
+    class="s3">false</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">reservations </span><span class="s4">= </span><span
+    class="s1">pathReservations</span><span class="s4">()</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">transform </span><span
+    class="s4">= </span><span class="s3">typeof </span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">transform </span><span class="s4">=== </span><span class="s0">'function' </span><span
+    class="s4">? </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">transform </span><span
+    class="s4">: </span><span class="s3">null</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">writable </span><span
+    class="s4">= </span><span class="s3">true</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">readable </span><span
+    class="s4">= </span><span class="s3">false</span>
+
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PENDING</span><span
+    class="s4">] = </span><span class="s5">0</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">ENDED</span><span class="s4">] = </span><span
+    class="s3">false</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">dirCache </span><span
+    class="s4">= </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">dirCache </span><span
+    class="s4">|| </span><span class="s3">new </span><span class="s1">Map</span><span class="s4">()</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">typeof </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">uid </span><span class="s4">=== </span><span class="s0">'number' </span><span
+    class="s4">|| </span><span class="s3">typeof </span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">gid </span><span class="s4">=== </span><span class="s0">'number'</span><span class="s4">) {</span>
+      <span class="s2">// need both or neither</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s3">typeof </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">uid </span><span class="s4">!== </span><span
+    class="s0">'number' </span><span class="s4">|| </span><span class="s3">typeof </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">gid </span><span class="s4">!== </span><span
+    class="s0">'number'</span><span class="s4">) {</span>
+        <span class="s3">throw new </span><span class="s1">TypeError</span><span class="s4">(</span><span class="s0">'cannot set owner without number uid and gid'</span><span
+    class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">preserveOwner</span><span class="s4">) {</span>
+        <span class="s3">throw new </span><span class="s1">TypeError</span><span class="s4">(</span>
+          <span class="s0">'cannot preserve owner in archive and also set owner explicitly'</span><span
+    class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">uid </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">uid</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">gid </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">gid</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">setOwner </span><span
+    class="s4">= </span><span class="s3">true</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">uid </span><span class="s4">= </span><span
+    class="s3">null</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">gid </span><span class="s4">= </span><span
+    class="s3">null</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">setOwner </span><span
+    class="s4">= </span><span class="s3">false</span>
+    <span class="s4">}</span>
+
+    <span class="s2">// default true for root</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">preserveOwner </span><span class="s4">=== </span><span class="s1">undefined </span><span class="s4">&amp;&amp; </span><span
+    class="s3">typeof </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">uid </span><span
+    class="s4">!== </span><span class="s0">'number'</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">preserveOwner </span><span
+    class="s4">= </span><span class="s1">process</span><span class="s4">.</span><span class="s1">getuid </span><span
+    class="s4">&amp;&amp; </span><span class="s1">process</span><span class="s4">.</span><span
+    class="s1">getuid</span><span class="s4">() === </span><span class="s5">0</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">preserveOwner </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">preserveOwner</span>
+    <span class="s4">}</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">processUid </span><span
+    class="s4">= (</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">preserveOwner </span><span class="s4">|| </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">setOwner</span><span class="s4">) &amp;&amp; </span><span
+    class="s1">process</span><span class="s4">.</span><span class="s1">getuid </span><span class="s4">?</span>
+      <span class="s1">process</span><span class="s4">.</span><span class="s1">getuid</span><span
+    class="s4">() : </span><span class="s3">null</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">processGid </span><span
+    class="s4">= (</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">preserveOwner </span><span class="s4">|| </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">setOwner</span><span class="s4">) &amp;&amp; </span><span
+    class="s1">process</span><span class="s4">.</span><span class="s1">getgid </span><span class="s4">?</span>
+      <span class="s1">process</span><span class="s4">.</span><span class="s1">getgid</span><span
+    class="s4">() : </span><span class="s3">null</span>
+
+    <span class="s2">// prevent excessively deep nesting of subfolders</span>
+    <span class="s2">// set to `Infinity` to remove this restriction</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">maxDepth </span><span
+    class="s4">= </span><span class="s3">typeof </span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">maxDepth </span><span class="s4">=== </span><span class="s0">'number'</span>
+      <span class="s4">? </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">maxDepth</span>
+      <span class="s4">: </span><span class="s1">DEFAULT_MAX_DEPTH</span>
+
+    <span class="s2">// mostly just for testing, but useful in some cases.</span>
+    <span class="s2">// Forcibly trigger a chown on every entry, no matter what</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">forceChown </span><span
+    class="s4">= </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">forceChown </span><span
+    class="s4">=== </span><span class="s3">true</span>
+
+    <span class="s2">// turn &gt;&lt;?| in filenames into 0xf000-higher encoded forms</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">win32 </span><span class="s4">= !!</span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">win32 </span><span class="s4">|| </span><span
+    class="s1">isWindows</span>
+
+    <span class="s2">// do not unpack over files that are newer than what's in the archive</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">newer </span><span class="s4">= !!</span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">newer</span>
+
+    <span class="s2">// do not unpack over ANY files</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">keep </span><span class="s4">= !!</span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">keep</span>
+
+    <span class="s2">// do not set mtime/atime of extracted entries</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">noMtime </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">noMtime</span>
+
+    <span class="s2">// allow .., absolute path entries, and unpacking through symlinks</span>
+    <span class="s2">// without this, warn and skip .., relativize absolutes, and error</span>
+    <span class="s2">// on symlinks in extraction path</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">preservePaths </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">preservePaths</span>
+
+    <span class="s2">// unlink files and links before writing. This breaks existing hard</span>
+    <span class="s2">// links, and removes symlink directories rather than erroring</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">unlink </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">unlink</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">cwd </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">resolve</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">cwd </span><span class="s4">|| </span><span class="s1">process</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">()))</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">strip </span><span class="s4">= +</span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">strip </span><span class="s4">|| </span><span
+    class="s5">0</span>
+    <span class="s2">// if we're not chmodding, then we don't need the process umask</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">processUmask </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">noChmod </span><span class="s4">? </span><span
+    class="s5">0 </span><span class="s4">: </span><span class="s1">process</span><span class="s4">.</span><span
+    class="s1">umask</span><span class="s4">()</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">umask </span><span class="s4">= </span><span
+    class="s3">typeof </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">umask </span><span
+    class="s4">=== </span><span class="s0">'number' </span><span class="s4">? </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">umask </span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">processUmask</span>
+
+    <span class="s2">// default mode for dirs created as parents</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">dmode </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">dmode </span><span class="s4">|| (</span><span
+    class="s5">0o0777 </span><span class="s4">&amp; (~</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">umask</span><span class="s4">))</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">fmode </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">fmode </span><span class="s4">|| (</span><span
+    class="s5">0o0666 </span><span class="s4">&amp; (~</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">umask</span><span class="s4">))</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'entry'</span><span class="s4">, </span><span class="s1">entry </span><span class="s4">=&gt; </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">ONENTRY</span><span class="s4">](</span><span
+    class="s1">entry</span><span class="s4">))</span>
+  <span class="s4">}</span>
+
+  <span class="s2">// a bad or damaged archive is a warning for Parser, but an error</span>
+  <span class="s2">// when extracting.  Mark those errors as unrecoverable, because</span>
+  <span class="s2">// the Unpack contract cannot be met.</span>
+  <span class="s1">warn </span><span class="s4">(</span><span class="s1">code</span><span class="s4">, </span><span
+    class="s1">msg</span><span class="s4">, </span><span class="s1">data </span><span class="s4">= {}) {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">code </span><span class="s4">=== </span><span
+    class="s0">'TAR_BAD_ARCHIVE' </span><span class="s4">|| </span><span class="s1">code </span><span
+    class="s4">=== </span><span class="s0">'TAR_ABORT'</span><span class="s4">) {</span>
+      <span class="s1">data</span><span class="s4">.</span><span class="s1">recoverable </span><span
+    class="s4">= </span><span class="s3">false</span>
+    <span class="s4">}</span>
+    <span class="s3">return super</span><span class="s4">.</span><span class="s1">warn</span><span
+    class="s4">(</span><span class="s1">code</span><span class="s4">, </span><span class="s1">msg</span><span
+    class="s4">, </span><span class="s1">data</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">MAYBECLOSE</span><span class="s4">] () {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">ENDED</span><span class="s4">] &amp;&amp; </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">PENDING</span><span class="s4">] === </span><span class="s5">0</span><span
+    class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">emit</span><span class="s4">(</span><span
+    class="s0">'prefinish'</span><span class="s4">)</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">emit</span><span class="s4">(</span><span
+    class="s0">'finish'</span><span class="s4">)</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">emit</span><span class="s4">(</span><span
+    class="s0">'end'</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">CHECKPATH</span><span class="s4">] (</span><span
+    class="s1">entry</span><span class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">p </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">path</span><span class="s4">)</span>
+    <span class="s3">const </span><span class="s1">parts </span><span class="s4">= </span><span class="s1">p</span><span
+    class="s4">.</span><span class="s1">split</span><span class="s4">(</span><span class="s0">'/'</span><span
+    class="s4">)</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">strip</span><span class="s4">) {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">parts</span><span class="s4">.</span><span
+    class="s1">length </span><span class="s4">&lt; </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">strip</span><span class="s4">) {</span>
+        <span class="s3">return false</span>
+      <span class="s4">}</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">type </span><span class="s4">=== </span><span class="s0">'Link'</span><span class="s4">) {</span>
+        <span class="s3">const </span><span class="s1">linkparts </span><span class="s4">= </span><span class="s1">normPath</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">linkpath</span><span
+    class="s4">).</span><span class="s1">split</span><span class="s4">(</span><span class="s0">'/'</span><span
+    class="s4">)</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">linkparts</span><span
+    class="s4">.</span><span class="s1">length </span><span class="s4">&gt;= </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">strip</span><span class="s4">) {</span>
+          <span class="s1">entry</span><span class="s4">.</span><span class="s1">linkpath </span><span
+    class="s4">= </span><span class="s1">linkparts</span><span class="s4">.</span><span class="s1">slice</span><span
+    class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span class="s1">strip</span><span
+    class="s4">).</span><span class="s1">join</span><span class="s4">(</span><span class="s0">'/'</span><span
+    class="s4">)</span>
+        <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+          <span class="s3">return false</span>
+        <span class="s4">}</span>
+      <span class="s4">}</span>
+      <span class="s1">parts</span><span class="s4">.</span><span class="s1">splice</span><span class="s4">(</span><span
+    class="s5">0</span><span class="s4">, </span><span class="s3">this</span><span class="s4">.</span><span class="s1">strip</span><span
+    class="s4">)</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">parts</span><span class="s4">.</span><span class="s1">join</span><span class="s4">(</span><span
+    class="s0">'/'</span><span class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">isFinite</span><span class="s4">(</span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">maxDepth</span><span class="s4">) &amp;&amp; </span><span
+    class="s1">parts</span><span class="s4">.</span><span class="s1">length </span><span class="s4">&gt; </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">maxDepth</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">warn</span><span class="s4">(</span><span
+    class="s0">'TAR_ENTRY_ERROR'</span><span class="s4">, </span><span class="s0">'path excessively deep'</span><span
+    class="s4">, {</span>
+        <span class="s1">entry</span><span class="s4">,</span>
+        <span class="s1">path</span><span class="s4">: </span><span class="s1">p</span><span class="s4">,</span>
+        <span class="s1">depth</span><span class="s4">: </span><span class="s1">parts</span><span
+    class="s4">.</span><span class="s1">length</span><span class="s4">,</span>
+        <span class="s1">maxDepth</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">maxDepth</span><span class="s4">,</span>
+      <span class="s4">})</span>
+      <span class="s3">return false</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(!</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">preservePaths</span><span class="s4">) {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">parts</span><span class="s4">.</span><span
+    class="s1">includes</span><span class="s4">(</span><span class="s0">'..'</span><span class="s4">) || </span><span
+    class="s1">isWindows </span><span class="s4">&amp;&amp; </span><span class="s6">/^[a-z]:\.\.$/i</span><span
+    class="s4">.</span><span class="s1">test</span><span class="s4">(</span><span class="s1">parts</span><span
+    class="s4">[</span><span class="s5">0</span><span class="s4">])) {</span>
+        <span class="s3">this</span><span class="s4">.</span><span class="s1">warn</span><span class="s4">(</span><span
+    class="s0">'TAR_ENTRY_ERROR'</span><span class="s4">, </span><span class="s0">`path contains '..'`</span><span
+    class="s4">, {</span>
+          <span class="s1">entry</span><span class="s4">,</span>
+          <span class="s1">path</span><span class="s4">: </span><span class="s1">p</span><span class="s4">,</span>
+        <span class="s4">})</span>
+        <span class="s3">return false</span>
+      <span class="s4">}</span>
+
+      <span class="s2">// strip off the root</span>
+      <span class="s3">const </span><span class="s4">[</span><span class="s1">root</span><span class="s4">, </span><span
+    class="s1">stripped</span><span class="s4">] = </span><span class="s1">stripAbsolutePath</span><span
+    class="s4">(</span><span class="s1">p</span><span class="s4">)</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">root</span><span class="s4">) {</span>
+        <span class="s1">entry</span><span class="s4">.</span><span class="s1">path </span><span
+    class="s4">= </span><span class="s1">stripped</span>
+        <span class="s3">this</span><span class="s4">.</span><span class="s1">warn</span><span class="s4">(</span><span
+    class="s0">'TAR_ENTRY_INFO'</span><span class="s4">, </span><span class="s0">`stripping </span><span
+    class="s1">$</span><span class="s4">{</span><span class="s1">root</span><span class="s4">} </span><span class="s0">from absolute path`</span><span
+    class="s4">, {</span>
+          <span class="s1">entry</span><span class="s4">,</span>
+          <span class="s1">path</span><span class="s4">: </span><span class="s1">p</span><span class="s4">,</span>
+        <span class="s4">})</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">isAbsolute</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">path</span><span class="s4">)) {</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute </span><span
+    class="s4">= </span><span class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span
+    class="s4">.</span><span class="s1">resolve</span><span class="s4">(</span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">path</span><span class="s4">))</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute </span><span
+    class="s4">= </span><span class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span
+    class="s4">.</span><span class="s1">resolve</span><span class="s4">(</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">cwd</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">path</span><span class="s4">))</span>
+    <span class="s4">}</span>
+
+    <span class="s2">// if we somehow ended up with a path that escapes the cwd, and we are</span>
+    <span class="s2">// not in preservePaths mode, then something is fishy!  This should have</span>
+    <span class="s2">// been prevented above, so ignore this for coverage.</span>
+    <span class="s2">/* istanbul ignore if - defense in depth */</span>
+    <span class="s3">if </span><span class="s4">(!</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">preservePaths </span><span class="s4">&amp;&amp;</span>
+        <span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">.</span><span class="s1">indexOf</span><span class="s4">(</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">cwd </span><span class="s4">+ </span><span class="s0">'/'</span><span
+    class="s4">) !== </span><span class="s5">0 </span><span class="s4">&amp;&amp;</span>
+        <span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute </span><span
+    class="s4">!== </span><span class="s3">this</span><span class="s4">.</span><span class="s1">cwd</span><span
+    class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">warn</span><span class="s4">(</span><span
+    class="s0">'TAR_ENTRY_ERROR'</span><span class="s4">, </span><span
+    class="s0">'path escaped extraction target'</span><span class="s4">, {</span>
+        <span class="s1">entry</span><span class="s4">,</span>
+        <span class="s1">path</span><span class="s4">: </span><span class="s1">normPath</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">path</span><span
+    class="s4">),</span>
+        <span class="s1">resolvedPath</span><span class="s4">: </span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">absolute</span><span class="s4">,</span>
+        <span class="s1">cwd</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">,</span>
+      <span class="s4">})</span>
+      <span class="s3">return false</span>
+    <span class="s4">}</span>
+
+    <span class="s2">// an archive can set properties on the extraction directory, but it</span>
+    <span class="s2">// may not replace the cwd with a different kind of thing entirely.</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute </span><span class="s4">=== </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd </span><span class="s4">&amp;&amp;</span>
+        <span class="s1">entry</span><span class="s4">.</span><span class="s1">type </span><span
+    class="s4">!== </span><span class="s0">'Directory' </span><span class="s4">&amp;&amp;</span>
+        <span class="s1">entry</span><span class="s4">.</span><span class="s1">type </span><span
+    class="s4">!== </span><span class="s0">'GNUDumpDir'</span><span class="s4">) {</span>
+      <span class="s3">return false</span>
+    <span class="s4">}</span>
+
+    <span class="s2">// only encode : chars that aren't drive letter indicators</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">win32</span><span class="s4">) {</span>
+      <span class="s3">const </span><span class="s4">{ </span><span class="s1">root</span><span
+    class="s4">: </span><span class="s1">aRoot </span><span class="s4">} = </span><span class="s1">path</span><span
+    class="s4">.</span><span class="s1">win32</span><span class="s4">.</span><span class="s1">parse</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">)</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute </span><span
+    class="s4">= </span><span class="s1">aRoot </span><span class="s4">+ </span><span class="s1">wc</span><span
+    class="s4">.</span><span class="s1">encode</span><span class="s4">(</span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">absolute</span><span class="s4">.</span><span class="s1">slice</span><span
+    class="s4">(</span><span class="s1">aRoot</span><span class="s4">.</span><span class="s1">length</span><span
+    class="s4">))</span>
+      <span class="s3">const </span><span class="s4">{ </span><span class="s1">root</span><span
+    class="s4">: </span><span class="s1">pRoot </span><span class="s4">} = </span><span class="s1">path</span><span
+    class="s4">.</span><span class="s1">win32</span><span class="s4">.</span><span class="s1">parse</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">path</span><span
+    class="s4">)</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">pRoot </span><span class="s4">+ </span><span class="s1">wc</span><span class="s4">.</span><span
+    class="s1">encode</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">path</span><span class="s4">.</span><span class="s1">slice</span><span class="s4">(</span><span
+    class="s1">pRoot</span><span class="s4">.</span><span class="s1">length</span><span class="s4">))</span>
+    <span class="s4">}</span>
+
+    <span class="s3">return true</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ONENTRY</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">) {</span>
+    <span class="s3">if </span><span class="s4">(!</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">CHECKPATH</span><span class="s4">](</span><span class="s1">entry</span><span class="s4">)) {</span>
+      <span class="s3">return </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">resume</span><span class="s4">()</span>
+    <span class="s4">}</span>
+
+    <span class="s1">assert</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s3">typeof </span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">, </span><span class="s0">'string'</span><span class="s4">)</span>
+
+    <span class="s3">switch </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">type</span><span class="s4">) {</span>
+      <span class="s3">case </span><span class="s0">'Directory'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'GNUDumpDir'</span><span class="s4">:</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">mode</span><span class="s4">) {</span>
+          <span class="s1">entry</span><span class="s4">.</span><span class="s1">mode </span><span
+    class="s4">= </span><span class="s1">entry</span><span class="s4">.</span><span class="s1">mode </span><span
+    class="s4">| </span><span class="s5">0o700</span>
+        <span class="s4">}</span>
+
+      <span class="s2">// eslint-disable-next-line no-fallthrough</span>
+      <span class="s3">case </span><span class="s0">'File'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'OldFile'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'ContiguousFile'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'Link'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'SymbolicLink'</span><span class="s4">:</span>
+        <span class="s3">return this</span><span class="s4">[</span><span class="s1">CHECKFS</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">)</span>
+
+      <span class="s3">case </span><span class="s0">'CharacterDevice'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'BlockDevice'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'FIFO'</span><span class="s4">:</span>
+      <span class="s3">default</span><span class="s4">:</span>
+        <span class="s3">return this</span><span class="s4">[</span><span class="s1">UNSUPPORTED</span><span class="s4">](</span><span
+    class="s1">entry</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ONERROR</span><span class="s4">] (</span><span class="s1">er</span><span
+    class="s4">, </span><span class="s1">entry</span><span class="s4">) {</span>
+    <span class="s2">// Cwd has to exist, or else nothing works. That's serious.</span>
+    <span class="s2">// Other errors are warnings, which raise the error in strict</span>
+    <span class="s2">// mode, but otherwise continue on.</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">.</span><span
+    class="s1">name </span><span class="s4">=== </span><span class="s0">'CwdError'</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">emit</span><span class="s4">(</span><span
+    class="s0">'error'</span><span class="s4">, </span><span class="s1">er</span><span class="s4">)</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">warn</span><span class="s4">(</span><span
+    class="s0">'TAR_ENTRY_ERROR'</span><span class="s4">, </span><span class="s1">er</span><span
+    class="s4">, { </span><span class="s1">entry </span><span class="s4">})</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">UNPEND</span><span class="s4">]()</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">MKDIR</span><span class="s4">] (</span><span class="s1">dir</span><span
+    class="s4">, </span><span class="s1">mode</span><span class="s4">, </span><span class="s1">cb</span><span
+    class="s4">) {</span>
+    <span class="s1">mkdir</span><span class="s4">(</span><span class="s1">normPath</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">), {</span>
+      <span class="s1">uid</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">uid</span><span class="s4">,</span>
+      <span class="s1">gid</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">gid</span><span class="s4">,</span>
+      <span class="s1">processUid</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">processUid</span><span class="s4">,</span>
+      <span class="s1">processGid</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">processGid</span><span class="s4">,</span>
+      <span class="s1">umask</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">processUmask</span><span class="s4">,</span>
+      <span class="s1">preserve</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">preservePaths</span><span class="s4">,</span>
+      <span class="s1">unlink</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">unlink</span><span class="s4">,</span>
+      <span class="s1">cache</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">dirCache</span><span class="s4">,</span>
+      <span class="s1">cwd</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">,</span>
+      <span class="s1">mode</span><span class="s4">: </span><span class="s1">mode</span><span class="s4">,</span>
+      <span class="s1">noChmod</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">noChmod</span><span class="s4">,</span>
+    <span class="s4">}, </span><span class="s1">cb</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">DOCHOWN</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">) {</span>
+    <span class="s2">// in preserve owner mode, chown if the entry doesn't match process</span>
+    <span class="s2">// in set owner mode, chown if setting doesn't match process</span>
+    <span class="s3">return this</span><span class="s4">.</span><span class="s1">forceChown </span><span
+    class="s4">||</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">preserveOwner </span><span class="s4">&amp;&amp;</span>
+      <span class="s4">(</span><span class="s3">typeof </span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">uid </span><span class="s4">=== </span><span class="s0">'number' </span><span
+    class="s4">&amp;&amp; </span><span class="s1">entry</span><span class="s4">.</span><span class="s1">uid </span><span
+    class="s4">!== </span><span class="s3">this</span><span class="s4">.</span><span class="s1">processUid </span><span
+    class="s4">||</span>
+        <span class="s3">typeof </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">gid </span><span class="s4">=== </span><span class="s0">'number' </span><span
+    class="s4">&amp;&amp; </span><span class="s1">entry</span><span class="s4">.</span><span class="s1">gid </span><span
+    class="s4">!== </span><span class="s3">this</span><span class="s4">.</span><span class="s1">processGid</span><span
+    class="s4">)</span>
+      <span class="s4">||</span>
+      <span class="s4">(</span><span class="s3">typeof this</span><span class="s4">.</span><span
+    class="s1">uid </span><span class="s4">=== </span><span class="s0">'number' </span><span
+    class="s4">&amp;&amp; </span><span class="s3">this</span><span class="s4">.</span><span class="s1">uid </span><span
+    class="s4">!== </span><span class="s3">this</span><span class="s4">.</span><span class="s1">processUid </span><span
+    class="s4">||</span>
+        <span class="s3">typeof this</span><span class="s4">.</span><span class="s1">gid </span><span
+    class="s4">=== </span><span class="s0">'number' </span><span class="s4">&amp;&amp; </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">gid </span><span class="s4">!== </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">processGid</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">UID</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">uint32</span><span class="s4">(</span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">uid</span><span class="s4">, </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">uid</span><span class="s4">, </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">processUid</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">GID</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">uint32</span><span class="s4">(</span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">gid</span><span class="s4">, </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">gid</span><span class="s4">, </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">processGid</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">FILE</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">fullyDone</span><span class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">mode </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">mode </span><span class="s4">&amp; </span><span
+    class="s5">0o7777 </span><span class="s4">|| </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">fmode</span>
+    <span class="s3">const </span><span class="s1">stream </span><span class="s4">= </span><span
+    class="s3">new </span><span class="s1">fsm</span><span class="s4">.</span><span class="s1">WriteStream</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">, {</span>
+      <span class="s1">flags</span><span class="s4">: </span><span class="s1">getFlag</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">size</span><span
+    class="s4">),</span>
+      <span class="s1">mode</span><span class="s4">: </span><span class="s1">mode</span><span class="s4">,</span>
+      <span class="s1">autoClose</span><span class="s4">: </span><span class="s3">false</span><span class="s4">,</span>
+    <span class="s4">})</span>
+    <span class="s1">stream</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'error'</span><span class="s4">, </span><span class="s1">er </span><span class="s4">=&gt; {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">stream</span><span class="s4">.</span><span
+    class="s1">fd</span><span class="s4">) {</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">close</span><span class="s4">(</span><span
+    class="s1">stream</span><span class="s4">.</span><span class="s1">fd</span><span class="s4">, () =&gt; {})</span>
+      <span class="s4">}</span>
+
+      <span class="s2">// flush all the data out so that we aren't left hanging</span>
+      <span class="s2">// if the error wasn't actually fatal.  otherwise the parse</span>
+      <span class="s2">// is blocked, and we never proceed.</span>
+      <span class="s1">stream</span><span class="s4">.</span><span class="s1">write </span><span
+    class="s4">= () =&gt; </span><span class="s3">true</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+      <span class="s1">fullyDone</span><span class="s4">()</span>
+    <span class="s4">})</span>
+
+    <span class="s3">let </span><span class="s1">actions </span><span class="s4">= </span><span class="s5">1</span>
+    <span class="s3">const </span><span class="s1">done </span><span class="s4">= </span><span
+    class="s1">er </span><span class="s4">=&gt; {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+        <span class="s2">/* istanbul ignore else - we should always have a fd by now */</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">stream</span><span class="s4">.</span><span
+    class="s1">fd</span><span class="s4">) {</span>
+          <span class="s1">fs</span><span class="s4">.</span><span class="s1">close</span><span class="s4">(</span><span
+    class="s1">stream</span><span class="s4">.</span><span class="s1">fd</span><span class="s4">, () =&gt; {})</span>
+        <span class="s4">}</span>
+
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+        <span class="s1">fullyDone</span><span class="s4">()</span>
+        <span class="s3">return</span>
+      <span class="s4">}</span>
+
+      <span class="s3">if </span><span class="s4">(--</span><span class="s1">actions </span><span class="s4">=== </span><span
+    class="s5">0</span><span class="s4">) {</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">close</span><span class="s4">(</span><span
+    class="s1">stream</span><span class="s4">.</span><span class="s1">fd</span><span class="s4">, </span><span
+    class="s1">er </span><span class="s4">=&gt; {</span>
+          <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+            <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+          <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+            <span class="s3">this</span><span class="s4">[</span><span class="s1">UNPEND</span><span
+    class="s4">]()</span>
+          <span class="s4">}</span>
+          <span class="s1">fullyDone</span><span class="s4">()</span>
+        <span class="s4">})</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+
+    <span class="s1">stream</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'finish'</span><span class="s4">, </span><span class="s1">_ </span><span class="s4">=&gt; {</span>
+      <span class="s2">// if futimes fails, try utimes</span>
+      <span class="s2">// if utimes fails, fail with the original error</span>
+      <span class="s2">// same for fchown/chown</span>
+      <span class="s3">const </span><span class="s1">abs </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span>
+      <span class="s3">const </span><span class="s1">fd </span><span class="s4">= </span><span
+    class="s1">stream</span><span class="s4">.</span><span class="s1">fd</span>
+
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">mtime </span><span class="s4">&amp;&amp; !</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">noMtime</span><span class="s4">) {</span>
+        <span class="s1">actions</span><span class="s4">++</span>
+        <span class="s3">const </span><span class="s1">atime </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">atime </span><span class="s4">|| </span><span
+    class="s3">new </span><span class="s1">Date</span><span class="s4">()</span>
+        <span class="s3">const </span><span class="s1">mtime </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">mtime</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">futimes</span><span class="s4">(</span><span
+    class="s1">fd</span><span class="s4">, </span><span class="s1">atime</span><span class="s4">, </span><span
+    class="s1">mtime</span><span class="s4">, </span><span class="s1">er </span><span class="s4">=&gt;</span>
+          <span class="s1">er </span><span class="s4">? </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">utimes</span><span class="s4">(</span><span class="s1">abs</span><span class="s4">, </span><span
+    class="s1">atime</span><span class="s4">, </span><span class="s1">mtime</span><span class="s4">, </span><span
+    class="s1">er2 </span><span class="s4">=&gt; </span><span class="s1">done</span><span class="s4">(</span><span
+    class="s1">er2 </span><span class="s4">&amp;&amp; </span><span class="s1">er</span><span class="s4">))</span>
+          <span class="s4">: </span><span class="s1">done</span><span class="s4">())</span>
+      <span class="s4">}</span>
+
+      <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">DOCHOWN</span><span class="s4">](</span><span class="s1">entry</span><span class="s4">)) {</span>
+        <span class="s1">actions</span><span class="s4">++</span>
+        <span class="s3">const </span><span class="s1">uid </span><span class="s4">= </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">UID</span><span class="s4">](</span><span class="s1">entry</span><span
+    class="s4">)</span>
+        <span class="s3">const </span><span class="s1">gid </span><span class="s4">= </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">GID</span><span class="s4">](</span><span class="s1">entry</span><span
+    class="s4">)</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">fchown</span><span class="s4">(</span><span
+    class="s1">fd</span><span class="s4">, </span><span class="s1">uid</span><span class="s4">, </span><span class="s1">gid</span><span
+    class="s4">, </span><span class="s1">er </span><span class="s4">=&gt;</span>
+          <span class="s1">er </span><span class="s4">? </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">chown</span><span class="s4">(</span><span class="s1">abs</span><span class="s4">, </span><span
+    class="s1">uid</span><span class="s4">, </span><span class="s1">gid</span><span class="s4">, </span><span
+    class="s1">er2 </span><span class="s4">=&gt; </span><span class="s1">done</span><span class="s4">(</span><span
+    class="s1">er2 </span><span class="s4">&amp;&amp; </span><span class="s1">er</span><span class="s4">))</span>
+          <span class="s4">: </span><span class="s1">done</span><span class="s4">())</span>
+      <span class="s4">}</span>
+
+      <span class="s1">done</span><span class="s4">()</span>
+    <span class="s4">})</span>
+
+    <span class="s3">const </span><span class="s1">tx </span><span class="s4">= </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">transform </span><span class="s4">? </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">transform</span><span class="s4">(</span><span class="s1">entry</span><span
+    class="s4">) || </span><span class="s1">entry </span><span class="s4">: </span><span class="s1">entry</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">tx </span><span class="s4">!== </span><span
+    class="s1">entry</span><span class="s4">) {</span>
+      <span class="s1">tx</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'error'</span><span class="s4">, </span><span class="s1">er </span><span class="s4">=&gt; {</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+        <span class="s1">fullyDone</span><span class="s4">()</span>
+      <span class="s4">})</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">pipe</span><span class="s4">(</span><span
+    class="s1">tx</span><span class="s4">)</span>
+    <span class="s4">}</span>
+    <span class="s1">tx</span><span class="s4">.</span><span class="s1">pipe</span><span class="s4">(</span><span
+    class="s1">stream</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">DIRECTORY</span><span class="s4">] (</span><span
+    class="s1">entry</span><span class="s4">, </span><span class="s1">fullyDone</span><span class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">mode </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">mode </span><span class="s4">&amp; </span><span
+    class="s5">0o7777 </span><span class="s4">|| </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">dmode</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">MKDIR</span><span class="s4">](</span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">, </span><span
+    class="s1">mode</span><span class="s4">, </span><span class="s1">er </span><span class="s4">=&gt; {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+        <span class="s1">fullyDone</span><span class="s4">()</span>
+        <span class="s3">return</span>
+      <span class="s4">}</span>
+
+      <span class="s3">let </span><span class="s1">actions </span><span class="s4">= </span><span class="s5">1</span>
+      <span class="s3">const </span><span class="s1">done </span><span class="s4">= </span><span
+    class="s1">_ </span><span class="s4">=&gt; {</span>
+        <span class="s3">if </span><span class="s4">(--</span><span class="s1">actions </span><span
+    class="s4">=== </span><span class="s5">0</span><span class="s4">) {</span>
+          <span class="s1">fullyDone</span><span class="s4">()</span>
+          <span class="s3">this</span><span class="s4">[</span><span class="s1">UNPEND</span><span class="s4">]()</span>
+          <span class="s1">entry</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+        <span class="s4">}</span>
+      <span class="s4">}</span>
+
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">mtime </span><span class="s4">&amp;&amp; !</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">noMtime</span><span class="s4">) {</span>
+        <span class="s1">actions</span><span class="s4">++</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">utimes</span><span class="s4">(</span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">, </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">atime </span><span class="s4">|| </span><span
+    class="s3">new </span><span class="s1">Date</span><span class="s4">(), </span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">mtime</span><span class="s4">, </span><span class="s1">done</span><span
+    class="s4">)</span>
+      <span class="s4">}</span>
+
+      <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">DOCHOWN</span><span class="s4">](</span><span class="s1">entry</span><span class="s4">)) {</span>
+        <span class="s1">actions</span><span class="s4">++</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">chown</span><span class="s4">(</span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">, </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">UID</span><span class="s4">](</span><span
+    class="s1">entry</span><span class="s4">), </span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">GID</span><span class="s4">](</span><span class="s1">entry</span><span class="s4">), </span><span
+    class="s1">done</span><span class="s4">)</span>
+      <span class="s4">}</span>
+
+      <span class="s1">done</span><span class="s4">()</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">UNSUPPORTED</span><span class="s4">] (</span><span
+    class="s1">entry</span><span class="s4">) {</span>
+    <span class="s1">entry</span><span class="s4">.</span><span class="s1">unsupported </span><span class="s4">= </span><span
+    class="s3">true</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">warn</span><span class="s4">(</span><span
+    class="s0">'TAR_ENTRY_UNSUPPORTED'</span><span class="s4">,</span>
+      <span class="s0">`unsupported entry type: </span><span class="s1">$</span><span class="s4">{</span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">type</span><span class="s4">}</span><span
+    class="s0">`</span><span class="s4">, { </span><span class="s1">entry </span><span class="s4">})</span>
+    <span class="s1">entry</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">SYMLINK</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">LINK</span><span class="s4">](</span><span
+    class="s1">entry</span><span class="s4">, </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">linkpath</span><span class="s4">, </span><span class="s0">'symlink'</span><span class="s4">, </span><span
+    class="s1">done</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">HARDLINK</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">linkpath </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">resolve</span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">, </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">linkpath</span><span class="s4">))</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">LINK</span><span class="s4">](</span><span
+    class="s1">entry</span><span class="s4">, </span><span class="s1">linkpath</span><span class="s4">, </span><span
+    class="s0">'link'</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">PEND</span><span class="s4">] () {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PENDING</span><span class="s4">]++</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">UNPEND</span><span class="s4">] () {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PENDING</span><span class="s4">]--</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">MAYBECLOSE</span><span class="s4">]()</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">SKIP</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">UNPEND</span><span class="s4">]()</span>
+    <span class="s1">entry</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+  <span class="s4">}</span>
+
+  <span class="s2">// Check if we can reuse an existing filesystem entry safely and</span>
+  <span class="s2">// overwrite it, rather than unlinking and recreating</span>
+  <span class="s2">// Windows doesn't report a useful nlink, so we just never reuse entries</span>
+  <span class="s4">[</span><span class="s1">ISREUSABLE</span><span class="s4">] (</span><span
+    class="s1">entry</span><span class="s4">, </span><span class="s1">st</span><span class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">type </span><span class="s4">=== </span><span class="s0">'File' </span><span class="s4">&amp;&amp;</span>
+      <span class="s4">!</span><span class="s3">this</span><span class="s4">.</span><span class="s1">unlink </span><span
+    class="s4">&amp;&amp;</span>
+      <span class="s1">st</span><span class="s4">.</span><span class="s1">isFile</span><span
+    class="s4">() &amp;&amp;</span>
+      <span class="s1">st</span><span class="s4">.</span><span class="s1">nlink </span><span
+    class="s4">&lt;= </span><span class="s5">1 </span><span class="s4">&amp;&amp;</span>
+      <span class="s4">!</span><span class="s1">isWindows</span>
+  <span class="s4">}</span>
+
+  <span class="s2">// check if a thing is there, and if so, try to clobber it</span>
+  <span class="s4">[</span><span class="s1">CHECKFS</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PEND</span><span class="s4">]()</span>
+    <span class="s3">const </span><span class="s1">paths </span><span class="s4">= [</span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">path</span><span class="s4">]</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">linkpath</span><span class="s4">) {</span>
+      <span class="s1">paths</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">linkpath</span><span class="s4">)</span>
+    <span class="s4">}</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">reservations</span><span
+    class="s4">.</span><span class="s1">reserve</span><span class="s4">(</span><span class="s1">paths</span><span
+    class="s4">, </span><span class="s1">done </span><span class="s4">=&gt; </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">CHECKFS2</span><span class="s4">](</span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">))</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">PRUNECACHE</span><span class="s4">] (</span><span
+    class="s1">entry</span><span class="s4">) {</span>
+    <span class="s2">// if we are not creating a directory, and the path is in the dirCache,</span>
+    <span class="s2">// then that means we are about to delete the directory we created</span>
+    <span class="s2">// previously, and it is no longer going to be a directory, and neither</span>
+    <span class="s2">// is any of its children.</span>
+    <span class="s2">// If a symbolic link is encountered, all bets are off.  There is no</span>
+    <span class="s2">// reasonable way to sanitize the cache in such a way we will be able to</span>
+    <span class="s2">// avoid having filesystem collisions.  If this happens with a non-symlink</span>
+    <span class="s2">// entry, it'll just fail to unpack, but a symlink to a directory, using an</span>
+    <span class="s2">// 8.3 shortname or certain unicode attacks, can evade detection and lead</span>
+    <span class="s2">// to arbitrary writes to anywhere on the system.</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">type </span><span class="s4">=== </span><span class="s0">'SymbolicLink'</span><span class="s4">) {</span>
+      <span class="s1">dropCache</span><span class="s4">(</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">dirCache</span><span class="s4">)</span>
+    <span class="s4">} </span><span class="s3">else if </span><span class="s4">(</span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">type </span><span class="s4">!== </span><span
+    class="s0">'Directory'</span><span class="s4">) {</span>
+      <span class="s1">pruneCache</span><span class="s4">(</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">dirCache</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">absolute</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">CHECKFS2</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">fullyDone</span><span class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PRUNECACHE</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">)</span>
+
+    <span class="s3">const </span><span class="s1">done </span><span class="s4">= </span><span
+    class="s1">er </span><span class="s4">=&gt; {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">PRUNECACHE</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">)</span>
+      <span class="s1">fullyDone</span><span class="s4">(</span><span class="s1">er</span><span class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s3">const </span><span class="s1">checkCwd </span><span class="s4">= () =&gt; {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">MKDIR</span><span class="s4">](</span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">cwd</span><span class="s4">, </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">dmode</span><span class="s4">, </span><span
+    class="s1">er </span><span class="s4">=&gt; {</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+          <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span class="s4">](</span><span
+    class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span class="s4">)</span>
+          <span class="s1">done</span><span class="s4">()</span>
+          <span class="s3">return</span>
+        <span class="s4">}</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">CHECKED_CWD</span><span
+    class="s4">] = </span><span class="s3">true</span>
+        <span class="s1">start</span><span class="s4">()</span>
+      <span class="s4">})</span>
+    <span class="s4">}</span>
+
+    <span class="s3">const </span><span class="s1">start </span><span class="s4">= () =&gt; {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute </span><span class="s4">!== </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">) {</span>
+        <span class="s3">const </span><span class="s1">parent </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">dirname</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">))</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">parent </span><span
+    class="s4">!== </span><span class="s3">this</span><span class="s4">.</span><span class="s1">cwd</span><span
+    class="s4">) {</span>
+          <span class="s3">return this</span><span class="s4">[</span><span class="s1">MKDIR</span><span
+    class="s4">](</span><span class="s1">parent</span><span class="s4">, </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">dmode</span><span class="s4">, </span><span class="s1">er </span><span
+    class="s4">=&gt; {</span>
+            <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+              <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+              <span class="s1">done</span><span class="s4">()</span>
+              <span class="s3">return</span>
+            <span class="s4">}</span>
+            <span class="s1">afterMakeParent</span><span class="s4">()</span>
+          <span class="s4">})</span>
+        <span class="s4">}</span>
+      <span class="s4">}</span>
+      <span class="s1">afterMakeParent</span><span class="s4">()</span>
+    <span class="s4">}</span>
+
+    <span class="s3">const </span><span class="s1">afterMakeParent </span><span class="s4">= () =&gt; {</span>
+      <span class="s1">fs</span><span class="s4">.</span><span class="s1">lstat</span><span class="s4">(</span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">, (</span><span
+    class="s1">lstatEr</span><span class="s4">, </span><span class="s1">st</span><span class="s4">) =&gt; {</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">st </span><span
+    class="s4">&amp;&amp; (</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">keep </span><span class="s4">|| </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">newer </span><span class="s4">&amp;&amp; </span><span class="s1">st</span><span class="s4">.</span><span
+    class="s1">mtime </span><span class="s4">&gt; </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">mtime</span><span class="s4">)) {</span>
+          <span class="s3">this</span><span class="s4">[</span><span class="s1">SKIP</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">)</span>
+          <span class="s1">done</span><span class="s4">()</span>
+          <span class="s3">return</span>
+        <span class="s4">}</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">lstatEr </span><span
+    class="s4">|| </span><span class="s3">this</span><span class="s4">[</span><span class="s1">ISREUSABLE</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">, </span><span class="s1">st</span><span
+    class="s4">)) {</span>
+          <span class="s3">return this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span
+    class="s4">](</span><span class="s3">null</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+        <span class="s4">}</span>
+
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">st</span><span class="s4">.</span><span
+    class="s1">isDirectory</span><span class="s4">()) {</span>
+          <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">type </span><span class="s4">=== </span><span class="s0">'Directory'</span><span
+    class="s4">) {</span>
+            <span class="s3">const </span><span class="s1">needChmod </span><span class="s4">= !</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">noChmod </span><span class="s4">&amp;&amp;</span>
+              <span class="s1">entry</span><span class="s4">.</span><span class="s1">mode </span><span class="s4">&amp;&amp;</span>
+              <span class="s4">(</span><span class="s1">st</span><span class="s4">.</span><span
+    class="s1">mode </span><span class="s4">&amp; </span><span class="s5">0o7777</span><span
+    class="s4">) !== </span><span class="s1">entry</span><span class="s4">.</span><span class="s1">mode</span>
+            <span class="s3">const </span><span class="s1">afterChmod </span><span class="s4">= </span><span class="s1">er </span><span
+    class="s4">=&gt; </span><span class="s3">this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+            <span class="s3">if </span><span class="s4">(!</span><span class="s1">needChmod</span><span
+    class="s4">) {</span>
+              <span class="s3">return </span><span class="s1">afterChmod</span><span class="s4">()</span>
+            <span class="s4">}</span>
+            <span class="s3">return </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">chmod</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">, </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">mode</span><span class="s4">, </span><span class="s1">afterChmod</span><span class="s4">)</span>
+          <span class="s4">}</span>
+          <span class="s2">// Not a dir entry, have to remove it.</span>
+          <span class="s2">// NB: the only way to end up with an entry that is the cwd</span>
+          <span class="s2">// itself, in such a way that == does not detect, is a</span>
+          <span class="s2">// tricky windows absolute path with UNC or 8.3 parts (and</span>
+          <span class="s2">// preservePaths:true, or else it will have been stripped).</span>
+          <span class="s2">// In that case, the user has opted out of path protections</span>
+          <span class="s2">// explicitly, so if they blow away the cwd, c'est la vie.</span>
+          <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">absolute </span><span class="s4">!== </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">cwd</span><span class="s4">) {</span>
+            <span class="s3">return </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">rmdir</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">, </span><span class="s1">er </span><span class="s4">=&gt;</span>
+              <span class="s3">this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">))</span>
+          <span class="s4">}</span>
+        <span class="s4">}</span>
+
+        <span class="s2">// not a dir, and not reusable</span>
+        <span class="s2">// don't remove if the cwd, we want that error</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute </span><span class="s4">=== </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">) {</span>
+          <span class="s3">return this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span
+    class="s4">](</span><span class="s3">null</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+        <span class="s4">}</span>
+
+        <span class="s1">unlinkFile</span><span class="s4">(</span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">absolute</span><span class="s4">, </span><span class="s1">er </span><span
+    class="s4">=&gt;</span>
+          <span class="s3">this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">))</span>
+      <span class="s4">})</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">CHECKED_CWD</span><span class="s4">]) {</span>
+      <span class="s1">start</span><span class="s4">()</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s1">checkCwd</span><span class="s4">()</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">MAKEFS</span><span class="s4">] (</span><span class="s1">er</span><span
+    class="s4">, </span><span class="s1">entry</span><span class="s4">, </span><span class="s1">done</span><span
+    class="s4">) {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+      <span class="s1">done</span><span class="s4">()</span>
+      <span class="s3">return</span>
+    <span class="s4">}</span>
+
+    <span class="s3">switch </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">type</span><span class="s4">) {</span>
+      <span class="s3">case </span><span class="s0">'File'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'OldFile'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'ContiguousFile'</span><span class="s4">:</span>
+        <span class="s3">return this</span><span class="s4">[</span><span class="s1">FILE</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">, </span><span class="s1">done</span><span
+    class="s4">)</span>
+
+      <span class="s3">case </span><span class="s0">'Link'</span><span class="s4">:</span>
+        <span class="s3">return this</span><span class="s4">[</span><span class="s1">HARDLINK</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">, </span><span class="s1">done</span><span
+    class="s4">)</span>
+
+      <span class="s3">case </span><span class="s0">'SymbolicLink'</span><span class="s4">:</span>
+        <span class="s3">return this</span><span class="s4">[</span><span class="s1">SYMLINK</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">, </span><span class="s1">done</span><span
+    class="s4">)</span>
+
+      <span class="s3">case </span><span class="s0">'Directory'</span><span class="s4">:</span>
+      <span class="s3">case </span><span class="s0">'GNUDumpDir'</span><span class="s4">:</span>
+        <span class="s3">return this</span><span class="s4">[</span><span class="s1">DIRECTORY</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">, </span><span class="s1">done</span><span
+    class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">LINK</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">linkpath</span><span class="s4">, </span><span class="s1">link</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">) {</span>
+    <span class="s2">// XXX: get the type ('symlink' or 'junction') for windows</span>
+    <span class="s1">fs</span><span class="s4">[</span><span class="s1">link</span><span class="s4">](</span><span
+    class="s1">linkpath</span><span class="s4">, </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">, </span><span class="s1">er </span><span class="s4">=&gt; {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+      <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">UNPEND</span><span class="s4">]()</span>
+        <span class="s1">entry</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+      <span class="s4">}</span>
+      <span class="s1">done</span><span class="s4">()</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">callSync </span><span class="s4">= </span><span
+    class="s1">fn </span><span class="s4">=&gt; {</span>
+  <span class="s3">try </span><span class="s4">{</span>
+    <span class="s3">return </span><span class="s4">[</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s1">fn</span><span class="s4">()]</span>
+  <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {</span>
+    <span class="s3">return </span><span class="s4">[</span><span class="s1">er</span><span class="s4">, </span><span
+    class="s3">null</span><span class="s4">]</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s3">class </span><span class="s1">UnpackSync </span><span class="s3">extends </span><span
+    class="s1">Unpack </span><span class="s4">{</span>
+  <span class="s4">[</span><span class="s1">MAKEFS</span><span class="s4">] (</span><span class="s1">er</span><span
+    class="s4">, </span><span class="s1">entry</span><span class="s4">) {</span>
+    <span class="s3">return super</span><span class="s4">[</span><span class="s1">MAKEFS</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">, () =&gt; {})</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">CHECKFS</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PRUNECACHE</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">)</span>
+
+    <span class="s3">if </span><span class="s4">(!</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">CHECKED_CWD</span><span class="s4">]) {</span>
+      <span class="s3">const </span><span class="s1">er </span><span class="s4">= </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">MKDIR</span><span class="s4">](</span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">cwd</span><span class="s4">, </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">dmode</span><span class="s4">)</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+        <span class="s3">return this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">CHECKED_CWD</span><span
+    class="s4">] = </span><span class="s3">true</span>
+    <span class="s4">}</span>
+
+    <span class="s2">// don't bother to make the parent if the current entry is the cwd,</span>
+    <span class="s2">// we've already checked it.</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute </span><span class="s4">!== </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">) {</span>
+      <span class="s3">const </span><span class="s1">parent </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">dirname</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">))</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">parent </span><span
+    class="s4">!== </span><span class="s3">this</span><span class="s4">.</span><span class="s1">cwd</span><span
+    class="s4">) {</span>
+        <span class="s3">const </span><span class="s1">mkParent </span><span class="s4">= </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">MKDIR</span><span class="s4">](</span><span
+    class="s1">parent</span><span class="s4">, </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">dmode</span><span class="s4">)</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s1">mkParent</span><span class="s4">) {</span>
+          <span class="s3">return this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">mkParent</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+        <span class="s4">}</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+
+    <span class="s3">const </span><span class="s4">[</span><span class="s1">lstatEr</span><span
+    class="s4">, </span><span class="s1">st</span><span class="s4">] = </span><span class="s1">callSync</span><span
+    class="s4">(() =&gt; </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">lstatSync</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">))</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">st </span><span
+    class="s4">&amp;&amp; (</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">keep </span><span class="s4">|| </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">newer </span><span class="s4">&amp;&amp; </span><span class="s1">st</span><span class="s4">.</span><span
+    class="s1">mtime </span><span class="s4">&gt; </span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">mtime</span><span class="s4">)) {</span>
+      <span class="s3">return this</span><span class="s4">[</span><span class="s1">SKIP</span><span class="s4">](</span><span
+    class="s1">entry</span><span class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">lstatEr </span><span class="s4">|| </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">ISREUSABLE</span><span class="s4">](</span><span
+    class="s1">entry</span><span class="s4">, </span><span class="s1">st</span><span class="s4">)) {</span>
+      <span class="s3">return this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span
+    class="s4">](</span><span class="s3">null</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">st</span><span class="s4">.</span><span
+    class="s1">isDirectory</span><span class="s4">()) {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">type </span><span class="s4">=== </span><span class="s0">'Directory'</span><span class="s4">) {</span>
+        <span class="s3">const </span><span class="s1">needChmod </span><span class="s4">= !</span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">noChmod </span><span class="s4">&amp;&amp;</span>
+          <span class="s1">entry</span><span class="s4">.</span><span class="s1">mode </span><span
+    class="s4">&amp;&amp;</span>
+          <span class="s4">(</span><span class="s1">st</span><span class="s4">.</span><span class="s1">mode </span><span
+    class="s4">&amp; </span><span class="s5">0o7777</span><span class="s4">) !== </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">mode</span>
+        <span class="s3">const </span><span class="s4">[</span><span class="s1">er</span><span
+    class="s4">] = </span><span class="s1">needChmod </span><span class="s4">? </span><span
+    class="s1">callSync</span><span class="s4">(() =&gt; {</span>
+          <span class="s1">fs</span><span class="s4">.</span><span class="s1">chmodSync</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">, </span><span class="s1">entry</span><span class="s4">.</span><span class="s1">mode</span><span
+    class="s4">)</span>
+        <span class="s4">}) : []</span>
+        <span class="s3">return this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s2">// not a dir entry, have to remove it</span>
+      <span class="s3">const </span><span class="s4">[</span><span class="s1">er</span><span class="s4">] = </span><span
+    class="s1">callSync</span><span class="s4">(() =&gt; </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">rmdirSync</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">))</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span class="s4">](</span><span
+    class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s2">// not a dir, and not reusable.</span>
+    <span class="s2">// don't remove if it's the cwd, since we want that error.</span>
+    <span class="s3">const </span><span class="s4">[</span><span class="s1">er</span><span class="s4">] = </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">absolute </span><span class="s4">=== </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">cwd </span><span class="s4">? []</span>
+      <span class="s4">: </span><span class="s1">callSync</span><span class="s4">(() =&gt; </span><span class="s1">unlinkFileSync</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">))</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">MAKEFS</span><span class="s4">](</span><span
+    class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">FILE</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">mode </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">mode </span><span class="s4">&amp; </span><span
+    class="s5">0o7777 </span><span class="s4">|| </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">fmode</span>
+
+    <span class="s3">const </span><span class="s1">oner </span><span class="s4">= </span><span
+    class="s1">er </span><span class="s4">=&gt; {</span>
+      <span class="s3">let </span><span class="s1">closeError</span>
+      <span class="s3">try </span><span class="s4">{</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">closeSync</span><span
+    class="s4">(</span><span class="s1">fd</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">e</span><span
+    class="s4">) {</span>
+        <span class="s1">closeError </span><span class="s4">= </span><span class="s1">e</span>
+      <span class="s4">}</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">er </span><span class="s4">|| </span><span
+    class="s1">closeError</span><span class="s4">) {</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er </span><span class="s4">|| </span><span class="s1">closeError</span><span
+    class="s4">, </span><span class="s1">entry</span><span class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s1">done</span><span class="s4">()</span>
+    <span class="s4">}</span>
+
+    <span class="s3">let </span><span class="s1">fd</span>
+    <span class="s3">try </span><span class="s4">{</span>
+      <span class="s1">fd </span><span class="s4">= </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">openSync</span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">, </span><span class="s1">getFlag</span><span class="s4">(</span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">size</span><span class="s4">), </span><span
+    class="s1">mode</span><span class="s4">)</span>
+    <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {</span>
+      <span class="s3">return </span><span class="s1">oner</span><span class="s4">(</span><span
+    class="s1">er</span><span class="s4">)</span>
+    <span class="s4">}</span>
+    <span class="s3">const </span><span class="s1">tx </span><span class="s4">= </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">transform </span><span class="s4">? </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">transform</span><span class="s4">(</span><span class="s1">entry</span><span
+    class="s4">) || </span><span class="s1">entry </span><span class="s4">: </span><span class="s1">entry</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">tx </span><span class="s4">!== </span><span
+    class="s1">entry</span><span class="s4">) {</span>
+      <span class="s1">tx</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'error'</span><span class="s4">, </span><span class="s1">er </span><span class="s4">=&gt; </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span class="s4">](</span><span
+    class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span class="s4">))</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">pipe</span><span class="s4">(</span><span
+    class="s1">tx</span><span class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s1">tx</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'data'</span><span class="s4">, </span><span class="s1">chunk </span><span class="s4">=&gt; {</span>
+      <span class="s3">try </span><span class="s4">{</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">writeSync</span><span
+    class="s4">(</span><span class="s1">fd</span><span class="s4">, </span><span class="s1">chunk</span><span
+    class="s4">, </span><span class="s5">0</span><span class="s4">, </span><span class="s1">chunk</span><span
+    class="s4">.</span><span class="s1">length</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {</span>
+        <span class="s1">oner</span><span class="s4">(</span><span class="s1">er</span><span class="s4">)</span>
+      <span class="s4">}</span>
+    <span class="s4">})</span>
+
+    <span class="s1">tx</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'end'</span><span class="s4">, </span><span class="s1">_ </span><span class="s4">=&gt; {</span>
+      <span class="s3">let </span><span class="s1">er </span><span class="s4">= </span><span class="s3">null</span>
+      <span class="s2">// try both, falling futimes back to utimes</span>
+      <span class="s2">// if either fails, handle the first error</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">mtime </span><span class="s4">&amp;&amp; !</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">noMtime</span><span class="s4">) {</span>
+        <span class="s3">const </span><span class="s1">atime </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">atime </span><span class="s4">|| </span><span
+    class="s3">new </span><span class="s1">Date</span><span class="s4">()</span>
+        <span class="s3">const </span><span class="s1">mtime </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">mtime</span>
+        <span class="s3">try </span><span class="s4">{</span>
+          <span class="s1">fs</span><span class="s4">.</span><span class="s1">futimesSync</span><span
+    class="s4">(</span><span class="s1">fd</span><span class="s4">, </span><span class="s1">atime</span><span
+    class="s4">, </span><span class="s1">mtime</span><span class="s4">)</span>
+        <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span
+    class="s1">futimeser</span><span class="s4">) {</span>
+          <span class="s3">try </span><span class="s4">{</span>
+            <span class="s1">fs</span><span class="s4">.</span><span class="s1">utimesSync</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">, </span><span class="s1">atime</span><span class="s4">, </span><span class="s1">mtime</span><span
+    class="s4">)</span>
+          <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span
+    class="s1">utimeser</span><span class="s4">) {</span>
+            <span class="s1">er </span><span class="s4">= </span><span class="s1">futimeser</span>
+          <span class="s4">}</span>
+        <span class="s4">}</span>
+      <span class="s4">}</span>
+
+      <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">DOCHOWN</span><span class="s4">](</span><span class="s1">entry</span><span class="s4">)) {</span>
+        <span class="s3">const </span><span class="s1">uid </span><span class="s4">= </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">UID</span><span class="s4">](</span><span class="s1">entry</span><span
+    class="s4">)</span>
+        <span class="s3">const </span><span class="s1">gid </span><span class="s4">= </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">GID</span><span class="s4">](</span><span class="s1">entry</span><span
+    class="s4">)</span>
+
+        <span class="s3">try </span><span class="s4">{</span>
+          <span class="s1">fs</span><span class="s4">.</span><span class="s1">fchownSync</span><span class="s4">(</span><span
+    class="s1">fd</span><span class="s4">, </span><span class="s1">uid</span><span class="s4">, </span><span class="s1">gid</span><span
+    class="s4">)</span>
+        <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span
+    class="s1">fchowner</span><span class="s4">) {</span>
+          <span class="s3">try </span><span class="s4">{</span>
+            <span class="s1">fs</span><span class="s4">.</span><span class="s1">chownSync</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">, </span><span class="s1">uid</span><span class="s4">, </span><span class="s1">gid</span><span
+    class="s4">)</span>
+          <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span
+    class="s1">chowner</span><span class="s4">) {</span>
+            <span class="s1">er </span><span class="s4">= </span><span class="s1">er </span><span
+    class="s4">|| </span><span class="s1">fchowner</span>
+          <span class="s4">}</span>
+        <span class="s4">}</span>
+      <span class="s4">}</span>
+
+      <span class="s1">oner</span><span class="s4">(</span><span class="s1">er</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">DIRECTORY</span><span class="s4">] (</span><span
+    class="s1">entry</span><span class="s4">, </span><span class="s1">done</span><span class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">mode </span><span class="s4">= </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">mode </span><span class="s4">&amp; </span><span
+    class="s5">0o7777 </span><span class="s4">|| </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">dmode</span>
+    <span class="s3">const </span><span class="s1">er </span><span class="s4">= </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">MKDIR</span><span class="s4">](</span><span class="s1">entry</span><span
+    class="s4">.</span><span class="s1">absolute</span><span class="s4">, </span><span class="s1">mode</span><span
+    class="s4">)</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+      <span class="s1">done</span><span class="s4">()</span>
+      <span class="s3">return</span>
+    <span class="s4">}</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">mtime </span><span class="s4">&amp;&amp; !</span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">noMtime</span><span class="s4">) {</span>
+      <span class="s3">try </span><span class="s4">{</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">utimesSync</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">, </span><span class="s1">entry</span><span class="s4">.</span><span class="s1">atime </span><span
+    class="s4">|| </span><span class="s3">new </span><span class="s1">Date</span><span class="s4">(), </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">mtime</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {}</span>
+    <span class="s4">}</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">DOCHOWN</span><span class="s4">](</span><span class="s1">entry</span><span class="s4">)) {</span>
+      <span class="s3">try </span><span class="s4">{</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">chownSync</span><span
+    class="s4">(</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">, </span><span class="s3">this</span><span class="s4">[</span><span class="s1">UID</span><span
+    class="s4">](</span><span class="s1">entry</span><span class="s4">), </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">GID</span><span class="s4">](</span><span class="s1">entry</span><span
+    class="s4">))</span>
+      <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {}</span>
+    <span class="s4">}</span>
+    <span class="s1">done</span><span class="s4">()</span>
+    <span class="s1">entry</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">MKDIR</span><span class="s4">] (</span><span class="s1">dir</span><span
+    class="s4">, </span><span class="s1">mode</span><span class="s4">) {</span>
+    <span class="s3">try </span><span class="s4">{</span>
+      <span class="s3">return </span><span class="s1">mkdir</span><span class="s4">.</span><span
+    class="s1">sync</span><span class="s4">(</span><span class="s1">normPath</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">), {</span>
+        <span class="s1">uid</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">uid</span><span class="s4">,</span>
+        <span class="s1">gid</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">gid</span><span class="s4">,</span>
+        <span class="s1">processUid</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">processUid</span><span class="s4">,</span>
+        <span class="s1">processGid</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">processGid</span><span class="s4">,</span>
+        <span class="s1">umask</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">processUmask</span><span class="s4">,</span>
+        <span class="s1">preserve</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">preservePaths</span><span class="s4">,</span>
+        <span class="s1">unlink</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">unlink</span><span class="s4">,</span>
+        <span class="s1">cache</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">dirCache</span><span class="s4">,</span>
+        <span class="s1">cwd</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">,</span>
+        <span class="s1">mode</span><span class="s4">: </span><span class="s1">mode</span><span class="s4">,</span>
+      <span class="s4">})</span>
+    <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {</span>
+      <span class="s3">return </span><span class="s1">er</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">LINK</span><span class="s4">] (</span><span class="s1">entry</span><span
+    class="s4">, </span><span class="s1">linkpath</span><span class="s4">, </span><span class="s1">link</span><span
+    class="s4">, </span><span class="s1">done</span><span class="s4">) {</span>
+    <span class="s3">try </span><span class="s4">{</span>
+      <span class="s1">fs</span><span class="s4">[</span><span class="s1">link </span><span class="s4">+ </span><span
+    class="s0">'Sync'</span><span class="s4">](</span><span class="s1">linkpath</span><span class="s4">, </span><span
+    class="s1">entry</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">)</span>
+      <span class="s1">done</span><span class="s4">()</span>
+      <span class="s1">entry</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+    <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {</span>
+      <span class="s3">return this</span><span class="s4">[</span><span class="s1">ONERROR</span><span
+    class="s4">](</span><span class="s1">er</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s1">Unpack</span><span class="s4">.</span><span class="s1">Sync </span><span class="s4">= </span><span
+    class="s1">UnpackSync</span>
+<span class="s1">module</span><span class="s4">.</span><span class="s1">exports </span><span class="s4">= </span><span
+    class="s1">Unpack</span>
+</pre>
+</body>
+</html>

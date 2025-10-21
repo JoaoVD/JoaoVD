@@ -1,0 +1,208 @@
+<html>
+<head>
+  <title>_mergeData.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _mergeData.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">composeArgs </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_composeArgs'</span><span class="s2">),</span>
+    <span class="s1">composeArgsRight </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_composeArgsRight'</span><span class="s2">),</span>
+    <span class="s1">replaceHolders </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_replaceHolders'</span><span class="s2">);</span>
+
+<span class="s4">/** Used as the internal argument placeholder. */</span>
+<span class="s0">var </span><span class="s1">PLACEHOLDER </span><span class="s2">= </span><span class="s3">'__lodash_placeholder__'</span><span
+    class="s2">;</span>
+
+<span class="s4">/** Used to compose bitmasks for function metadata. */</span>
+<span class="s0">var </span><span class="s1">WRAP_BIND_FLAG </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">,</span>
+    <span class="s1">WRAP_BIND_KEY_FLAG </span><span class="s2">= </span><span class="s5">2</span><span
+    class="s2">,</span>
+    <span class="s1">WRAP_CURRY_BOUND_FLAG </span><span class="s2">= </span><span class="s5">4</span><span
+    class="s2">,</span>
+    <span class="s1">WRAP_CURRY_FLAG </span><span class="s2">= </span><span class="s5">8</span><span class="s2">,</span>
+    <span class="s1">WRAP_ARY_FLAG </span><span class="s2">= </span><span class="s5">128</span><span class="s2">,</span>
+    <span class="s1">WRAP_REARG_FLAG </span><span class="s2">= </span><span class="s5">256</span><span
+    class="s2">;</span>
+
+<span class="s6">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMin </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">min</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Merges the function metadata of `source` into `data`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* Merging metadata reduces the number of wrappers used to invoke a function.</span>
+ <span class="s4">* This is possible because methods like `_.bind`, `_.curry`, and `_.partial`</span>
+ <span class="s4">* may be applied regardless of execution order. Methods like `_.ary` and</span>
+ <span class="s4">* `_.rearg` modify function arguments, making the order in which they are</span>
+ <span class="s4">* executed important, preventing the merging of metadata. However, we make</span>
+ <span class="s4">* an exception for a safe combined case where curried functions have `_.ary`</span>
+ <span class="s4">* and or `_.rearg` applied.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s7">@private</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{Array} data The destination metadata.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{Array} source The source metadata.</span>
+ <span class="s4">* </span><span class="s7">@returns </span><span class="s4">{Array} Returns `data`.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">mergeData</span><span class="s2">(</span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">source</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">bitmask </span><span class="s2">= </span><span
+    class="s1">data</span><span class="s2">[</span><span class="s5">1</span><span class="s2">],</span>
+      <span class="s1">srcBitmask </span><span class="s2">= </span><span class="s1">source</span><span
+    class="s2">[</span><span class="s5">1</span><span class="s2">],</span>
+      <span class="s1">newBitmask </span><span class="s2">= </span><span class="s1">bitmask </span><span
+    class="s2">| </span><span class="s1">srcBitmask</span><span class="s2">,</span>
+      <span class="s1">isCommon </span><span class="s2">= </span><span class="s1">newBitmask </span><span class="s2">&lt; (</span><span
+    class="s1">WRAP_BIND_FLAG </span><span class="s2">| </span><span class="s1">WRAP_BIND_KEY_FLAG </span><span
+    class="s2">| </span><span class="s1">WRAP_ARY_FLAG</span><span class="s2">);</span>
+
+  <span class="s0">var </span><span class="s1">isCombo </span><span class="s2">=</span>
+    <span class="s2">((</span><span class="s1">srcBitmask </span><span class="s2">== </span><span class="s1">WRAP_ARY_FLAG</span><span
+    class="s2">) &amp;&amp; (</span><span class="s1">bitmask </span><span class="s2">== </span><span class="s1">WRAP_CURRY_FLAG</span><span
+    class="s2">)) ||</span>
+    <span class="s2">((</span><span class="s1">srcBitmask </span><span class="s2">== </span><span class="s1">WRAP_ARY_FLAG</span><span
+    class="s2">) &amp;&amp; (</span><span class="s1">bitmask </span><span class="s2">== </span><span class="s1">WRAP_REARG_FLAG</span><span
+    class="s2">) &amp;&amp; (</span><span class="s1">data</span><span class="s2">[</span><span class="s5">7</span><span
+    class="s2">].</span><span class="s1">length </span><span class="s2">&lt;= </span><span class="s1">source</span><span
+    class="s2">[</span><span class="s5">8</span><span class="s2">])) ||</span>
+    <span class="s2">((</span><span class="s1">srcBitmask </span><span class="s2">== (</span><span class="s1">WRAP_ARY_FLAG </span><span
+    class="s2">| </span><span class="s1">WRAP_REARG_FLAG</span><span class="s2">)) &amp;&amp; (</span><span class="s1">source</span><span
+    class="s2">[</span><span class="s5">7</span><span class="s2">].</span><span class="s1">length </span><span
+    class="s2">&lt;= </span><span class="s1">source</span><span class="s2">[</span><span class="s5">8</span><span
+    class="s2">]) &amp;&amp; (</span><span class="s1">bitmask </span><span class="s2">== </span><span class="s1">WRAP_CURRY_FLAG</span><span
+    class="s2">));</span>
+
+  <span class="s6">// Exit early if metadata can't be merged.</span>
+  <span class="s0">if </span><span class="s2">(!(</span><span class="s1">isCommon </span><span
+    class="s2">|| </span><span class="s1">isCombo</span><span class="s2">)) {</span>
+    <span class="s0">return </span><span class="s1">data</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s6">// Use source `thisArg` if available.</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">srcBitmask </span><span
+    class="s2">&amp; </span><span class="s1">WRAP_BIND_FLAG</span><span class="s2">) {</span>
+    <span class="s1">data</span><span class="s2">[</span><span class="s5">2</span><span class="s2">] = </span><span
+    class="s1">source</span><span class="s2">[</span><span class="s5">2</span><span class="s2">];</span>
+    <span class="s6">// Set when currying a bound function.</span>
+    <span class="s1">newBitmask </span><span class="s2">|= </span><span class="s1">bitmask </span><span
+    class="s2">&amp; </span><span class="s1">WRAP_BIND_FLAG </span><span class="s2">? </span><span
+    class="s5">0 </span><span class="s2">: </span><span class="s1">WRAP_CURRY_BOUND_FLAG</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s6">// Compose partial arguments.</span>
+  <span class="s0">var </span><span class="s1">value </span><span class="s2">= </span><span
+    class="s1">source</span><span class="s2">[</span><span class="s5">3</span><span class="s2">];</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">value</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">partials </span><span class="s2">= </span><span
+    class="s1">data</span><span class="s2">[</span><span class="s5">3</span><span class="s2">];</span>
+    <span class="s1">data</span><span class="s2">[</span><span class="s5">3</span><span class="s2">] = </span><span
+    class="s1">partials </span><span class="s2">? </span><span class="s1">composeArgs</span><span
+    class="s2">(</span><span class="s1">partials</span><span class="s2">, </span><span class="s1">value</span><span
+    class="s2">, </span><span class="s1">source</span><span class="s2">[</span><span class="s5">4</span><span
+    class="s2">]) : </span><span class="s1">value</span><span class="s2">;</span>
+    <span class="s1">data</span><span class="s2">[</span><span class="s5">4</span><span class="s2">] = </span><span
+    class="s1">partials </span><span class="s2">? </span><span class="s1">replaceHolders</span><span class="s2">(</span><span
+    class="s1">data</span><span class="s2">[</span><span class="s5">3</span><span class="s2">], </span><span class="s1">PLACEHOLDER</span><span
+    class="s2">) : </span><span class="s1">source</span><span class="s2">[</span><span class="s5">4</span><span
+    class="s2">];</span>
+  <span class="s2">}</span>
+  <span class="s6">// Compose partial right arguments.</span>
+  <span class="s1">value </span><span class="s2">= </span><span class="s1">source</span><span class="s2">[</span><span
+    class="s5">5</span><span class="s2">];</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">value</span><span class="s2">) {</span>
+    <span class="s1">partials </span><span class="s2">= </span><span class="s1">data</span><span
+    class="s2">[</span><span class="s5">5</span><span class="s2">];</span>
+    <span class="s1">data</span><span class="s2">[</span><span class="s5">5</span><span class="s2">] = </span><span
+    class="s1">partials </span><span class="s2">? </span><span class="s1">composeArgsRight</span><span
+    class="s2">(</span><span class="s1">partials</span><span class="s2">, </span><span class="s1">value</span><span
+    class="s2">, </span><span class="s1">source</span><span class="s2">[</span><span class="s5">6</span><span
+    class="s2">]) : </span><span class="s1">value</span><span class="s2">;</span>
+    <span class="s1">data</span><span class="s2">[</span><span class="s5">6</span><span class="s2">] = </span><span
+    class="s1">partials </span><span class="s2">? </span><span class="s1">replaceHolders</span><span class="s2">(</span><span
+    class="s1">data</span><span class="s2">[</span><span class="s5">5</span><span class="s2">], </span><span class="s1">PLACEHOLDER</span><span
+    class="s2">) : </span><span class="s1">source</span><span class="s2">[</span><span class="s5">6</span><span
+    class="s2">];</span>
+  <span class="s2">}</span>
+  <span class="s6">// Use source `argPos` if available.</span>
+  <span class="s1">value </span><span class="s2">= </span><span class="s1">source</span><span class="s2">[</span><span
+    class="s5">7</span><span class="s2">];</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">value</span><span class="s2">) {</span>
+    <span class="s1">data</span><span class="s2">[</span><span class="s5">7</span><span class="s2">] = </span><span
+    class="s1">value</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s6">// Use source `ary` if it's smaller.</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">srcBitmask </span><span
+    class="s2">&amp; </span><span class="s1">WRAP_ARY_FLAG</span><span class="s2">) {</span>
+    <span class="s1">data</span><span class="s2">[</span><span class="s5">8</span><span class="s2">] = </span><span
+    class="s1">data</span><span class="s2">[</span><span class="s5">8</span><span class="s2">] == </span><span
+    class="s0">null </span><span class="s2">? </span><span class="s1">source</span><span class="s2">[</span><span
+    class="s5">8</span><span class="s2">] : </span><span class="s1">nativeMin</span><span class="s2">(</span><span
+    class="s1">data</span><span class="s2">[</span><span class="s5">8</span><span class="s2">], </span><span class="s1">source</span><span
+    class="s2">[</span><span class="s5">8</span><span class="s2">]);</span>
+  <span class="s2">}</span>
+  <span class="s6">// Use source `arity` if one is not provided.</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">data</span><span class="s2">[</span><span
+    class="s5">9</span><span class="s2">] == </span><span class="s0">null</span><span class="s2">) {</span>
+    <span class="s1">data</span><span class="s2">[</span><span class="s5">9</span><span class="s2">] = </span><span
+    class="s1">source</span><span class="s2">[</span><span class="s5">9</span><span class="s2">];</span>
+  <span class="s2">}</span>
+  <span class="s6">// Use source `func` and merge bitmasks.</span>
+  <span class="s1">data</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] = </span><span
+    class="s1">source</span><span class="s2">[</span><span class="s5">0</span><span class="s2">];</span>
+  <span class="s1">data</span><span class="s2">[</span><span class="s5">1</span><span class="s2">] = </span><span
+    class="s1">newBitmask</span><span class="s2">;</span>
+
+  <span class="s0">return </span><span class="s1">data</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">mergeData</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

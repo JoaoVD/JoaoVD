@@ -1,0 +1,919 @@
+<html>
+<head>
+  <title>nopt.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          nopt.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// info about each config option.</span>
+
+<span class="s2">var </span><span class="s1">debug </span><span class="s3">= </span><span class="s1">process</span><span
+    class="s3">.</span><span class="s1">env</span><span class="s3">.</span><span class="s1">DEBUG_NOPT </span><span
+    class="s3">|| </span><span class="s1">process</span><span class="s3">.</span><span class="s1">env</span><span
+    class="s3">.</span><span class="s1">NOPT_DEBUG</span>
+  <span class="s3">? </span><span class="s2">function </span><span class="s3">() { </span><span
+    class="s1">console</span><span class="s3">.</span><span class="s1">error</span><span class="s3">.</span><span
+    class="s1">apply</span><span class="s3">(</span><span class="s1">console</span><span class="s3">, </span><span
+    class="s1">arguments</span><span class="s3">) }</span>
+  <span class="s3">: </span><span class="s2">function </span><span class="s3">() {}</span>
+
+<span class="s2">var </span><span class="s1">url </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">&quot;url&quot;</span><span class="s3">)</span>
+  <span class="s3">, </span><span class="s1">path </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">&quot;path&quot;</span><span class="s3">)</span>
+  <span class="s3">, </span><span class="s1">Stream </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">&quot;stream&quot;</span><span
+    class="s3">).</span><span class="s1">Stream</span>
+  <span class="s3">, </span><span class="s1">abbrev </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">&quot;abbrev&quot;</span><span
+    class="s3">)</span>
+  <span class="s3">, </span><span class="s1">os </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">&quot;os&quot;</span><span class="s3">)</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">exports </span><span class="s3">= </span><span class="s1">nopt</span>
+<span class="s1">exports</span><span class="s3">.</span><span class="s1">clean </span><span class="s3">= </span><span
+    class="s1">clean</span>
+
+<span class="s1">exports</span><span class="s3">.</span><span class="s1">typeDefs </span><span class="s3">=</span>
+  <span class="s3">{ </span><span class="s1">String  </span><span class="s3">: { </span><span
+    class="s1">type</span><span class="s3">: </span><span class="s1">String</span><span class="s3">,  </span><span
+    class="s1">validate</span><span class="s3">: </span><span class="s1">validateString  </span><span
+    class="s3">}</span>
+  <span class="s3">, </span><span class="s1">Boolean </span><span class="s3">: { </span><span
+    class="s1">type</span><span class="s3">: </span><span class="s1">Boolean</span><span class="s3">, </span><span
+    class="s1">validate</span><span class="s3">: </span><span class="s1">validateBoolean </span><span
+    class="s3">}</span>
+  <span class="s3">, </span><span class="s1">url     </span><span class="s3">: { </span><span
+    class="s1">type</span><span class="s3">: </span><span class="s1">url</span><span class="s3">,     </span><span
+    class="s1">validate</span><span class="s3">: </span><span class="s1">validateUrl     </span><span
+    class="s3">}</span>
+  <span class="s3">, </span><span class="s1">Number  </span><span class="s3">: { </span><span
+    class="s1">type</span><span class="s3">: </span><span class="s1">Number</span><span class="s3">,  </span><span
+    class="s1">validate</span><span class="s3">: </span><span class="s1">validateNumber  </span><span
+    class="s3">}</span>
+  <span class="s3">, </span><span class="s1">path    </span><span class="s3">: { </span><span
+    class="s1">type</span><span class="s3">: </span><span class="s1">path</span><span class="s3">,    </span><span
+    class="s1">validate</span><span class="s3">: </span><span class="s1">validatePath    </span><span
+    class="s3">}</span>
+  <span class="s3">, </span><span class="s1">Stream  </span><span class="s3">: { </span><span
+    class="s1">type</span><span class="s3">: </span><span class="s1">Stream</span><span class="s3">,  </span><span
+    class="s1">validate</span><span class="s3">: </span><span class="s1">validateStream  </span><span
+    class="s3">}</span>
+  <span class="s3">, </span><span class="s1">Date    </span><span class="s3">: { </span><span
+    class="s1">type</span><span class="s3">: </span><span class="s1">Date</span><span class="s3">,    </span><span
+    class="s1">validate</span><span class="s3">: </span><span class="s1">validateDate    </span><span
+    class="s3">}</span>
+  <span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">nopt </span><span class="s3">(</span><span
+    class="s1">types</span><span class="s3">, </span><span class="s1">shorthands</span><span class="s3">, </span><span
+    class="s1">args</span><span class="s3">, </span><span class="s1">slice</span><span class="s3">) {</span>
+  <span class="s1">args </span><span class="s3">= </span><span class="s1">args </span><span class="s3">|| </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">argv</span>
+  <span class="s1">types </span><span class="s3">= </span><span class="s1">types </span><span class="s3">|| {}</span>
+  <span class="s1">shorthands </span><span class="s3">= </span><span class="s1">shorthands </span><span
+    class="s3">|| {}</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">slice </span><span
+    class="s3">!== </span><span class="s4">&quot;number&quot;</span><span class="s3">) </span><span
+    class="s1">slice </span><span class="s3">= </span><span class="s5">2</span>
+
+  <span class="s1">debug</span><span class="s3">(</span><span class="s1">types</span><span class="s3">, </span><span
+    class="s1">shorthands</span><span class="s3">, </span><span class="s1">args</span><span class="s3">, </span><span
+    class="s1">slice</span><span class="s3">)</span>
+
+  <span class="s1">args </span><span class="s3">= </span><span class="s1">args</span><span class="s3">.</span><span
+    class="s1">slice</span><span class="s3">(</span><span class="s1">slice</span><span class="s3">)</span>
+  <span class="s2">var </span><span class="s1">data </span><span class="s3">= {}</span>
+    <span class="s3">, </span><span class="s1">key</span>
+    <span class="s3">, </span><span class="s1">argv </span><span class="s3">= {</span>
+        <span class="s1">remain</span><span class="s3">: [],</span>
+        <span class="s1">cooked</span><span class="s3">: </span><span class="s1">args</span><span class="s3">,</span>
+        <span class="s1">original</span><span class="s3">: </span><span class="s1">args</span><span
+    class="s3">.</span><span class="s1">slice</span><span class="s3">(</span><span class="s5">0</span><span
+    class="s3">)</span>
+      <span class="s3">}</span>
+
+  <span class="s1">parse</span><span class="s3">(</span><span class="s1">args</span><span class="s3">, </span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">argv</span><span class="s3">.</span><span
+    class="s1">remain</span><span class="s3">, </span><span class="s1">types</span><span class="s3">, </span><span
+    class="s1">shorthands</span><span class="s3">)</span>
+  <span class="s0">// now data is full</span>
+  <span class="s1">clean</span><span class="s3">(</span><span class="s1">data</span><span class="s3">, </span><span
+    class="s1">types</span><span class="s3">, </span><span class="s1">exports</span><span class="s3">.</span><span
+    class="s1">typeDefs</span><span class="s3">)</span>
+  <span class="s1">data</span><span class="s3">.</span><span class="s1">argv </span><span class="s3">= </span><span
+    class="s1">argv</span>
+  <span class="s1">Object</span><span class="s3">.</span><span class="s1">defineProperty</span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">.</span><span class="s1">argv</span><span class="s3">, </span><span
+    class="s4">'toString'</span><span class="s3">, { </span><span class="s1">value</span><span class="s3">: </span><span
+    class="s2">function </span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">.</span><span class="s1">original</span><span
+    class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span class="s1">JSON</span><span class="s3">.</span><span
+    class="s1">stringify</span><span class="s3">).</span><span class="s1">join</span><span class="s3">(</span><span
+    class="s4">&quot; &quot;</span><span class="s3">)</span>
+  <span class="s3">}, </span><span class="s1">enumerable</span><span class="s3">: </span><span
+    class="s2">false </span><span class="s3">})</span>
+  <span class="s2">return </span><span class="s1">data</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">clean </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">types</span><span class="s3">, </span><span
+    class="s1">typeDefs</span><span class="s3">) {</span>
+  <span class="s1">typeDefs </span><span class="s3">= </span><span class="s1">typeDefs </span><span
+    class="s3">|| </span><span class="s1">exports</span><span class="s3">.</span><span class="s1">typeDefs</span>
+  <span class="s2">var </span><span class="s1">remove </span><span class="s3">= {}</span>
+    <span class="s3">, </span><span class="s1">typeDefault </span><span class="s3">= [</span><span
+    class="s2">false</span><span class="s3">, </span><span class="s2">true</span><span class="s3">, </span><span
+    class="s2">null</span><span class="s3">, </span><span class="s1">String</span><span class="s3">, </span><span
+    class="s1">Array</span><span class="s3">]</span>
+
+  <span class="s1">Object</span><span class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">).</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">k</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">k </span><span class="s3">=== </span><span
+    class="s4">&quot;argv&quot;</span><span class="s3">) </span><span class="s2">return</span>
+    <span class="s2">var </span><span class="s1">val </span><span class="s3">= </span><span class="s1">data</span><span
+    class="s3">[</span><span class="s1">k</span><span class="s3">]</span>
+      <span class="s3">, </span><span class="s1">isArray </span><span class="s3">= </span><span
+    class="s1">Array</span><span class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">)</span>
+      <span class="s3">, </span><span class="s1">type </span><span class="s3">= </span><span
+    class="s1">types</span><span class="s3">[</span><span class="s1">k</span><span class="s3">]</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">isArray</span><span class="s3">) </span><span
+    class="s1">val </span><span class="s3">= [</span><span class="s1">val</span><span class="s3">]</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">type</span><span class="s3">) </span><span
+    class="s1">type </span><span class="s3">= </span><span class="s1">typeDefault</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">type </span><span class="s3">=== </span><span
+    class="s1">Array</span><span class="s3">) </span><span class="s1">type </span><span class="s3">= </span><span
+    class="s1">typeDefault</span><span class="s3">.</span><span class="s1">concat</span><span class="s3">(</span><span
+    class="s1">Array</span><span class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">Array</span><span class="s3">.</span><span
+    class="s1">isArray</span><span class="s3">(</span><span class="s1">type</span><span class="s3">)) </span><span
+    class="s1">type </span><span class="s3">= [</span><span class="s1">type</span><span class="s3">]</span>
+
+    <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;val=%j&quot;</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">)</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;types=&quot;</span><span
+    class="s3">, </span><span class="s1">type</span><span class="s3">)</span>
+    <span class="s1">val </span><span class="s3">= </span><span class="s1">val</span><span class="s3">.</span><span
+    class="s1">map</span><span class="s3">(</span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">) {</span>
+      <span class="s0">// if it's an unknown value, then parse false/true/null/numbers/dates</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span
+    class="s1">val </span><span class="s3">=== </span><span class="s4">&quot;string&quot;</span><span
+    class="s3">) {</span>
+        <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;string %j&quot;</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">)</span>
+        <span class="s1">val </span><span class="s3">= </span><span class="s1">val</span><span class="s3">.</span><span
+    class="s1">trim</span><span class="s3">()</span>
+        <span class="s2">if </span><span class="s3">((</span><span class="s1">val </span><span
+    class="s3">=== </span><span class="s4">&quot;null&quot; </span><span class="s3">&amp;&amp; ~</span><span class="s1">type</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s2">null</span><span
+    class="s3">))</span>
+            <span class="s3">|| (</span><span class="s1">val </span><span class="s3">=== </span><span class="s4">&quot;true&quot; </span><span
+    class="s3">&amp;&amp;</span>
+               <span class="s3">(~</span><span class="s1">type</span><span class="s3">.</span><span
+    class="s1">indexOf</span><span class="s3">(</span><span class="s2">true</span><span class="s3">) || ~</span><span
+    class="s1">type</span><span class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span
+    class="s1">Boolean</span><span class="s3">)))</span>
+            <span class="s3">|| (</span><span class="s1">val </span><span class="s3">=== </span><span class="s4">&quot;false&quot; </span><span
+    class="s3">&amp;&amp;</span>
+               <span class="s3">(~</span><span class="s1">type</span><span class="s3">.</span><span
+    class="s1">indexOf</span><span class="s3">(</span><span class="s2">false</span><span class="s3">) || ~</span><span
+    class="s1">type</span><span class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span
+    class="s1">Boolean</span><span class="s3">)))) {</span>
+          <span class="s1">val </span><span class="s3">= </span><span class="s1">JSON</span><span
+    class="s3">.</span><span class="s1">parse</span><span class="s3">(</span><span class="s1">val</span><span
+    class="s3">)</span>
+          <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;jsonable %j&quot;</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">)</span>
+        <span class="s3">} </span><span class="s2">else if </span><span class="s3">(~</span><span class="s1">type</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s1">Number</span><span
+    class="s3">) &amp;&amp; !</span><span class="s1">isNaN</span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">)) {</span>
+          <span class="s1">debug</span><span class="s3">(</span><span
+    class="s4">&quot;convert to number&quot;</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">)</span>
+          <span class="s1">val </span><span class="s3">= +</span><span class="s1">val</span>
+        <span class="s3">} </span><span class="s2">else if </span><span class="s3">(~</span><span class="s1">type</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s1">Date</span><span
+    class="s3">) &amp;&amp; !</span><span class="s1">isNaN</span><span class="s3">(</span><span
+    class="s1">Date</span><span class="s3">.</span><span class="s1">parse</span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">))) {</span>
+          <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;convert to date&quot;</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">)</span>
+          <span class="s1">val </span><span class="s3">= </span><span class="s2">new </span><span class="s1">Date</span><span
+    class="s3">(</span><span class="s1">val</span><span class="s3">)</span>
+        <span class="s3">}</span>
+      <span class="s3">}</span>
+
+      <span class="s2">if </span><span class="s3">(!</span><span class="s1">types</span><span class="s3">.</span><span
+    class="s1">hasOwnProperty</span><span class="s3">(</span><span class="s1">k</span><span class="s3">)) {</span>
+        <span class="s2">return </span><span class="s1">val</span>
+      <span class="s3">}</span>
+
+      <span class="s0">// allow `--no-blah` to set 'blah' to null if null is allowed</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">val </span><span class="s3">=== </span><span
+    class="s2">false </span><span class="s3">&amp;&amp; ~</span><span class="s1">type</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s2">null</span><span
+    class="s3">) &amp;&amp;</span>
+          <span class="s3">!(~</span><span class="s1">type</span><span class="s3">.</span><span
+    class="s1">indexOf</span><span class="s3">(</span><span class="s2">false</span><span class="s3">) || ~</span><span
+    class="s1">type</span><span class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span
+    class="s1">Boolean</span><span class="s3">))) {</span>
+        <span class="s1">val </span><span class="s3">= </span><span class="s2">null</span>
+      <span class="s3">}</span>
+
+      <span class="s2">var </span><span class="s1">d </span><span class="s3">= {}</span>
+      <span class="s1">d</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">val</span>
+      <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;prevalidated val&quot;</span><span
+    class="s3">, </span><span class="s1">d</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">types</span><span class="s3">[</span><span class="s1">k</span><span class="s3">])</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s1">validate</span><span
+    class="s3">(</span><span class="s1">d</span><span class="s3">, </span><span class="s1">k</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">, </span><span class="s1">types</span><span
+    class="s3">[</span><span class="s1">k</span><span class="s3">], </span><span class="s1">typeDefs</span><span
+    class="s3">)) {</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">exports</span><span
+    class="s3">.</span><span class="s1">invalidHandler</span><span class="s3">) {</span>
+          <span class="s1">exports</span><span class="s3">.</span><span class="s1">invalidHandler</span><span
+    class="s3">(</span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">types</span><span class="s3">[</span><span class="s1">k</span><span class="s3">], </span><span
+    class="s1">data</span><span class="s3">)</span>
+        <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span
+    class="s1">exports</span><span class="s3">.</span><span class="s1">invalidHandler </span><span
+    class="s3">!== </span><span class="s2">false</span><span class="s3">) {</span>
+          <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;invalid: &quot;</span><span
+    class="s3">+</span><span class="s1">k</span><span class="s3">+</span><span class="s4">&quot;=&quot;</span><span
+    class="s3">+</span><span class="s1">val</span><span class="s3">, </span><span class="s1">types</span><span
+    class="s3">[</span><span class="s1">k</span><span class="s3">])</span>
+        <span class="s3">}</span>
+        <span class="s2">return </span><span class="s1">remove</span>
+      <span class="s3">}</span>
+      <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;validated val&quot;</span><span
+    class="s3">, </span><span class="s1">d</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">types</span><span class="s3">[</span><span class="s1">k</span><span class="s3">])</span>
+      <span class="s2">return </span><span class="s1">d</span><span class="s3">[</span><span class="s1">k</span><span
+    class="s3">]</span>
+    <span class="s3">}).</span><span class="s1">filter</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">val</span><span class="s3">) { </span><span
+    class="s2">return </span><span class="s1">val </span><span class="s3">!== </span><span
+    class="s1">remove </span><span class="s3">})</span>
+
+    <span class="s0">// if we allow Array specifically, then an empty array is how we</span>
+    <span class="s0">// express 'no value here', not null.  Allow it.</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">val</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">&amp;&amp; </span><span class="s1">type</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s1">Array</span><span
+    class="s3">) === -</span><span class="s5">1</span><span class="s3">) {</span>
+      <span class="s1">debug</span><span class="s3">(</span><span class="s4">'VAL HAS NO LENGTH, DELETE IT'</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">, </span><span class="s1">k</span><span
+    class="s3">, </span><span class="s1">type</span><span class="s3">.</span><span class="s1">indexOf</span><span
+    class="s3">(</span><span class="s1">Array</span><span class="s3">))</span>
+      <span class="s2">delete </span><span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span
+    class="s3">]</span>
+    <span class="s3">}</span>
+    <span class="s2">else if </span><span class="s3">(</span><span class="s1">isArray</span><span class="s3">) {</span>
+      <span class="s1">debug</span><span class="s3">(</span><span class="s1">isArray</span><span
+    class="s3">, </span><span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">], </span><span
+    class="s1">val</span><span class="s3">)</span>
+      <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">val</span>
+    <span class="s3">} </span><span class="s2">else </span><span class="s1">data</span><span class="s3">[</span><span
+    class="s1">k</span><span class="s3">] = </span><span class="s1">val</span><span class="s3">[</span><span class="s5">0</span><span
+    class="s3">]</span>
+
+    <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;k=%s val=%j&quot;</span><span
+    class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">])</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">validateString </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">) {</span>
+  <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">String</span><span class="s3">(</span><span class="s1">val</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">validatePath </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">val </span><span class="s3">=== </span><span
+    class="s2">true</span><span class="s3">) </span><span class="s2">return false</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">val </span><span class="s3">=== </span><span
+    class="s2">null</span><span class="s3">) </span><span class="s2">return true</span>
+
+  <span class="s1">val </span><span class="s3">= </span><span class="s1">String</span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">)</span>
+
+  <span class="s2">var </span><span class="s1">isWin       </span><span class="s3">= </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">platform </span><span class="s3">=== </span><span
+    class="s4">'win32'</span>
+    <span class="s3">, </span><span class="s1">homePattern </span><span class="s3">= </span><span
+    class="s1">isWin </span><span class="s3">? </span><span class="s6">/^~(\/|\\)/ </span><span
+    class="s3">: </span><span class="s6">/^~\//</span>
+    <span class="s3">, </span><span class="s1">home        </span><span class="s3">= </span><span
+    class="s1">os</span><span class="s3">.</span><span class="s1">homedir</span><span class="s3">()</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">home </span><span
+    class="s3">&amp;&amp; </span><span class="s1">val</span><span class="s3">.</span><span class="s1">match</span><span
+    class="s3">(</span><span class="s1">homePattern</span><span class="s3">)) {</span>
+    <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">path</span><span class="s3">.</span><span class="s1">resolve</span><span class="s3">(</span><span
+    class="s1">home</span><span class="s3">, </span><span class="s1">val</span><span class="s3">.</span><span
+    class="s1">substr</span><span class="s3">(</span><span class="s5">2</span><span class="s3">))</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+    <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">path</span><span class="s3">.</span><span class="s1">resolve</span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">)</span>
+  <span class="s3">}</span>
+  <span class="s2">return true</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">validateNumber </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">) {</span>
+  <span class="s1">debug</span><span class="s3">(</span><span
+    class="s4">&quot;validate Number %j %j %j&quot;</span><span class="s3">, </span><span class="s1">k</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">, </span><span class="s1">isNaN</span><span
+    class="s3">(</span><span class="s1">val</span><span class="s3">))</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">isNaN</span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">)) </span><span class="s2">return false</span>
+  <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = +</span><span
+    class="s1">val</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">validateDate </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">s </span><span class="s3">= </span><span class="s1">Date</span><span
+    class="s3">.</span><span class="s1">parse</span><span class="s3">(</span><span class="s1">val</span><span
+    class="s3">)</span>
+  <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;validate Date %j %j %j&quot;</span><span
+    class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">s</span><span class="s3">)</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">isNaN</span><span class="s3">(</span><span
+    class="s1">s</span><span class="s3">)) </span><span class="s2">return false</span>
+  <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s2">new </span><span class="s1">Date</span><span class="s3">(</span><span class="s1">val</span><span
+    class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">validateBoolean </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">val </span><span
+    class="s2">instanceof </span><span class="s1">Boolean</span><span class="s3">) </span><span
+    class="s1">val </span><span class="s3">= </span><span class="s1">val</span><span class="s3">.</span><span
+    class="s1">valueOf</span><span class="s3">()</span>
+  <span class="s2">else if </span><span class="s3">(</span><span class="s2">typeof </span><span
+    class="s1">val </span><span class="s3">=== </span><span class="s4">&quot;string&quot;</span><span
+    class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">isNaN</span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">)) </span><span class="s1">val </span><span class="s3">= !!(+</span><span
+    class="s1">val</span><span class="s3">)</span>
+    <span class="s2">else if </span><span class="s3">(</span><span class="s1">val </span><span
+    class="s3">=== </span><span class="s4">&quot;null&quot; </span><span class="s3">|| </span><span
+    class="s1">val </span><span class="s3">=== </span><span class="s4">&quot;false&quot;</span><span
+    class="s3">) </span><span class="s1">val </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s2">else </span><span class="s1">val </span><span class="s3">= </span><span class="s2">true</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s1">val </span><span class="s3">= !!</span><span
+    class="s1">val</span>
+  <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">val</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">validateUrl </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">) {</span>
+  <span class="s1">val </span><span class="s3">= </span><span class="s1">url</span><span class="s3">.</span><span
+    class="s1">parse</span><span class="s3">(</span><span class="s1">String</span><span class="s3">(</span><span
+    class="s1">val</span><span class="s3">))</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">val</span><span class="s3">.</span><span
+    class="s1">host</span><span class="s3">) </span><span class="s2">return false</span>
+  <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">val</span><span class="s3">.</span><span class="s1">href</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">validateStream </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(!(</span><span class="s1">val </span><span
+    class="s2">instanceof </span><span class="s1">Stream</span><span class="s3">)) </span><span
+    class="s2">return false</span>
+  <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">val</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">validate </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span class="s1">typeDefs</span><span
+    class="s3">) {</span>
+  <span class="s0">// arrays are lists of types.</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">Array</span><span class="s3">.</span><span
+    class="s1">isArray</span><span class="s3">(</span><span class="s1">type</span><span class="s3">)) {</span>
+    <span class="s2">for </span><span class="s3">(</span><span class="s2">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">, </span><span class="s1">l </span><span
+    class="s3">= </span><span class="s1">type</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">l</span><span
+    class="s3">; </span><span class="s1">i </span><span class="s3">++) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">type</span><span class="s3">[</span><span
+    class="s1">i</span><span class="s3">] === </span><span class="s1">Array</span><span class="s3">) </span><span
+    class="s2">continue</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">validate</span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">type</span><span class="s3">[</span><span class="s1">i</span><span class="s3">], </span><span
+    class="s1">typeDefs</span><span class="s3">)) </span><span class="s2">return true</span>
+    <span class="s3">}</span>
+    <span class="s2">delete </span><span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span
+    class="s3">]</span>
+    <span class="s2">return false</span>
+  <span class="s3">}</span>
+
+  <span class="s0">// an array of anything?</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">type </span><span class="s3">=== </span><span
+    class="s1">Array</span><span class="s3">) </span><span class="s2">return true</span>
+
+  <span class="s0">// NaN is poisonous.  Means that something is not allowed.</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">type </span><span class="s3">!== </span><span
+    class="s1">type</span><span class="s3">) {</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;Poison NaN&quot;</span><span
+    class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">type</span><span class="s3">)</span>
+    <span class="s2">delete </span><span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span
+    class="s3">]</span>
+    <span class="s2">return false</span>
+  <span class="s3">}</span>
+
+  <span class="s0">// explicit list of values</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">val </span><span class="s3">=== </span><span
+    class="s1">type</span><span class="s3">) {</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;Explicitly allowed %j&quot;</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">)</span>
+    <span class="s0">// if (isArray) (data[k] = data[k] || []).push(val)</span>
+    <span class="s0">// else data[k] = val</span>
+    <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">val</span>
+    <span class="s2">return true</span>
+  <span class="s3">}</span>
+
+  <span class="s0">// now go through the list of typeDefs, validate against each one.</span>
+  <span class="s2">var </span><span class="s1">ok </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s3">, </span><span class="s1">types </span><span class="s3">= </span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span
+    class="s1">typeDefs</span><span class="s3">)</span>
+  <span class="s2">for </span><span class="s3">(</span><span class="s2">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">, </span><span class="s1">l </span><span
+    class="s3">= </span><span class="s1">types</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">l</span><span
+    class="s3">; </span><span class="s1">i </span><span class="s3">++) {</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;test type %j %j %j&quot;</span><span
+    class="s3">, </span><span class="s1">k</span><span class="s3">, </span><span class="s1">val</span><span
+    class="s3">, </span><span class="s1">types</span><span class="s3">[</span><span class="s1">i</span><span class="s3">])</span>
+    <span class="s2">var </span><span class="s1">t </span><span class="s3">= </span><span
+    class="s1">typeDefs</span><span class="s3">[</span><span class="s1">types</span><span class="s3">[</span><span
+    class="s1">i</span><span class="s3">]]</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">t </span><span class="s3">&amp;&amp;</span>
+      <span class="s3">((</span><span class="s1">type </span><span class="s3">&amp;&amp; </span><span
+    class="s1">type</span><span class="s3">.</span><span class="s1">name </span><span class="s3">&amp;&amp; </span><span
+    class="s1">t</span><span class="s3">.</span><span class="s1">type </span><span class="s3">&amp;&amp; </span><span
+    class="s1">t</span><span class="s3">.</span><span class="s1">type</span><span class="s3">.</span><span class="s1">name</span><span
+    class="s3">) ? (</span><span class="s1">type</span><span class="s3">.</span><span class="s1">name </span><span
+    class="s3">=== </span><span class="s1">t</span><span class="s3">.</span><span class="s1">type</span><span
+    class="s3">.</span><span class="s1">name</span><span class="s3">) : (</span><span class="s1">type </span><span
+    class="s3">=== </span><span class="s1">t</span><span class="s3">.</span><span class="s1">type</span><span
+    class="s3">))) {</span>
+      <span class="s2">var </span><span class="s1">d </span><span class="s3">= {}</span>
+      <span class="s1">ok </span><span class="s3">= </span><span class="s2">false </span><span
+    class="s3">!== </span><span class="s1">t</span><span class="s3">.</span><span class="s1">validate</span><span
+    class="s3">(</span><span class="s1">d</span><span class="s3">, </span><span class="s1">k</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">)</span>
+      <span class="s1">val </span><span class="s3">= </span><span class="s1">d</span><span class="s3">[</span><span
+    class="s1">k</span><span class="s3">]</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">ok</span><span class="s3">) {</span>
+        <span class="s0">// if (isArray) (data[k] = data[k] || []).push(val)</span>
+        <span class="s0">// else data[k] = val</span>
+        <span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">val</span>
+        <span class="s2">break</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+  <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;OK? %j (%j %j %j)&quot;</span><span
+    class="s3">, </span><span class="s1">ok</span><span class="s3">, </span><span class="s1">k</span><span
+    class="s3">, </span><span class="s1">val</span><span class="s3">, </span><span class="s1">types</span><span
+    class="s3">[</span><span class="s1">i</span><span class="s3">])</span>
+
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">ok</span><span class="s3">) </span><span
+    class="s2">delete </span><span class="s1">data</span><span class="s3">[</span><span class="s1">k</span><span
+    class="s3">]</span>
+  <span class="s2">return </span><span class="s1">ok</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">parse </span><span class="s3">(</span><span
+    class="s1">args</span><span class="s3">, </span><span class="s1">data</span><span class="s3">, </span><span
+    class="s1">remain</span><span class="s3">, </span><span class="s1">types</span><span class="s3">, </span><span
+    class="s1">shorthands</span><span class="s3">) {</span>
+  <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;parse&quot;</span><span
+    class="s3">, </span><span class="s1">args</span><span class="s3">, </span><span class="s1">data</span><span
+    class="s3">, </span><span class="s1">remain</span><span class="s3">)</span>
+
+  <span class="s2">var </span><span class="s1">key </span><span class="s3">= </span><span class="s2">null</span>
+    <span class="s3">, </span><span class="s1">abbrevs </span><span class="s3">= </span><span
+    class="s1">abbrev</span><span class="s3">(</span><span class="s1">Object</span><span class="s3">.</span><span
+    class="s1">keys</span><span class="s3">(</span><span class="s1">types</span><span class="s3">))</span>
+    <span class="s3">, </span><span class="s1">shortAbbr </span><span class="s3">= </span><span class="s1">abbrev</span><span
+    class="s3">(</span><span class="s1">Object</span><span class="s3">.</span><span class="s1">keys</span><span
+    class="s3">(</span><span class="s1">shorthands</span><span class="s3">))</span>
+
+  <span class="s2">for </span><span class="s3">(</span><span class="s2">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">args</span><span class="s3">.</span><span class="s1">length</span><span class="s3">; </span><span
+    class="s1">i </span><span class="s3">++) {</span>
+    <span class="s2">var </span><span class="s1">arg </span><span class="s3">= </span><span class="s1">args</span><span
+    class="s3">[</span><span class="s1">i</span><span class="s3">]</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;arg&quot;</span><span
+    class="s3">, </span><span class="s1">arg</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">arg</span><span class="s3">.</span><span
+    class="s1">match</span><span class="s3">(</span><span class="s6">/^-{2,}$/</span><span class="s3">)) {</span>
+      <span class="s0">// done with keys.</span>
+      <span class="s0">// the rest are args.</span>
+      <span class="s1">remain</span><span class="s3">.</span><span class="s1">push</span><span class="s3">.</span><span
+    class="s1">apply</span><span class="s3">(</span><span class="s1">remain</span><span class="s3">, </span><span
+    class="s1">args</span><span class="s3">.</span><span class="s1">slice</span><span class="s3">(</span><span
+    class="s1">i </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">))</span>
+      <span class="s1">args</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] = </span><span
+    class="s4">&quot;--&quot;</span>
+      <span class="s2">break</span>
+    <span class="s3">}</span>
+    <span class="s2">var </span><span class="s1">hadEq </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">arg</span><span class="s3">.</span><span
+    class="s1">charAt</span><span class="s3">(</span><span class="s5">0</span><span class="s3">) === </span><span
+    class="s4">&quot;-&quot; </span><span class="s3">&amp;&amp; </span><span class="s1">arg</span><span
+    class="s3">.</span><span class="s1">length </span><span class="s3">&gt; </span><span class="s5">1</span><span
+    class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">at </span><span class="s3">= </span><span class="s1">arg</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s4">'='</span><span
+    class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">at </span><span class="s3">&gt; -</span><span
+    class="s5">1</span><span class="s3">) {</span>
+        <span class="s1">hadEq </span><span class="s3">= </span><span class="s2">true</span>
+        <span class="s2">var </span><span class="s1">v </span><span class="s3">= </span><span class="s1">arg</span><span
+    class="s3">.</span><span class="s1">substr</span><span class="s3">(</span><span class="s1">at </span><span
+    class="s3">+ </span><span class="s5">1</span><span class="s3">)</span>
+        <span class="s1">arg </span><span class="s3">= </span><span class="s1">arg</span><span class="s3">.</span><span
+    class="s1">substr</span><span class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span
+    class="s1">at</span><span class="s3">)</span>
+        <span class="s1">args</span><span class="s3">.</span><span class="s1">splice</span><span
+    class="s3">(</span><span class="s1">i</span><span class="s3">, </span><span class="s5">1</span><span
+    class="s3">, </span><span class="s1">arg</span><span class="s3">, </span><span class="s1">v</span><span
+    class="s3">)</span>
+      <span class="s3">}</span>
+
+      <span class="s0">// see if it's a shorthand</span>
+      <span class="s0">// if so, splice and back up to re-parse it.</span>
+      <span class="s2">var </span><span class="s1">shRes </span><span class="s3">= </span><span
+    class="s1">resolveShort</span><span class="s3">(</span><span class="s1">arg</span><span class="s3">, </span><span
+    class="s1">shorthands</span><span class="s3">, </span><span class="s1">shortAbbr</span><span
+    class="s3">, </span><span class="s1">abbrevs</span><span class="s3">)</span>
+      <span class="s1">debug</span><span class="s3">(</span><span class="s4">&quot;arg=%j shRes=%j&quot;</span><span
+    class="s3">, </span><span class="s1">arg</span><span class="s3">, </span><span class="s1">shRes</span><span
+    class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">shRes</span><span class="s3">) {</span>
+        <span class="s1">debug</span><span class="s3">(</span><span class="s1">arg</span><span class="s3">, </span><span
+    class="s1">shRes</span><span class="s3">)</span>
+        <span class="s1">args</span><span class="s3">.</span><span class="s1">splice</span><span
+    class="s3">.</span><span class="s1">apply</span><span class="s3">(</span><span class="s1">args</span><span
+    class="s3">, [</span><span class="s1">i</span><span class="s3">, </span><span class="s5">1</span><span
+    class="s3">].</span><span class="s1">concat</span><span class="s3">(</span><span class="s1">shRes</span><span
+    class="s3">))</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">arg </span><span
+    class="s3">!== </span><span class="s1">shRes</span><span class="s3">[</span><span class="s5">0</span><span
+    class="s3">]) {</span>
+          <span class="s1">i </span><span class="s3">--</span>
+          <span class="s2">continue</span>
+        <span class="s3">}</span>
+      <span class="s3">}</span>
+      <span class="s1">arg </span><span class="s3">= </span><span class="s1">arg</span><span class="s3">.</span><span
+    class="s1">replace</span><span class="s3">(</span><span class="s6">/^-+/</span><span class="s3">, </span><span
+    class="s4">&quot;&quot;</span><span class="s3">)</span>
+      <span class="s2">var </span><span class="s1">no </span><span class="s3">= </span><span class="s2">null</span>
+      <span class="s2">while </span><span class="s3">(</span><span class="s1">arg</span><span class="s3">.</span><span
+    class="s1">toLowerCase</span><span class="s3">().</span><span class="s1">indexOf</span><span
+    class="s3">(</span><span class="s4">&quot;no-&quot;</span><span class="s3">) === </span><span
+    class="s5">0</span><span class="s3">) {</span>
+        <span class="s1">no </span><span class="s3">= !</span><span class="s1">no</span>
+        <span class="s1">arg </span><span class="s3">= </span><span class="s1">arg</span><span class="s3">.</span><span
+    class="s1">substr</span><span class="s3">(</span><span class="s5">3</span><span class="s3">)</span>
+      <span class="s3">}</span>
+
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">abbrevs</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">]) </span><span class="s1">arg </span><span class="s3">= </span><span
+    class="s1">abbrevs</span><span class="s3">[</span><span class="s1">arg</span><span class="s3">]</span>
+
+      <span class="s2">var </span><span class="s1">argType </span><span class="s3">= </span><span
+    class="s1">types</span><span class="s3">[</span><span class="s1">arg</span><span class="s3">]</span>
+      <span class="s2">var </span><span class="s1">isTypeArray </span><span class="s3">= </span><span
+    class="s1">Array</span><span class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span
+    class="s1">argType</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">isTypeArray </span><span class="s3">&amp;&amp; </span><span
+    class="s1">argType</span><span class="s3">.</span><span class="s1">length </span><span class="s3">=== </span><span
+    class="s5">1</span><span class="s3">) {</span>
+        <span class="s1">isTypeArray </span><span class="s3">= </span><span class="s2">false</span>
+        <span class="s1">argType </span><span class="s3">= </span><span class="s1">argType</span><span
+    class="s3">[</span><span class="s5">0</span><span class="s3">]</span>
+      <span class="s3">}</span>
+
+      <span class="s2">var </span><span class="s1">isArray </span><span class="s3">= </span><span
+    class="s1">argType </span><span class="s3">=== </span><span class="s1">Array </span><span class="s3">||</span>
+        <span class="s1">isTypeArray </span><span class="s3">&amp;&amp; </span><span class="s1">argType</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s1">Array</span><span
+    class="s3">) !== -</span><span class="s5">1</span>
+
+      <span class="s0">// allow unknown things to be arrays if specified multiple times.</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s1">types</span><span class="s3">.</span><span
+    class="s1">hasOwnProperty</span><span class="s3">(</span><span class="s1">arg</span><span
+    class="s3">) &amp;&amp; </span><span class="s1">data</span><span class="s3">.</span><span
+    class="s1">hasOwnProperty</span><span class="s3">(</span><span class="s1">arg</span><span class="s3">)) {</span>
+        <span class="s2">if </span><span class="s3">(!</span><span class="s1">Array</span><span class="s3">.</span><span
+    class="s1">isArray</span><span class="s3">(</span><span class="s1">data</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">]))</span>
+          <span class="s1">data</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">] = [</span><span class="s1">data</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">]]</span>
+        <span class="s1">isArray </span><span class="s3">= </span><span class="s2">true</span>
+      <span class="s3">}</span>
+
+      <span class="s2">var </span><span class="s1">val</span>
+        <span class="s3">, </span><span class="s1">la </span><span class="s3">= </span><span class="s1">args</span><span
+    class="s3">[</span><span class="s1">i </span><span class="s3">+ </span><span class="s5">1</span><span
+    class="s3">]</span>
+
+      <span class="s2">var </span><span class="s1">isBool </span><span class="s3">= </span><span
+    class="s2">typeof </span><span class="s1">no </span><span class="s3">=== </span><span
+    class="s4">'boolean' </span><span class="s3">||</span>
+        <span class="s1">argType </span><span class="s3">=== </span><span class="s1">Boolean </span><span
+    class="s3">||</span>
+        <span class="s1">isTypeArray </span><span class="s3">&amp;&amp; </span><span class="s1">argType</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s1">Boolean</span><span
+    class="s3">) !== -</span><span class="s5">1 </span><span class="s3">||</span>
+        <span class="s3">(</span><span class="s2">typeof </span><span class="s1">argType </span><span
+    class="s3">=== </span><span class="s4">'undefined' </span><span class="s3">&amp;&amp; !</span><span
+    class="s1">hadEq</span><span class="s3">) ||</span>
+        <span class="s3">(</span><span class="s1">la </span><span class="s3">=== </span><span class="s4">&quot;false&quot; </span><span
+    class="s3">&amp;&amp;</span>
+         <span class="s3">(</span><span class="s1">argType </span><span class="s3">=== </span><span
+    class="s2">null </span><span class="s3">||</span>
+          <span class="s1">isTypeArray </span><span class="s3">&amp;&amp; ~</span><span class="s1">argType</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s2">null</span><span
+    class="s3">)))</span>
+
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">isBool</span><span class="s3">) {</span>
+        <span class="s0">// just set and move along</span>
+        <span class="s1">val </span><span class="s3">= !</span><span class="s1">no</span>
+        <span class="s0">// however, also support --bool true or --bool false</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">la </span><span class="s3">=== </span><span
+    class="s4">&quot;true&quot; </span><span class="s3">|| </span><span class="s1">la </span><span
+    class="s3">=== </span><span class="s4">&quot;false&quot;</span><span class="s3">) {</span>
+          <span class="s1">val </span><span class="s3">= </span><span class="s1">JSON</span><span
+    class="s3">.</span><span class="s1">parse</span><span class="s3">(</span><span class="s1">la</span><span class="s3">)</span>
+          <span class="s1">la </span><span class="s3">= </span><span class="s2">null</span>
+          <span class="s2">if </span><span class="s3">(</span><span class="s1">no</span><span class="s3">) </span><span
+    class="s1">val </span><span class="s3">= !</span><span class="s1">val</span>
+          <span class="s1">i </span><span class="s3">++</span>
+        <span class="s3">}</span>
+
+        <span class="s0">// also support &quot;foo&quot;:[Boolean, &quot;bar&quot;] and &quot;--foo bar&quot;</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">isTypeArray </span><span class="s3">&amp;&amp; </span><span
+    class="s1">la</span><span class="s3">) {</span>
+          <span class="s2">if </span><span class="s3">(~</span><span class="s1">argType</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s1">la</span><span
+    class="s3">)) {</span>
+            <span class="s0">// an explicit type</span>
+            <span class="s1">val </span><span class="s3">= </span><span class="s1">la</span>
+            <span class="s1">i </span><span class="s3">++</span>
+          <span class="s3">} </span><span class="s2">else if </span><span class="s3">( </span><span
+    class="s1">la </span><span class="s3">=== </span><span class="s4">&quot;null&quot; </span><span class="s3">&amp;&amp; ~</span><span
+    class="s1">argType</span><span class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span
+    class="s2">null</span><span class="s3">) ) {</span>
+            <span class="s0">// null allowed</span>
+            <span class="s1">val </span><span class="s3">= </span><span class="s2">null</span>
+            <span class="s1">i </span><span class="s3">++</span>
+          <span class="s3">} </span><span class="s2">else if </span><span class="s3">( !</span><span
+    class="s1">la</span><span class="s3">.</span><span class="s1">match</span><span class="s3">(</span><span class="s6">/^-{2,}[^-]/</span><span
+    class="s3">) &amp;&amp;</span>
+                      <span class="s3">!</span><span class="s1">isNaN</span><span class="s3">(</span><span
+    class="s1">la</span><span class="s3">) &amp;&amp;</span>
+                      <span class="s3">~</span><span class="s1">argType</span><span class="s3">.</span><span class="s1">indexOf</span><span
+    class="s3">(</span><span class="s1">Number</span><span class="s3">) ) {</span>
+            <span class="s0">// number</span>
+            <span class="s1">val </span><span class="s3">= +</span><span class="s1">la</span>
+            <span class="s1">i </span><span class="s3">++</span>
+          <span class="s3">} </span><span class="s2">else if </span><span class="s3">( !</span><span
+    class="s1">la</span><span class="s3">.</span><span class="s1">match</span><span class="s3">(</span><span class="s6">/^-[^-]/</span><span
+    class="s3">) &amp;&amp; ~</span><span class="s1">argType</span><span class="s3">.</span><span
+    class="s1">indexOf</span><span class="s3">(</span><span class="s1">String</span><span class="s3">) ) {</span>
+            <span class="s0">// string</span>
+            <span class="s1">val </span><span class="s3">= </span><span class="s1">la</span>
+            <span class="s1">i </span><span class="s3">++</span>
+          <span class="s3">}</span>
+        <span class="s3">}</span>
+
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">isArray</span><span
+    class="s3">) (</span><span class="s1">data</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">] = </span><span class="s1">data</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">] || []).</span><span class="s1">push</span><span class="s3">(</span><span class="s1">val</span><span
+    class="s3">)</span>
+        <span class="s2">else </span><span class="s1">data</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">] = </span><span class="s1">val</span>
+
+        <span class="s2">continue</span>
+      <span class="s3">}</span>
+
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">argType </span><span
+    class="s3">=== </span><span class="s1">String</span><span class="s3">) {</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">la </span><span class="s3">=== </span><span
+    class="s1">undefined</span><span class="s3">) {</span>
+          <span class="s1">la </span><span class="s3">= </span><span class="s4">&quot;&quot;</span>
+        <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span
+    class="s1">la</span><span class="s3">.</span><span class="s1">match</span><span class="s3">(</span><span class="s6">/^-{1,2}[^-]+/</span><span
+    class="s3">)) {</span>
+          <span class="s1">la </span><span class="s3">= </span><span class="s4">&quot;&quot;</span>
+          <span class="s1">i </span><span class="s3">--</span>
+        <span class="s3">}</span>
+      <span class="s3">}</span>
+
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">la </span><span class="s3">&amp;&amp; </span><span
+    class="s1">la</span><span class="s3">.</span><span class="s1">match</span><span class="s3">(</span><span class="s6">/^-{2,}$/</span><span
+    class="s3">)) {</span>
+        <span class="s1">la </span><span class="s3">= </span><span class="s1">undefined</span>
+        <span class="s1">i </span><span class="s3">--</span>
+      <span class="s3">}</span>
+
+      <span class="s1">val </span><span class="s3">= </span><span class="s1">la </span><span class="s3">=== </span><span
+    class="s1">undefined </span><span class="s3">? </span><span class="s2">true </span><span class="s3">: </span><span
+    class="s1">la</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">isArray</span><span
+    class="s3">) (</span><span class="s1">data</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">] = </span><span class="s1">data</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">] || []).</span><span class="s1">push</span><span class="s3">(</span><span class="s1">val</span><span
+    class="s3">)</span>
+      <span class="s2">else </span><span class="s1">data</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">] = </span><span class="s1">val</span>
+
+      <span class="s1">i </span><span class="s3">++</span>
+      <span class="s2">continue</span>
+    <span class="s3">}</span>
+    <span class="s1">remain</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s1">arg</span><span class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">resolveShort </span><span class="s3">(</span><span
+    class="s1">arg</span><span class="s3">, </span><span class="s1">shorthands</span><span class="s3">, </span><span
+    class="s1">shortAbbr</span><span class="s3">, </span><span class="s1">abbrevs</span><span class="s3">) {</span>
+  <span class="s0">// handle single-char shorthands glommed together, like</span>
+  <span class="s0">// npm ls -glp, but only if there is one dash, and only if</span>
+  <span class="s0">// all of the chars are single-char shorthands, and it's</span>
+  <span class="s0">// not a match to some other abbrev.</span>
+  <span class="s1">arg </span><span class="s3">= </span><span class="s1">arg</span><span class="s3">.</span><span
+    class="s1">replace</span><span class="s3">(</span><span class="s6">/^-+/</span><span class="s3">, </span><span
+    class="s4">''</span><span class="s3">)</span>
+
+  <span class="s0">// if it's an exact known option, then don't go any further</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">abbrevs</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">] === </span><span class="s1">arg</span><span class="s3">)</span>
+    <span class="s2">return null</span>
+
+  <span class="s0">// if it's an exact known shortopt, same deal</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">shorthands</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">]) {</span>
+    <span class="s0">// make it an array, if it's a list of words</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">shorthands</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">] &amp;&amp; !</span><span class="s1">Array</span><span
+    class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span class="s1">shorthands</span><span
+    class="s3">[</span><span class="s1">arg</span><span class="s3">]))</span>
+      <span class="s1">shorthands</span><span class="s3">[</span><span class="s1">arg</span><span class="s3">] = </span><span
+    class="s1">shorthands</span><span class="s3">[</span><span class="s1">arg</span><span class="s3">].</span><span
+    class="s1">split</span><span class="s3">(</span><span class="s6">/\s+/</span><span class="s3">)</span>
+
+    <span class="s2">return </span><span class="s1">shorthands</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">]</span>
+  <span class="s3">}</span>
+
+  <span class="s0">// first check to see if this arg is a set of single-char shorthands</span>
+  <span class="s2">var </span><span class="s1">singles </span><span class="s3">= </span><span
+    class="s1">shorthands</span><span class="s3">.</span><span class="s1">___singles</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">singles</span><span class="s3">) {</span>
+    <span class="s1">singles </span><span class="s3">= </span><span class="s1">Object</span><span
+    class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span class="s1">shorthands</span><span
+    class="s3">).</span><span class="s1">filter</span><span class="s3">(</span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">s</span><span class="s3">) {</span>
+      <span class="s2">return </span><span class="s1">s</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">1</span>
+    <span class="s3">}).</span><span class="s1">reduce</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">l</span><span class="s3">,</span><span
+    class="s1">r</span><span class="s3">) {</span>
+      <span class="s1">l</span><span class="s3">[</span><span class="s1">r</span><span class="s3">] = </span><span
+    class="s2">true</span>
+      <span class="s2">return </span><span class="s1">l</span>
+    <span class="s3">}, {})</span>
+    <span class="s1">shorthands</span><span class="s3">.</span><span class="s1">___singles </span><span
+    class="s3">= </span><span class="s1">singles</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s4">'shorthand singles'</span><span
+    class="s3">, </span><span class="s1">singles</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s2">var </span><span class="s1">chrs </span><span class="s3">= </span><span class="s1">arg</span><span
+    class="s3">.</span><span class="s1">split</span><span class="s3">(</span><span class="s4">&quot;&quot;</span><span
+    class="s3">).</span><span class="s1">filter</span><span class="s3">(</span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">c</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">singles</span><span class="s3">[</span><span
+    class="s1">c</span><span class="s3">]</span>
+  <span class="s3">})</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">chrs</span><span class="s3">.</span><span
+    class="s1">join</span><span class="s3">(</span><span class="s4">&quot;&quot;</span><span
+    class="s3">) === </span><span class="s1">arg</span><span class="s3">) </span><span class="s2">return </span><span
+    class="s1">chrs</span><span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">c</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">shorthands</span><span class="s3">[</span><span
+    class="s1">c</span><span class="s3">]</span>
+  <span class="s3">}).</span><span class="s1">reduce</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">l</span><span class="s3">, </span><span
+    class="s1">r</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">l</span><span class="s3">.</span><span class="s1">concat</span><span
+    class="s3">(</span><span class="s1">r</span><span class="s3">)</span>
+  <span class="s3">}, [])</span>
+
+
+  <span class="s0">// if it's an arg abbrev, and not a literal shorthand, then prefer the arg</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">abbrevs</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">] &amp;&amp; !</span><span class="s1">shorthands</span><span
+    class="s3">[</span><span class="s1">arg</span><span class="s3">])</span>
+    <span class="s2">return null</span>
+
+  <span class="s0">// if it's an abbr for a shorthand, then use that</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">shortAbbr</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">])</span>
+    <span class="s1">arg </span><span class="s3">= </span><span class="s1">shortAbbr</span><span
+    class="s3">[</span><span class="s1">arg</span><span class="s3">]</span>
+
+  <span class="s0">// make it an array, if it's a list of words</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">shorthands</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">] &amp;&amp; !</span><span class="s1">Array</span><span
+    class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span class="s1">shorthands</span><span
+    class="s3">[</span><span class="s1">arg</span><span class="s3">]))</span>
+    <span class="s1">shorthands</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">] = </span><span class="s1">shorthands</span><span class="s3">[</span><span class="s1">arg</span><span
+    class="s3">].</span><span class="s1">split</span><span class="s3">(</span><span class="s6">/\s+/</span><span
+    class="s3">)</span>
+
+  <span class="s2">return </span><span class="s1">shorthands</span><span class="s3">[</span><span
+    class="s1">arg</span><span class="s3">]</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

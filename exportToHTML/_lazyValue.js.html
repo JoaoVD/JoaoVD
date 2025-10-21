@@ -1,0 +1,167 @@
+<html>
+<head>
+  <title>_lazyValue.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _lazyValue.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseWrapperValue </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_baseWrapperValue'</span><span class="s2">),</span>
+    <span class="s1">getView </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_getView'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to indicate the type of lazy iteratees. */</span>
+<span class="s0">var </span><span class="s1">LAZY_FILTER_FLAG </span><span class="s2">= </span><span class="s5">1</span><span
+    class="s2">,</span>
+    <span class="s1">LAZY_MAP_FLAG </span><span class="s2">= </span><span class="s5">2</span><span class="s2">;</span>
+
+<span class="s6">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMin </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">min</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Extracts the unwrapped value from its lazy wrapper.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s7">@private</span>
+ <span class="s4">* </span><span class="s7">@name </span><span class="s4">value</span>
+ <span class="s4">* </span><span class="s7">@memberOf </span><span class="s4">LazyWrapper</span>
+ <span class="s4">* </span><span class="s7">@returns </span><span class="s4">{*} Returns the unwrapped value.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">lazyValue</span><span class="s2">() {</span>
+  <span class="s0">var </span><span class="s1">array </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__wrapped__</span><span class="s2">.</span><span class="s1">value</span><span
+    class="s2">(),</span>
+      <span class="s1">dir </span><span class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">__dir__</span><span class="s2">,</span>
+      <span class="s1">isArr </span><span class="s2">= </span><span class="s1">isArray</span><span
+    class="s2">(</span><span class="s1">array</span><span class="s2">),</span>
+      <span class="s1">isRight </span><span class="s2">= </span><span class="s1">dir </span><span
+    class="s2">&lt; </span><span class="s5">0</span><span class="s2">,</span>
+      <span class="s1">arrLength </span><span class="s2">= </span><span class="s1">isArr </span><span
+    class="s2">? </span><span class="s1">array</span><span class="s2">.</span><span class="s1">length </span><span
+    class="s2">: </span><span class="s5">0</span><span class="s2">,</span>
+      <span class="s1">view </span><span class="s2">= </span><span class="s1">getView</span><span
+    class="s2">(</span><span class="s5">0</span><span class="s2">, </span><span class="s1">arrLength</span><span
+    class="s2">, </span><span class="s0">this</span><span class="s2">.</span><span class="s1">__views__</span><span
+    class="s2">),</span>
+      <span class="s1">start </span><span class="s2">= </span><span class="s1">view</span><span class="s2">.</span><span
+    class="s1">start</span><span class="s2">,</span>
+      <span class="s1">end </span><span class="s2">= </span><span class="s1">view</span><span class="s2">.</span><span
+    class="s1">end</span><span class="s2">,</span>
+      <span class="s1">length </span><span class="s2">= </span><span class="s1">end </span><span
+    class="s2">- </span><span class="s1">start</span><span class="s2">,</span>
+      <span class="s1">index </span><span class="s2">= </span><span class="s1">isRight </span><span class="s2">? </span><span
+    class="s1">end </span><span class="s2">: (</span><span class="s1">start </span><span class="s2">- </span><span
+    class="s5">1</span><span class="s2">),</span>
+      <span class="s1">iteratees </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__iteratees__</span><span class="s2">,</span>
+      <span class="s1">iterLength </span><span class="s2">= </span><span class="s1">iteratees</span><span
+    class="s2">.</span><span class="s1">length</span><span class="s2">,</span>
+      <span class="s1">resIndex </span><span class="s2">= </span><span class="s5">0</span><span class="s2">,</span>
+      <span class="s1">takeCount </span><span class="s2">= </span><span class="s1">nativeMin</span><span
+    class="s2">(</span><span class="s1">length</span><span class="s2">, </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__takeCount__</span><span class="s2">);</span>
+
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">isArr </span><span class="s2">|| (!</span><span
+    class="s1">isRight </span><span class="s2">&amp;&amp; </span><span class="s1">arrLength </span><span
+    class="s2">== </span><span class="s1">length </span><span class="s2">&amp;&amp; </span><span
+    class="s1">takeCount </span><span class="s2">== </span><span class="s1">length</span><span class="s2">)) {</span>
+    <span class="s0">return </span><span class="s1">baseWrapperValue</span><span class="s2">(</span><span class="s1">array</span><span
+    class="s2">, </span><span class="s0">this</span><span class="s2">.</span><span class="s1">__actions__</span><span
+    class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">result </span><span class="s2">= [];</span>
+
+  <span class="s1">outer</span><span class="s2">:</span>
+  <span class="s0">while </span><span class="s2">(</span><span class="s1">length</span><span
+    class="s2">-- &amp;&amp; </span><span class="s1">resIndex </span><span class="s2">&lt; </span><span class="s1">takeCount</span><span
+    class="s2">) {</span>
+    <span class="s1">index </span><span class="s2">+= </span><span class="s1">dir</span><span class="s2">;</span>
+
+    <span class="s0">var </span><span class="s1">iterIndex </span><span class="s2">= -</span><span
+    class="s5">1</span><span class="s2">,</span>
+        <span class="s1">value </span><span class="s2">= </span><span class="s1">array</span><span
+    class="s2">[</span><span class="s1">index</span><span class="s2">];</span>
+
+    <span class="s0">while </span><span class="s2">(++</span><span class="s1">iterIndex </span><span
+    class="s2">&lt; </span><span class="s1">iterLength</span><span class="s2">) {</span>
+      <span class="s0">var </span><span class="s1">data </span><span class="s2">= </span><span
+    class="s1">iteratees</span><span class="s2">[</span><span class="s1">iterIndex</span><span class="s2">],</span>
+          <span class="s1">iteratee </span><span class="s2">= </span><span class="s1">data</span><span
+    class="s2">.</span><span class="s1">iteratee</span><span class="s2">,</span>
+          <span class="s1">type </span><span class="s2">= </span><span class="s1">data</span><span
+    class="s2">.</span><span class="s1">type</span><span class="s2">,</span>
+          <span class="s1">computed </span><span class="s2">= </span><span class="s1">iteratee</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">);</span>
+
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">type </span><span class="s2">== </span><span
+    class="s1">LAZY_MAP_FLAG</span><span class="s2">) {</span>
+        <span class="s1">value </span><span class="s2">= </span><span class="s1">computed</span><span
+    class="s2">;</span>
+      <span class="s2">} </span><span class="s0">else if </span><span class="s2">(!</span><span
+    class="s1">computed</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">type </span><span
+    class="s2">== </span><span class="s1">LAZY_FILTER_FLAG</span><span class="s2">) {</span>
+          <span class="s0">continue </span><span class="s1">outer</span><span class="s2">;</span>
+        <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+          <span class="s0">break </span><span class="s1">outer</span><span class="s2">;</span>
+        <span class="s2">}</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+    <span class="s1">result</span><span class="s2">[</span><span class="s1">resIndex</span><span
+    class="s2">++] = </span><span class="s1">value</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">lazyValue</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

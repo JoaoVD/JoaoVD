@@ -1,0 +1,113 @@
+<html>
+<head>
+  <title>invokeMap.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          invokeMap.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">apply </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_apply'</span><span class="s2">),</span>
+    <span class="s1">baseEach </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseEach'</span><span class="s2">),</span>
+    <span class="s1">baseInvoke </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseInvoke'</span><span class="s2">),</span>
+    <span class="s1">baseRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">),</span>
+    <span class="s1">isArrayLike </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArrayLike'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Invokes the method at `path` of each element in `collection`, returning</span>
+ <span class="s4">* an array of the results of each invoked method. Any additional arguments</span>
+ <span class="s4">* are provided to each invoked method. If `path` is a function, it's invoked</span>
+ <span class="s4">* for, and `this` bound to, each element in `collection`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">4.0.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Collection</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array|Object} collection The collection to iterate over.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array|Function|string} path The path of the method to invoke or</span>
+ <span class="s4">*  the function invoked per iteration.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{...*} [args] The arguments to invoke each method with.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span
+    class="s4">{Array} Returns the array of results.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.invokeMap([[5, 1, 7], [3, 2, 1]], 'sort');</span>
+ <span class="s4">* // =&gt; [[1, 5, 7], [1, 2, 3]]</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.invokeMap([123, 456], String.prototype.split, '');</span>
+ <span class="s4">* // =&gt; [['1', '2', '3'], ['4', '5', '6']]</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">invokeMap </span><span class="s2">= </span><span class="s1">baseRest</span><span
+    class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">, </span><span class="s1">path</span><span class="s2">, </span><span class="s1">args</span><span
+    class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">index </span><span class="s2">= -</span><span class="s6">1</span><span
+    class="s2">,</span>
+      <span class="s1">isFunc </span><span class="s2">= </span><span class="s0">typeof </span><span
+    class="s1">path </span><span class="s2">== </span><span class="s3">'function'</span><span class="s2">,</span>
+      <span class="s1">result </span><span class="s2">= </span><span class="s1">isArrayLike</span><span
+    class="s2">(</span><span class="s1">collection</span><span class="s2">) ? </span><span class="s1">Array</span><span
+    class="s2">(</span><span class="s1">collection</span><span class="s2">.</span><span class="s1">length</span><span
+    class="s2">) : [];</span>
+
+  <span class="s1">baseEach</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">, </span><span class="s0">function</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">) {</span>
+    <span class="s1">result</span><span class="s2">[++</span><span class="s1">index</span><span
+    class="s2">] = </span><span class="s1">isFunc </span><span class="s2">? </span><span class="s1">apply</span><span
+    class="s2">(</span><span class="s1">path</span><span class="s2">, </span><span class="s1">value</span><span
+    class="s2">, </span><span class="s1">args</span><span class="s2">) : </span><span class="s1">baseInvoke</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">, </span><span class="s1">path</span><span
+    class="s2">, </span><span class="s1">args</span><span class="s2">);</span>
+  <span class="s2">});</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">invokeMap</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

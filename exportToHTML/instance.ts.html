@@ -1,0 +1,126 @@
+<html>
+<head>
+  <title>instance.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          instance.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">Ajv</span><span class="s2">, {</span><span
+  class="s1">AnySchema</span><span class="s2">, </span><span class="s1">AnyValidateFunction</span><span
+  class="s2">, </span><span class="s1">ErrorObject</span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">&quot;../core&quot;</span>
+<span class="s0">import </span><span class="s1">standaloneCode from </span><span class="s3">&quot;.&quot;</span>
+<span class="s0">import </span><span class="s2">* as </span><span class="s1">requireFromString from </span><span
+    class="s3">&quot;require-from-string&quot;</span>
+
+<span class="s0">export default class </span><span class="s1">AjvPack </span><span class="s2">{</span>
+  <span class="s1">errors</span><span class="s2">?: </span><span class="s1">ErrorObject</span><span
+    class="s2">[] | </span><span class="s0">null </span><span class="s4">// errors from the last validation</span>
+  <span class="s1">constructor</span><span class="s2">(</span><span class="s1">readonly ajv</span><span
+    class="s2">: </span><span class="s1">Ajv</span><span class="s2">) {}</span>
+
+  <span class="s1">validate</span><span class="s2">(</span><span class="s1">schemaKeyRef</span><span
+    class="s2">: </span><span class="s1">AnySchema </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span class="s1">unknown</span><span
+    class="s2">): </span><span class="s1">boolean </span><span class="s2">| </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">unknown</span><span class="s2">&gt; {</span>
+    <span class="s0">return </span><span class="s1">Ajv</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">validate</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">schemaKeyRef</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">compile</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">= </span><span
+    class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span
+    class="s1">AnySchema</span><span class="s2">, </span><span class="s1">meta</span><span class="s2">?: </span><span
+    class="s1">boolean</span><span class="s2">): </span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; {</span>
+    <span class="s0">return this</span><span class="s2">.</span><span class="s1">getStandalone</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span class="s1">ajv</span><span class="s2">.</span><span
+    class="s1">compile</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;(</span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">meta</span><span class="s2">))</span>
+  <span class="s2">}</span>
+
+  <span class="s1">getSchema</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">= </span><span
+    class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">keyRef</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; | </span><span
+    class="s1">undefined </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">v </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">ajv</span><span class="s2">.</span><span class="s1">getSchema</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;(</span><span class="s1">keyRef</span><span
+    class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">v</span><span class="s2">) </span><span
+    class="s0">return </span><span class="s1">undefined</span>
+    <span class="s0">return this</span><span class="s2">.</span><span class="s1">getStandalone</span><span
+    class="s2">(</span><span class="s1">v</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">getStandalone</span><span class="s2">&lt;</span><span
+    class="s1">T </span><span class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span
+    class="s1">v</span><span class="s2">: </span><span class="s1">AnyValidateFunction</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt;): </span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; {</span>
+    <span class="s0">return </span><span class="s1">requireFromString</span><span class="s2">(</span><span class="s1">standaloneCode</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span class="s1">ajv</span><span class="s2">, </span><span
+    class="s1">v</span><span class="s2">)) as </span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s2">}</span>
+
+  <span class="s1">addSchema</span><span class="s2">(</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">Parameters</span><span class="s2">&lt;</span><span
+    class="s0">typeof </span><span class="s1">Ajv</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">addSchema</span><span class="s2">&gt;): </span><span
+    class="s1">AjvPack </span><span class="s2">{</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">ajv</span><span class="s2">.</span><span
+    class="s1">addSchema</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">ajv</span><span class="s2">, </span><span
+    class="s1">...args</span><span class="s2">)</span>
+    <span class="s0">return this</span>
+  <span class="s2">}</span>
+
+  <span class="s1">addKeyword</span><span class="s2">(</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">Parameters</span><span class="s2">&lt;</span><span
+    class="s0">typeof </span><span class="s1">Ajv</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">addKeyword</span><span class="s2">&gt;): </span><span class="s1">AjvPack </span><span
+    class="s2">{</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">ajv</span><span class="s2">.</span><span
+    class="s1">addKeyword</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">ajv</span><span class="s2">, </span><span
+    class="s1">...args</span><span class="s2">)</span>
+    <span class="s0">return this</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

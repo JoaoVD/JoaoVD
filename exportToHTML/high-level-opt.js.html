@@ -1,0 +1,106 @@
+<html>
+<head>
+  <title>high-level-opt.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #7a7e85;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          high-level-opt.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">// turn tar(1) style args like `C` into the more verbose things like `cwd`</span>
+
+<span class="s3">const </span><span class="s1">argmap </span><span class="s4">= </span><span class="s3">new </span><span
+    class="s1">Map</span><span class="s4">([</span>
+  <span class="s4">[</span><span class="s0">'C'</span><span class="s4">, </span><span class="s0">'cwd'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'f'</span><span class="s4">, </span><span class="s0">'file'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'z'</span><span class="s4">, </span><span class="s0">'gzip'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'P'</span><span class="s4">, </span><span
+    class="s0">'preservePaths'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'U'</span><span class="s4">, </span><span class="s0">'unlink'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'strip-components'</span><span class="s4">, </span><span
+    class="s0">'strip'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'stripComponents'</span><span class="s4">, </span><span
+    class="s0">'strip'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'keep-newer'</span><span class="s4">, </span><span class="s0">'newer'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'keepNewer'</span><span class="s4">, </span><span
+    class="s0">'newer'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'keep-newer-files'</span><span class="s4">, </span><span
+    class="s0">'newer'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'keepNewerFiles'</span><span class="s4">, </span><span
+    class="s0">'newer'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'k'</span><span class="s4">, </span><span class="s0">'keep'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'keep-existing'</span><span class="s4">, </span><span
+    class="s0">'keep'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'keepExisting'</span><span class="s4">, </span><span
+    class="s0">'keep'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'m'</span><span class="s4">, </span><span class="s0">'noMtime'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'no-mtime'</span><span class="s4">, </span><span class="s0">'noMtime'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'p'</span><span class="s4">, </span><span
+    class="s0">'preserveOwner'</span><span class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'L'</span><span class="s4">, </span><span class="s0">'follow'</span><span
+    class="s4">],</span>
+  <span class="s4">[</span><span class="s0">'h'</span><span class="s4">, </span><span class="s0">'follow'</span><span
+    class="s4">],</span>
+<span class="s4">])</span>
+
+<span class="s1">module</span><span class="s4">.</span><span class="s1">exports </span><span class="s4">= </span><span
+    class="s1">opt </span><span class="s4">=&gt; </span><span class="s1">opt </span><span class="s4">? </span><span
+    class="s1">Object</span><span class="s4">.</span><span class="s1">keys</span><span class="s4">(</span><span
+    class="s1">opt</span><span class="s4">).</span><span class="s1">map</span><span class="s4">(</span><span class="s1">k </span><span
+    class="s4">=&gt; [</span>
+  <span class="s1">argmap</span><span class="s4">.</span><span class="s1">has</span><span class="s4">(</span><span
+    class="s1">k</span><span class="s4">) ? </span><span class="s1">argmap</span><span class="s4">.</span><span
+    class="s1">get</span><span class="s4">(</span><span class="s1">k</span><span class="s4">) : </span><span class="s1">k</span><span
+    class="s4">, </span><span class="s1">opt</span><span class="s4">[</span><span class="s1">k</span><span
+    class="s4">],</span>
+<span class="s4">]).</span><span class="s1">reduce</span><span class="s4">((</span><span class="s1">set</span><span
+    class="s4">, </span><span class="s1">kv</span><span class="s4">) =&gt; (</span><span class="s1">set</span><span
+    class="s4">[</span><span class="s1">kv</span><span class="s4">[</span><span class="s5">0</span><span
+    class="s4">]] = </span><span class="s1">kv</span><span class="s4">[</span><span class="s5">1</span><span class="s4">], </span><span
+    class="s1">set</span><span class="s4">), </span><span class="s1">Object</span><span class="s4">.</span><span
+    class="s1">create</span><span class="s4">(</span><span class="s3">null</span><span class="s4">)) : {}</span>
+</pre>
+</body>
+</html>

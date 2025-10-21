@@ -1,0 +1,92 @@
+<html>
+<head>
+  <title>warn-mixin.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          warn-mixin.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">Base </span><span class="s2">=&gt; </span><span class="s3">class extends </span><span
+    class="s1">Base </span><span class="s2">{</span>
+  <span class="s1">warn </span><span class="s2">(</span><span class="s1">code</span><span class="s2">, </span><span
+    class="s1">message</span><span class="s2">, </span><span class="s1">data </span><span class="s2">= {}) {</span>
+    <span class="s3">if </span><span class="s2">(</span><span class="s3">this</span><span class="s2">.</span><span
+    class="s1">file</span><span class="s2">) {</span>
+      <span class="s1">data</span><span class="s2">.</span><span class="s1">file </span><span class="s2">= </span><span
+    class="s3">this</span><span class="s2">.</span><span class="s1">file</span>
+    <span class="s2">}</span>
+    <span class="s3">if </span><span class="s2">(</span><span class="s3">this</span><span class="s2">.</span><span
+    class="s1">cwd</span><span class="s2">) {</span>
+      <span class="s1">data</span><span class="s2">.</span><span class="s1">cwd </span><span class="s2">= </span><span
+    class="s3">this</span><span class="s2">.</span><span class="s1">cwd</span>
+    <span class="s2">}</span>
+    <span class="s1">data</span><span class="s2">.</span><span class="s1">code </span><span class="s2">= </span><span
+    class="s1">message </span><span class="s3">instanceof </span><span class="s1">Error </span><span class="s2">&amp;&amp; </span><span
+    class="s1">message</span><span class="s2">.</span><span class="s1">code </span><span class="s2">|| </span><span
+    class="s1">code</span>
+    <span class="s1">data</span><span class="s2">.</span><span class="s1">tarCode </span><span class="s2">= </span><span
+    class="s1">code</span>
+    <span class="s3">if </span><span class="s2">(!</span><span class="s3">this</span><span class="s2">.</span><span
+    class="s1">strict </span><span class="s2">&amp;&amp; </span><span class="s1">data</span><span
+    class="s2">.</span><span class="s1">recoverable </span><span class="s2">!== </span><span
+    class="s3">false</span><span class="s2">) {</span>
+      <span class="s3">if </span><span class="s2">(</span><span class="s1">message </span><span
+    class="s3">instanceof </span><span class="s1">Error</span><span class="s2">) {</span>
+        <span class="s1">data </span><span class="s2">= </span><span class="s1">Object</span><span
+    class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span class="s1">message</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">)</span>
+        <span class="s1">message </span><span class="s2">= </span><span class="s1">message</span><span
+    class="s2">.</span><span class="s1">message</span>
+      <span class="s2">}</span>
+      <span class="s3">this</span><span class="s2">.</span><span class="s1">emit</span><span class="s2">(</span><span
+    class="s0">'warn'</span><span class="s2">, </span><span class="s1">data</span><span class="s2">.</span><span
+    class="s1">tarCode</span><span class="s2">, </span><span class="s1">message</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">)</span>
+    <span class="s2">} </span><span class="s3">else if </span><span class="s2">(</span><span
+    class="s1">message </span><span class="s3">instanceof </span><span class="s1">Error</span><span
+    class="s2">) {</span>
+      <span class="s3">this</span><span class="s2">.</span><span class="s1">emit</span><span class="s2">(</span><span
+    class="s0">'error'</span><span class="s2">, </span><span class="s1">Object</span><span class="s2">.</span><span
+    class="s1">assign</span><span class="s2">(</span><span class="s1">message</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">))</span>
+    <span class="s2">} </span><span class="s3">else </span><span class="s2">{</span>
+      <span class="s3">this</span><span class="s2">.</span><span class="s1">emit</span><span class="s2">(</span><span
+    class="s0">'error'</span><span class="s2">, </span><span class="s1">Object</span><span class="s2">.</span><span
+    class="s1">assign</span><span class="s2">(</span><span class="s3">new </span><span class="s1">Error</span><span
+    class="s2">(</span><span class="s0">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">code</span><span class="s2">}</span><span class="s0">: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">message</span><span class="s2">}</span><span class="s0">`</span><span
+    class="s2">), </span><span class="s1">data</span><span class="s2">))</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<html>
+<head>
+  <title>render-template.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          render-template.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">var </span><span class="s1">align </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'wide-align'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">validate </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'aproba'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">wideTruncate </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./wide-truncate'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">error </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'./error'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">TemplateItem </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./template-item'</span><span class="s3">)</span>
+
+<span class="s2">function </span><span class="s1">renderValueWithValues </span><span class="s3">(</span><span
+    class="s1">values</span><span class="s3">) {</span>
+  <span class="s2">return function </span><span class="s3">(</span><span class="s1">item</span><span
+    class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">renderValue</span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">, </span><span class="s1">values</span><span class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">var </span><span class="s1">renderTemplate </span><span class="s3">= </span><span
+    class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">width</span><span class="s3">, </span><span
+    class="s1">template</span><span class="s3">, </span><span class="s1">values</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">items </span><span class="s3">= </span><span
+    class="s1">prepareItems</span><span class="s3">(</span><span class="s1">width</span><span class="s3">, </span><span
+    class="s1">template</span><span class="s3">, </span><span class="s1">values</span><span class="s3">)</span>
+  <span class="s2">var </span><span class="s1">rendered </span><span class="s3">= </span><span
+    class="s1">items</span><span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span
+    class="s1">renderValueWithValues</span><span class="s3">(</span><span class="s1">values</span><span
+    class="s3">)).</span><span class="s1">join</span><span class="s3">(</span><span class="s0">''</span><span
+    class="s3">)</span>
+  <span class="s2">return </span><span class="s1">align</span><span class="s3">.</span><span class="s1">left</span><span
+    class="s3">(</span><span class="s1">wideTruncate</span><span class="s3">(</span><span
+    class="s1">rendered</span><span class="s3">, </span><span class="s1">width</span><span class="s3">), </span><span
+    class="s1">width</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">preType </span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">cappedTypeName </span><span class="s3">= </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">type</span><span class="s3">[</span><span
+    class="s4">0</span><span class="s3">].</span><span class="s1">toUpperCase</span><span class="s3">() + </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">type</span><span class="s3">.</span><span
+    class="s1">slice</span><span class="s3">(</span><span class="s4">1</span><span class="s3">)</span>
+  <span class="s2">return </span><span class="s0">'pre' </span><span class="s3">+ </span><span
+    class="s1">cappedTypeName</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">postType </span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">cappedTypeName </span><span class="s3">= </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">type</span><span class="s3">[</span><span
+    class="s4">0</span><span class="s3">].</span><span class="s1">toUpperCase</span><span class="s3">() + </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">type</span><span class="s3">.</span><span
+    class="s1">slice</span><span class="s3">(</span><span class="s4">1</span><span class="s3">)</span>
+  <span class="s2">return </span><span class="s0">'post' </span><span class="s3">+ </span><span class="s1">cappedTypeName</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">hasPreOrPost </span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">, </span><span class="s1">values</span><span class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">) {</span>
+    <span class="s2">return</span>
+  <span class="s3">}</span>
+  <span class="s2">return </span><span class="s1">values</span><span class="s3">[</span><span
+    class="s1">preType</span><span class="s3">(</span><span class="s1">item</span><span class="s3">)] || </span><span
+    class="s1">values</span><span class="s3">[</span><span class="s1">postType</span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">)]</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">generatePreAndPost </span><span class="s3">(</span><span class="s1">baseItem</span><span
+    class="s3">, </span><span class="s1">parentValues</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">item </span><span class="s3">= </span><span class="s1">Object</span><span
+    class="s3">.</span><span class="s1">assign</span><span class="s3">({}, </span><span class="s1">baseItem</span><span
+    class="s3">)</span>
+  <span class="s2">var </span><span class="s1">values </span><span class="s3">= </span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s1">parentValues</span><span class="s3">)</span>
+  <span class="s2">var </span><span class="s1">template </span><span class="s3">= []</span>
+  <span class="s2">var </span><span class="s1">pre </span><span class="s3">= </span><span class="s1">preType</span><span
+    class="s3">(</span><span class="s1">item</span><span class="s3">)</span>
+  <span class="s2">var </span><span class="s1">post </span><span class="s3">= </span><span
+    class="s1">postType</span><span class="s3">(</span><span class="s1">item</span><span class="s3">)</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">values</span><span class="s3">[</span><span
+    class="s1">pre</span><span class="s3">]) {</span>
+    <span class="s1">template</span><span class="s3">.</span><span class="s1">push</span><span
+    class="s3">({ </span><span class="s1">value</span><span class="s3">: </span><span class="s1">values</span><span
+    class="s3">[</span><span class="s1">pre</span><span class="s3">] })</span>
+    <span class="s1">values</span><span class="s3">[</span><span class="s1">pre</span><span class="s3">] = </span><span
+    class="s2">null</span>
+  <span class="s3">}</span>
+  <span class="s1">item</span><span class="s3">.</span><span class="s1">minLength </span><span class="s3">= </span><span
+    class="s2">null</span>
+  <span class="s1">item</span><span class="s3">.</span><span class="s1">length </span><span class="s3">= </span><span
+    class="s2">null</span>
+  <span class="s1">item</span><span class="s3">.</span><span class="s1">maxLength </span><span class="s3">= </span><span
+    class="s2">null</span>
+  <span class="s1">template</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">)</span>
+  <span class="s1">values</span><span class="s3">[</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">] = </span><span class="s1">values</span><span class="s3">[</span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">type</span><span class="s3">]</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">values</span><span class="s3">[</span><span
+    class="s1">post</span><span class="s3">]) {</span>
+    <span class="s1">template</span><span class="s3">.</span><span class="s1">push</span><span
+    class="s3">({ </span><span class="s1">value</span><span class="s3">: </span><span class="s1">values</span><span
+    class="s3">[</span><span class="s1">post</span><span class="s3">] })</span>
+    <span class="s1">values</span><span class="s3">[</span><span class="s1">post</span><span class="s3">] = </span><span
+    class="s2">null</span>
+  <span class="s3">}</span>
+  <span class="s2">return function </span><span class="s3">(</span><span class="s1">$1</span><span
+    class="s3">, </span><span class="s1">$2</span><span class="s3">, </span><span class="s1">length</span><span
+    class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">renderTemplate</span><span class="s3">(</span><span class="s1">length</span><span
+    class="s3">, </span><span class="s1">template</span><span class="s3">, </span><span class="s1">values</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">prepareItems </span><span class="s3">(</span><span
+    class="s1">width</span><span class="s3">, </span><span class="s1">template</span><span class="s3">, </span><span
+    class="s1">values</span><span class="s3">) {</span>
+  <span class="s2">function </span><span class="s1">cloneAndObjectify </span><span class="s3">(</span><span class="s1">item</span><span
+    class="s3">, </span><span class="s1">index</span><span class="s3">, </span><span class="s1">arr</span><span
+    class="s3">) {</span>
+    <span class="s2">var </span><span class="s1">cloned </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">TemplateItem</span><span class="s3">(</span><span class="s1">item</span><span
+    class="s3">, </span><span class="s1">width</span><span class="s3">)</span>
+    <span class="s2">var </span><span class="s1">type </span><span class="s3">= </span><span
+    class="s1">cloned</span><span class="s3">.</span><span class="s1">type</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">cloned</span><span class="s3">.</span><span
+    class="s1">value </span><span class="s3">== </span><span class="s2">null</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(!(</span><span class="s1">type </span><span
+    class="s2">in </span><span class="s1">values</span><span class="s3">)) {</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">cloned</span><span class="s3">.</span><span
+    class="s1">default </span><span class="s3">== </span><span class="s2">null</span><span class="s3">) {</span>
+          <span class="s2">throw new </span><span class="s1">error</span><span class="s3">.</span><span class="s1">MissingTemplateValue</span><span
+    class="s3">(</span><span class="s1">cloned</span><span class="s3">, </span><span class="s1">values</span><span
+    class="s3">)</span>
+        <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+          <span class="s1">cloned</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s1">cloned</span><span class="s3">.</span><span class="s1">default</span>
+        <span class="s3">}</span>
+      <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+        <span class="s1">cloned</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s1">values</span><span class="s3">[</span><span class="s1">type</span><span
+    class="s3">]</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">cloned</span><span class="s3">.</span><span
+    class="s1">value </span><span class="s3">== </span><span class="s2">null </span><span class="s3">|| </span><span
+    class="s1">cloned</span><span class="s3">.</span><span class="s1">value </span><span class="s3">=== </span><span
+    class="s0">''</span><span class="s3">) {</span>
+      <span class="s2">return null</span>
+    <span class="s3">}</span>
+    <span class="s1">cloned</span><span class="s3">.</span><span class="s1">index </span><span class="s3">= </span><span
+    class="s1">index</span>
+    <span class="s1">cloned</span><span class="s3">.</span><span class="s1">first </span><span class="s3">= </span><span
+    class="s1">index </span><span class="s3">=== </span><span class="s4">0</span>
+    <span class="s1">cloned</span><span class="s3">.</span><span class="s1">last </span><span class="s3">= </span><span
+    class="s1">index </span><span class="s3">=== </span><span class="s1">arr</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">- </span><span class="s4">1</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">hasPreOrPost</span><span
+    class="s3">(</span><span class="s1">cloned</span><span class="s3">, </span><span class="s1">values</span><span
+    class="s3">)) {</span>
+      <span class="s1">cloned</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s1">generatePreAndPost</span><span class="s3">(</span><span
+    class="s1">cloned</span><span class="s3">, </span><span class="s1">values</span><span class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">return </span><span class="s1">cloned</span>
+  <span class="s3">}</span>
+
+  <span class="s2">var </span><span class="s1">output </span><span class="s3">= </span><span
+    class="s1">template</span><span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span
+    class="s1">cloneAndObjectify</span><span class="s3">).</span><span class="s1">filter</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">item</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">item </span><span class="s3">!= </span><span class="s2">null</span>
+  <span class="s3">})</span>
+
+  <span class="s2">var </span><span class="s1">remainingSpace </span><span class="s3">= </span><span
+    class="s1">width</span>
+  <span class="s2">var </span><span class="s1">variableCount </span><span class="s3">= </span><span
+    class="s1">output</span><span class="s3">.</span><span class="s1">length</span>
+
+  <span class="s2">function </span><span class="s1">consumeSpace </span><span class="s3">(</span><span
+    class="s1">length</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">length </span><span
+    class="s3">&gt; </span><span class="s1">remainingSpace</span><span class="s3">) {</span>
+      <span class="s1">length </span><span class="s3">= </span><span class="s1">remainingSpace</span>
+    <span class="s3">}</span>
+    <span class="s1">remainingSpace </span><span class="s3">-= </span><span class="s1">length</span>
+  <span class="s3">}</span>
+
+  <span class="s2">function </span><span class="s1">finishSizing </span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">, </span><span class="s1">length</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">finished</span><span class="s3">) {</span>
+      <span class="s2">throw new </span><span class="s1">error</span><span class="s3">.</span><span
+    class="s1">Internal</span><span class="s3">(</span><span class="s0">'Tried to finish template item that was already finished'</span><span
+    class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">length </span><span class="s3">=== </span><span
+    class="s1">Infinity</span><span class="s3">) {</span>
+      <span class="s2">throw new </span><span class="s1">error</span><span class="s3">.</span><span
+    class="s1">Internal</span><span class="s3">(</span><span
+    class="s0">'Length of template item cannot be infinity'</span><span class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">length </span><span class="s3">!= </span><span
+    class="s2">null</span><span class="s3">) {</span>
+      <span class="s1">item</span><span class="s3">.</span><span class="s1">length </span><span
+    class="s3">= </span><span class="s1">length</span>
+    <span class="s3">}</span>
+    <span class="s1">item</span><span class="s3">.</span><span class="s1">minLength </span><span
+    class="s3">= </span><span class="s2">null</span>
+    <span class="s1">item</span><span class="s3">.</span><span class="s1">maxLength </span><span
+    class="s3">= </span><span class="s2">null</span>
+    <span class="s3">--</span><span class="s1">variableCount</span>
+    <span class="s1">item</span><span class="s3">.</span><span class="s1">finished </span><span
+    class="s3">= </span><span class="s2">true</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">== </span><span class="s2">null</span><span class="s3">) {</span>
+      <span class="s1">item</span><span class="s3">.</span><span class="s1">length </span><span
+    class="s3">= </span><span class="s1">item</span><span class="s3">.</span><span class="s1">getBaseLength</span><span
+    class="s3">()</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">== </span><span class="s2">null</span><span class="s3">) {</span>
+      <span class="s2">throw new </span><span class="s1">error</span><span class="s3">.</span><span
+    class="s1">Internal</span><span class="s3">(</span><span
+    class="s0">'Finished template items must have a length'</span><span class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s1">consumeSpace</span><span class="s3">(</span><span class="s1">item</span><span
+    class="s3">.</span><span class="s1">getLength</span><span class="s3">())</span>
+  <span class="s3">}</span>
+
+  <span class="s1">output</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">item</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">kerning</span><span class="s3">) {</span>
+      <span class="s2">return</span>
+    <span class="s3">}</span>
+    <span class="s2">var </span><span class="s1">prevPadRight </span><span class="s3">= </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">first </span><span class="s3">? </span><span
+    class="s4">0 </span><span class="s3">: </span><span class="s1">output</span><span class="s3">[</span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">index </span><span class="s3">- </span><span
+    class="s4">1</span><span class="s3">].</span><span class="s1">padRight</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">first </span><span class="s3">&amp;&amp; </span><span class="s1">prevPadRight </span><span class="s3">&lt; </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">kerning</span><span class="s3">) {</span>
+      <span class="s1">item</span><span class="s3">.</span><span class="s1">padLeft </span><span
+    class="s3">= </span><span class="s1">item</span><span class="s3">.</span><span class="s1">kerning </span><span
+    class="s3">- </span><span class="s1">prevPadRight</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">last</span><span class="s3">) {</span>
+      <span class="s1">item</span><span class="s3">.</span><span class="s1">padRight </span><span
+    class="s3">= </span><span class="s1">item</span><span class="s3">.</span><span class="s1">kerning</span>
+    <span class="s3">}</span>
+  <span class="s3">})</span>
+
+  <span class="s5">// Finish any that have a fixed (literal or intuited) length</span>
+  <span class="s1">output</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">item</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">getBaseLength</span><span class="s3">() == </span><span class="s2">null</span><span class="s3">) {</span>
+      <span class="s2">return</span>
+    <span class="s3">}</span>
+    <span class="s1">finishSizing</span><span class="s3">(</span><span class="s1">item</span><span class="s3">)</span>
+  <span class="s3">})</span>
+
+  <span class="s2">var </span><span class="s1">resized </span><span class="s3">= </span><span class="s4">0</span>
+  <span class="s2">var </span><span class="s1">resizing</span>
+  <span class="s2">var </span><span class="s1">hunkSize</span>
+  <span class="s2">do </span><span class="s3">{</span>
+    <span class="s1">resizing </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s1">hunkSize </span><span class="s3">= </span><span class="s1">Math</span><span
+    class="s3">.</span><span class="s1">round</span><span class="s3">(</span><span
+    class="s1">remainingSpace </span><span class="s3">/ </span><span class="s1">variableCount</span><span
+    class="s3">)</span>
+    <span class="s1">output</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">item</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">finished</span><span class="s3">) {</span>
+        <span class="s2">return</span>
+      <span class="s3">}</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">maxLength</span><span class="s3">) {</span>
+        <span class="s2">return</span>
+      <span class="s3">}</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">getMaxLength</span><span class="s3">() &lt; </span><span class="s1">hunkSize</span><span
+    class="s3">) {</span>
+        <span class="s1">finishSizing</span><span class="s3">(</span><span class="s1">item</span><span
+    class="s3">, </span><span class="s1">item</span><span class="s3">.</span><span class="s1">maxLength</span><span
+    class="s3">)</span>
+        <span class="s1">resizing </span><span class="s3">= </span><span class="s2">true</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+  <span class="s3">} </span><span class="s2">while </span><span class="s3">(</span><span
+    class="s1">resizing </span><span class="s3">&amp;&amp; </span><span class="s1">resized</span><span class="s3">++ &lt; </span><span
+    class="s1">output</span><span class="s3">.</span><span class="s1">length</span><span class="s3">)</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">resizing</span><span class="s3">) {</span>
+    <span class="s2">throw new </span><span class="s1">error</span><span class="s3">.</span><span
+    class="s1">Internal</span><span class="s3">(</span><span class="s0">'Resize loop iterated too many times while determining maxLength'</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">resized </span><span class="s3">= </span><span class="s4">0</span>
+  <span class="s2">do </span><span class="s3">{</span>
+    <span class="s1">resizing </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s1">hunkSize </span><span class="s3">= </span><span class="s1">Math</span><span
+    class="s3">.</span><span class="s1">round</span><span class="s3">(</span><span
+    class="s1">remainingSpace </span><span class="s3">/ </span><span class="s1">variableCount</span><span
+    class="s3">)</span>
+    <span class="s1">output</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">item</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">finished</span><span class="s3">) {</span>
+        <span class="s2">return</span>
+      <span class="s3">}</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">minLength</span><span class="s3">) {</span>
+        <span class="s2">return</span>
+      <span class="s3">}</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">getMinLength</span><span class="s3">() &gt;= </span><span class="s1">hunkSize</span><span
+    class="s3">) {</span>
+        <span class="s1">finishSizing</span><span class="s3">(</span><span class="s1">item</span><span
+    class="s3">, </span><span class="s1">item</span><span class="s3">.</span><span class="s1">minLength</span><span
+    class="s3">)</span>
+        <span class="s1">resizing </span><span class="s3">= </span><span class="s2">true</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+  <span class="s3">} </span><span class="s2">while </span><span class="s3">(</span><span
+    class="s1">resizing </span><span class="s3">&amp;&amp; </span><span class="s1">resized</span><span class="s3">++ &lt; </span><span
+    class="s1">output</span><span class="s3">.</span><span class="s1">length</span><span class="s3">)</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">resizing</span><span class="s3">) {</span>
+    <span class="s2">throw new </span><span class="s1">error</span><span class="s3">.</span><span
+    class="s1">Internal</span><span class="s3">(</span><span class="s0">'Resize loop iterated too many times while determining minLength'</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">hunkSize </span><span class="s3">= </span><span class="s1">Math</span><span class="s3">.</span><span
+    class="s1">round</span><span class="s3">(</span><span class="s1">remainingSpace </span><span
+    class="s3">/ </span><span class="s1">variableCount</span><span class="s3">)</span>
+  <span class="s1">output</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">item</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">finished</span><span class="s3">) {</span>
+      <span class="s2">return</span>
+    <span class="s3">}</span>
+    <span class="s1">finishSizing</span><span class="s3">(</span><span class="s1">item</span><span
+    class="s3">, </span><span class="s1">hunkSize</span><span class="s3">)</span>
+  <span class="s3">})</span>
+
+  <span class="s2">return </span><span class="s1">output</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">renderFunction </span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">, </span><span class="s1">values</span><span class="s3">, </span><span
+    class="s1">length</span><span class="s3">) {</span>
+  <span class="s1">validate</span><span class="s3">(</span><span class="s0">'OON'</span><span class="s3">, </span><span
+    class="s1">arguments</span><span class="s3">)</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">value</span><span class="s3">(</span><span class="s1">values</span><span class="s3">, </span><span
+    class="s1">values</span><span class="s3">[</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">type </span><span class="s3">+ </span><span class="s0">'Theme'</span><span
+    class="s3">] || {}, </span><span class="s1">length</span><span class="s3">)</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+    <span class="s2">return </span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">value</span><span class="s3">(</span><span class="s1">values</span><span class="s3">, {}, </span><span
+    class="s1">length</span><span class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">renderValue </span><span class="s3">(</span><span
+    class="s1">item</span><span class="s3">, </span><span class="s1">values</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">length </span><span class="s3">= </span><span class="s1">item</span><span
+    class="s3">.</span><span class="s1">getBaseLength</span><span class="s3">()</span>
+  <span class="s2">var </span><span class="s1">value </span><span class="s3">= </span><span
+    class="s2">typeof </span><span class="s1">item</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">=== </span><span class="s0">'function' </span><span class="s3">? </span><span
+    class="s1">renderFunction</span><span class="s3">(</span><span class="s1">item</span><span class="s3">, </span><span
+    class="s1">values</span><span class="s3">, </span><span class="s1">length</span><span class="s3">) : </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">value</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">value </span><span class="s3">== </span><span
+    class="s2">null </span><span class="s3">|| </span><span class="s1">value </span><span class="s3">=== </span><span
+    class="s0">''</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s0">''</span>
+  <span class="s3">}</span>
+  <span class="s2">var </span><span class="s1">alignWith </span><span class="s3">= </span><span
+    class="s1">align</span><span class="s3">[</span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">align</span><span class="s3">] || </span><span class="s1">align</span><span class="s3">.</span><span
+    class="s1">left</span>
+  <span class="s2">var </span><span class="s1">leftPadding </span><span class="s3">= </span><span class="s1">item</span><span
+    class="s3">.</span><span class="s1">padLeft </span><span class="s3">? </span><span class="s1">align</span><span
+    class="s3">.</span><span class="s1">left</span><span class="s3">(</span><span class="s0">''</span><span
+    class="s3">, </span><span class="s1">item</span><span class="s3">.</span><span class="s1">padLeft</span><span
+    class="s3">) : </span><span class="s0">''</span>
+  <span class="s2">var </span><span class="s1">rightPadding </span><span class="s3">= </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">padRight </span><span class="s3">? </span><span
+    class="s1">align</span><span class="s3">.</span><span class="s1">right</span><span class="s3">(</span><span
+    class="s0">''</span><span class="s3">, </span><span class="s1">item</span><span class="s3">.</span><span class="s1">padRight</span><span
+    class="s3">) : </span><span class="s0">''</span>
+  <span class="s2">var </span><span class="s1">truncated </span><span class="s3">= </span><span
+    class="s1">wideTruncate</span><span class="s3">(</span><span class="s1">String</span><span class="s3">(</span><span
+    class="s1">value</span><span class="s3">), </span><span class="s1">length</span><span class="s3">)</span>
+  <span class="s2">var </span><span class="s1">aligned </span><span class="s3">= </span><span
+    class="s1">alignWith</span><span class="s3">(</span><span class="s1">truncated</span><span class="s3">, </span><span
+    class="s1">length</span><span class="s3">)</span>
+  <span class="s2">return </span><span class="s1">leftPadding </span><span class="s3">+ </span><span
+    class="s1">aligned </span><span class="s3">+ </span><span class="s1">rightPadding</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

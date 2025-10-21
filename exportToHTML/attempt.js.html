@@ -1,0 +1,93 @@
+<html>
+<head>
+  <title>attempt.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          attempt.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">apply </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_apply'</span><span class="s2">),</span>
+    <span class="s1">baseRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">),</span>
+    <span class="s1">isError </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isError'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Attempts to invoke `func`, returning either the result or the caught error</span>
+ <span class="s4">* object. Any additional arguments are provided to `func` when it's invoked.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">3.0.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Util</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Function} func The function to attempt.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{...*} [args] The arguments to invoke `func` with.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{*} Returns the `func` result or error object.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Avoid throwing errors for invalid selectors.</span>
+ <span class="s4">* var elements = _.attempt(function(selector) {</span>
+ <span class="s4">*   return document.querySelectorAll(selector);</span>
+ <span class="s4">* }, '&gt;_&gt;');</span>
+ <span class="s4">*</span>
+ <span class="s4">* if (_.isError(elements)) {</span>
+ <span class="s4">*   elements = [];</span>
+ <span class="s4">* }</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">attempt </span><span class="s2">= </span><span
+    class="s1">baseRest</span><span class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">args</span><span class="s2">) {</span>
+  <span class="s0">try </span><span class="s2">{</span>
+    <span class="s0">return </span><span class="s1">apply</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">undefined</span><span class="s2">, </span><span
+    class="s1">args</span><span class="s2">);</span>
+  <span class="s2">} </span><span class="s0">catch </span><span class="s2">(</span><span class="s1">e</span><span
+    class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">isError</span><span class="s2">(</span><span
+    class="s1">e</span><span class="s2">) ? </span><span class="s1">e </span><span class="s2">: </span><span class="s0">new </span><span
+    class="s1">Error</span><span class="s2">(</span><span class="s1">e</span><span class="s2">);</span>
+  <span class="s2">}</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">attempt</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

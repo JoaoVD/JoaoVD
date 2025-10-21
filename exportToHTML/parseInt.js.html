@@ -1,0 +1,115 @@
+<html>
+<head>
+  <title>parseInt.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s8 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          parseInt.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">root </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_root'</span><span class="s2">),</span>
+    <span class="s1">toString </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./toString'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to match leading whitespace. */</span>
+<span class="s0">var </span><span class="s1">reTrimStart </span><span class="s2">= </span><span class="s5">/^\s+/</span><span
+    class="s2">;</span>
+
+<span class="s6">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeParseInt </span><span class="s2">= </span><span
+    class="s1">root</span><span class="s2">.</span><span class="s1">parseInt</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Converts `string` to an integer of the specified radix. If `radix` is</span>
+ <span class="s4">* `undefined` or `0`, a `radix` of `10` is used unless `value` is a</span>
+ <span class="s4">* hexadecimal, in which case a `radix` of `16` is used.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This method aligns with the</span>
+ <span class="s4">* [ES5 implementation](https://es5.github.io/#x15.1.2.2) of `parseInt`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s7">@static</span>
+ <span class="s4">* </span><span class="s7">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s7">@since </span><span class="s4">1.1.0</span>
+ <span class="s4">* </span><span class="s7">@category </span><span class="s4">String</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{string} string The string to convert.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{number} [radix=10] The radix to interpret `value` by.</span>
+ <span class="s4">* </span><span class="s7">@param- </span><span class="s4">{Object} [guard] Enables use as an iteratee for methods like `_.map`.</span>
+ <span class="s4">* </span><span class="s7">@returns </span><span
+    class="s4">{number} Returns the converted integer.</span>
+ <span class="s4">* </span><span class="s7">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.parseInt('08');</span>
+ <span class="s4">* // =&gt; 8</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.map(['6', '08', '10'], _.parseInt);</span>
+ <span class="s4">* // =&gt; [6, 8, 10]</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">parseInt</span><span class="s2">(</span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">radix</span><span class="s2">, </span><span class="s1">guard</span><span
+    class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">guard </span><span class="s2">|| </span><span
+    class="s1">radix </span><span class="s2">== </span><span class="s0">null</span><span class="s2">) {</span>
+    <span class="s1">radix </span><span class="s2">= </span><span class="s8">0</span><span class="s2">;</span>
+  <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span class="s1">radix</span><span
+    class="s2">) {</span>
+    <span class="s1">radix </span><span class="s2">= +</span><span class="s1">radix</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">nativeParseInt</span><span class="s2">(</span><span class="s1">toString</span><span
+    class="s2">(</span><span class="s1">string</span><span class="s2">).</span><span class="s1">replace</span><span
+    class="s2">(</span><span class="s1">reTrimStart</span><span class="s2">, </span><span class="s3">''</span><span
+    class="s2">), </span><span class="s1">radix </span><span class="s2">|| </span><span class="s8">0</span><span
+    class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">parseInt</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

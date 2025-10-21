@@ -1,0 +1,1807 @@
+<html>
+<head>
+  <title>net.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          net.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* &gt; Stability: 2 - Stable</span>
+ <span class="s0">*</span>
+ <span class="s0">* The `node:net` module provides an asynchronous network API for creating stream-based</span>
+ <span class="s0">* TCP or `IPC` servers ({</span><span class="s1">@link </span><span class="s0">createServer}) and clients</span>
+ <span class="s0">* ({</span><span class="s1">@link </span><span class="s0">createConnection}).</span>
+ <span class="s0">*</span>
+ <span class="s0">* It can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import net from 'node:net';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/net.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;net&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">stream from </span><span class="s3">&quot;node:stream&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Abortable</span><span class="s4">, </span><span
+    class="s2">EventEmitter </span><span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:events&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">dns from </span><span class="s3">&quot;node:dns&quot;</span><span
+    class="s4">;</span>
+    <span class="s2">type LookupFunction </span><span class="s4">= (</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">dns</span><span
+    class="s4">.</span><span class="s2">LookupOptions</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">dns</span><span
+    class="s4">.</span><span class="s2">LookupAddress</span><span class="s4">[], </span><span
+    class="s2">family</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">AddressInfo </span><span class="s4">{</span>
+        <span class="s2">address</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">family</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SocketConstructorOpts </span><span class="s4">{</span>
+        <span class="s2">fd</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">allowHalfOpen</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">onread</span><span class="s4">?: </span><span class="s2">OnReadOpts </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">readable</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">writable</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">signal</span><span class="s4">?: </span><span class="s2">AbortSignal</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">OnReadOpts </span><span class="s4">{</span>
+        <span class="s2">buffer</span><span class="s4">: </span><span class="s2">Uint8Array </span><span class="s4">| (() =&gt; </span><span
+    class="s2">Uint8Array</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This function is called for every chunk of incoming data.</span>
+         <span class="s0">* Two arguments are passed to it: the number of bytes written to `buffer` and a reference to `buffer`.</span>
+         <span class="s0">* Return `false` from this function to implicitly `pause()` the socket.</span>
+         <span class="s0">*/</span>
+        <span class="s2">callback</span><span class="s4">(</span><span class="s2">bytesWritten</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">Uint8Array</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">TcpSocketConnectOpts </span><span class="s4">{</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">host</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">localAddress</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">localPort</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">hints</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">family</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">lookup</span><span class="s4">?: </span><span class="s2">LookupFunction </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">noDelay</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">keepAlive</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">keepAliveInitialDelay</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.13.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">autoSelectFamily</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.13.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">autoSelectFamilyAttemptTimeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">blockList</span><span class="s4">?: </span><span class="s2">BlockList </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">IpcSocketConnectOpts </span><span class="s4">{</span>
+        <span class="s2">path</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type SocketConnectOpts </span><span class="s4">= </span><span
+    class="s2">TcpSocketConnectOpts </span><span class="s4">| </span><span class="s2">IpcSocketConnectOpts</span><span
+    class="s4">;</span>
+    <span class="s2">type SocketReadyState </span><span class="s4">= </span><span class="s3">&quot;opening&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;open&quot; </span><span class="s4">| </span><span class="s3">&quot;readOnly&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;writeOnly&quot; </span><span class="s4">| </span><span class="s3">&quot;closed&quot;</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This class is an abstraction of a TCP socket or a streaming `IPC` endpoint</span>
+     <span class="s0">* (uses named pipes on Windows, and Unix domain sockets otherwise). It is also</span>
+     <span class="s0">* an `EventEmitter`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* A `net.Socket` can be created by the user and used directly to interact with</span>
+     <span class="s0">* a server. For example, it is returned by {</span><span class="s1">@link </span><span class="s0">createConnection},</span>
+     <span class="s0">* so the user can use it to talk to the server.</span>
+     <span class="s0">*</span>
+     <span class="s0">* It can also be created by Node.js and passed to the user when a connection</span>
+     <span
+       class="s0">* is received. For example, it is passed to the listeners of a `'connection'` event emitted on a {</span><span
+    class="s1">@link </span><span class="s0">Server}, so the user can use</span>
+     <span class="s0">* it to interact with the client.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.4</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Socket </span><span class="s5">extends </span><span
+    class="s2">stream</span><span class="s4">.</span><span class="s2">Duplex </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">SocketConstructorOpts</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Destroys the socket after all data is written. If the `finish` event was already emitted the socket is destroyed immediately.</span>
+         <span class="s0">* If the socket is still writable it implicitly calls `socket.end()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">destroySoon</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sends data on the socket. The second parameter specifies the encoding in the</span>
+         <span class="s0">* case of a string. It defaults to UTF8 encoding.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Returns `true` if the entire data was flushed successfully to the kernel</span>
+         <span class="s0">* buffer. Returns `false` if all or part of the data was queued in user memory.`'drain'` will be emitted when the buffer is again free.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The optional `callback` parameter will be executed when the data is finally</span>
+         <span class="s0">* written out, which may not be immediately.</span>
+         <span class="s0">*</span>
+         <span class="s0">* See `Writable` stream `write()` method for more</span>
+         <span class="s0">* information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[encoding='utf8'] Only used when data is `string`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">write</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">Uint8Array </span><span class="s4">| </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">cb</span><span class="s4">?: (</span><span class="s2">err</span><span
+    class="s4">?: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">write</span><span class="s4">(</span><span class="s2">str</span><span class="s4">: </span><span
+    class="s2">Uint8Array </span><span class="s4">| </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">encoding</span><span class="s4">?: </span><span class="s2">BufferEncoding</span><span
+    class="s4">, </span><span class="s2">cb</span><span class="s4">?: (</span><span class="s2">err</span><span
+    class="s4">?: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Initiate a connection on a given socket.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Possible signatures:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `socket.connect(options[, connectListener])`</span>
+         <span class="s0">* * `socket.connect(path[, connectListener])` for `IPC` connections.</span>
+         <span class="s0">* * `socket.connect(port[, host][, connectListener])` for TCP connections.</span>
+         <span class="s0">* * Returns: `net.Socket` The socket itself.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This function is asynchronous. When the connection is established, the `'connect'` event will be emitted. If there is a problem connecting,</span>
+         <span class="s0">* instead of a `'connect'` event, an `'error'` event will be emitted with</span>
+         <span class="s0">* the error passed to the `'error'` listener.</span>
+         <span class="s0">* The last parameter `connectListener`, if supplied, will be added as a listener</span>
+         <span class="s0">* for the `'connect'` event **once**.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This function should only be used for reconnecting a socket after`'close'` has been emitted or otherwise it may lead to undefined</span>
+         <span class="s0">* behavior.</span>
+         <span class="s0">*/</span>
+        <span class="s2">connect</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">SocketConnectOpts</span><span class="s4">, </span><span class="s2">connectionListener</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">connect</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">host</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">connect</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">connect</span><span class="s4">(</span><span class="s2">path</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Set the encoding for the socket as a `Readable Stream`. See `readable.setEncoding()` for more information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setEncoding</span><span class="s4">(</span><span class="s2">encoding</span><span
+    class="s4">?: </span><span class="s2">BufferEncoding</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Pauses the reading of data. That is, `'data'` events will not be emitted.</span>
+         <span class="s0">* Useful to throttle back an upload.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">pause</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Close the TCP connection by sending an RST packet and destroy the stream.</span>
+         <span class="s0">* If this TCP socket is in connecting status, it will send an RST packet and destroy this TCP socket once it is connected.</span>
+         <span class="s0">* Otherwise, it will call `socket.destroy` with an `ERR_SOCKET_CLOSED` Error.</span>
+         <span class="s0">* If this is not a TCP socket (for example, a pipe), calling this method will immediately throw an `ERR_INVALID_HANDLE_TYPE` Error.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.3.0, v16.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">resetAndDestroy</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Resumes reading after a call to `socket.pause()`.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">resume</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sets the socket to timeout after `timeout` milliseconds of inactivity on</span>
+         <span class="s0">* the socket. By default `net.Socket` do not have a timeout.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When an idle timeout is triggered the socket will receive a `'timeout'` event but the connection will not be severed. The user must manually call `socket.end()` or `socket.destroy()` to</span>
+         <span class="s0">* end the connection.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* socket.setTimeout(3000);</span>
+         <span class="s0">* socket.on('timeout', () =&gt; {</span>
+         <span class="s0">*   console.log('socket timeout');</span>
+         <span class="s0">*   socket.end();</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `timeout` is 0, then the existing idle timeout is disabled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The optional `callback` parameter will be added as a one-time listener for the `'timeout'` event.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setTimeout</span><span class="s4">(</span><span class="s2">timeout</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Enable/disable the use of Nagle's algorithm.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When a TCP connection is created, it will have Nagle's algorithm enabled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Nagle's algorithm delays data before it is sent via the network. It attempts</span>
+         <span class="s0">* to optimize throughput at the expense of latency.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Passing `true` for `noDelay` or not passing an argument will disable Nagle's</span>
+         <span class="s0">* algorithm for the socket. Passing `false` for `noDelay` will enable Nagle's</span>
+         <span class="s0">* algorithm.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[noDelay=true]</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setNoDelay</span><span class="s4">(</span><span class="s2">noDelay</span><span
+    class="s4">?: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Enable/disable keep-alive functionality, and optionally set the initial</span>
+         <span class="s0">* delay before the first keepalive probe is sent on an idle socket.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Set `initialDelay` (in milliseconds) to set the delay between the last</span>
+         <span class="s0">* data packet received and the first keepalive probe. Setting `0` for`initialDelay` will leave the value unchanged from the default</span>
+         <span class="s0">* (or previous) setting.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Enabling the keep-alive functionality will set the following socket options:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `SO_KEEPALIVE=1`</span>
+         <span class="s0">* * `TCP_KEEPIDLE=initialDelay`</span>
+         <span class="s0">* * `TCP_KEEPCNT=10`</span>
+         <span class="s0">* * `TCP_KEEPINTVL=1`</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.92</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[enable=false]</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[initialDelay=0]</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setKeepAlive</span><span class="s4">(</span><span class="s2">enable</span><span
+    class="s4">?: </span><span class="s2">boolean</span><span class="s4">, </span><span
+    class="s2">initialDelay</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the bound `address`, the address `family` name and `port` of the</span>
+         <span class="s0">* socket as reported by the operating system:`{ port: 12346, family: 'IPv4', address: '127.0.0.1' }`</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">*/</span>
+        <span class="s2">address</span><span class="s4">(): </span><span class="s2">AddressInfo </span><span class="s4">| {};</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Calling `unref()` on a socket will allow the program to exit if this is the only</span>
+         <span class="s0">* active socket in the event system. If the socket is already `unref`ed calling`unref()` again will have no effect.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">unref</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Opposite of `unref()`, calling `ref()` on a previously `unref`ed socket will _not_ let the program exit if it's the only socket left (the default behavior).</span>
+         <span class="s0">* If the socket is `ref`ed calling `ref` again will have no effect.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ref</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This property is only present if the family autoselection algorithm is enabled in `socket.connect(options)`</span>
+         <span class="s0">* and it is an array of the addresses that have been attempted.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Each address is a string in the form of `$IP:$PORT`.</span>
+         <span class="s0">* If the connection was successful, then the last address is the one that the socket is currently connected to.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.4.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly autoSelectFamilyAttemptedAddresses</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This property shows the number of characters buffered for writing. The buffer</span>
+         <span class="s0">* may contain strings whose length after encoding is not yet known. So this number</span>
+         <span class="s0">* is only an approximation of the number of bytes in the buffer.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `net.Socket` has the property that `socket.write()` always works. This is to</span>
+         <span class="s0">* help users get up and running quickly. The computer cannot always keep up</span>
+         <span class="s0">* with the amount of data that is written to a socket. The network connection</span>
+         <span class="s0">* simply might be too slow. Node.js will internally queue up the data written to a</span>
+         <span class="s0">* socket and send it out over the wire when it is possible.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The consequence of this internal buffering is that memory may grow.</span>
+         <span class="s0">* Users who experience large or growing `bufferSize` should attempt to</span>
+         <span class="s0">* &quot;throttle&quot; the data flows in their program with `socket.pause()` and `socket.resume()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.8</span>
+         <span class="s0">* </span><span class="s1">@deprecated </span><span class="s0">Since v14.6.0 - Use `writableLength` instead.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly bufferSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The amount of received bytes.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.3</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly bytesRead</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The amount of bytes sent.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.3</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly bytesWritten</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, `socket.connect(options[, connectListener])` was</span>
+         <span class="s0">* called and has not yet finished. It will stay `true` until the socket becomes</span>
+         <span class="s0">* connected, then it is set to `false` and the `'connect'` event is emitted. Note</span>
+         <span class="s0">* that the `socket.connect(options[, connectListener])` callback is a listener for the `'connect'` event.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v6.1.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly connecting</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This is `true` if the socket is not connected yet, either because `.connect()`has not yet been called or because it is still in the process of connecting</span>
+         <span class="s0">* (see `socket.connecting`).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.2.0, v10.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly pending</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* See `writable.destroyed` for further details.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly destroyed</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The string representation of the local IP address the remote client is</span>
+         <span class="s0">* connecting on. For example, in a server listening on `'0.0.0.0'`, if a client</span>
+         <span
+           class="s0">* connects on `'192.168.1.1'`, the value of `socket.localAddress` would be`'192.168.1.1'`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.6</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly localAddress</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The numeric representation of the local port. For example, `80` or `21`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.6</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly localPort</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The string representation of the local IP family. `'IPv4'` or `'IPv6'`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.8.0, v16.18.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly localFamily</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This property represents the state of the connection as a string.</span>
+         <span class="s0">*</span>
+         <span class="s0">* * If the stream is connecting `socket.readyState` is `opening`.</span>
+         <span class="s0">* * If the stream is readable and writable, it is `open`.</span>
+         <span class="s0">* * If the stream is readable and not writable, it is `readOnly`.</span>
+         <span class="s0">* * If the stream is not readable and writable, it is `writeOnly`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly readyState</span><span class="s4">: </span><span
+    class="s2">SocketReadyState</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The string representation of the remote IP address. For example,`'74.125.127.100'` or `'2001:4860:a005::68'`. Value may be `undefined` if</span>
+         <span class="s0">* the socket is destroyed (for example, if the client disconnected).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.10</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly remoteAddress</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The string representation of the remote IP family. `'IPv4'` or `'IPv6'`. Value may be `undefined` if</span>
+         <span class="s0">* the socket is destroyed (for example, if the client disconnected).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.14</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly remoteFamily</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The numeric representation of the remote port. For example, `80` or `21`. Value may be `undefined` if</span>
+         <span class="s0">* the socket is destroyed (for example, if the client disconnected).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.10</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly remotePort</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The socket timeout in milliseconds as set by `socket.setTimeout()`.</span>
+         <span class="s0">* It is `undefined` if a timeout has not been set.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.7.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Half-closes the socket. i.e., it sends a FIN packet. It is possible the</span>
+         <span class="s0">* server will still send some data.</span>
+         <span class="s0">*</span>
+         <span class="s0">* See `writable.end()` for further details.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[encoding='utf8'] Only used when data is `string`.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Optional callback for when the socket is finished.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The socket itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">end</span><span class="s4">(</span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">end</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">Uint8Array </span><span class="s4">| </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">end</span><span class="s4">(</span><span class="s2">str</span><span class="s4">: </span><span
+    class="s2">Uint8Array </span><span class="s4">| </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">encoding</span><span class="s4">?: </span><span class="s2">BufferEncoding</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* events.EventEmitter</span>
+         <span class="s0">*   1. close</span>
+         <span class="s0">*   2. connect</span>
+         <span class="s0">*   3. connectionAttempt</span>
+         <span class="s0">*   4. connectionAttemptFailed</span>
+         <span class="s0">*   5. connectionAttemptTimeout</span>
+         <span class="s0">*   6. data</span>
+         <span class="s0">*   7. drain</span>
+         <span class="s0">*   8. end</span>
+         <span class="s0">*   9. error</span>
+         <span class="s0">*   10. lookup</span>
+         <span class="s0">*   11. ready</span>
+         <span class="s0">*   12. timeout</span>
+         <span class="s0">*/</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">hadError</span><span class="s4">: </span><span
+    class="s2">boolean</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connectionAttempt&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">ip</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptFailed&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptTimeout&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;data&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">data</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drain&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;end&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;lookup&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">host</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;ready&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;timeout&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">hadError</span><span class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connectionAttempt&quot;</span><span class="s4">, </span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connectionAttemptFailed&quot;</span><span class="s4">, </span><span
+    class="s2">ip</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connectionAttemptTimeout&quot;</span><span class="s4">, </span><span
+    class="s2">ip</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;data&quot;</span><span class="s4">, </span><span
+    class="s2">data</span><span class="s4">: </span><span class="s2">Buffer</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drain&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;end&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;lookup&quot;</span><span class="s4">, </span><span
+    class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">, </span><span
+    class="s2">address</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">family</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">host</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;ready&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;timeout&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;close&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">hadError</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttempt&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">ip</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptFailed&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptTimeout&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;data&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">data</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;drain&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;end&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;error&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;lookup&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">host</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;ready&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;timeout&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">hadError</span><span class="s4">: </span><span
+    class="s2">boolean</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connectionAttempt&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">ip</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptFailed&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connectionAttemptTimeout&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;data&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">data</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drain&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;end&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;lookup&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">host</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;ready&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;timeout&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">hadError</span><span class="s4">: </span><span
+    class="s2">boolean</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connectionAttempt&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">ip</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptFailed&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptTimeout&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;data&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">data</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drain&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;end&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;lookup&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">host</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;ready&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;timeout&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">hadError</span><span class="s4">: </span><span
+    class="s2">boolean</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;connectionAttempt&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptFailed&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connectionAttemptTimeout&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">ip</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;data&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">data</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drain&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;end&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;lookup&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">host</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;ready&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;timeout&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ListenOptions </span><span class="s5">extends </span><span
+    class="s2">Abortable </span><span class="s4">{</span>
+        <span class="s2">backlog</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">exclusive</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">host</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">ipv6Only</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">reusePort</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">path</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">port</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">readableAll</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">writableAll</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ServerOpts </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Indicates whether half-opened TCP connections are allowed.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">allowHalfOpen</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Indicates whether the socket should be paused on incoming connections.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">pauseOnConnect</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If set to `true`, it disables the use of Nagle's algorithm immediately after a new incoming connection is received.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v16.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">noDelay</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If set to `true`, it enables keep-alive functionality on the socket immediately after a new incoming connection is received,</span>
+         <span class="s0">* similarly on what is done in `socket.setKeepAlive([enable][, initialDelay])`.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v16.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">keepAlive</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If set to a positive number, it sets the initial delay before the first keepalive probe is sent on an idle socket.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v16.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">keepAliveInitialDelay</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Optionally overrides all `net.Socket`s' `readableHighWaterMark` and `writableHighWaterMark`.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">See [stream.getDefaultHighWaterMark()](https://nodejs.org/docs/latest-v24.x/api/stream.html#streamgetdefaulthighwatermarkobjectmode).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.17.0, v20.1.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">highWaterMark</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `blockList` can be used for disabling inbound</span>
+         <span class="s0">* access to specific IP addresses, IP ranges, or IP subnets. This does not</span>
+         <span class="s0">* work if the server is behind a reverse proxy, NAT, etc. because the address</span>
+         <span class="s0">* checked against the block list is the address of the proxy, or the one</span>
+         <span class="s0">* specified by the NAT.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">blockList</span><span class="s4">?: </span><span class="s2">BlockList </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">DropArgument </span><span class="s4">{</span>
+        <span class="s2">localAddress</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">localPort</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">localFamily</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">remoteAddress</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">remotePort</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">remoteFamily</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This class is used to create a TCP or `IPC` server.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Server </span><span class="s5">extends </span><span class="s2">EventEmitter </span><span
+    class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">connectionListener</span><span
+    class="s4">?: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">Socket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">);</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ServerOpts</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: (</span><span class="s2">socket</span><span
+    class="s4">: </span><span class="s2">Socket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Start a server listening for connections. A `net.Server` can be a TCP or</span>
+         <span class="s0">* an `IPC` server depending on what it listens to.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Possible signatures:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `server.listen(handle[, backlog][, callback])`</span>
+         <span class="s0">* * `server.listen(options[, callback])`</span>
+         <span class="s0">* * `server.listen(path[, backlog][, callback])` for `IPC` servers</span>
+         <span class="s0">* * `server.listen([port[, host[, backlog]]][, callback])` for TCP servers</span>
+         <span class="s0">*</span>
+         <span class="s0">* This function is asynchronous. When the server starts listening, the `'listening'` event will be emitted. The last parameter `callback`will be added as a listener for the `'listening'`</span>
+         <span class="s0">* event.</span>
+         <span class="s0">*</span>
+         <span class="s0">* All `listen()` methods can take a `backlog` parameter to specify the maximum</span>
+         <span class="s0">* length of the queue of pending connections. The actual length will be determined</span>
+         <span class="s0">* by the OS through sysctl settings such as `tcp_max_syn_backlog` and `somaxconn` on Linux. The default value of this parameter is 511 (not 512).</span>
+         <span class="s0">*</span>
+         <span class="s0">* All {</span><span class="s1">@link </span><span class="s0">Socket} are set to `SO_REUSEADDR` (see [`socket(7)`](https://man7.org/linux/man-pages/man7/socket.7.html) for</span>
+         <span class="s0">* details).</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `server.listen()` method can be called again if and only if there was an</span>
+         <span class="s0">* error during the first `server.listen()` call or `server.close()` has been</span>
+         <span class="s0">* called. Otherwise, an `ERR_SERVER_ALREADY_LISTEN` error will be thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* One of the most common errors raised when listening is `EADDRINUSE`.</span>
+         <span class="s0">* This happens when another server is already listening on the requested`port`/`path`/`handle`. One way to handle this would be to retry</span>
+         <span class="s0">* after a certain amount of time:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* server.on('error', (e) =&gt; {</span>
+         <span class="s0">*   if (e.code === 'EADDRINUSE') {</span>
+         <span class="s0">*     console.error('Address in use, retrying...');</span>
+         <span class="s0">*     setTimeout(() =&gt; {</span>
+         <span class="s0">*       server.close();</span>
+         <span class="s0">*       server.listen(PORT, HOST);</span>
+         <span class="s0">*     }, 1000);</span>
+         <span class="s0">*   }</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*/</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">hostname</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">backlog</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">hostname</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">backlog</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">path</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">backlog</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">path</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ListenOptions</span><span class="s4">, </span><span class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">handle</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">, </span><span class="s2">backlog</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">listen</span><span class="s4">(</span><span class="s2">handle</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">, </span><span
+    class="s2">listeningListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Stops the server from accepting new connections and keeps existing</span>
+         <span class="s0">* connections. This function is asynchronous, the server is finally closed</span>
+         <span class="s0">* when all connections are ended and the server emits a `'close'` event.</span>
+         <span class="s0">* The optional `callback` will be called once the `'close'` event occurs. Unlike</span>
+         <span class="s0">* that event, it will be called with an `Error` as its only argument if the server</span>
+         <span class="s0">* was not open when it was closed.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Called when the server is closed.</span>
+         <span class="s0">*/</span>
+        <span class="s2">close</span><span class="s4">(</span><span class="s2">callback</span><span
+    class="s4">?: (</span><span class="s2">err</span><span class="s4">?: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the bound `address`, the address `family` name, and `port` of the server</span>
+         <span class="s0">* as reported by the operating system if listening on an IP socket</span>
+         <span class="s0">* (useful to find which port was assigned when getting an OS-assigned address):`{ port: 12346, family: 'IPv4', address: '127.0.0.1' }`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For a server listening on a pipe or Unix domain socket, the name is returned</span>
+         <span class="s0">* as a string.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const server = net.createServer((socket) =&gt; {</span>
+         <span class="s0">*   socket.end('goodbye\n');</span>
+         <span class="s0">* }).on('error', (err) =&gt; {</span>
+         <span class="s0">*   // Handle errors here.</span>
+         <span class="s0">*   throw err;</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Grab an arbitrary unused port.</span>
+         <span class="s0">* server.listen(() =&gt; {</span>
+         <span class="s0">*   console.log('opened server on', server.address());</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* `server.address()` returns `null` before the `'listening'` event has been</span>
+         <span class="s0">* emitted or after calling `server.close()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">*/</span>
+        <span class="s2">address</span><span class="s4">(): </span><span class="s2">AddressInfo </span><span class="s4">| </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Asynchronously get the number of concurrent connections on the server. Works</span>
+         <span class="s0">* when sockets were sent to forks.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Callback should take two arguments `err` and `count`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.7</span>
+         <span class="s0">*/</span>
+        <span class="s2">getConnections</span><span class="s4">(</span><span class="s2">cb</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">count</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Opposite of `unref()`, calling `ref()` on a previously `unref`ed server will _not_ let the program exit if it's the only server left (the default behavior).</span>
+         <span class="s0">* If the server is `ref`ed calling `ref()` again will have no effect.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+         <span class="s0">*/</span>
+        <span class="s2">ref</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Calling `unref()` on a server will allow the program to exit if this is the only</span>
+         <span class="s0">* active server in the event system. If the server is already `unref`ed calling`unref()` again will have no effect.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+         <span class="s0">*/</span>
+        <span class="s2">unref</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Set this property to reject connections when the server's connection count gets</span>
+         <span class="s0">* high.</span>
+         <span class="s0">*</span>
+         <span class="s0">* It is not recommended to use this option once a socket has been sent to a child</span>
+         <span class="s0">* with `child_process.fork()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.2.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxConnections</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">connections</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Indicates whether or not the server is listening for connections.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v5.7.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly listening</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* events.EventEmitter</span>
+         <span class="s0">*   1. close</span>
+         <span class="s0">*   2. connection</span>
+         <span class="s0">*   3. error</span>
+         <span class="s0">*   4. listening</span>
+         <span class="s0">*   5. drop</span>
+         <span class="s0">*/</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">Socket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drop&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">data</span><span class="s4">?: </span><span
+    class="s2">DropArgument</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connection&quot;</span><span class="s4">, </span><span
+    class="s2">socket</span><span class="s4">: </span><span class="s2">Socket</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drop&quot;</span><span class="s4">, </span><span
+    class="s2">data</span><span class="s4">?: </span><span class="s2">DropArgument</span><span
+    class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;close&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">socket</span><span class="s4">: </span><span class="s2">Socket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;error&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;listening&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;drop&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">data</span><span class="s4">?: </span><span
+    class="s2">DropArgument</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">Socket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drop&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">data</span><span class="s4">?: </span><span
+    class="s2">DropArgument</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">Socket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drop&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">data</span><span class="s4">?: </span><span
+    class="s2">DropArgument</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">Socket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;drop&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">data</span><span class="s4">?: </span><span
+    class="s2">DropArgument</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Calls {</span><span class="s1">@link </span><span class="s0">Server.close()} and returns a promise that fulfills when the server has closed.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">asyncDispose</span><span class="s4">](): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s5">void</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s2">type IPVersion </span><span class="s4">= </span><span class="s3">&quot;ipv4&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;ipv6&quot;</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `BlockList` object can be used with some network APIs to specify rules for</span>
+     <span class="s0">* disabling inbound or outbound access to specific IP addresses, IP ranges, or</span>
+     <span class="s0">* IP subnets.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0, v14.18.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">BlockList </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Adds a rule to block the given IP address.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0, v14.18.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">address An IPv4 or IPv6 address.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[type='ipv4'] Either `'ipv4'` or `'ipv6'`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">addAddress</span><span class="s4">(</span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">type</span><span
+    class="s4">?: </span><span class="s2">IPVersion</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">addAddress</span><span class="s4">(</span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">SocketAddress</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Adds a rule to block a range of IP addresses from `start` (inclusive) to`end` (inclusive).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0, v14.18.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">start The starting IPv4 or IPv6 address in the range.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">end The ending IPv4 or IPv6 address in the range.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[type='ipv4'] Either `'ipv4'` or `'ipv6'`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">addRange</span><span class="s4">(</span><span class="s2">start</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">end</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">type</span><span class="s4">?: </span><span
+    class="s2">IPVersion</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">addRange</span><span class="s4">(</span><span class="s2">start</span><span class="s4">: </span><span
+    class="s2">SocketAddress</span><span class="s4">, </span><span class="s2">end</span><span class="s4">: </span><span
+    class="s2">SocketAddress</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Adds a rule to block a range of IP addresses specified as a subnet mask.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0, v14.18.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">net The network IPv4 or IPv6 address.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">prefix The number of CIDR prefix bits. For IPv4, this must be a value between `0` and `32`. For IPv6, this must be between `0` and `128`.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[type='ipv4'] Either `'ipv4'` or `'ipv6'`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">addSubnet</span><span class="s4">(</span><span class="s2">net</span><span
+    class="s4">: </span><span class="s2">SocketAddress</span><span class="s4">, </span><span
+    class="s2">prefix</span><span class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s2">addSubnet</span><span class="s4">(</span><span class="s2">net</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">prefix</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">type</span><span
+    class="s4">?: </span><span class="s2">IPVersion</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Returns `true` if the given IP address matches any of the rules added to the`BlockList`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const blockList = new net.BlockList();</span>
+         <span class="s0">* blockList.addAddress('123.123.123.123');</span>
+         <span class="s0">* blockList.addRange('10.0.0.1', '10.0.0.10');</span>
+         <span class="s0">* blockList.addSubnet('8592:757c:efae:4e45::', 64, 'ipv6');</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(blockList.check('123.123.123.123'));  // Prints: true</span>
+         <span class="s0">* console.log(blockList.check('10.0.0.3'));  // Prints: true</span>
+         <span class="s0">* console.log(blockList.check('222.111.111.222'));  // Prints: false</span>
+         <span class="s0">*</span>
+         <span class="s0">* // IPv6 notation for IPv4 addresses works:</span>
+         <span class="s0">* console.log(blockList.check('::ffff:7b7b:7b7b', 'ipv6')); // Prints: true</span>
+         <span class="s0">* console.log(blockList.check('::ffff:123.123.123.123', 'ipv6')); // Prints: true</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0, v14.18.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">address The IP address to check</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[type='ipv4'] Either `'ipv4'` or `'ipv6'`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">check</span><span class="s4">(</span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">SocketAddress</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">check</span><span class="s4">(</span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">type</span><span
+    class="s4">?: </span><span class="s2">IPVersion</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The list of rules added to the blocklist.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0, v14.18.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">rules</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns `true` if the `value` is a `net.BlockList`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">value Any JS value</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">isBlockList</span><span class="s4">(</span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">): </span><span class="s2">value </span><span
+    class="s4">is </span><span class="s2">BlockList</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const blockList = new net.BlockList();</span>
+         <span class="s0">* const data = [</span>
+         <span class="s0">*   'Subnet: IPv4 192.168.1.0/24',</span>
+         <span class="s0">*   'Address: IPv4 10.0.0.5',</span>
+         <span class="s0">*   'Range: IPv4 192.168.2.1-192.168.2.10',</span>
+         <span class="s0">*   'Range: IPv4 10.0.0.1-10.0.0.10',</span>
+         <span class="s0">* ];</span>
+         <span class="s0">* blockList.fromJSON(data);</span>
+         <span class="s0">* blockList.fromJSON(JSON.stringify(data));</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.5.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">fromJSON</span><span class="s4">(</span><span class="s2">data</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">readonly string</span><span
+    class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.5.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">toJSON</span><span class="s4">(): </span><span class="s2">readonly string</span><span
+    class="s4">[];</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">TcpNetConnectOpts </span><span class="s5">extends </span><span
+    class="s2">TcpSocketConnectOpts</span><span class="s4">, </span><span class="s2">SocketConstructorOpts </span><span
+    class="s4">{</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">IpcNetConnectOpts </span><span class="s5">extends </span><span
+    class="s2">IpcSocketConnectOpts</span><span class="s4">, </span><span class="s2">SocketConstructorOpts </span><span
+    class="s4">{</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type NetConnectOpts </span><span class="s4">= </span><span
+    class="s2">TcpNetConnectOpts </span><span class="s4">| </span><span class="s2">IpcNetConnectOpts</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates a new TCP or `IPC` server.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `allowHalfOpen` is set to `true`, when the other end of the socket</span>
+     <span class="s0">* signals the end of transmission, the server will only send back the end of</span>
+     <span class="s0">* transmission when `socket.end()` is explicitly called. For example, in the</span>
+     <span class="s0">* context of TCP, when a FIN packed is received, a FIN packed is sent</span>
+     <span class="s0">* back only when `socket.end()` is explicitly called. Until then the</span>
+     <span class="s0">* connection is half-closed (non-readable but still writable). See `'end'` event and [RFC 1122](https://tools.ietf.org/html/rfc1122) (section 4.2.2.13) for more information.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `pauseOnConnect` is set to `true`, then the socket associated with each</span>
+     <span class="s0">* incoming connection will be paused, and no data will be read from its handle.</span>
+     <span class="s0">* This allows connections to be passed between processes without any data being</span>
+     <span class="s0">* read by the original process. To begin reading data from a paused socket, call `socket.resume()`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The server can be a TCP server or an `IPC` server, depending on what it `listen()` to.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Here is an example of a TCP echo server which listens for connections</span>
+     <span class="s0">* on port 8124:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import net from 'node:net';</span>
+     <span class="s0">* const server = net.createServer((c) =&gt; {</span>
+     <span class="s0">*   // 'connection' listener.</span>
+     <span class="s0">*   console.log('client connected');</span>
+     <span class="s0">*   c.on('end', () =&gt; {</span>
+     <span class="s0">*     console.log('client disconnected');</span>
+     <span class="s0">*   });</span>
+     <span class="s0">*   c.write('hello\r\n');</span>
+     <span class="s0">*   c.pipe(c);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* server.on('error', (err) =&gt; {</span>
+     <span class="s0">*   throw err;</span>
+     <span class="s0">* });</span>
+     <span class="s0">* server.listen(8124, () =&gt; {</span>
+     <span class="s0">*   console.log('server bound');</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Test this by using `telnet`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```bash</span>
+     <span class="s0">* telnet localhost 8124</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* To listen on the socket `/tmp/echo.sock`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* server.listen('/tmp/echo.sock', () =&gt; {</span>
+     <span class="s0">*   console.log('server bound');</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Use `nc` to connect to a Unix domain socket server:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```bash</span>
+     <span class="s0">* nc -U /tmp/echo.sock</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">connectionListener Automatically set as a listener for the {</span><span
+    class="s1">@link </span><span class="s0">'connection'} event.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createServer</span><span class="s4">(</span><span class="s2">connectionListener</span><span
+    class="s4">?: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">Socket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">Server</span><span
+    class="s4">;</span>
+    <span class="s5">function </span><span class="s2">createServer</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ServerOpts</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: (</span><span class="s2">socket</span><span
+    class="s4">: </span><span class="s2">Socket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s2">Server</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Aliases to {</span><span class="s1">@link </span><span class="s0">createConnection}.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Possible signatures:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * {</span><span class="s1">@link </span><span class="s0">connect}</span>
+     <span class="s0">* * {</span><span class="s1">@link </span><span class="s0">connect} for `IPC` connections.</span>
+     <span class="s0">* * {</span><span class="s1">@link </span><span class="s0">connect} for TCP connections.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">connect</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">NetConnectOpts</span><span
+    class="s4">, </span><span class="s2">connectionListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s2">Socket</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">connect</span><span class="s4">(</span><span
+    class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">host</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s2">Socket</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">connect</span><span class="s4">(</span><span
+    class="s2">path</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s2">Socket</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* A factory function, which creates a new {</span><span class="s1">@link </span><span class="s0">Socket},</span>
+     <span class="s0">* immediately initiates connection with `socket.connect()`,</span>
+     <span class="s0">* then returns the `net.Socket` that starts the connection.</span>
+     <span class="s0">*</span>
+     <span class="s0">* When the connection is established, a `'connect'` event will be emitted</span>
+     <span class="s0">* on the returned socket. The last parameter `connectListener`, if supplied,</span>
+     <span class="s0">* will be added as a listener for the `'connect'` event **once**.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Possible signatures:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * {</span><span class="s1">@link </span><span class="s0">createConnection}</span>
+     <span class="s0">* * {</span><span class="s1">@link </span><span class="s0">createConnection} for `IPC` connections.</span>
+     <span class="s0">* * {</span><span class="s1">@link </span><span
+    class="s0">createConnection} for TCP connections.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The {</span><span class="s1">@link </span><span class="s0">connect} function is an alias to this function.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createConnection</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">NetConnectOpts</span><span class="s4">, </span><span class="s2">connectionListener</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s2">Socket</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">createConnection</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">host</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s2">Socket</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">createConnection</span><span class="s4">(</span><span class="s2">path</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">connectionListener</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s2">Socket</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span
+       class="s0">* Gets the current default value of the `autoSelectFamily` option of `socket.connect(options)`.</span>
+     <span class="s0">* The initial default value is `true`, unless the command line option`--no-network-family-autoselection` is provided.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.4.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getDefaultAutoSelectFamily</span><span class="s4">(): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Sets the default value of the `autoSelectFamily` option of `socket.connect(options)`.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">value The new default value.</span>
+     <span class="s0">* The initial default value is `true`, unless the command line option</span>
+     <span class="s0">* `--no-network-family-autoselection` is provided.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.4.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">setDefaultAutoSelectFamily</span><span class="s4">(</span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Gets the current default value of the `autoSelectFamilyAttemptTimeout` option of `socket.connect(options)`.</span>
+     <span class="s0">* The initial default value is `250` or the value specified via the command line option `--network-family-autoselection-attempt-timeout`.</span>
+     <span class="s0">* </span><span class="s1">@returns </span><span class="s0">The current default value of the `autoSelectFamilyAttemptTimeout` option.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.8.0, v18.8.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getDefaultAutoSelectFamilyAttemptTimeout</span><span class="s4">(): </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Sets the default value of the `autoSelectFamilyAttemptTimeout` option of `socket.connect(options)`.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">value The new default value, which must be a positive number. If the number is less than `10`, the value `10` is used instead. The initial default value is `250` or the value specified via the command line</span>
+     <span class="s0">* option `--network-family-autoselection-attempt-timeout`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.8.0, v18.8.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">setDefaultAutoSelectFamilyAttemptTimeout</span><span
+    class="s4">(</span><span class="s2">value</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns `6` if `input` is an IPv6 address. Returns `4` if `input` is an IPv4</span>
+     <span class="s0">* address in [dot-decimal notation](https://en.wikipedia.org/wiki/Dot-decimal_notation) with no leading zeroes. Otherwise, returns`0`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* net.isIP('::1'); // returns 6</span>
+     <span class="s0">* net.isIP('127.0.0.1'); // returns 4</span>
+     <span class="s0">* net.isIP('127.000.000.001'); // returns 0</span>
+     <span class="s0">* net.isIP('127.0.0.1/24'); // returns 0</span>
+     <span class="s0">* net.isIP('fhqwhgads'); // returns 0</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">isIP</span><span class="s4">(</span><span
+    class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns `true` if `input` is an IPv4 address in [dot-decimal notation](https://en.wikipedia.org/wiki/Dot-decimal_notation) with no</span>
+     <span class="s0">* leading zeroes. Otherwise, returns `false`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* net.isIPv4('127.0.0.1'); // returns true</span>
+     <span class="s0">* net.isIPv4('127.000.000.001'); // returns false</span>
+     <span class="s0">* net.isIPv4('127.0.0.1/24'); // returns false</span>
+     <span class="s0">* net.isIPv4('fhqwhgads'); // returns false</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">isIPv4</span><span class="s4">(</span><span
+    class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns `true` if `input` is an IPv6 address. Otherwise, returns `false`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* net.isIPv6('::1'); // returns true</span>
+     <span class="s0">* net.isIPv6('fhqwhgads'); // returns false</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">isIPv6</span><span class="s4">(</span><span
+    class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">SocketAddressInitOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The network address as either an IPv4 or IPv6 string.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">127.0.0.1</span>
+         <span class="s0">*/</span>
+        <span class="s2">address</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">`'ipv4'`</span>
+         <span class="s0">*/</span>
+        <span class="s2">family</span><span class="s4">?: </span><span class="s2">IPVersion </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An IPv6 flow-label used only if `family` is `'ipv6'`.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">flowlabel</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An IP port.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">port</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.14.0, v14.18.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">SocketAddress </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">SocketAddressInitOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Either \`'ipv4'\` or \`'ipv6'\`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.14.0, v14.18.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly address</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Either \`'ipv4'\` or \`'ipv6'\`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.14.0, v14.18.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly family</span><span class="s4">: </span><span class="s2">IPVersion</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.14.0, v14.18.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly port</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.14.0, v14.18.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly flowlabel</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">input An input string containing an IP address and optional port,</span>
+         <span class="s0">* e.g. `123.1.2.3:1234` or `[1::1]:1234`.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">Returns a `SocketAddress` if parsing was successful.</span>
+         <span class="s0">* Otherwise returns `undefined`.</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">parse</span><span class="s4">(</span><span
+    class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">SocketAddress </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:net&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;net&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

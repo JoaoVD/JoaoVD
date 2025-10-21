@@ -1,0 +1,269 @@
+<html>
+<head>
+  <title>jtd.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          jtd.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">AnySchemaObject</span><span
+  class="s2">, </span><span class="s1">SchemaObject</span><span class="s2">, </span><span
+  class="s1">JTDParser</span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">&quot;./types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">JTDSchemaType</span><span class="s2">, </span><span class="s1">SomeJTDSchemaType</span><span
+    class="s2">, </span><span class="s1">JTDDataType</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;./types/jtd-schema&quot;</span>
+<span class="s0">import </span><span class="s1">AjvCore</span><span class="s2">, {</span><span
+    class="s1">CurrentOptions</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./core&quot;</span>
+<span class="s0">import </span><span class="s1">jtdVocabulary from </span><span class="s3">&quot;./vocabularies/jtd&quot;</span>
+<span class="s0">import </span><span class="s1">jtdMetaSchema from </span><span
+    class="s3">&quot;./refs/jtd-schema&quot;</span>
+<span class="s0">import </span><span class="s1">compileSerializer from </span><span class="s3">&quot;./compile/jtd/serialize&quot;</span>
+<span class="s0">import </span><span class="s1">compileParser from </span><span class="s3">&quot;./compile/jtd/parse&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">SchemaEnv</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;./compile&quot;</span>
+
+<span class="s0">const </span><span class="s1">META_SCHEMA_ID </span><span class="s2">= </span><span class="s3">&quot;JTD-meta-schema&quot;</span>
+
+<span class="s1">type JTDOptions </span><span class="s2">= </span><span class="s1">CurrentOptions </span><span
+    class="s2">&amp; {</span>
+  <span class="s4">// strict mode options not supported with JTD:</span>
+  <span class="s1">strict</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">allowMatchingProperties</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">allowUnionTypes</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">validateFormats</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s4">// validation and reporting options not supported with JTD:</span>
+  <span class="s1">$data</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">verbose</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">$comment</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">formats</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">loadSchema</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s4">// options to modify validated data:</span>
+  <span class="s1">useDefaults</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">coerceTypes</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s4">// advanced options:</span>
+  <span class="s1">next</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">unevaluated</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">dynamicRef</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">meta</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">defaultMeta</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">inlineRefs</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">loopRequired</span><span class="s2">?: </span><span class="s1">never</span>
+  <span class="s1">multipleOfPrecision</span><span class="s2">?: </span><span class="s1">never</span>
+<span class="s2">}</span>
+
+<span class="s0">export class </span><span class="s1">Ajv </span><span class="s0">extends </span><span class="s1">AjvCore </span><span
+    class="s2">{</span>
+  <span class="s1">constructor</span><span class="s2">(</span><span class="s1">opts</span><span
+    class="s2">: </span><span class="s1">JTDOptions </span><span class="s2">= {}) {</span>
+    <span class="s0">super</span><span class="s2">({</span>
+      <span class="s1">...opts</span><span class="s2">,</span>
+      <span class="s1">jtd</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+    <span class="s2">})</span>
+  <span class="s2">}</span>
+
+  <span class="s1">_addVocabularies</span><span class="s2">(): </span><span class="s0">void </span><span
+    class="s2">{</span>
+    <span class="s0">super</span><span class="s2">.</span><span class="s1">_addVocabularies</span><span
+    class="s2">()</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">addVocabulary</span><span
+    class="s2">(</span><span class="s1">jtdVocabulary</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">_addDefaultMetaSchema</span><span class="s2">(): </span><span class="s0">void </span><span
+    class="s2">{</span>
+    <span class="s0">super</span><span class="s2">.</span><span class="s1">_addDefaultMetaSchema</span><span class="s2">()</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">meta</span><span class="s2">) </span><span
+    class="s0">return</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">addMetaSchema</span><span
+    class="s2">(</span><span class="s1">jtdMetaSchema</span><span class="s2">, </span><span
+    class="s1">META_SCHEMA_ID</span><span class="s2">, </span><span class="s0">false</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">defaultMeta</span><span class="s2">(): </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">AnySchemaObject </span><span class="s2">| </span><span
+    class="s1">undefined </span><span class="s2">{</span>
+    <span class="s0">return </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">defaultMeta </span><span class="s2">=</span>
+      <span class="s0">super</span><span class="s2">.</span><span class="s1">defaultMeta</span><span
+    class="s2">() || (</span><span class="s0">this</span><span class="s2">.</span><span class="s1">getSchema</span><span
+    class="s2">(</span><span class="s1">META_SCHEMA_ID</span><span class="s2">) ? </span><span
+    class="s1">META_SCHEMA_ID </span><span class="s2">: </span><span class="s1">undefined</span><span
+    class="s2">))</span>
+  <span class="s2">}</span>
+
+  <span class="s1">compileSerializer</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">SchemaObject</span><span class="s2">): (</span><span
+    class="s1">data</span><span class="s2">: </span><span class="s1">T</span><span class="s2">) =&gt; </span><span
+    class="s1">string</span>
+  <span class="s4">// Separated for type inference to work</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/unified-signatures</span>
+  <span class="s1">compileSerializer</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">JTDSchemaType</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;): (</span><span class="s1">data</span><span class="s2">: </span><span class="s1">T</span><span
+    class="s2">) =&gt; </span><span class="s1">string</span>
+  <span class="s1">compileSerializer</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">SchemaObject</span><span class="s2">): (</span><span
+    class="s1">data</span><span class="s2">: </span><span class="s1">T</span><span class="s2">) =&gt; </span><span
+    class="s1">string </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_addSchema</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">serialize </span><span class="s2">|| </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_compileSerializer</span><span class="s2">(</span><span class="s1">sch</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">compileParser</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">SchemaObject</span><span class="s2">): </span><span class="s1">JTDParser</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s4">// Separated for type inference to work</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/unified-signatures</span>
+  <span class="s1">compileParser</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">JTDSchemaType</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;): </span><span class="s1">JTDParser</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;</span>
+  <span class="s1">compileParser</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">SchemaObject</span><span class="s2">): </span><span class="s1">JTDParser</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; {</span>
+    <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_addSchema</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s2">(</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">parse </span><span class="s2">|| </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_compileParser</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">)) as </span><span class="s1">JTDParser</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">_compileSerializer</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt;(</span><span class="s1">sch</span><span class="s2">: </span><span
+    class="s1">SchemaEnv</span><span class="s2">): (</span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">T</span><span class="s2">) =&gt; </span><span class="s1">string </span><span class="s2">{</span>
+    <span class="s1">compileSerializer</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">sch</span><span
+    class="s2">, (</span><span class="s1">sch</span><span class="s2">.</span><span class="s1">schema </span><span
+    class="s2">as </span><span class="s1">AnySchemaObject</span><span class="s2">).</span><span
+    class="s1">definitions </span><span class="s2">|| {})</span>
+    <span class="s4">/* istanbul ignore if */</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">serialize</span><span class="s2">) </span><span class="s0">throw new </span><span class="s1">Error</span><span
+    class="s2">(</span><span class="s3">&quot;ajv implementation error&quot;</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s1">sch</span><span class="s2">.</span><span class="s1">serialize</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">_compileParser</span><span class="s2">(</span><span
+    class="s1">sch</span><span class="s2">: </span><span class="s1">SchemaEnv</span><span class="s2">): </span><span
+    class="s1">JTDParser </span><span class="s2">{</span>
+    <span class="s1">compileParser</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">sch</span><span
+    class="s2">, (</span><span class="s1">sch</span><span class="s2">.</span><span class="s1">schema </span><span
+    class="s2">as </span><span class="s1">AnySchemaObject</span><span class="s2">).</span><span
+    class="s1">definitions </span><span class="s2">|| {})</span>
+    <span class="s4">/* istanbul ignore if */</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">parse</span><span class="s2">) </span><span class="s0">throw new </span><span
+    class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;ajv implementation error&quot;</span><span
+    class="s2">)</span>
+    <span class="s0">return </span><span class="s1">sch</span><span class="s2">.</span><span class="s1">parse</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">exports </span><span class="s2">= </span><span class="s1">Ajv</span>
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports</span><span class="s2">.</span><span
+    class="s1">Ajv </span><span class="s2">= </span><span class="s1">Ajv</span>
+<span class="s1">Object</span><span class="s2">.</span><span class="s1">defineProperty</span><span
+    class="s2">(</span><span class="s1">exports</span><span class="s2">, </span><span
+    class="s3">&quot;__esModule&quot;</span><span class="s2">, {</span><span class="s1">value</span><span
+    class="s2">: </span><span class="s0">true</span><span class="s2">})</span>
+
+<span class="s0">export default </span><span class="s1">Ajv</span>
+
+<span class="s0">export </span><span class="s2">{</span>
+  <span class="s1">Format</span><span class="s2">,</span>
+  <span class="s1">FormatDefinition</span><span class="s2">,</span>
+  <span class="s1">AsyncFormatDefinition</span><span class="s2">,</span>
+  <span class="s1">KeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">KeywordErrorDefinition</span><span class="s2">,</span>
+  <span class="s1">CodeKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">MacroKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">FuncKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">Vocabulary</span><span class="s2">,</span>
+  <span class="s1">Schema</span><span class="s2">,</span>
+  <span class="s1">SchemaObject</span><span class="s2">,</span>
+  <span class="s1">AnySchemaObject</span><span class="s2">,</span>
+  <span class="s1">AsyncSchema</span><span class="s2">,</span>
+  <span class="s1">AnySchema</span><span class="s2">,</span>
+  <span class="s1">ValidateFunction</span><span class="s2">,</span>
+  <span class="s1">AsyncValidateFunction</span><span class="s2">,</span>
+  <span class="s1">ErrorObject</span><span class="s2">,</span>
+  <span class="s1">ErrorNoParams</span><span class="s2">,</span>
+  <span class="s1">JTDParser</span><span class="s2">,</span>
+<span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./types&quot;</span>
+
+<span class="s0">export </span><span class="s2">{</span><span class="s1">Plugin</span><span class="s2">, </span><span
+    class="s1">Options</span><span class="s2">, </span><span class="s1">CodeOptions</span><span
+    class="s2">, </span><span class="s1">InstanceOptions</span><span class="s2">, </span><span
+    class="s1">Logger</span><span class="s2">, </span><span class="s1">ErrorsTextOptions</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./core&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">SchemaCxt</span><span class="s2">, </span><span
+    class="s1">SchemaObjCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">KeywordCxt</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile/validate&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">JTDErrorObject</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;./vocabularies/jtd&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">, </span><span class="s1">stringify</span><span class="s2">, </span><span
+    class="s1">nil</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">, </span><span
+    class="s1">Code</span><span class="s2">, </span><span class="s1">CodeGen</span><span class="s2">, </span><span
+    class="s1">CodeGenOptions</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile/codegen&quot;</span>
+
+<span class="s0">export </span><span class="s2">{</span><span class="s1">JTDSchemaType</span><span
+    class="s2">, </span><span class="s1">SomeJTDSchemaType</span><span class="s2">, </span><span
+    class="s1">JTDDataType</span><span class="s2">}</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">JTDOptions</span><span class="s2">}</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s0">default </span><span class="s2">as </span><span
+    class="s1">ValidationError</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./runtime/validation_error&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s0">default </span><span class="s2">as </span><span
+    class="s1">MissingRefError</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile/ref_error&quot;</span>
+</pre>
+</body>
+</html>

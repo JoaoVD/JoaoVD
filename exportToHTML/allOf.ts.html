@@ -1,0 +1,87 @@
+<html>
+<head>
+  <title>allOf.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          allOf.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">AnySchema</span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/util&quot;</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;allOf&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;array&quot;</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+    <span class="s4">/* istanbul ignore if */</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">)) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;ajv implementation error&quot;</span><span
+    class="s2">)</span>
+    <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span class="s3">&quot;valid&quot;</span><span
+    class="s2">)</span>
+    <span class="s1">schema</span><span class="s2">.</span><span class="s1">forEach</span><span
+    class="s2">((</span><span class="s1">sch</span><span class="s2">: </span><span class="s1">AnySchema</span><span
+    class="s2">, </span><span class="s1">i</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">) =&gt; {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span class="s1">sch</span><span class="s2">)) </span><span
+    class="s0">return</span>
+      <span class="s0">const </span><span class="s1">schCxt </span><span class="s2">= </span><span class="s1">cxt</span><span
+    class="s2">.</span><span class="s1">subschema</span><span class="s2">({</span><span class="s1">keyword</span><span
+    class="s2">: </span><span class="s3">&quot;allOf&quot;</span><span class="s2">, </span><span
+    class="s1">schemaProp</span><span class="s2">: </span><span class="s1">i</span><span class="s2">}, </span><span
+    class="s1">valid</span><span class="s2">)</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">)</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">mergeEvaluated</span><span
+    class="s2">(</span><span class="s1">schCxt</span><span class="s2">)</span>
+    <span class="s2">})</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

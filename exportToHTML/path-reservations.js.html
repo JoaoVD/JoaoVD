@@ -1,0 +1,318 @@
+<html>
+<head>
+  <title>path-reservations.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          path-reservations.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// A path exclusive reservation system</span>
+<span class="s0">// reserve([list, of, paths], fn)</span>
+<span class="s0">// When the fn is first in line for all its paths, it</span>
+<span class="s0">// is called with a cb that clears the reservation.</span>
+<span class="s0">//</span>
+<span class="s0">// Used by async unpack to avoid clobbering paths in use,</span>
+<span class="s0">// while still allowing maximal safe parallelization.</span>
+
+<span class="s2">const </span><span class="s1">assert </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'assert'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">normalize </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'./normalize-unicode.js'</span><span
+    class="s3">)</span>
+<span class="s2">const </span><span class="s1">stripSlashes </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'./strip-trailing-slashes.js'</span><span
+    class="s3">)</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">join </span><span class="s3">} = </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'path'</span><span class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">platform </span><span class="s3">= </span><span class="s1">process</span><span
+    class="s3">.</span><span class="s1">env</span><span class="s3">.</span><span
+    class="s1">TESTING_TAR_FAKE_PLATFORM </span><span class="s3">|| </span><span class="s1">process</span><span
+    class="s3">.</span><span class="s1">platform</span>
+<span class="s2">const </span><span class="s1">isWindows </span><span class="s3">= </span><span
+    class="s1">platform </span><span class="s3">=== </span><span class="s4">'win32'</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span
+    class="s3">= () =&gt; {</span>
+  <span class="s0">// path =&gt; [function or Set]</span>
+  <span class="s0">// A Set object means a directory reservation</span>
+  <span class="s0">// A fn is a direct reservation on that path</span>
+  <span class="s2">const </span><span class="s1">queues </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Map</span><span class="s3">()</span>
+
+  <span class="s0">// fn =&gt; {paths:[path,...], dirs:[path, ...]}</span>
+  <span class="s2">const </span><span class="s1">reservations </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Map</span><span class="s3">()</span>
+
+  <span class="s0">// return a set of parent dirs for a given path</span>
+  <span class="s0">// '/a/b/c/d' -&gt; ['/', '/a', '/a/b', '/a/b/c', '/a/b/c/d']</span>
+  <span class="s2">const </span><span class="s1">getDirs </span><span class="s3">= </span><span
+    class="s1">path </span><span class="s3">=&gt; {</span>
+    <span class="s2">const </span><span class="s1">dirs </span><span class="s3">= </span><span
+    class="s1">path</span><span class="s3">.</span><span class="s1">split</span><span class="s3">(</span><span
+    class="s4">'/'</span><span class="s3">).</span><span class="s1">slice</span><span class="s3">(</span><span
+    class="s5">0</span><span class="s3">, -</span><span class="s5">1</span><span class="s3">).</span><span class="s1">reduce</span><span
+    class="s3">((</span><span class="s1">set</span><span class="s3">, </span><span class="s1">path</span><span
+    class="s3">) =&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">set</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">) {</span>
+        <span class="s1">path </span><span class="s3">= </span><span class="s1">join</span><span
+    class="s3">(</span><span class="s1">set</span><span class="s3">[</span><span class="s1">set</span><span
+    class="s3">.</span><span class="s1">length </span><span class="s3">- </span><span class="s5">1</span><span
+    class="s3">], </span><span class="s1">path</span><span class="s3">)</span>
+      <span class="s3">}</span>
+      <span class="s1">set</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s1">path </span><span class="s3">|| </span><span class="s4">'/'</span><span class="s3">)</span>
+      <span class="s2">return </span><span class="s1">set</span>
+    <span class="s3">}, [])</span>
+    <span class="s2">return </span><span class="s1">dirs</span>
+  <span class="s3">}</span>
+
+  <span class="s0">// functions currently running</span>
+  <span class="s2">const </span><span class="s1">running </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Set</span><span class="s3">()</span>
+
+  <span class="s0">// return the queues for each path the function cares about</span>
+  <span class="s0">// fn =&gt; {paths, dirs}</span>
+  <span class="s2">const </span><span class="s1">getQueues </span><span class="s3">= </span><span
+    class="s1">fn </span><span class="s3">=&gt; {</span>
+    <span class="s2">const </span><span class="s1">res </span><span class="s3">= </span><span
+    class="s1">reservations</span><span class="s3">.</span><span class="s1">get</span><span class="s3">(</span><span
+    class="s1">fn</span><span class="s3">)</span>
+    <span class="s0">/* istanbul ignore if - unpossible */</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">res</span><span class="s3">) {</span>
+      <span class="s2">throw new </span><span class="s1">Error</span><span class="s3">(</span><span class="s4">'function does not have any path reservations'</span><span
+    class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">return </span><span class="s3">{</span>
+      <span class="s1">paths</span><span class="s3">: </span><span class="s1">res</span><span class="s3">.</span><span
+    class="s1">paths</span><span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span
+    class="s1">path </span><span class="s3">=&gt; </span><span class="s1">queues</span><span class="s3">.</span><span
+    class="s1">get</span><span class="s3">(</span><span class="s1">path</span><span class="s3">)),</span>
+      <span class="s1">dirs</span><span class="s3">: [</span><span class="s1">...res</span><span
+    class="s3">.</span><span class="s1">dirs</span><span class="s3">].</span><span class="s1">map</span><span
+    class="s3">(</span><span class="s1">path </span><span class="s3">=&gt; </span><span class="s1">queues</span><span
+    class="s3">.</span><span class="s1">get</span><span class="s3">(</span><span class="s1">path</span><span class="s3">)),</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s0">// check if fn is first in line for all its paths, and is</span>
+  <span class="s0">// included in the first set for all its dir queues</span>
+  <span class="s2">const </span><span class="s1">check </span><span class="s3">= </span><span class="s1">fn </span><span
+    class="s3">=&gt; {</span>
+    <span class="s2">const </span><span class="s3">{ </span><span class="s1">paths</span><span class="s3">, </span><span
+    class="s1">dirs </span><span class="s3">} = </span><span class="s1">getQueues</span><span class="s3">(</span><span
+    class="s1">fn</span><span class="s3">)</span>
+    <span class="s2">return </span><span class="s1">paths</span><span class="s3">.</span><span
+    class="s1">every</span><span class="s3">(</span><span class="s1">q </span><span class="s3">=&gt; </span><span
+    class="s1">q</span><span class="s3">[</span><span class="s5">0</span><span class="s3">] === </span><span class="s1">fn</span><span
+    class="s3">) &amp;&amp;</span>
+      <span class="s1">dirs</span><span class="s3">.</span><span class="s1">every</span><span class="s3">(</span><span
+    class="s1">q </span><span class="s3">=&gt; </span><span class="s1">q</span><span class="s3">[</span><span
+    class="s5">0</span><span class="s3">] </span><span class="s2">instanceof </span><span class="s1">Set </span><span
+    class="s3">&amp;&amp; </span><span class="s1">q</span><span class="s3">[</span><span class="s5">0</span><span
+    class="s3">].</span><span class="s1">has</span><span class="s3">(</span><span class="s1">fn</span><span class="s3">))</span>
+  <span class="s3">}</span>
+
+  <span class="s0">// run the function if it's first in line and not already running</span>
+  <span class="s2">const </span><span class="s1">run </span><span class="s3">= </span><span class="s1">fn </span><span
+    class="s3">=&gt; {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">running</span><span class="s3">.</span><span
+    class="s1">has</span><span class="s3">(</span><span class="s1">fn</span><span class="s3">) || !</span><span
+    class="s1">check</span><span class="s3">(</span><span class="s1">fn</span><span class="s3">)) {</span>
+      <span class="s2">return false</span>
+    <span class="s3">}</span>
+    <span class="s1">running</span><span class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span
+    class="s1">fn</span><span class="s3">)</span>
+    <span class="s1">fn</span><span class="s3">(() =&gt; </span><span class="s1">clear</span><span
+    class="s3">(</span><span class="s1">fn</span><span class="s3">))</span>
+    <span class="s2">return true</span>
+  <span class="s3">}</span>
+
+  <span class="s2">const </span><span class="s1">clear </span><span class="s3">= </span><span class="s1">fn </span><span
+    class="s3">=&gt; {</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">running</span><span class="s3">.</span><span
+    class="s1">has</span><span class="s3">(</span><span class="s1">fn</span><span class="s3">)) {</span>
+      <span class="s2">return false</span>
+    <span class="s3">}</span>
+
+    <span class="s2">const </span><span class="s3">{ </span><span class="s1">paths</span><span class="s3">, </span><span
+    class="s1">dirs </span><span class="s3">} = </span><span class="s1">reservations</span><span
+    class="s3">.</span><span class="s1">get</span><span class="s3">(</span><span class="s1">fn</span><span
+    class="s3">)</span>
+    <span class="s2">const </span><span class="s1">next </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Set</span><span class="s3">()</span>
+
+    <span class="s1">paths</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s1">path </span><span class="s3">=&gt; {</span>
+      <span class="s2">const </span><span class="s1">q </span><span class="s3">= </span><span
+    class="s1">queues</span><span class="s3">.</span><span class="s1">get</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">)</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">equal</span><span class="s3">(</span><span
+    class="s1">q</span><span class="s3">[</span><span class="s5">0</span><span class="s3">], </span><span
+    class="s1">fn</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">q</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">1</span><span class="s3">) {</span>
+        <span class="s1">queues</span><span class="s3">.</span><span class="s1">delete</span><span
+    class="s3">(</span><span class="s1">path</span><span class="s3">)</span>
+      <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+        <span class="s1">q</span><span class="s3">.</span><span class="s1">shift</span><span class="s3">()</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span
+    class="s1">q</span><span class="s3">[</span><span class="s5">0</span><span class="s3">] === </span><span class="s4">'function'</span><span
+    class="s3">) {</span>
+          <span class="s1">next</span><span class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span
+    class="s1">q</span><span class="s3">[</span><span class="s5">0</span><span class="s3">])</span>
+        <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+          <span class="s1">q</span><span class="s3">[</span><span class="s5">0</span><span class="s3">].</span><span
+    class="s1">forEach</span><span class="s3">(</span><span class="s1">fn </span><span class="s3">=&gt; </span><span
+    class="s1">next</span><span class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span class="s1">fn</span><span
+    class="s3">))</span>
+        <span class="s3">}</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+
+    <span class="s1">dirs</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s1">dir </span><span class="s3">=&gt; {</span>
+      <span class="s2">const </span><span class="s1">q </span><span class="s3">= </span><span
+    class="s1">queues</span><span class="s3">.</span><span class="s1">get</span><span class="s3">(</span><span
+    class="s1">dir</span><span class="s3">)</span>
+      <span class="s1">assert</span><span class="s3">(</span><span class="s1">q</span><span class="s3">[</span><span
+    class="s5">0</span><span class="s3">] </span><span class="s2">instanceof </span><span class="s1">Set</span><span
+    class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">q</span><span class="s3">[</span><span
+    class="s5">0</span><span class="s3">].</span><span class="s1">size </span><span class="s3">=== </span><span
+    class="s5">1 </span><span class="s3">&amp;&amp; </span><span class="s1">q</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">1</span><span class="s3">) {</span>
+        <span class="s1">queues</span><span class="s3">.</span><span class="s1">delete</span><span
+    class="s3">(</span><span class="s1">dir</span><span class="s3">)</span>
+      <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span class="s1">q</span><span
+    class="s3">[</span><span class="s5">0</span><span class="s3">].</span><span class="s1">size </span><span class="s3">=== </span><span
+    class="s5">1</span><span class="s3">) {</span>
+        <span class="s1">q</span><span class="s3">.</span><span class="s1">shift</span><span class="s3">()</span>
+
+        <span class="s0">// must be a function or else the Set would've been reused</span>
+        <span class="s1">next</span><span class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span
+    class="s1">q</span><span class="s3">[</span><span class="s5">0</span><span class="s3">])</span>
+      <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+        <span class="s1">q</span><span class="s3">[</span><span class="s5">0</span><span class="s3">].</span><span
+    class="s1">delete</span><span class="s3">(</span><span class="s1">fn</span><span class="s3">)</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+    <span class="s1">running</span><span class="s3">.</span><span class="s1">delete</span><span class="s3">(</span><span
+    class="s1">fn</span><span class="s3">)</span>
+
+    <span class="s1">next</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s1">fn </span><span class="s3">=&gt; </span><span class="s1">run</span><span class="s3">(</span><span
+    class="s1">fn</span><span class="s3">))</span>
+    <span class="s2">return true</span>
+  <span class="s3">}</span>
+
+  <span class="s2">const </span><span class="s1">reserve </span><span class="s3">= (</span><span class="s1">paths</span><span
+    class="s3">, </span><span class="s1">fn</span><span class="s3">) =&gt; {</span>
+    <span class="s0">// collide on matches across case and unicode normalization</span>
+    <span class="s0">// On windows, thanks to the magic of 8.3 shortnames, it is fundamentally</span>
+    <span class="s0">// impossible to determine whether two paths refer to the same thing on</span>
+    <span class="s0">// disk, without asking the kernel for a shortname.</span>
+    <span class="s0">// So, we just pretend that every path matches every other path here,</span>
+    <span class="s0">// effectively removing all parallelization on windows.</span>
+    <span class="s1">paths </span><span class="s3">= </span><span class="s1">isWindows </span><span
+    class="s3">? [</span><span class="s4">'win32 parallelization disabled'</span><span class="s3">] : </span><span
+    class="s1">paths</span><span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span
+    class="s1">p </span><span class="s3">=&gt; {</span>
+      <span class="s0">// don't need normPath, because we skip this entirely for windows</span>
+      <span class="s2">return </span><span class="s1">stripSlashes</span><span class="s3">(</span><span
+    class="s1">join</span><span class="s3">(</span><span class="s1">normalize</span><span class="s3">(</span><span
+    class="s1">p</span><span class="s3">))).</span><span class="s1">toLowerCase</span><span class="s3">()</span>
+    <span class="s3">})</span>
+
+    <span class="s2">const </span><span class="s1">dirs </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Set</span><span class="s3">(</span>
+      <span class="s1">paths</span><span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span
+    class="s1">path </span><span class="s3">=&gt; </span><span class="s1">getDirs</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">)).</span><span class="s1">reduce</span><span class="s3">((</span><span
+    class="s1">a</span><span class="s3">, </span><span class="s1">b</span><span class="s3">) =&gt; </span><span
+    class="s1">a</span><span class="s3">.</span><span class="s1">concat</span><span class="s3">(</span><span class="s1">b</span><span
+    class="s3">))</span>
+    <span class="s3">)</span>
+    <span class="s1">reservations</span><span class="s3">.</span><span class="s1">set</span><span
+    class="s3">(</span><span class="s1">fn</span><span class="s3">, { </span><span class="s1">dirs</span><span
+    class="s3">, </span><span class="s1">paths </span><span class="s3">})</span>
+    <span class="s1">paths</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s1">path </span><span class="s3">=&gt; {</span>
+      <span class="s2">const </span><span class="s1">q </span><span class="s3">= </span><span
+    class="s1">queues</span><span class="s3">.</span><span class="s1">get</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s1">q</span><span class="s3">) {</span>
+        <span class="s1">queues</span><span class="s3">.</span><span class="s1">set</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">, [</span><span class="s1">fn</span><span class="s3">])</span>
+      <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+        <span class="s1">q</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s1">fn</span><span class="s3">)</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+    <span class="s1">dirs</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s1">dir </span><span class="s3">=&gt; {</span>
+      <span class="s2">const </span><span class="s1">q </span><span class="s3">= </span><span
+    class="s1">queues</span><span class="s3">.</span><span class="s1">get</span><span class="s3">(</span><span
+    class="s1">dir</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s1">q</span><span class="s3">) {</span>
+        <span class="s1">queues</span><span class="s3">.</span><span class="s1">set</span><span class="s3">(</span><span
+    class="s1">dir</span><span class="s3">, [</span><span class="s2">new </span><span class="s1">Set</span><span
+    class="s3">([</span><span class="s1">fn</span><span class="s3">])])</span>
+      <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span class="s1">q</span><span
+    class="s3">[</span><span class="s1">q</span><span class="s3">.</span><span class="s1">length </span><span
+    class="s3">- </span><span class="s5">1</span><span class="s3">] </span><span class="s2">instanceof </span><span
+    class="s1">Set</span><span class="s3">) {</span>
+        <span class="s1">q</span><span class="s3">[</span><span class="s1">q</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">- </span><span class="s5">1</span><span class="s3">].</span><span
+    class="s1">add</span><span class="s3">(</span><span class="s1">fn</span><span class="s3">)</span>
+      <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+        <span class="s1">q</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s2">new </span><span class="s1">Set</span><span class="s3">([</span><span class="s1">fn</span><span
+    class="s3">]))</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+
+    <span class="s2">return </span><span class="s1">run</span><span class="s3">(</span><span class="s1">fn</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s2">return </span><span class="s3">{ </span><span class="s1">check</span><span class="s3">, </span><span
+    class="s1">reserve </span><span class="s3">}</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<html>
+<head>
+  <title>values.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          values.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">SchemaObject</span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">, </span><span class="s1">Type</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;../../compile/util&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">not</span><span class="s2">, </span><span
+    class="s1">or</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">checkMetadata</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./metadata&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">checkNullableObject</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./nullable&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">typeError</span><span class="s2">, </span><span
+    class="s1">_JTDTypeError</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./error&quot;</span>
+
+<span class="s0">export </span><span class="s1">type JTDValuesError </span><span class="s2">= </span><span class="s1">_JTDTypeError</span><span
+    class="s2">&lt;</span><span class="s3">&quot;values&quot;</span><span class="s2">, </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">, </span><span class="s1">SchemaObject</span><span class="s2">&gt;</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;values&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">error</span><span class="s2">: </span><span class="s1">typeError</span><span class="s2">(</span><span
+    class="s3">&quot;object&quot;</span><span class="s2">),</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s1">checkMetadata</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">)</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s0">const </span><span class="s2">[</span><span class="s1">valid</span><span class="s2">, </span><span
+    class="s1">cond</span><span class="s2">] = </span><span class="s1">checkNullableObject</span><span
+    class="s2">(</span><span class="s1">cxt</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span class="s1">schema</span><span
+    class="s2">)) {</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">not</span><span class="s2">(</span><span class="s1">or</span><span class="s2">(</span><span class="s1">cond</span><span
+    class="s2">, </span><span class="s1">valid</span><span class="s2">)), () =&gt; </span><span
+    class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span class="s2">())</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">cond</span><span class="s2">)</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s1">validateMap</span><span class="s2">())</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span><span
+    class="s1">not</span><span class="s2">(</span><span class="s1">valid</span><span class="s2">))</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span class="s2">()</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">endIf</span><span class="s2">()</span>
+    <span class="s2">}</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">)</span>
+
+    <span class="s0">function </span><span class="s1">validateMap</span><span class="s2">(): </span><span class="s1">Name </span><span
+    class="s2">| </span><span class="s1">boolean </span><span class="s2">{</span>
+      <span class="s0">const </span><span class="s1">_valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">allErrors</span><span class="s2">) {</span>
+        <span class="s0">const </span><span class="s1">validMap </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;valid&quot;</span><span
+    class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+        <span class="s1">validateValues</span><span class="s2">(() =&gt; </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span class="s1">validMap</span><span
+    class="s2">, </span><span class="s0">false</span><span class="s2">))</span>
+        <span class="s0">return </span><span class="s1">validMap</span>
+      <span class="s2">}</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">var</span><span class="s2">(</span><span
+    class="s1">_valid</span><span class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+      <span class="s1">validateValues</span><span class="s2">(() =&gt; </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">break</span><span class="s2">())</span>
+      <span class="s0">return </span><span class="s1">_valid</span>
+
+      <span class="s0">function </span><span class="s1">validateValues</span><span class="s2">(</span><span class="s1">notValid</span><span
+    class="s2">: () =&gt; </span><span class="s0">void</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">forIn</span><span class="s2">(</span><span
+    class="s3">&quot;key&quot;</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, (</span><span class="s1">key</span><span class="s2">) =&gt; {</span>
+          <span class="s1">cxt</span><span class="s2">.</span><span class="s1">subschema</span><span class="s2">(</span>
+            <span class="s2">{</span>
+              <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;values&quot;</span><span
+    class="s2">,</span>
+              <span class="s1">dataProp</span><span class="s2">: </span><span class="s1">key</span><span
+    class="s2">,</span>
+              <span class="s1">dataPropType</span><span class="s2">: </span><span class="s1">Type</span><span
+    class="s2">.</span><span class="s1">Str</span><span class="s2">,</span>
+            <span class="s2">},</span>
+            <span class="s1">_valid</span>
+          <span class="s2">)</span>
+          <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">not</span><span class="s2">(</span><span class="s1">_valid</span><span class="s2">), </span><span
+    class="s1">notValid</span><span class="s2">)</span>
+        <span class="s2">})</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

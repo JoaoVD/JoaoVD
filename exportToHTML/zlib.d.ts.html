@@ -1,0 +1,1191 @@
+<html>
+<head>
+  <title>zlib.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          zlib.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:zlib` module provides compression functionality implemented using</span>
+ <span class="s0">* Gzip, Deflate/Inflate, and Brotli.</span>
+ <span class="s0">*</span>
+ <span class="s0">* To access it:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import zlib from 'node:zlib';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* Compression and decompression are built around the Node.js</span>
+ <span class="s0">* [Streams API](https://nodejs.org/docs/latest-v24.x/api/stream.html).</span>
+ <span class="s0">*</span>
+ <span class="s0">* Compressing or decompressing a stream (such as a file) can be accomplished by</span>
+ <span class="s0">* piping the source stream through a `zlib` `Transform` stream into a destination</span>
+ <span class="s0">* stream:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { createGzip } from 'node:zlib';</span>
+ <span class="s0">* import { pipeline } from 'node:stream';</span>
+ <span class="s0">* import {</span>
+ <span class="s0">*   createReadStream,</span>
+ <span class="s0">*   createWriteStream,</span>
+ <span class="s0">* } from 'node:fs';</span>
+ <span class="s0">*</span>
+ <span class="s0">* const gzip = createGzip();</span>
+ <span class="s0">* const source = createReadStream('input.txt');</span>
+ <span class="s0">* const destination = createWriteStream('input.txt.gz');</span>
+ <span class="s0">*</span>
+ <span class="s0">* pipeline(source, gzip, destination, (err) =&gt; {</span>
+ <span class="s0">*   if (err) {</span>
+ <span class="s0">*     console.error('An error occurred:', err);</span>
+ <span class="s0">*     process.exitCode = 1;</span>
+ <span class="s0">*   }</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* // Or, Promisified</span>
+ <span class="s0">*</span>
+ <span class="s0">* import { promisify } from 'node:util';</span>
+ <span class="s0">* const pipe = promisify(pipeline);</span>
+ <span class="s0">*</span>
+ <span class="s0">* async function do_gzip(input, output) {</span>
+ <span class="s0">*   const gzip = createGzip();</span>
+ <span class="s0">*   const source = createReadStream(input);</span>
+ <span class="s0">*   const destination = createWriteStream(output);</span>
+ <span class="s0">*   await pipe(source, gzip, destination);</span>
+ <span class="s0">* }</span>
+ <span class="s0">*</span>
+ <span class="s0">* do_gzip('input.txt', 'input.txt.gz')</span>
+ <span class="s0">*   .catch((err) =&gt; {</span>
+ <span class="s0">*     console.error('An error occurred:', err);</span>
+ <span class="s0">*     process.exitCode = 1;</span>
+ <span class="s0">*   });</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* It is also possible to compress or decompress data in a single step:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { deflate, unzip } from 'node:zlib';</span>
+ <span class="s0">*</span>
+ <span class="s0">* const input = '.................................';</span>
+ <span class="s0">* deflate(input, (err, buffer) =&gt; {</span>
+ <span class="s0">*   if (err) {</span>
+ <span class="s0">*     console.error('An error occurred:', err);</span>
+ <span class="s0">*     process.exitCode = 1;</span>
+ <span class="s0">*   }</span>
+ <span class="s0">*   console.log(buffer.toString('base64'));</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* const buffer = Buffer.from('eJzT0yMAAGTvBe8=', 'base64');</span>
+ <span class="s0">* unzip(buffer, (err, buffer) =&gt; {</span>
+ <span class="s0">*   if (err) {</span>
+ <span class="s0">*     console.error('An error occurred:', err);</span>
+ <span class="s0">*     process.exitCode = 1;</span>
+ <span class="s0">*   }</span>
+ <span class="s0">*   console.log(buffer.toString());</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* // Or, Promisified</span>
+ <span class="s0">*</span>
+ <span class="s0">* import { promisify } from 'node:util';</span>
+ <span class="s0">* const do_unzip = promisify(unzip);</span>
+ <span class="s0">*</span>
+ <span class="s0">* do_unzip(buffer)</span>
+ <span class="s0">*   .then((buf) =&gt; console.log(buf.toString()))</span>
+ <span class="s0">*   .catch((err) =&gt; {</span>
+ <span class="s0">*     console.error('An error occurred:', err);</span>
+ <span class="s0">*     process.exitCode = 1;</span>
+ <span class="s0">*   });</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/zlib.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;zlib&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">stream from </span><span class="s3">&quot;node:stream&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">ZlibOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">constants.Z_NO_FLUSH</span>
+         <span class="s0">*/</span>
+        <span class="s2">flush</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">constants.Z_FINISH</span>
+         <span class="s0">*/</span>
+        <span class="s2">finishFlush</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">16*1024</span>
+         <span class="s0">*/</span>
+        <span class="s2">chunkSize</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">windowBits</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">level</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">; </span><span
+    class="s6">// compression only</span>
+        <span class="s2">memLevel</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">; </span><span
+    class="s6">// compression only</span>
+        <span class="s2">strategy</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">; </span><span
+    class="s6">// compression only</span>
+        <span class="s2">dictionary</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ArrayBufferView </span><span class="s4">| </span><span
+    class="s2">ArrayBuffer </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">; </span><span class="s6">// deflate/inflate only, empty dictionary by default</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, returns an object with `buffer` and `engine`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">info</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Limits output size when using convenience methods.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">buffer.kMaxLength</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxOutputLength</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">BrotliOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span
+    class="s0">constants.BROTLI_OPERATION_PROCESS</span>
+         <span class="s0">*/</span>
+        <span class="s2">flush</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span
+    class="s0">constants.BROTLI_OPERATION_FINISH</span>
+         <span class="s0">*/</span>
+        <span class="s2">finishFlush</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">16*1024</span>
+         <span class="s0">*/</span>
+        <span class="s2">chunkSize</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">params</span><span class="s4">?:</span>
+            <span class="s4">| {</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Each key is a `constants.BROTLI_*` constant.</span>
+                 <span class="s0">*/</span>
+                <span class="s4">[</span><span class="s2">key</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">]: </span><span class="s2">boolean </span><span class="s4">| </span><span
+    class="s2">number</span><span class="s4">;</span>
+            <span class="s4">}</span>
+            <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Limits output size when using [convenience methods](https://nodejs.org/docs/latest-v24.x/api/zlib.html#convenience-methods).</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">buffer.kMaxLength</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxOutputLength</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, returns an object with `buffer` and `engine`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">info</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ZstdOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">constants.ZSTD_e_continue</span>
+         <span class="s0">*/</span>
+        <span class="s2">flush</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">constants.ZSTD_e_end</span>
+         <span class="s0">*/</span>
+        <span class="s2">finishFlush</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">16 * 1024</span>
+         <span class="s0">*/</span>
+        <span class="s2">chunkSize</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Key-value object containing indexed</span>
+         <span class="s0">* [Zstd parameters](https://nodejs.org/docs/latest-v24.x/api/zlib.html#zstd-constants).</span>
+         <span class="s0">*/</span>
+        <span class="s2">params</span><span class="s4">?: { [</span><span class="s2">key</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">]: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">boolean </span><span class="s4">} | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Limits output size when using</span>
+         <span class="s0">* [convenience methods](https://nodejs.org/docs/latest-v24.x/api/zlib.html#convenience-methods).</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">buffer.kMaxLength</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxOutputLength</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, returns an object with `buffer` and `engine`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">info</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Optional dictionary used to improve compression efficiency when compressing or decompressing data that</span>
+         <span class="s0">* shares common patterns with the dictionary.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">dictionary</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ArrayBufferView </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">Zlib </span><span class="s4">{</span>
+        <span class="s2">readonly bytesWritten</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">shell</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">string </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">close</span><span class="s4">(</span><span class="s2">callback</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">flush</span><span class="s4">(</span><span class="s2">kind</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s2">flush</span><span class="s4">(</span><span class="s2">callback</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ZlibParams </span><span class="s4">{</span>
+        <span class="s2">params</span><span class="s4">(</span><span class="s2">level</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">strategy</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ZlibReset </span><span class="s4">{</span>
+        <span class="s2">reset</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">BrotliCompress </span><span class="s5">extends </span><span
+    class="s2">stream</span><span class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span
+    class="s2">Zlib </span><span class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">BrotliDecompress </span><span class="s5">extends </span><span
+    class="s2">stream</span><span class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span
+    class="s2">Zlib </span><span class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">Gzip </span><span class="s5">extends </span><span class="s2">stream</span><span
+    class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span class="s2">Zlib </span><span
+    class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">Gunzip </span><span class="s5">extends </span><span class="s2">stream</span><span
+    class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span class="s2">Zlib </span><span
+    class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">Deflate </span><span class="s5">extends </span><span class="s2">stream</span><span
+    class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span class="s2">Zlib</span><span
+    class="s4">, </span><span class="s2">ZlibReset</span><span class="s4">, </span><span
+    class="s2">ZlibParams </span><span class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">Inflate </span><span class="s5">extends </span><span class="s2">stream</span><span
+    class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span class="s2">Zlib</span><span
+    class="s4">, </span><span class="s2">ZlibReset </span><span class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">DeflateRaw </span><span class="s5">extends </span><span
+    class="s2">stream</span><span class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span
+    class="s2">Zlib</span><span class="s4">, </span><span class="s2">ZlibReset</span><span class="s4">, </span><span
+    class="s2">ZlibParams </span><span class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">InflateRaw </span><span class="s5">extends </span><span
+    class="s2">stream</span><span class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span
+    class="s2">Zlib</span><span class="s4">, </span><span class="s2">ZlibReset </span><span class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">Unzip </span><span class="s5">extends </span><span class="s2">stream</span><span
+    class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span class="s2">Zlib </span><span
+    class="s4">{}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">ZstdCompress </span><span class="s5">extends </span><span
+    class="s2">stream</span><span class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span
+    class="s2">Zlib </span><span class="s4">{}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">ZstdDecompress </span><span class="s5">extends </span><span
+    class="s2">stream</span><span class="s4">.</span><span class="s2">Transform</span><span class="s4">, </span><span
+    class="s2">Zlib </span><span class="s4">{}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Computes a 32-bit [Cyclic Redundancy Check](https://en.wikipedia.org/wiki/Cyclic_redundancy_check) checksum of `data`.</span>
+     <span class="s0">* If `value` is specified, it is used as the starting value of the checksum, otherwise, 0 is used as the starting value.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">data When `data` is a string, it will be encoded as UTF-8 before being used for computation.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">value An optional starting value. It must be a 32-bit unsigned integer. @default 0</span>
+     <span class="s0">* </span><span class="s1">@returns </span><span class="s0">A 32-bit unsigned integer containing the checksum.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.2.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">crc32</span><span class="s4">(</span><span
+    class="s2">data</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Buffer </span><span class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView</span><span class="s4">, </span><span class="s2">value</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `BrotliCompress` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.7.0, v10.16.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createBrotliCompress</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">BrotliOptions</span><span class="s4">): </span><span
+    class="s2">BrotliCompress</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `BrotliDecompress` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.7.0, v10.16.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createBrotliDecompress</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">BrotliOptions</span><span class="s4">): </span><span
+    class="s2">BrotliDecompress</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `Gzip` object.</span>
+     <span class="s0">* See `example`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createGzip</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZlibOptions</span><span
+    class="s4">): </span><span class="s2">Gzip</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `Gunzip` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createGunzip</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Gunzip</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `Deflate` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createDeflate</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Deflate</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `Inflate` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createInflate</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Inflate</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `DeflateRaw` object.</span>
+     <span class="s0">*</span>
+     <span class="s0">* An upgrade of zlib from 1.2.8 to 1.2.11 changed behavior when `windowBits` is set to 8 for raw deflate streams. zlib would automatically set `windowBits` to 9 if was initially set to 8. Newer</span>
+     <span class="s0">* versions of zlib will throw an exception,</span>
+     <span class="s0">* so Node.js restored the original behavior of upgrading a value of 8 to 9,</span>
+     <span class="s0">* since passing `windowBits = 9` to zlib actually results in a compressed stream</span>
+     <span class="s0">* that effectively uses an 8-bit window only.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createDeflateRaw</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">DeflateRaw</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `InflateRaw` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createInflateRaw</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">InflateRaw</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `Unzip` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createUnzip</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Unzip</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `ZstdCompress` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createZstdCompress</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZstdOptions</span><span
+    class="s4">): </span><span class="s2">ZstdCompress</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates and returns a new `ZstdDecompress` object.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createZstdDecompress</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZstdOptions</span><span
+    class="s4">): </span><span class="s2">ZstdDecompress</span><span class="s4">;</span>
+    <span class="s2">type InputType </span><span class="s4">= </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">ArrayBuffer </span><span class="s4">| </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ArrayBufferView</span><span class="s4">;</span>
+    <span class="s2">type CompressCallback </span><span class="s4">= (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">result</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.7.0, v10.16.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">brotliCompress</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">BrotliOptions</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">CompressCallback</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">brotliCompress</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace brotliCompress </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">BrotliOptions</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Compress a chunk of data with `BrotliCompress`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.7.0, v10.16.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">brotliCompressSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">BrotliOptions</span><span class="s4">): </span><span
+    class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.7.0, v10.16.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">brotliDecompress</span><span class="s4">(</span><span class="s2">buf</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">BrotliOptions</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">brotliDecompress</span><span class="s4">(</span><span class="s2">buf</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: </span><span class="s2">CompressCallback</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace brotliDecompress </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">BrotliOptions</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Decompress a chunk of data with `BrotliDecompress`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.7.0, v10.16.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">brotliDecompressSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">BrotliOptions</span><span class="s4">): </span><span
+    class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">deflate</span><span class="s4">(</span><span class="s2">buf</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: </span><span class="s2">CompressCallback</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">deflate</span><span class="s4">(</span><span class="s2">buf</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">ZlibOptions</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace deflate </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Compress a chunk of data with `Deflate`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">deflateSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZlibOptions</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">deflateRaw</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">deflateRaw</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ZlibOptions</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">CompressCallback</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace deflateRaw </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Compress a chunk of data with `DeflateRaw`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">deflateRawSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZlibOptions</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">gzip</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">gzip</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ZlibOptions</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">CompressCallback</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace gzip </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Compress a chunk of data with `Gzip`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">gzipSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZlibOptions</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">gunzip</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">gunzip</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ZlibOptions</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">CompressCallback</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace gunzip </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Decompress a chunk of data with `Gunzip`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">gunzipSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZlibOptions</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">inflate</span><span class="s4">(</span><span class="s2">buf</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: </span><span class="s2">CompressCallback</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">inflate</span><span class="s4">(</span><span class="s2">buf</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">ZlibOptions</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace inflate </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Decompress a chunk of data with `Inflate`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">inflateSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZlibOptions</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">inflateRaw</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">inflateRaw</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ZlibOptions</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">CompressCallback</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace inflateRaw </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Decompress a chunk of data with `InflateRaw`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">inflateRawSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZlibOptions</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">unzip</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">unzip</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ZlibOptions</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">CompressCallback</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace unzip </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZlibOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Decompress a chunk of data with `Unzip`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">unzipSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZlibOptions</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">zstdCompress</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">zstdCompress</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ZstdOptions</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">CompressCallback</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace zstdCompress </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZstdOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Compress a chunk of data with `ZstdCompress`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">zstdCompressSync</span><span class="s4">(</span><span class="s2">buf</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZstdOptions</span><span class="s4">): </span><span
+    class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">zstdDecompress</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">CompressCallback</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">zstdDecompress</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ZstdOptions</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">CompressCallback</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">namespace zstdDecompress </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ZstdOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Decompress a chunk of data with `ZstdDecompress`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">zstdDecompressSync</span><span class="s4">(</span><span
+    class="s2">buf</span><span class="s4">: </span><span class="s2">InputType</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ZstdOptions</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s2">namespace constants </span><span class="s4">{</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODE</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MAP</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_1</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_2</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_ALLOC_TREE_GROUPS</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_DICTIONARY_NOT_SET</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_1</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_2</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_CL_SPACE</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_CONTEXT_MAP_REPEAT</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_DICTIONARY</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_DISTANCE</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_META_NIBBLE</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_NIBBLE</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_HUFFMAN_SPACE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_PADDING_1</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_PADDING_2</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_RESERVED</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_ALPHABET</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_SAME</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_TRANSFORM</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_FORMAT_WINDOW_BITS</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_INVALID_ARGUMENTS</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_ERROR_UNREACHABLE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_NEEDS_MORE_INPUT</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_NEEDS_MORE_OUTPUT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_NO_ERROR</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_PARAM_LARGE_WINDOW</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_RESULT_ERROR</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_RESULT_SUCCESS</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DECODER_SUCCESS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DEFAULT_MODE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DEFAULT_QUALITY</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_DEFAULT_WINDOW</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_ENCODE</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_LARGE_MAX_WINDOW_BITS</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MAX_INPUT_BLOCK_BITS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MAX_QUALITY</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MAX_WINDOW_BITS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MIN_INPUT_BLOCK_BITS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MIN_QUALITY</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MIN_WINDOW_BITS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MODE_FONT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MODE_GENERIC</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_MODE_TEXT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_OPERATION_EMIT_METADATA</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_OPERATION_FINISH</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_OPERATION_FLUSH</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_OPERATION_PROCESS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_LARGE_WINDOW</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_LGBLOCK</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_LGWIN</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_MODE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_NDIRECT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_NPOSTFIX</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_QUALITY</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">BROTLI_PARAM_SIZE_HINT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">DEFLATE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">DEFLATERAW</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">GUNZIP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">GZIP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">INFLATE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">INFLATERAW</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">UNZIP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZLIB_VERNUM</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_CLEVEL_DEFAULT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_COMPRESS</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_DECOMPRESS</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_btlazy2</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_btopt</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_btultra</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_btultra2</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_chainLog</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_checksumFlag</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_compressionLevel</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_contentSizeFlag</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_dictIDFlag</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_enableLongDistanceMatching</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_hashLog</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_jobSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_ldmBucketSizeLog</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_ldmHashLog</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_ldmHashRateLog</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_ldmMinMatch</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_minMatch</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_nbWorkers</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_overlapLog</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_searchLog</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_strategy</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_targetLength</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_c_windowLog</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_d_windowLogMax</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_dfast</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_e_continue</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_e_end</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_e_flush</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_GENERIC</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_checksum_wrong</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_corruption_detected</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_dictionaryCreation_failed</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_dictionary_corrupted</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_dictionary_wrong</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_dstBuffer_null</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_dstSize_tooSmall</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_frameParameter_unsupported</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_frameParameter_windowTooLarge</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_init_missing</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_literals_headerWrong</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_maxSymbolValue_tooLarge</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_maxSymbolValue_tooSmall</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_memory_allocation</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_noForwardProgress_destFull</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_noForwardProgress_inputEmpty</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_no_error</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_parameter_combination_unsupported</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_parameter_outOfBound</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_parameter_unsupported</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_prefix_unknown</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_srcSize_wrong</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_stabilityCondition_notRespected</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_stage_wrong</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_tableLog_tooLarge</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_version_unsupported</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_error_workSpace_tooSmall</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_fast</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_greedy</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_lazy</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZSTD_lazy2</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_BEST_COMPRESSION</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_BEST_SPEED</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_BLOCK</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_BUF_ERROR</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_DATA_ERROR</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_DEFAULT_CHUNK</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_DEFAULT_COMPRESSION</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_DEFAULT_LEVEL</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_DEFAULT_MEMLEVEL</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_DEFAULT_STRATEGY</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_DEFAULT_WINDOWBITS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_ERRNO</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_FILTERED</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_FINISH</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_FIXED</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_FULL_FLUSH</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_HUFFMAN_ONLY</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MAX_CHUNK</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MAX_LEVEL</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MAX_MEMLEVEL</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MAX_WINDOWBITS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MEM_ERROR</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MIN_CHUNK</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MIN_LEVEL</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MIN_MEMLEVEL</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_MIN_WINDOWBITS</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_NEED_DICT</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_NO_COMPRESSION</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_NO_FLUSH</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_OK</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_PARTIAL_FLUSH</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_RLE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_STREAM_END</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_STREAM_ERROR</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_SYNC_FLUSH</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">Z_VERSION_ERROR</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s6">// Allowed flush values.</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_NO_FLUSH` */</span>
+    <span class="s5">const </span><span class="s2">Z_NO_FLUSH</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_PARTIAL_FLUSH` */</span>
+    <span class="s5">const </span><span class="s2">Z_PARTIAL_FLUSH</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_SYNC_FLUSH` */</span>
+    <span class="s5">const </span><span class="s2">Z_SYNC_FLUSH</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_FULL_FLUSH` */</span>
+    <span class="s5">const </span><span class="s2">Z_FULL_FLUSH</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_FINISH` */</span>
+    <span class="s5">const </span><span class="s2">Z_FINISH</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_BLOCK` */</span>
+    <span class="s5">const </span><span class="s2">Z_BLOCK</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s6">// Return codes for the compression/decompression functions.</span>
+    <span class="s6">// Negative values are errors, positive values are used for special but normal events.</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_OK` */</span>
+    <span class="s5">const </span><span class="s2">Z_OK</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_STREAM_END` */</span>
+    <span class="s5">const </span><span class="s2">Z_STREAM_END</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_NEED_DICT` */</span>
+    <span class="s5">const </span><span class="s2">Z_NEED_DICT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_ERRNO` */</span>
+    <span class="s5">const </span><span class="s2">Z_ERRNO</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_STREAM_ERROR` */</span>
+    <span class="s5">const </span><span class="s2">Z_STREAM_ERROR</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_DATA_ERROR` */</span>
+    <span class="s5">const </span><span class="s2">Z_DATA_ERROR</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_MEM_ERROR` */</span>
+    <span class="s5">const </span><span class="s2">Z_MEM_ERROR</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_BUF_ERROR` */</span>
+    <span class="s5">const </span><span class="s2">Z_BUF_ERROR</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_VERSION_ERROR` */</span>
+    <span class="s5">const </span><span class="s2">Z_VERSION_ERROR</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s6">// Compression levels.</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_NO_COMPRESSION` */</span>
+    <span class="s5">const </span><span class="s2">Z_NO_COMPRESSION</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_BEST_SPEED` */</span>
+    <span class="s5">const </span><span class="s2">Z_BEST_SPEED</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_BEST_COMPRESSION` */</span>
+    <span class="s5">const </span><span class="s2">Z_BEST_COMPRESSION</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_DEFAULT_COMPRESSION` */</span>
+    <span class="s5">const </span><span class="s2">Z_DEFAULT_COMPRESSION</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s6">// Compression strategy.</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_FILTERED` */</span>
+    <span class="s5">const </span><span class="s2">Z_FILTERED</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `constants.Z_HUFFMAN_ONLY` */</span>
+    <span class="s5">const </span><span class="s2">Z_HUFFMAN_ONLY</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_RLE` */</span>
+    <span class="s5">const </span><span class="s2">Z_RLE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_FIXED` */</span>
+    <span class="s5">const </span><span class="s2">Z_FIXED</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `constants.Z_DEFAULT_STRATEGY` */</span>
+    <span class="s5">const </span><span class="s2">Z_DEFAULT_STRATEGY</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">Z_BINARY</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">Z_TEXT</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">Z_ASCII</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated  </span><span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">Z_UNKNOWN</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">Z_DEFLATED</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:zlib&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;zlib&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

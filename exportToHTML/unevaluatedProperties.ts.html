@@ -1,0 +1,206 @@
+<html>
+<head>
+  <title>unevaluatedProperties.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          unevaluatedProperties.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span>
+  <span class="s1">CodeKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">KeywordErrorDefinition</span><span class="s2">,</span>
+  <span class="s1">ErrorObject</span><span class="s2">,</span>
+  <span class="s1">AnySchema</span><span class="s2">,</span>
+<span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">not</span><span class="s2">, </span><span class="s1">and</span><span class="s2">, </span><span
+    class="s1">Name</span><span class="s2">, </span><span class="s1">Code</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">, </span><span class="s1">Type</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;../../compile/util&quot;</span>
+<span class="s0">import </span><span class="s1">N from </span><span class="s3">&quot;../../compile/names&quot;</span>
+
+<span class="s0">export </span><span class="s1">type UnevaluatedPropertiesError </span><span class="s2">= </span><span
+    class="s1">ErrorObject</span><span class="s2">&lt;</span>
+  <span class="s3">&quot;unevaluatedProperties&quot;</span><span class="s2">,</span>
+  <span class="s2">{</span><span class="s1">unevaluatedProperty</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">},</span>
+  <span class="s1">AnySchema</span>
+<span class="s2">&gt;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: </span><span class="s3">&quot;must NOT have unevaluated properties&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">params</span><span
+    class="s2">}) =&gt; </span><span class="s1">_</span><span class="s3">`{unevaluatedProperty: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">params</span><span class="s2">.</span><span
+    class="s1">unevaluatedProperty</span><span class="s2">}</span><span class="s3">}`</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span
+    class="s3">&quot;unevaluatedProperties&quot;</span><span class="s2">,</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: [</span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;object&quot;</span><span class="s2">],</span>
+  <span class="s1">trackErrors</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span
+    class="s1">errsCount</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+    <span class="s4">/* istanbul ignore if */</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">errsCount</span><span
+    class="s2">) </span><span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">&quot;ajv implementation error&quot;</span><span class="s2">)</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">allErrors</span><span
+    class="s2">, </span><span class="s1">props</span><span class="s2">} = </span><span class="s1">it</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">props </span><span
+    class="s0">instanceof </span><span class="s1">Name</span><span class="s2">) {</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">props</span><span class="s2">} </span><span class="s3">!== true`</span><span class="s2">, () =&gt;</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">forIn</span><span class="s2">(</span><span
+    class="s3">&quot;key&quot;</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, (</span><span class="s1">key</span><span class="s2">: </span><span class="s1">Name</span><span
+    class="s2">) =&gt;</span>
+          <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">unevaluatedDynamic</span><span class="s2">(</span><span class="s1">props</span><span class="s2">, </span><span
+    class="s1">key</span><span class="s2">), () =&gt; </span><span class="s1">unevaluatedPropCode</span><span
+    class="s2">(</span><span class="s1">key</span><span class="s2">))</span>
+        <span class="s2">)</span>
+      <span class="s2">)</span>
+    <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span
+    class="s1">props </span><span class="s2">!== </span><span class="s0">true</span><span class="s2">) {</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">forIn</span><span class="s2">(</span><span
+    class="s3">&quot;key&quot;</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, (</span><span class="s1">key</span><span class="s2">: </span><span class="s1">Name</span><span
+    class="s2">) =&gt;</span>
+        <span class="s1">props </span><span class="s2">=== </span><span class="s1">undefined</span>
+          <span class="s2">? </span><span class="s1">unevaluatedPropCode</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">)</span>
+          <span class="s2">: </span><span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span
+    class="s2">(</span><span class="s1">unevaluatedStatic</span><span class="s2">(</span><span
+    class="s1">props</span><span class="s2">, </span><span class="s1">key</span><span
+    class="s2">), () =&gt; </span><span class="s1">unevaluatedPropCode</span><span class="s2">(</span><span class="s1">key</span><span
+    class="s2">))</span>
+      <span class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s1">it</span><span class="s2">.</span><span class="s1">props </span><span class="s2">= </span><span
+    class="s0">true</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">errsCount</span><span
+    class="s2">} </span><span class="s3">=== </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">N</span><span class="s2">.</span><span class="s1">errors</span><span class="s2">}</span><span class="s3">`</span><span
+    class="s2">)</span>
+
+    <span class="s0">function </span><span class="s1">unevaluatedPropCode</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">schema </span><span
+    class="s2">=== </span><span class="s0">false</span><span class="s2">) {</span>
+        <span class="s1">cxt</span><span class="s2">.</span><span class="s1">setParams</span><span
+    class="s2">({</span><span class="s1">unevaluatedProperty</span><span class="s2">: </span><span class="s1">key</span><span
+    class="s2">})</span>
+        <span class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span class="s2">()</span>
+        <span class="s0">if </span><span class="s2">(!</span><span class="s1">allErrors</span><span class="s2">) </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">break</span><span class="s2">()</span>
+        <span class="s0">return</span>
+      <span class="s2">}</span>
+
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span class="s1">schema</span><span
+    class="s2">)) {</span>
+        <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span class="s3">&quot;valid&quot;</span><span
+    class="s2">)</span>
+        <span class="s1">cxt</span><span class="s2">.</span><span class="s1">subschema</span><span class="s2">(</span>
+          <span class="s2">{</span>
+            <span class="s1">keyword</span><span class="s2">: </span><span
+    class="s3">&quot;unevaluatedProperties&quot;</span><span class="s2">,</span>
+            <span class="s1">dataProp</span><span class="s2">: </span><span class="s1">key</span><span
+    class="s2">,</span>
+            <span class="s1">dataPropType</span><span class="s2">: </span><span class="s1">Type</span><span
+    class="s2">.</span><span class="s1">Str</span><span class="s2">,</span>
+          <span class="s2">},</span>
+          <span class="s1">valid</span>
+        <span class="s2">)</span>
+        <span class="s0">if </span><span class="s2">(!</span><span class="s1">allErrors</span><span class="s2">) </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span class="s1">not</span><span
+    class="s2">(</span><span class="s1">valid</span><span class="s2">), () =&gt; </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">break</span><span class="s2">())</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">unevaluatedDynamic</span><span class="s2">(</span><span
+    class="s1">evaluatedProps</span><span class="s2">: </span><span class="s1">Name</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">: </span><span class="s1">Name</span><span
+    class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+      <span class="s0">return </span><span class="s1">_</span><span class="s3">`!</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">evaluatedProps</span><span class="s2">} </span><span class="s3">|| !</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">evaluatedProps</span><span class="s2">}</span><span
+    class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span class="s1">key</span><span
+    class="s2">}</span><span class="s3">]`</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">unevaluatedStatic</span><span class="s2">(</span><span class="s1">evaluatedProps</span><span
+    class="s2">: {[</span><span class="s1">K </span><span class="s0">in </span><span class="s1">string</span><span
+    class="s2">]?: </span><span class="s0">true</span><span class="s2">}, </span><span class="s1">key</span><span
+    class="s2">: </span><span class="s1">Name</span><span class="s2">): </span><span class="s1">Code </span><span
+    class="s2">{</span>
+      <span class="s0">const </span><span class="s1">ps</span><span class="s2">: </span><span
+    class="s1">Code</span><span class="s2">[] = []</span>
+      <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">p </span><span
+    class="s0">in </span><span class="s1">evaluatedProps</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">evaluatedProps</span><span
+    class="s2">[</span><span class="s1">p</span><span class="s2">] === </span><span class="s0">true</span><span
+    class="s2">) </span><span class="s1">ps</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">key</span><span class="s2">} </span><span class="s3">!== </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">p</span><span class="s2">}</span><span class="s3">`</span><span
+    class="s2">)</span>
+      <span class="s2">}</span>
+      <span class="s0">return </span><span class="s1">and</span><span class="s2">(</span><span
+    class="s1">...ps</span><span class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

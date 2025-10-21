@@ -1,0 +1,816 @@
+<html>
+<head>
+  <title>pack.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #7a7e85;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          pack.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">// A readable tar stream creator</span>
+<span class="s2">// Technically, this is a transform stream that you write paths into,</span>
+<span class="s2">// and tar format comes out of.</span>
+<span class="s2">// The `add()` method is like `write()` but returns this,</span>
+<span class="s2">// and end() return `this` as well, so you can</span>
+<span class="s2">// do `new Pack(opt).add('files').add('dir').end().pipe(output)</span>
+<span class="s2">// You could also do something like:</span>
+<span class="s2">// streamOfPaths().pipe(new Pack()).pipe(new fs.WriteStream('out.tar'))</span>
+
+<span class="s3">class </span><span class="s1">PackJob </span><span class="s4">{</span>
+  <span class="s1">constructor </span><span class="s4">(</span><span class="s1">path</span><span
+    class="s4">, </span><span class="s1">absolute</span><span class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">path </span><span class="s4">|| </span><span class="s0">'./'</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">absolute </span><span
+    class="s4">= </span><span class="s1">absolute</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">entry </span><span class="s4">= </span><span
+    class="s3">null</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">stat </span><span class="s4">= </span><span
+    class="s3">null</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">readdir </span><span class="s4">= </span><span
+    class="s3">null</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">pending </span><span class="s4">= </span><span
+    class="s3">false</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">ignore </span><span class="s4">= </span><span
+    class="s3">false</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">piped </span><span class="s4">= </span><span
+    class="s3">false</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s4">{ </span><span class="s1">Minipass </span><span
+    class="s4">} = </span><span class="s1">require</span><span class="s4">(</span><span
+    class="s0">'minipass'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">zlib </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'minizlib'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ReadEntry </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./read-entry.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">WriteEntry </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./write-entry.js'</span><span
+    class="s4">)</span>
+<span class="s3">const </span><span class="s1">WriteEntrySync </span><span class="s4">= </span><span class="s1">WriteEntry</span><span
+    class="s4">.</span><span class="s1">Sync</span>
+<span class="s3">const </span><span class="s1">WriteEntryTar </span><span class="s4">= </span><span class="s1">WriteEntry</span><span
+    class="s4">.</span><span class="s1">Tar</span>
+<span class="s3">const </span><span class="s1">Yallist </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'yallist'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">EOF </span><span class="s4">= </span><span class="s1">Buffer</span><span
+    class="s4">.</span><span class="s1">alloc</span><span class="s4">(</span><span class="s5">1024</span><span
+    class="s4">)</span>
+<span class="s3">const </span><span class="s1">ONSTAT </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'onStat'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ENDED </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'ended'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">QUEUE </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'queue'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">CURRENT </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'current'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">PROCESS </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'process'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">PROCESSING </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'processing'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">PROCESSJOB </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'processJob'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">JOBS </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'jobs'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">JOBDONE </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'jobDone'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ADDFSENTRY </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'addFSEntry'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ADDTARENTRY </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'addTarEntry'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">STAT </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'stat'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">READDIR </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'readdir'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ONREADDIR </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'onreaddir'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">PIPE </span><span class="s4">= </span><span class="s1">Symbol</span><span
+    class="s4">(</span><span class="s0">'pipe'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ENTRY </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'entry'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ENTRYOPT </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'entryOpt'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">WRITEENTRYCLASS </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'writeEntryClass'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">WRITE </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'write'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">ONDRAIN </span><span class="s4">= </span><span
+    class="s1">Symbol</span><span class="s4">(</span><span class="s0">'ondrain'</span><span class="s4">)</span>
+
+<span class="s3">const </span><span class="s1">fs </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'fs'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'path'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">warner </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./warn-mixin.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">normPath </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'./normalize-windows-path.js'</span><span class="s4">)</span>
+
+<span class="s3">const </span><span class="s1">Pack </span><span class="s4">= </span><span class="s1">warner</span><span
+    class="s4">(</span><span class="s3">class </span><span class="s1">Pack </span><span class="s3">extends </span><span
+    class="s1">Minipass </span><span class="s4">{</span>
+  <span class="s1">constructor </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">) {</span>
+    <span class="s3">super</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">)</span>
+    <span class="s1">opt </span><span class="s4">= </span><span class="s1">opt </span><span class="s4">|| </span><span
+    class="s1">Object</span><span class="s4">.</span><span class="s1">create</span><span class="s4">(</span><span
+    class="s3">null</span><span class="s4">)</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">opt </span><span class="s4">= </span><span
+    class="s1">opt</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">file </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">file </span><span class="s4">|| </span><span
+    class="s0">''</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">cwd </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">cwd </span><span class="s4">|| </span><span
+    class="s1">process</span><span class="s4">.</span><span class="s1">cwd</span><span class="s4">()</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">maxReadSize </span><span
+    class="s4">= </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">maxReadSize</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">preservePaths </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">preservePaths</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">strict </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">strict</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">noPax </span><span class="s4">= !!</span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">noPax</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">prefix </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">prefix </span><span class="s4">|| </span><span class="s0">''</span><span class="s4">)</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">linkCache </span><span
+    class="s4">= </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">linkCache </span><span
+    class="s4">|| </span><span class="s3">new </span><span class="s1">Map</span><span class="s4">()</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">statCache </span><span
+    class="s4">= </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">statCache </span><span
+    class="s4">|| </span><span class="s3">new </span><span class="s1">Map</span><span class="s4">()</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">readdirCache </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">readdirCache </span><span class="s4">|| </span><span
+    class="s3">new </span><span class="s1">Map</span><span class="s4">()</span>
+
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">WRITEENTRYCLASS</span><span
+    class="s4">] = </span><span class="s1">WriteEntry</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">typeof </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">onwarn </span><span class="s4">=== </span><span
+    class="s0">'function'</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'warn'</span><span class="s4">, </span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">onwarn</span><span class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">portable </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">portable</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">zip </span><span class="s4">= </span><span
+    class="s3">null</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">gzip </span><span class="s4">|| </span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">brotli</span><span class="s4">) {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">gzip </span><span class="s4">&amp;&amp; </span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">brotli</span><span class="s4">) {</span>
+        <span class="s3">throw new </span><span class="s1">TypeError</span><span class="s4">(</span><span class="s0">'gzip and brotli are mutually exclusive'</span><span
+    class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">gzip</span><span class="s4">) {</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s3">typeof </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">gzip </span><span class="s4">!== </span><span
+    class="s0">'object'</span><span class="s4">) {</span>
+          <span class="s1">opt</span><span class="s4">.</span><span class="s1">gzip </span><span class="s4">= {}</span>
+        <span class="s4">}</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">portable</span><span class="s4">) {</span>
+          <span class="s1">opt</span><span class="s4">.</span><span class="s1">gzip</span><span class="s4">.</span><span
+    class="s1">portable </span><span class="s4">= </span><span class="s3">true</span>
+        <span class="s4">}</span>
+        <span class="s3">this</span><span class="s4">.</span><span class="s1">zip </span><span class="s4">= </span><span
+    class="s3">new </span><span class="s1">zlib</span><span class="s4">.</span><span class="s1">Gzip</span><span
+    class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">gzip</span><span class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">brotli</span><span class="s4">) {</span>
+        <span class="s3">if </span><span class="s4">(</span><span class="s3">typeof </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">brotli </span><span class="s4">!== </span><span
+    class="s0">'object'</span><span class="s4">) {</span>
+          <span class="s1">opt</span><span class="s4">.</span><span class="s1">brotli </span><span
+    class="s4">= {}</span>
+        <span class="s4">}</span>
+        <span class="s3">this</span><span class="s4">.</span><span class="s1">zip </span><span class="s4">= </span><span
+    class="s3">new </span><span class="s1">zlib</span><span class="s4">.</span><span
+    class="s1">BrotliCompress</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">brotli</span><span class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">zip</span><span class="s4">.</span><span
+    class="s1">on</span><span class="s4">(</span><span class="s0">'data'</span><span class="s4">, </span><span
+    class="s1">chunk </span><span class="s4">=&gt; </span><span class="s3">super</span><span class="s4">.</span><span
+    class="s1">write</span><span class="s4">(</span><span class="s1">chunk</span><span class="s4">))</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">zip</span><span class="s4">.</span><span
+    class="s1">on</span><span class="s4">(</span><span class="s0">'end'</span><span class="s4">, </span><span
+    class="s1">_ </span><span class="s4">=&gt; </span><span class="s3">super</span><span class="s4">.</span><span
+    class="s1">end</span><span class="s4">())</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">zip</span><span class="s4">.</span><span
+    class="s1">on</span><span class="s4">(</span><span class="s0">'drain'</span><span class="s4">, </span><span
+    class="s1">_ </span><span class="s4">=&gt; </span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">ONDRAIN</span><span class="s4">]())</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'resume'</span><span class="s4">, </span><span class="s1">_ </span><span class="s4">=&gt; </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">zip</span><span class="s4">.</span><span class="s1">resume</span><span
+    class="s4">())</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'drain'</span><span class="s4">, </span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">ONDRAIN</span><span class="s4">])</span>
+    <span class="s4">}</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">noDirRecurse </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">noDirRecurse</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">follow </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">follow</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">noMtime </span><span
+    class="s4">= !!</span><span class="s1">opt</span><span class="s4">.</span><span class="s1">noMtime</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">mtime </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">mtime </span><span class="s4">|| </span><span
+    class="s3">null</span>
+
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">filter </span><span class="s4">= </span><span
+    class="s3">typeof </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">filter </span><span
+    class="s4">=== </span><span class="s0">'function' </span><span class="s4">? </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">filter </span><span class="s4">: </span><span class="s1">_ </span><span
+    class="s4">=&gt; </span><span class="s3">true</span>
+
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">QUEUE</span><span class="s4">] = </span><span
+    class="s3">new </span><span class="s1">Yallist</span><span class="s4">()</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span class="s4">] = </span><span
+    class="s5">0</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">jobs </span><span class="s4">= +</span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">jobs </span><span class="s4">|| </span><span
+    class="s5">4</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESSING</span><span
+    class="s4">] = </span><span class="s3">false</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">ENDED</span><span class="s4">] = </span><span
+    class="s3">false</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">WRITE</span><span class="s4">] (</span><span class="s1">chunk</span><span
+    class="s4">) {</span>
+    <span class="s3">return super</span><span class="s4">.</span><span class="s1">write</span><span
+    class="s4">(</span><span class="s1">chunk</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s1">add </span><span class="s4">(</span><span class="s1">path</span><span class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">write</span><span class="s4">(</span><span
+    class="s1">path</span><span class="s4">)</span>
+    <span class="s3">return this</span>
+  <span class="s4">}</span>
+
+  <span class="s1">end </span><span class="s4">(</span><span class="s1">path</span><span class="s4">) {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">path</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">write</span><span class="s4">(</span><span
+    class="s1">path</span><span class="s4">)</span>
+    <span class="s4">}</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">ENDED</span><span class="s4">] = </span><span
+    class="s3">true</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESS</span><span class="s4">]()</span>
+    <span class="s3">return this</span>
+  <span class="s4">}</span>
+
+  <span class="s1">write </span><span class="s4">(</span><span class="s1">path</span><span class="s4">) {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">ENDED</span><span class="s4">]) {</span>
+      <span class="s3">throw new </span><span class="s1">Error</span><span class="s4">(</span><span class="s0">'write after end'</span><span
+    class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">path </span><span class="s3">instanceof </span><span
+    class="s1">ReadEntry</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">ADDTARENTRY</span><span class="s4">](</span><span
+    class="s1">path</span><span class="s4">)</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">ADDFSENTRY</span><span
+    class="s4">](</span><span class="s1">path</span><span class="s4">)</span>
+    <span class="s4">}</span>
+    <span class="s3">return this</span><span class="s4">.</span><span class="s1">flowing</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ADDTARENTRY</span><span class="s4">] (</span><span class="s1">p</span><span
+    class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">absolute </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">resolve</span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">, </span><span class="s1">p</span><span class="s4">.</span><span class="s1">path</span><span
+    class="s4">))</span>
+    <span class="s2">// in this case, we don't have to wait for the stat</span>
+    <span class="s3">if </span><span class="s4">(!</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">filter</span><span class="s4">(</span><span class="s1">p</span><span class="s4">.</span><span class="s1">path</span><span
+    class="s4">, </span><span class="s1">p</span><span class="s4">)) {</span>
+      <span class="s1">p</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s3">const </span><span class="s1">job </span><span class="s4">= </span><span
+    class="s3">new </span><span class="s1">PackJob</span><span class="s4">(</span><span class="s1">p</span><span
+    class="s4">.</span><span class="s1">path</span><span class="s4">, </span><span class="s1">absolute</span><span
+    class="s4">, </span><span class="s3">false</span><span class="s4">)</span>
+      <span class="s1">job</span><span class="s4">.</span><span class="s1">entry </span><span class="s4">= </span><span
+    class="s3">new </span><span class="s1">WriteEntryTar</span><span class="s4">(</span><span class="s1">p</span><span
+    class="s4">, </span><span class="s3">this</span><span class="s4">[</span><span class="s1">ENTRYOPT</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">))</span>
+      <span class="s1">job</span><span class="s4">.</span><span class="s1">entry</span><span class="s4">.</span><span
+    class="s1">on</span><span class="s4">(</span><span class="s0">'end'</span><span class="s4">, </span><span
+    class="s1">_ </span><span class="s4">=&gt; </span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">JOBDONE</span><span class="s4">](</span><span class="s1">job</span><span class="s4">))</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span
+    class="s4">] += </span><span class="s5">1</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">QUEUE</span><span class="s4">].</span><span
+    class="s1">push</span><span class="s4">(</span><span class="s1">job</span><span class="s4">)</span>
+    <span class="s4">}</span>
+
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESS</span><span class="s4">]()</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ADDFSENTRY</span><span class="s4">] (</span><span class="s1">p</span><span
+    class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">absolute </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">resolve</span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">, </span><span class="s1">p</span><span class="s4">))</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">QUEUE</span><span class="s4">].</span><span
+    class="s1">push</span><span class="s4">(</span><span class="s3">new </span><span class="s1">PackJob</span><span
+    class="s4">(</span><span class="s1">p</span><span class="s4">, </span><span class="s1">absolute</span><span
+    class="s4">))</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESS</span><span class="s4">]()</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">STAT</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s1">job</span><span class="s4">.</span><span class="s1">pending </span><span class="s4">= </span><span
+    class="s3">true</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span class="s4">] += </span><span
+    class="s5">1</span>
+    <span class="s3">const </span><span class="s1">stat </span><span class="s4">= </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">follow </span><span class="s4">? </span><span
+    class="s0">'stat' </span><span class="s4">: </span><span class="s0">'lstat'</span>
+    <span class="s1">fs</span><span class="s4">[</span><span class="s1">stat</span><span class="s4">](</span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">, (</span><span
+    class="s1">er</span><span class="s4">, </span><span class="s1">stat</span><span class="s4">) =&gt; {</span>
+      <span class="s1">job</span><span class="s4">.</span><span class="s1">pending </span><span
+    class="s4">= </span><span class="s3">false</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span
+    class="s4">] -= </span><span class="s5">1</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+        <span class="s3">this</span><span class="s4">.</span><span class="s1">emit</span><span class="s4">(</span><span
+    class="s0">'error'</span><span class="s4">, </span><span class="s1">er</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ONSTAT</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">, </span><span class="s1">stat</span><span
+    class="s4">)</span>
+      <span class="s4">}</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ONSTAT</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">, </span><span class="s1">stat</span><span class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">statCache</span><span class="s4">.</span><span
+    class="s1">set</span><span class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">, </span><span class="s1">stat</span><span class="s4">)</span>
+    <span class="s1">job</span><span class="s4">.</span><span class="s1">stat </span><span class="s4">= </span><span
+    class="s1">stat</span>
+
+    <span class="s2">// now we have the stat, we can filter it.</span>
+    <span class="s3">if </span><span class="s4">(!</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">filter</span><span class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">path</span><span class="s4">, </span><span class="s1">stat</span><span class="s4">)) {</span>
+      <span class="s1">job</span><span class="s4">.</span><span class="s1">ignore </span><span class="s4">= </span><span
+    class="s3">true</span>
+    <span class="s4">}</span>
+
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESS</span><span class="s4">]()</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">READDIR</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s1">job</span><span class="s4">.</span><span class="s1">pending </span><span class="s4">= </span><span
+    class="s3">true</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span class="s4">] += </span><span
+    class="s5">1</span>
+    <span class="s1">fs</span><span class="s4">.</span><span class="s1">readdir</span><span class="s4">(</span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">, (</span><span
+    class="s1">er</span><span class="s4">, </span><span class="s1">entries</span><span class="s4">) =&gt; {</span>
+      <span class="s1">job</span><span class="s4">.</span><span class="s1">pending </span><span
+    class="s4">= </span><span class="s3">false</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span
+    class="s4">] -= </span><span class="s5">1</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+        <span class="s3">return this</span><span class="s4">.</span><span class="s1">emit</span><span
+    class="s4">(</span><span class="s0">'error'</span><span class="s4">, </span><span class="s1">er</span><span
+    class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">ONREADDIR</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">, </span><span class="s1">entries</span><span
+    class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ONREADDIR</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">, </span><span class="s1">entries</span><span class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">readdirCache</span><span
+    class="s4">.</span><span class="s1">set</span><span class="s4">(</span><span class="s1">job</span><span
+    class="s4">.</span><span class="s1">absolute</span><span class="s4">, </span><span class="s1">entries</span><span
+    class="s4">)</span>
+    <span class="s1">job</span><span class="s4">.</span><span class="s1">readdir </span><span class="s4">= </span><span
+    class="s1">entries</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESS</span><span class="s4">]()</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">PROCESS</span><span class="s4">] () {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">PROCESSING</span><span class="s4">]) {</span>
+      <span class="s3">return</span>
+    <span class="s4">}</span>
+
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESSING</span><span
+    class="s4">] = </span><span class="s3">true</span>
+    <span class="s3">for </span><span class="s4">(</span><span class="s3">let </span><span class="s1">w </span><span
+    class="s4">= </span><span class="s3">this</span><span class="s4">[</span><span class="s1">QUEUE</span><span
+    class="s4">].</span><span class="s1">head</span><span class="s4">;</span>
+      <span class="s1">w </span><span class="s4">!== </span><span class="s3">null </span><span
+    class="s4">&amp;&amp; </span><span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span
+    class="s4">] &lt; </span><span class="s3">this</span><span class="s4">.</span><span class="s1">jobs</span><span
+    class="s4">;</span>
+      <span class="s1">w </span><span class="s4">= </span><span class="s1">w</span><span class="s4">.</span><span
+    class="s1">next</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESSJOB</span><span
+    class="s4">](</span><span class="s1">w</span><span class="s4">.</span><span class="s1">value</span><span class="s4">)</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">w</span><span class="s4">.</span><span
+    class="s1">value</span><span class="s4">.</span><span class="s1">ignore</span><span class="s4">) {</span>
+        <span class="s3">const </span><span class="s1">p </span><span class="s4">= </span><span class="s1">w</span><span
+    class="s4">.</span><span class="s1">next</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">QUEUE</span><span
+    class="s4">].</span><span class="s1">removeNode</span><span class="s4">(</span><span class="s1">w</span><span
+    class="s4">)</span>
+        <span class="s1">w</span><span class="s4">.</span><span class="s1">next </span><span class="s4">= </span><span
+    class="s1">p</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESSING</span><span
+    class="s4">] = </span><span class="s3">false</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">ENDED</span><span class="s4">] &amp;&amp; !</span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">QUEUE</span><span class="s4">].</span><span class="s1">length </span><span
+    class="s4">&amp;&amp; </span><span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span
+    class="s4">] === </span><span class="s5">0</span><span class="s4">) {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">zip</span><span class="s4">) {</span>
+        <span class="s3">this</span><span class="s4">.</span><span class="s1">zip</span><span class="s4">.</span><span
+    class="s1">end</span><span class="s4">(</span><span class="s1">EOF</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+        <span class="s3">super</span><span class="s4">.</span><span class="s1">write</span><span
+    class="s4">(</span><span class="s1">EOF</span><span class="s4">)</span>
+        <span class="s3">super</span><span class="s4">.</span><span class="s1">end</span><span class="s4">()</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s1">get </span><span class="s4">[</span><span class="s1">CURRENT</span><span class="s4">] () {</span>
+    <span class="s3">return this</span><span class="s4">[</span><span class="s1">QUEUE</span><span class="s4">] &amp;&amp; </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">QUEUE</span><span class="s4">].</span><span
+    class="s1">head </span><span class="s4">&amp;&amp; </span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">QUEUE</span><span class="s4">].</span><span class="s1">head</span><span class="s4">.</span><span
+    class="s1">value</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">JOBDONE</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">QUEUE</span><span class="s4">].</span><span
+    class="s1">shift</span><span class="s4">()</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span class="s4">] -= </span><span
+    class="s5">1</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">PROCESS</span><span class="s4">]()</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">PROCESSJOB</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">pending</span><span class="s4">) {</span>
+      <span class="s3">return</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">entry</span><span class="s4">) {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">job </span><span class="s4">=== </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">CURRENT</span><span class="s4">] &amp;&amp; !</span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">piped</span><span class="s4">) {</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">PIPE</span><span class="s4">](</span><span
+    class="s1">job</span><span class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">return</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(!</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">stat</span><span class="s4">) {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">statCache</span><span class="s4">.</span><span class="s1">has</span><span class="s4">(</span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">)) {</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ONSTAT</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">, </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">statCache</span><span class="s4">.</span><span class="s1">get</span><span
+    class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">))</span>
+      <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">STAT</span><span class="s4">](</span><span
+    class="s1">job</span><span class="s4">)</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+    <span class="s3">if </span><span class="s4">(!</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">stat</span><span class="s4">) {</span>
+      <span class="s3">return</span>
+    <span class="s4">}</span>
+
+    <span class="s2">// filtered out!</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">ignore</span><span class="s4">) {</span>
+      <span class="s3">return</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(!</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">noDirRecurse </span><span class="s4">&amp;&amp; </span><span class="s1">job</span><span
+    class="s4">.</span><span class="s1">stat</span><span class="s4">.</span><span class="s1">isDirectory</span><span
+    class="s4">() &amp;&amp; !</span><span class="s1">job</span><span class="s4">.</span><span class="s1">readdir</span><span
+    class="s4">) {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">readdirCache</span><span class="s4">.</span><span class="s1">has</span><span class="s4">(</span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">)) {</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ONREADDIR</span><span class="s4">](</span><span
+    class="s1">job</span><span class="s4">, </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">readdirCache</span><span class="s4">.</span><span class="s1">get</span><span class="s4">(</span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">absolute</span><span class="s4">))</span>
+      <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">READDIR</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">)</span>
+      <span class="s4">}</span>
+      <span class="s3">if </span><span class="s4">(!</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">readdir</span><span class="s4">) {</span>
+        <span class="s3">return</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+
+    <span class="s2">// we know it doesn't have an entry, because that got checked above</span>
+    <span class="s1">job</span><span class="s4">.</span><span class="s1">entry </span><span class="s4">= </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">ENTRY</span><span class="s4">](</span><span
+    class="s1">job</span><span class="s4">)</span>
+    <span class="s3">if </span><span class="s4">(!</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">entry</span><span class="s4">) {</span>
+      <span class="s1">job</span><span class="s4">.</span><span class="s1">ignore </span><span class="s4">= </span><span
+    class="s3">true</span>
+      <span class="s3">return</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">job </span><span class="s4">=== </span><span
+    class="s3">this</span><span class="s4">[</span><span class="s1">CURRENT</span><span class="s4">] &amp;&amp; !</span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">piped</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">PIPE</span><span class="s4">](</span><span
+    class="s1">job</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ENTRYOPT</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s3">return </span><span class="s4">{</span>
+      <span class="s1">onwarn</span><span class="s4">: (</span><span class="s1">code</span><span
+    class="s4">, </span><span class="s1">msg</span><span class="s4">, </span><span class="s1">data</span><span
+    class="s4">) =&gt; </span><span class="s3">this</span><span class="s4">.</span><span class="s1">warn</span><span
+    class="s4">(</span><span class="s1">code</span><span class="s4">, </span><span class="s1">msg</span><span
+    class="s4">, </span><span class="s1">data</span><span class="s4">),</span>
+      <span class="s1">noPax</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">noPax</span><span class="s4">,</span>
+      <span class="s1">cwd</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">,</span>
+      <span class="s1">absolute</span><span class="s4">: </span><span class="s1">job</span><span
+    class="s4">.</span><span class="s1">absolute</span><span class="s4">,</span>
+      <span class="s1">preservePaths</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">preservePaths</span><span class="s4">,</span>
+      <span class="s1">maxReadSize</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">maxReadSize</span><span class="s4">,</span>
+      <span class="s1">strict</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">strict</span><span class="s4">,</span>
+      <span class="s1">portable</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">portable</span><span class="s4">,</span>
+      <span class="s1">linkCache</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">linkCache</span><span class="s4">,</span>
+      <span class="s1">statCache</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">statCache</span><span class="s4">,</span>
+      <span class="s1">noMtime</span><span class="s4">: </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">noMtime</span><span class="s4">,</span>
+      <span class="s1">mtime</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">mtime</span><span class="s4">,</span>
+      <span class="s1">prefix</span><span class="s4">: </span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">prefix</span><span class="s4">,</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ENTRY</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">JOBS</span><span class="s4">] += </span><span
+    class="s5">1</span>
+    <span class="s3">try </span><span class="s4">{</span>
+      <span class="s3">return new this</span><span class="s4">[</span><span class="s1">WRITEENTRYCLASS</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">.</span><span class="s1">path</span><span
+    class="s4">, </span><span class="s3">this</span><span class="s4">[</span><span class="s1">ENTRYOPT</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">))</span>
+        <span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span class="s0">'end'</span><span
+    class="s4">, () =&gt; </span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">JOBDONE</span><span class="s4">](</span><span class="s1">job</span><span class="s4">))</span>
+        <span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span class="s0">'error'</span><span
+    class="s4">, </span><span class="s1">er </span><span class="s4">=&gt; </span><span class="s3">this</span><span
+    class="s4">.</span><span class="s1">emit</span><span class="s4">(</span><span class="s0">'error'</span><span
+    class="s4">, </span><span class="s1">er</span><span class="s4">))</span>
+    <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">emit</span><span class="s4">(</span><span
+    class="s0">'error'</span><span class="s4">, </span><span class="s1">er</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">ONDRAIN</span><span class="s4">] () {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">[</span><span
+    class="s1">CURRENT</span><span class="s4">] &amp;&amp; </span><span class="s3">this</span><span
+    class="s4">[</span><span class="s1">CURRENT</span><span class="s4">].</span><span class="s1">entry</span><span
+    class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">[</span><span class="s1">CURRENT</span><span
+    class="s4">].</span><span class="s1">entry</span><span class="s4">.</span><span class="s1">resume</span><span
+    class="s4">()</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s2">// like .pipe() but using super, because our write() is special</span>
+  <span class="s4">[</span><span class="s1">PIPE</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s1">job</span><span class="s4">.</span><span class="s1">piped </span><span class="s4">= </span><span
+    class="s3">true</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">readdir</span><span class="s4">) {</span>
+      <span class="s1">job</span><span class="s4">.</span><span class="s1">readdir</span><span class="s4">.</span><span
+    class="s1">forEach</span><span class="s4">(</span><span class="s1">entry </span><span class="s4">=&gt; {</span>
+        <span class="s3">const </span><span class="s1">p </span><span class="s4">= </span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">path</span>
+        <span class="s3">const </span><span class="s1">base </span><span class="s4">= </span><span
+    class="s1">p </span><span class="s4">=== </span><span class="s0">'./' </span><span class="s4">? </span><span
+    class="s0">'' </span><span class="s4">: </span><span class="s1">p</span><span class="s4">.</span><span class="s1">replace</span><span
+    class="s4">(</span><span class="s6">/\/*$/</span><span class="s4">, </span><span class="s0">'/'</span><span
+    class="s4">)</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ADDFSENTRY</span><span
+    class="s4">](</span><span class="s1">base </span><span class="s4">+ </span><span class="s1">entry</span><span
+    class="s4">)</span>
+      <span class="s4">})</span>
+    <span class="s4">}</span>
+
+    <span class="s3">const </span><span class="s1">source </span><span class="s4">= </span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">entry</span>
+    <span class="s3">const </span><span class="s1">zip </span><span class="s4">= </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">zip</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">zip</span><span class="s4">) {</span>
+      <span class="s1">source</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'data'</span><span class="s4">, </span><span class="s1">chunk </span><span class="s4">=&gt; {</span>
+        <span class="s3">if </span><span class="s4">(!</span><span class="s1">zip</span><span class="s4">.</span><span
+    class="s1">write</span><span class="s4">(</span><span class="s1">chunk</span><span class="s4">)) {</span>
+          <span class="s1">source</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+        <span class="s4">}</span>
+      <span class="s4">})</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s1">source</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'data'</span><span class="s4">, </span><span class="s1">chunk </span><span class="s4">=&gt; {</span>
+        <span class="s3">if </span><span class="s4">(!</span><span class="s3">super</span><span class="s4">.</span><span
+    class="s1">write</span><span class="s4">(</span><span class="s1">chunk</span><span class="s4">)) {</span>
+          <span class="s1">source</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+        <span class="s4">}</span>
+      <span class="s4">})</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s1">pause </span><span class="s4">() {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s3">this</span><span class="s4">.</span><span
+    class="s1">zip</span><span class="s4">) {</span>
+      <span class="s3">this</span><span class="s4">.</span><span class="s1">zip</span><span class="s4">.</span><span
+    class="s1">pause</span><span class="s4">()</span>
+    <span class="s4">}</span>
+    <span class="s3">return super</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s3">class </span><span class="s1">PackSync </span><span class="s3">extends </span><span
+    class="s1">Pack </span><span class="s4">{</span>
+  <span class="s1">constructor </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">) {</span>
+    <span class="s3">super</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">)</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">WRITEENTRYCLASS</span><span
+    class="s4">] = </span><span class="s1">WriteEntrySync</span>
+  <span class="s4">}</span>
+
+  <span class="s2">// pause/resume are no-ops in sync streams.</span>
+  <span class="s1">pause </span><span class="s4">() {}</span>
+  <span class="s1">resume </span><span class="s4">() {}</span>
+
+  <span class="s4">[</span><span class="s1">STAT</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">stat </span><span class="s4">= </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">follow </span><span class="s4">? </span><span
+    class="s0">'statSync' </span><span class="s4">: </span><span class="s0">'lstatSync'</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">ONSTAT</span><span class="s4">](</span><span
+    class="s1">job</span><span class="s4">, </span><span class="s1">fs</span><span class="s4">[</span><span class="s1">stat</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">.</span><span class="s1">absolute</span><span
+    class="s4">))</span>
+  <span class="s4">}</span>
+
+  <span class="s4">[</span><span class="s1">READDIR</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">, </span><span class="s1">stat</span><span class="s4">) {</span>
+    <span class="s3">this</span><span class="s4">[</span><span class="s1">ONREADDIR</span><span
+    class="s4">](</span><span class="s1">job</span><span class="s4">, </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">readdirSync</span><span class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">absolute</span><span class="s4">))</span>
+  <span class="s4">}</span>
+
+  <span class="s2">// gotta get it all in this tick</span>
+  <span class="s4">[</span><span class="s1">PIPE</span><span class="s4">] (</span><span class="s1">job</span><span
+    class="s4">) {</span>
+    <span class="s3">const </span><span class="s1">source </span><span class="s4">= </span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">entry</span>
+    <span class="s3">const </span><span class="s1">zip </span><span class="s4">= </span><span
+    class="s3">this</span><span class="s4">.</span><span class="s1">zip</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">job</span><span class="s4">.</span><span
+    class="s1">readdir</span><span class="s4">) {</span>
+      <span class="s1">job</span><span class="s4">.</span><span class="s1">readdir</span><span class="s4">.</span><span
+    class="s1">forEach</span><span class="s4">(</span><span class="s1">entry </span><span class="s4">=&gt; {</span>
+        <span class="s3">const </span><span class="s1">p </span><span class="s4">= </span><span
+    class="s1">job</span><span class="s4">.</span><span class="s1">path</span>
+        <span class="s3">const </span><span class="s1">base </span><span class="s4">= </span><span
+    class="s1">p </span><span class="s4">=== </span><span class="s0">'./' </span><span class="s4">? </span><span
+    class="s0">'' </span><span class="s4">: </span><span class="s1">p</span><span class="s4">.</span><span class="s1">replace</span><span
+    class="s4">(</span><span class="s6">/\/*$/</span><span class="s4">, </span><span class="s0">'/'</span><span
+    class="s4">)</span>
+        <span class="s3">this</span><span class="s4">[</span><span class="s1">ADDFSENTRY</span><span
+    class="s4">](</span><span class="s1">base </span><span class="s4">+ </span><span class="s1">entry</span><span
+    class="s4">)</span>
+      <span class="s4">})</span>
+    <span class="s4">}</span>
+
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">zip</span><span class="s4">) {</span>
+      <span class="s1">source</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'data'</span><span class="s4">, </span><span class="s1">chunk </span><span class="s4">=&gt; {</span>
+        <span class="s1">zip</span><span class="s4">.</span><span class="s1">write</span><span class="s4">(</span><span
+    class="s1">chunk</span><span class="s4">)</span>
+      <span class="s4">})</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s1">source</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'data'</span><span class="s4">, </span><span class="s1">chunk </span><span class="s4">=&gt; {</span>
+        <span class="s3">super</span><span class="s4">[</span><span class="s1">WRITE</span><span
+    class="s4">](</span><span class="s1">chunk</span><span class="s4">)</span>
+      <span class="s4">})</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s1">Pack</span><span class="s4">.</span><span class="s1">Sync </span><span class="s4">= </span><span
+    class="s1">PackSync</span>
+
+<span class="s1">module</span><span class="s4">.</span><span class="s1">exports </span><span class="s4">= </span><span
+    class="s1">Pack</span>
+</pre>
+</body>
+</html>

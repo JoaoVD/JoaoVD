@@ -1,0 +1,255 @@
+<html>
+<head>
+  <title>dependencies.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          dependencies.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span>
+  <span class="s1">CodeKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">ErrorObject</span><span class="s2">,</span>
+  <span class="s1">KeywordErrorDefinition</span><span class="s2">,</span>
+  <span class="s1">SchemaMap</span><span class="s2">,</span>
+  <span class="s1">AnySchema</span><span class="s2">,</span>
+<span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/util&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">checkReportMissingProp</span><span
+    class="s2">, </span><span class="s1">checkMissingProp</span><span class="s2">, </span><span class="s1">reportMissingProp</span><span
+    class="s2">, </span><span class="s1">propertyInData</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../code&quot;</span>
+
+<span class="s0">export </span><span class="s1">type PropertyDependencies </span><span class="s2">= {[</span><span
+    class="s1">K </span><span class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">string</span><span class="s2">[]}</span>
+
+<span class="s0">export interface </span><span class="s1">DependenciesErrorParams </span><span class="s2">{</span>
+  <span class="s1">property</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">missingProperty</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">depsCount</span><span class="s2">: </span><span class="s1">number</span>
+  <span class="s1">deps</span><span class="s2">: </span><span class="s1">string </span><span class="s4">// TODO change to string[]</span>
+<span class="s2">}</span>
+
+<span class="s1">type SchemaDependencies </span><span class="s2">= </span><span class="s1">SchemaMap</span>
+
+<span class="s0">export </span><span class="s1">type DependenciesError </span><span class="s2">= </span><span
+    class="s1">ErrorObject</span><span class="s2">&lt;</span>
+  <span class="s3">&quot;dependencies&quot;</span><span class="s2">,</span>
+  <span class="s1">DependenciesErrorParams</span><span class="s2">,</span>
+  <span class="s2">{[</span><span class="s1">K </span><span class="s0">in </span><span class="s1">string</span><span
+    class="s2">]?: </span><span class="s1">string</span><span class="s2">[] | </span><span
+    class="s1">AnySchema</span><span class="s2">}</span>
+<span class="s2">&gt;</span>
+
+<span class="s0">export const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: ({</span><span class="s1">params</span><span
+    class="s2">: {</span><span class="s1">property</span><span class="s2">, </span><span
+    class="s1">depsCount</span><span class="s2">, </span><span class="s1">deps</span><span class="s2">}}) =&gt; {</span>
+    <span class="s0">const </span><span class="s1">property_ies </span><span class="s2">= </span><span class="s1">depsCount </span><span
+    class="s2">=== </span><span class="s5">1 </span><span class="s2">? </span><span
+    class="s3">&quot;property&quot; </span><span class="s2">: </span><span class="s3">&quot;properties&quot;</span>
+    <span class="s0">return </span><span class="s1">str</span><span class="s3">`must have </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">property_ies</span><span class="s2">} </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">deps</span><span class="s2">} </span><span class="s3">when property </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">property</span><span class="s2">} </span><span
+    class="s3">is present`</span>
+  <span class="s2">},</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">params</span><span
+    class="s2">: {</span><span class="s1">property</span><span class="s2">, </span><span
+    class="s1">depsCount</span><span class="s2">, </span><span class="s1">deps</span><span class="s2">, </span><span
+    class="s1">missingProperty</span><span class="s2">}}) =&gt;</span>
+    <span class="s1">_</span><span class="s3">`{property: </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">property</span><span class="s2">}</span><span class="s3">,
+    missingProperty: </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">missingProperty</span><span class="s2">}</span><span class="s3">,
+    depsCount: </span><span class="s1">$</span><span class="s2">{</span><span class="s1">depsCount</span><span
+    class="s2">}</span><span class="s3">,
+    deps: </span><span class="s1">$</span><span class="s2">{</span><span class="s1">deps</span><span class="s2">}</span><span
+    class="s3">}`</span><span class="s2">, </span><span class="s4">// TODO change to reference</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;dependencies&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">[</span><span class="s1">propDeps</span><span
+    class="s2">, </span><span class="s1">schDeps</span><span class="s2">] = </span><span
+    class="s1">splitDependencies</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">)</span>
+    <span class="s1">validatePropertyDeps</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">, </span><span class="s1">propDeps</span><span class="s2">)</span>
+    <span class="s1">validateSchemaDeps</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">, </span><span class="s1">schDeps</span><span class="s2">)</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">splitDependencies</span><span class="s2">({</span><span class="s1">schema</span><span
+    class="s2">}: </span><span class="s1">KeywordCxt</span><span class="s2">): [</span><span class="s1">PropertyDependencies</span><span
+    class="s2">, </span><span class="s1">SchemaDependencies</span><span class="s2">] {</span>
+  <span class="s0">const </span><span class="s1">propertyDeps</span><span class="s2">: </span><span class="s1">PropertyDependencies </span><span
+    class="s2">= {}</span>
+  <span class="s0">const </span><span class="s1">schemaDeps</span><span class="s2">: </span><span class="s1">SchemaDependencies </span><span
+    class="s2">= {}</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">schema</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">key </span><span class="s2">=== </span><span
+    class="s3">&quot;__proto__&quot;</span><span class="s2">) </span><span class="s0">continue</span>
+    <span class="s0">const </span><span class="s1">deps </span><span class="s2">= </span><span
+    class="s1">Array</span><span class="s2">.</span><span class="s1">isArray</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">[</span><span class="s1">key</span><span class="s2">]) ? </span><span
+    class="s1">propertyDeps </span><span class="s2">: </span><span class="s1">schemaDeps</span>
+    <span class="s1">deps</span><span class="s2">[</span><span class="s1">key</span><span class="s2">] = </span><span
+    class="s1">schema</span><span class="s2">[</span><span class="s1">key</span><span class="s2">]</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s2">[</span><span class="s1">propertyDeps</span><span class="s2">, </span><span
+    class="s1">schemaDeps</span><span class="s2">]</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">validatePropertyDeps</span><span class="s2">(</span>
+  <span class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">,</span>
+  <span class="s1">propertyDeps</span><span class="s2">: {[</span><span class="s1">K </span><span
+    class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span class="s1">string</span><span
+    class="s2">[]} = </span><span class="s1">cxt</span><span class="s2">.</span><span class="s1">schema</span>
+<span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">Object</span><span class="s2">.</span><span
+    class="s1">keys</span><span class="s2">(</span><span class="s1">propertyDeps</span><span class="s2">).</span><span
+    class="s1">length </span><span class="s2">=== </span><span class="s5">0</span><span class="s2">) </span><span
+    class="s0">return</span>
+  <span class="s0">const </span><span class="s1">missing </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;missing&quot;</span><span
+    class="s2">)</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">prop </span><span
+    class="s0">in </span><span class="s1">propertyDeps</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">deps </span><span class="s2">= </span><span
+    class="s1">propertyDeps</span><span class="s2">[</span><span class="s1">prop</span><span
+    class="s2">] as </span><span class="s1">string</span><span class="s2">[]</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">deps</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">=== </span><span class="s5">0</span><span class="s2">) </span><span
+    class="s0">continue</span>
+    <span class="s0">const </span><span class="s1">hasProperty </span><span class="s2">= </span><span class="s1">propertyInData</span><span
+    class="s2">(</span><span class="s1">gen</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">prop</span><span class="s2">, </span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">ownProperties</span><span
+    class="s2">)</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">setParams</span><span class="s2">({</span>
+      <span class="s1">property</span><span class="s2">: </span><span class="s1">prop</span><span class="s2">,</span>
+      <span class="s1">depsCount</span><span class="s2">: </span><span class="s1">deps</span><span
+    class="s2">.</span><span class="s1">length</span><span class="s2">,</span>
+      <span class="s1">deps</span><span class="s2">: </span><span class="s1">deps</span><span class="s2">.</span><span
+    class="s1">join</span><span class="s2">(</span><span class="s3">&quot;, &quot;</span><span class="s2">),</span>
+    <span class="s2">})</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">allErrors</span><span class="s2">) {</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">hasProperty</span><span class="s2">, () =&gt; {</span>
+        <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">depProp of deps</span><span
+    class="s2">) {</span>
+          <span class="s1">checkReportMissingProp</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">, </span><span class="s1">depProp</span><span class="s2">)</span>
+        <span class="s2">}</span>
+      <span class="s2">})</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">hasProperty</span><span
+    class="s2">} </span><span class="s3">&amp;&amp; (</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">checkMissingProp</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">, </span><span class="s1">deps</span><span class="s2">, </span><span class="s1">missing</span><span
+    class="s2">)}</span><span class="s3">)`</span><span class="s2">)</span>
+      <span class="s1">reportMissingProp</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">, </span><span class="s1">missing</span><span class="s2">)</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">else</span><span class="s2">()</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">validateSchemaDeps</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span
+    class="s1">schemaDeps</span><span class="s2">: </span><span class="s1">SchemaMap </span><span
+    class="s2">= </span><span class="s1">cxt</span><span class="s2">.</span><span class="s1">schema</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">keyword</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+  <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">prop </span><span
+    class="s0">in </span><span class="s1">schemaDeps</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span class="s1">schemaDeps</span><span
+    class="s2">[</span><span class="s1">prop</span><span class="s2">] as </span><span class="s1">AnySchema</span><span
+    class="s2">)) </span><span class="s0">continue</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span>
+      <span class="s1">propertyInData</span><span class="s2">(</span><span class="s1">gen</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s1">prop</span><span
+    class="s2">, </span><span class="s1">it</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">ownProperties</span><span class="s2">),</span>
+      <span class="s2">() =&gt; {</span>
+        <span class="s0">const </span><span class="s1">schCxt </span><span class="s2">= </span><span
+    class="s1">cxt</span><span class="s2">.</span><span class="s1">subschema</span><span class="s2">({</span><span
+    class="s1">keyword</span><span class="s2">, </span><span class="s1">schemaProp</span><span class="s2">: </span><span
+    class="s1">prop</span><span class="s2">}, </span><span class="s1">valid</span><span class="s2">)</span>
+        <span class="s1">cxt</span><span class="s2">.</span><span class="s1">mergeValidEvaluated</span><span class="s2">(</span><span
+    class="s1">schCxt</span><span class="s2">, </span><span class="s1">valid</span><span class="s2">)</span>
+      <span class="s2">},</span>
+      <span class="s2">() =&gt; </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">var</span><span class="s2">(</span><span class="s1">valid</span><span class="s2">, </span><span
+    class="s0">true</span><span class="s2">) </span><span class="s4">// TODO var</span>
+    <span class="s2">)</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

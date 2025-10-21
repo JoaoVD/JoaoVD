@@ -1,0 +1,110 @@
+<html>
+<head>
+  <title>_getView.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+
+    .s7 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _getView.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s2">var </span><span class="s1">nativeMax </span><span class="s3">= </span><span
+    class="s1">Math</span><span class="s3">.</span><span class="s1">max</span><span class="s3">,</span>
+    <span class="s1">nativeMin </span><span class="s3">= </span><span class="s1">Math</span><span
+    class="s3">.</span><span class="s1">min</span><span class="s3">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Gets the view, applying any `transforms` to the `start` and `end` positions.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{number} start The start of the view.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{number} end The end of the view.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array} transforms The transformations to apply to the view.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Object} Returns an object containing the `start` and `end`</span>
+ <span class="s4">*  positions of the view.</span>
+ <span class="s4">*/</span>
+<span class="s2">function </span><span class="s1">getView</span><span class="s3">(</span><span
+    class="s1">start</span><span class="s3">, </span><span class="s1">end</span><span class="s3">, </span><span
+    class="s1">transforms</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">index </span><span class="s3">= -</span><span class="s6">1</span><span
+    class="s3">,</span>
+      <span class="s1">length </span><span class="s3">= </span><span class="s1">transforms</span><span
+    class="s3">.</span><span class="s1">length</span><span class="s3">;</span>
+
+  <span class="s2">while </span><span class="s3">(++</span><span class="s1">index </span><span
+    class="s3">&lt; </span><span class="s1">length</span><span class="s3">) {</span>
+    <span class="s2">var </span><span class="s1">data </span><span class="s3">= </span><span
+    class="s1">transforms</span><span class="s3">[</span><span class="s1">index</span><span class="s3">],</span>
+        <span class="s1">size </span><span class="s3">= </span><span class="s1">data</span><span
+    class="s3">.</span><span class="s1">size</span><span class="s3">;</span>
+
+    <span class="s2">switch </span><span class="s3">(</span><span class="s1">data</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">) {</span>
+      <span class="s2">case </span><span class="s7">'drop'</span><span class="s3">:      </span><span
+    class="s1">start </span><span class="s3">+= </span><span class="s1">size</span><span class="s3">; </span><span
+    class="s2">break</span><span class="s3">;</span>
+      <span class="s2">case </span><span class="s7">'dropRight'</span><span class="s3">: </span><span
+    class="s1">end </span><span class="s3">-= </span><span class="s1">size</span><span class="s3">; </span><span
+    class="s2">break</span><span class="s3">;</span>
+      <span class="s2">case </span><span class="s7">'take'</span><span class="s3">:      </span><span
+    class="s1">end </span><span class="s3">= </span><span class="s1">nativeMin</span><span class="s3">(</span><span
+    class="s1">end</span><span class="s3">, </span><span class="s1">start </span><span class="s3">+ </span><span
+    class="s1">size</span><span class="s3">); </span><span class="s2">break</span><span class="s3">;</span>
+      <span class="s2">case </span><span class="s7">'takeRight'</span><span class="s3">: </span><span
+    class="s1">start </span><span class="s3">= </span><span class="s1">nativeMax</span><span class="s3">(</span><span
+    class="s1">start</span><span class="s3">, </span><span class="s1">end </span><span class="s3">- </span><span
+    class="s1">size</span><span class="s3">); </span><span class="s2">break</span><span class="s3">;</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+  <span class="s2">return </span><span class="s3">{ </span><span class="s7">'start'</span><span
+    class="s3">: </span><span class="s1">start</span><span class="s3">, </span><span class="s7">'end'</span><span
+    class="s3">: </span><span class="s1">end </span><span class="s3">};</span>
+<span class="s3">}</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">getView</span><span class="s3">;</span>
+</pre>
+</body>
+</html>

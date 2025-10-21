@@ -1,0 +1,430 @@
+<html>
+<head>
+  <title>timers.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          timers.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `timer` module exposes a global API for scheduling functions to</span>
+ <span class="s0">* be called at some future period of time. Because the timer functions are</span>
+ <span class="s0">* globals, there is no need to import `node:timers` to use the API.</span>
+ <span class="s0">*</span>
+ <span class="s0">* The timer functions within Node.js implement a similar API as the timers API</span>
+ <span class="s0">* provided by Web Browsers but use a different internal implementation that is</span>
+ <span class="s0">* built around the Node.js [Event Loop](https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/#setimmediate-vs-settimeout).</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/timers.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;timers&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Abortable </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:events&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">promises from </span><span class="s3">&quot;node:timers/promises&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export interface </span><span class="s2">TimerOptions </span><span class="s5">extends </span><span
+    class="s2">Abortable </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Set to `false` to indicate that the scheduled `Timeout`</span>
+         <span class="s0">* should not require the Node.js event loop to remain active.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">ref</span><span class="s4">?: </span><span class="s2">boolean </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">global </span><span class="s4">{</span>
+        <span class="s2">namespace NodeJS </span><span class="s4">{</span>
+            <span class="s0">/**</span>
+             <span class="s0">* This object is created internally and is returned from `setImmediate()`. It</span>
+             <span class="s0">* can be passed to `clearImmediate()` in order to cancel the scheduled</span>
+             <span class="s0">* actions.</span>
+             <span class="s0">*</span>
+             <span class="s0">* By default, when an immediate is scheduled, the Node.js event loop will continue</span>
+             <span class="s0">* running as long as the immediate is active. The `Immediate` object returned by</span>
+             <span class="s0">* `setImmediate()` exports both `immediate.ref()` and `immediate.unref()`</span>
+             <span class="s0">* functions that can be used to control this default behavior.</span>
+             <span class="s0">*/</span>
+            <span class="s5">interface </span><span class="s2">Immediate </span><span class="s5">extends </span><span
+    class="s2">RefCounted</span><span class="s4">, </span><span class="s2">Disposable </span><span class="s4">{</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* If true, the `Immediate` object will keep the Node.js event loop active.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.0.0</span>
+                 <span class="s0">*/</span>
+                <span class="s2">hasRef</span><span class="s4">(): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* When called, requests that the Node.js event loop _not_ exit so long as the</span>
+                 <span class="s0">* `Immediate` is active. Calling `immediate.ref()` multiple times will have no</span>
+                 <span class="s0">* effect.</span>
+                 <span class="s0">*</span>
+                 <span class="s0">* By default, all `Immediate` objects are &quot;ref'ed&quot;, making it normally unnecessary</span>
+                 <span
+                   class="s0">* to call `immediate.ref()` unless `immediate.unref()` had been called previously.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.7.0</span>
+                 <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">a reference to `immediate`</span>
+                 <span class="s0">*/</span>
+                <span class="s2">ref</span><span class="s4">(): </span><span class="s5">this</span><span
+    class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* When called, the active `Immediate` object will not require the Node.js event</span>
+                 <span class="s0">* loop to remain active. If there is no other activity keeping the event loop</span>
+                 <span class="s0">* running, the process may exit before the `Immediate` object's callback is</span>
+                 <span class="s0">* invoked. Calling `immediate.unref()` multiple times will have no effect.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.7.0</span>
+                 <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">a reference to `immediate`</span>
+                 <span class="s0">*/</span>
+                <span class="s2">unref</span><span class="s4">(): </span><span class="s5">this</span><span
+    class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Cancels the immediate. This is similar to calling `clearImmediate()`.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.5.0, v18.18.0</span>
+                 <span class="s0">*/</span>
+                <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">dispose</span><span class="s4">](): </span><span class="s5">void</span><span class="s4">;</span>
+                <span class="s2">_onImmediate</span><span class="s4">(</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s4">}</span>
+            <span class="s6">// Legacy interface used in Node.js v9 and prior</span>
+            <span class="s6">// TODO: remove in a future major version bump</span>
+            <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `NodeJS.Timeout` instead. */</span>
+            <span class="s5">interface </span><span class="s2">Timer </span><span class="s5">extends </span><span
+    class="s2">RefCounted </span><span class="s4">{</span>
+                <span class="s2">hasRef</span><span class="s4">(): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+                <span class="s2">refresh</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+                <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span class="s2">toPrimitive</span><span
+    class="s4">](): </span><span class="s2">number</span><span class="s4">;</span>
+            <span class="s4">}</span>
+            <span class="s0">/**</span>
+             <span class="s0">* This object is created internally and is returned from `setTimeout()` and</span>
+             <span class="s0">* `setInterval()`. It can be passed to either `clearTimeout()` or</span>
+             <span class="s0">* `clearInterval()` in order to cancel the scheduled actions.</span>
+             <span class="s0">*</span>
+             <span class="s0">* By default, when a timer is scheduled using either `setTimeout()` or</span>
+             <span class="s0">* `setInterval()`, the Node.js event loop will continue running as long as the</span>
+             <span class="s0">* timer is active. Each of the `Timeout` objects returned by these functions</span>
+             <span class="s0">* export both `timeout.ref()` and `timeout.unref()` functions that can be used to</span>
+             <span class="s0">* control this default behavior.</span>
+             <span class="s0">*/</span>
+            <span class="s5">interface </span><span class="s2">Timeout </span><span class="s5">extends </span><span
+    class="s2">RefCounted</span><span class="s4">, </span><span class="s2">Disposable</span><span
+    class="s4">, </span><span class="s2">Timer </span><span class="s4">{</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Cancels the timeout.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+                 <span class="s0">* </span><span class="s1">@legacy </span><span class="s0">Use `clearTimeout()` instead.</span>
+                 <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">a reference to `timeout`</span>
+                 <span class="s0">*/</span>
+                <span class="s2">close</span><span class="s4">(): </span><span class="s5">this</span><span
+    class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* If true, the `Timeout` object will keep the Node.js event loop active.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.0.0</span>
+                 <span class="s0">*/</span>
+                <span class="s2">hasRef</span><span class="s4">(): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* When called, requests that the Node.js event loop _not_ exit so long as the</span>
+                 <span
+                   class="s0">* `Timeout` is active. Calling `timeout.ref()` multiple times will have no effect.</span>
+                 <span class="s0">*</span>
+                 <span class="s0">* By default, all `Timeout` objects are &quot;ref'ed&quot;, making it normally unnecessary</span>
+                 <span class="s0">* to call `timeout.ref()` unless `timeout.unref()` had been called previously.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+                 <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">a reference to `timeout`</span>
+                 <span class="s0">*/</span>
+                <span class="s2">ref</span><span class="s4">(): </span><span class="s5">this</span><span
+    class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Sets the timer's start time to the current time, and reschedules the timer to</span>
+                 <span
+                   class="s0">* call its callback at the previously specified duration adjusted to the current</span>
+                 <span class="s0">* time. This is useful for refreshing a timer without allocating a new</span>
+                 <span class="s0">* JavaScript object.</span>
+                 <span class="s0">*</span>
+                 <span
+                   class="s0">* Using this on a timer that has already called its callback will reactivate the</span>
+                 <span class="s0">* timer.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.2.0</span>
+                 <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">a reference to `timeout`</span>
+                 <span class="s0">*/</span>
+                <span class="s2">refresh</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span
+                   class="s0">* When called, the active `Timeout` object will not require the Node.js event loop</span>
+                 <span
+                   class="s0">* to remain active. If there is no other activity keeping the event loop running,</span>
+                 <span
+                   class="s0">* the process may exit before the `Timeout` object's callback is invoked. Calling</span>
+                 <span class="s0">* `timeout.unref()` multiple times will have no effect.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+                 <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">a reference to `timeout`</span>
+                 <span class="s0">*/</span>
+                <span class="s2">unref</span><span class="s4">(): </span><span class="s5">this</span><span
+    class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Coerce a `Timeout` to a primitive. The primitive can be used to</span>
+                 <span class="s0">* clear the `Timeout`. The primitive can only be used in the</span>
+                 <span class="s0">* same thread where the timeout was created. Therefore, to use it</span>
+                 <span class="s0">* across `worker_threads` it must first be passed to the correct</span>
+                 <span class="s0">* thread. This allows enhanced compatibility with browser</span>
+                 <span class="s0">* `setTimeout()` and `setInterval()` implementations.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.9.0, v12.19.0</span>
+                 <span class="s0">*/</span>
+                <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span class="s2">toPrimitive</span><span
+    class="s4">](): </span><span class="s2">number</span><span class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Cancels the timeout.</span>
+                 <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.5.0, v18.18.0</span>
+                 <span class="s0">*/</span>
+                <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">dispose</span><span class="s4">](): </span><span class="s5">void</span><span class="s4">;</span>
+                <span class="s2">_onTimeout</span><span class="s4">(</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s4">}</span>
+        <span class="s4">}</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Schedules the &quot;immediate&quot; execution of the `callback` after I/O events'</span>
+         <span class="s0">* callbacks.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When multiple calls to `setImmediate()` are made, the `callback` functions are</span>
+         <span class="s0">* queued for execution in the order in which they are created. The entire callback</span>
+         <span class="s0">* queue is processed every event loop iteration. If an immediate timer is queued</span>
+         <span class="s0">* from inside an executing callback, that timer will not be triggered until the</span>
+         <span class="s0">* next event loop iteration.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `callback` is not a function, a `TypeError` will be thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method has a custom variant for promises that is available using</span>
+         <span class="s0">* `timersPromises.setImmediate()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback The function to call at the end of this turn of</span>
+         <span class="s0">* the Node.js [Event Loop](https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/#setimmediate-vs-settimeout)</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">args Optional arguments to pass when the `callback` is called.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">for use with `clearImmediate()`</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">setImmediate</span><span class="s4">&lt;</span><span
+    class="s2">TArgs </span><span class="s5">extends </span><span class="s2">any</span><span class="s4">[]&gt;(</span>
+            <span class="s2">callback</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">TArgs</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+            <span class="s2">...args</span><span class="s4">: </span><span class="s2">TArgs</span>
+        <span class="s4">): </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Immediate</span><span class="s4">;</span>
+        <span class="s6">// Allow a single void-accepting argument to be optional in arguments lists.</span>
+        <span class="s6">// Allows usage such as `new Promise(resolve =&gt; setTimeout(resolve, ms))` (#54258)</span>
+        <span class="s6">// eslint-disable-next-line @typescript-eslint/no-invalid-void-type</span>
+        <span class="s5">function </span><span class="s2">setImmediate</span><span class="s4">(</span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">_</span><span class="s4">: </span><span class="s5">void</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Immediate</span><span class="s4">;</span>
+        <span class="s2">namespace setImmediate </span><span class="s4">{</span>
+            <span class="s5">import </span><span class="s2">__promisify__ </span><span class="s4">= </span><span
+    class="s2">promises</span><span class="s4">.</span><span class="s2">setImmediate</span><span class="s4">;</span>
+            <span class="s5">export </span><span class="s4">{ </span><span class="s2">__promisify__ </span><span
+    class="s4">};</span>
+        <span class="s4">}</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Schedules repeated execution of `callback` every `delay` milliseconds.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When `delay` is larger than `2147483647` or less than `1` or `NaN`, the `delay`</span>
+         <span class="s0">* will be set to `1`. Non-integer delays are truncated to an integer.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `callback` is not a function, a `TypeError` will be thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method has a custom variant for promises that is available using</span>
+         <span class="s0">* `timersPromises.setInterval()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.0.1</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback The function to call when the timer elapses.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">delay The number of milliseconds to wait before calling the</span>
+         <span class="s0">* `callback`. **Default:** `1`.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">args Optional arguments to pass when the `callback` is called.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">for use with `clearInterval()`</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">setInterval</span><span class="s4">&lt;</span><span
+    class="s2">TArgs </span><span class="s5">extends </span><span class="s2">any</span><span class="s4">[]&gt;(</span>
+            <span class="s2">callback</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">TArgs</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+            <span class="s2">delay</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">...args</span><span class="s4">: </span><span class="s2">TArgs</span>
+        <span class="s4">): </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Timeout</span><span class="s4">;</span>
+        <span class="s6">// Allow a single void-accepting argument to be optional in arguments lists.</span>
+        <span class="s6">// Allows usage such as `new Promise(resolve =&gt; setTimeout(resolve, ms))` (#54258)</span>
+        <span class="s6">// eslint-disable-next-line @typescript-eslint/no-invalid-void-type</span>
+        <span class="s5">function </span><span class="s2">setInterval</span><span class="s4">(</span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">_</span><span class="s4">: </span><span class="s5">void</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span class="s2">delay</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Timeout</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Schedules execution of a one-time `callback` after `delay` milliseconds.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `callback` will likely not be invoked in precisely `delay` milliseconds.</span>
+         <span class="s0">* Node.js makes no guarantees about the exact timing of when callbacks will fire,</span>
+         <span class="s0">* nor of their ordering. The callback will be called as close as possible to the</span>
+         <span class="s0">* time specified.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When `delay` is larger than `2147483647` or less than `1` or `NaN`, the `delay`</span>
+         <span class="s0">* will be set to `1`. Non-integer delays are truncated to an integer.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `callback` is not a function, a `TypeError` will be thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method has a custom variant for promises that is available using</span>
+         <span class="s0">* `timersPromises.setTimeout()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.0.1</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback The function to call when the timer elapses.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">delay The number of milliseconds to wait before calling the</span>
+         <span class="s0">* `callback`. **Default:** `1`.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">args Optional arguments to pass when the `callback` is called.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span
+    class="s0">for use with `clearTimeout()`</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">setTimeout</span><span class="s4">&lt;</span><span class="s2">TArgs </span><span
+    class="s5">extends </span><span class="s2">any</span><span class="s4">[]&gt;(</span>
+            <span class="s2">callback</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">TArgs</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+            <span class="s2">delay</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">...args</span><span class="s4">: </span><span class="s2">TArgs</span>
+        <span class="s4">): </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Timeout</span><span class="s4">;</span>
+        <span class="s6">// Allow a single void-accepting argument to be optional in arguments lists.</span>
+        <span class="s6">// Allows usage such as `new Promise(resolve =&gt; setTimeout(resolve, ms))` (#54258)</span>
+        <span class="s6">// eslint-disable-next-line @typescript-eslint/no-invalid-void-type</span>
+        <span class="s5">function </span><span class="s2">setTimeout</span><span class="s4">(</span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">_</span><span class="s4">: </span><span class="s5">void</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span class="s2">delay</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Timeout</span><span class="s4">;</span>
+        <span class="s2">namespace setTimeout </span><span class="s4">{</span>
+            <span class="s5">import </span><span class="s2">__promisify__ </span><span class="s4">= </span><span
+    class="s2">promises</span><span class="s4">.</span><span class="s2">setTimeout</span><span class="s4">;</span>
+            <span class="s5">export </span><span class="s4">{ </span><span class="s2">__promisify__ </span><span
+    class="s4">};</span>
+        <span class="s4">}</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Cancels an `Immediate` object created by `setImmediate()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">immediate An `Immediate` object as returned by `setImmediate()`.</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">clearImmediate</span><span class="s4">(</span><span
+    class="s2">immediate</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Immediate </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Cancels a `Timeout` object created by `setInterval()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.0.1</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">timeout A `Timeout` object as returned by `setInterval()`</span>
+         <span class="s0">* or the primitive of the `Timeout` object as a string or a number.</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">clearInterval</span><span class="s4">(</span><span class="s2">timeout</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Timeout </span><span
+    class="s4">| </span><span class="s2">string </span><span class="s4">| </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Cancels a `Timeout` object created by `setTimeout()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.0.1</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">timeout A `Timeout` object as returned by `setTimeout()`</span>
+         <span class="s0">* or the primitive of the `Timeout` object as a string or a number.</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">clearTimeout</span><span class="s4">(</span><span class="s2">timeout</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Timeout </span><span
+    class="s4">| </span><span class="s2">string </span><span class="s4">| </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `queueMicrotask()` method queues a microtask to invoke `callback`. If</span>
+         <span class="s0">* `callback` throws an exception, the `process` object `'uncaughtException'`</span>
+         <span class="s0">* event will be emitted.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The microtask queue is managed by V8 and may be used in a similar manner to</span>
+         <span class="s0">* the `process.nextTick()` queue, which is managed by Node.js. The</span>
+         <span class="s0">* `process.nextTick()` queue is always processed before the microtask queue</span>
+         <span class="s0">* within each turn of the Node.js event loop.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.0.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">callback Function to be queued.</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">queueMicrotask</span><span class="s4">(</span><span
+    class="s2">callback</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">import </span><span class="s2">clearImmediate </span><span class="s4">= </span><span class="s2">globalThis</span><span
+    class="s4">.</span><span class="s2">clearImmediate</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s2">clearInterval </span><span class="s4">= </span><span class="s2">globalThis</span><span
+    class="s4">.</span><span class="s2">clearInterval</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s2">clearTimeout </span><span class="s4">= </span><span class="s2">globalThis</span><span
+    class="s4">.</span><span class="s2">clearTimeout</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s2">setImmediate </span><span class="s4">= </span><span class="s2">globalThis</span><span
+    class="s4">.</span><span class="s2">setImmediate</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s2">setInterval </span><span class="s4">= </span><span class="s2">globalThis</span><span
+    class="s4">.</span><span class="s2">setInterval</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s2">setTimeout </span><span class="s4">= </span><span class="s2">globalThis</span><span
+    class="s4">.</span><span class="s2">setTimeout</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s4">{ </span><span class="s2">clearImmediate</span><span
+    class="s4">, </span><span class="s2">clearInterval</span><span class="s4">, </span><span
+    class="s2">clearTimeout</span><span class="s4">, </span><span class="s2">promises</span><span
+    class="s4">, </span><span class="s2">setImmediate</span><span class="s4">, </span><span
+    class="s2">setInterval</span><span class="s4">, </span><span class="s2">setTimeout </span><span class="s4">};</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:timers&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;timers&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

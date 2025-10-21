@@ -1,0 +1,104 @@
+<html>
+<head>
+  <title>invert.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          invert.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">constant </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./constant'</span><span class="s2">),</span>
+    <span class="s1">createInverter </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createInverter'</span><span class="s2">),</span>
+    <span class="s1">identity </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./identity'</span><span class="s2">);</span>
+
+<span class="s4">/** Used for built-in method references. */</span>
+<span class="s0">var </span><span class="s1">objectProto </span><span class="s2">= </span><span class="s1">Object</span><span
+    class="s2">.</span><span class="s1">prototype</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Used to resolve the</span>
+ <span class="s4">* [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)</span>
+ <span class="s4">* of values.</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">nativeObjectToString </span><span class="s2">= </span><span class="s1">objectProto</span><span
+    class="s2">.</span><span class="s1">toString</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates an object composed of the inverted keys and values of `object`.</span>
+ <span class="s4">* If `object` contains duplicate values, subsequent values overwrite</span>
+ <span class="s4">* property assignments of previous values.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.7.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Object</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} object The object to invert.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span
+    class="s4">{Object} Returns the new inverted object.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var object = { 'a': 1, 'b': 2, 'c': 1 };</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.invert(object);</span>
+ <span class="s4">* // =&gt; { '1': 'c', '2': 'b' }</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">invert </span><span class="s2">= </span><span
+    class="s1">createInverter</span><span class="s2">(</span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">result</span><span class="s2">, </span><span class="s1">value</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">value </span><span class="s2">!= </span><span
+    class="s0">null </span><span class="s2">&amp;&amp;</span>
+      <span class="s0">typeof </span><span class="s1">value</span><span class="s2">.</span><span
+    class="s1">toString </span><span class="s2">!= </span><span class="s3">'function'</span><span class="s2">) {</span>
+    <span class="s1">value </span><span class="s2">= </span><span class="s1">nativeObjectToString</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s1">result</span><span class="s2">[</span><span class="s1">value</span><span class="s2">] = </span><span
+    class="s1">key</span><span class="s2">;</span>
+<span class="s2">}, </span><span class="s1">constant</span><span class="s2">(</span><span
+    class="s1">identity</span><span class="s2">));</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">invert</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

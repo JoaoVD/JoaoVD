@@ -1,0 +1,534 @@
+<html>
+<head>
+  <title>dataType.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          dataType.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span>
+  <span class="s1">KeywordErrorDefinition</span><span class="s2">,</span>
+  <span class="s1">KeywordErrorCxt</span><span class="s2">,</span>
+  <span class="s1">ErrorObject</span><span class="s2">,</span>
+  <span class="s1">AnySchemaObject</span><span class="s2">,</span>
+<span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">SchemaObjCxt</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;..&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">isJSONType</span><span
+    class="s2">, </span><span class="s1">JSONType</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;../rules&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">schemaHasRulesForType</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./applicability&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">reportError</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../errors&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">nil</span><span class="s2">, </span><span class="s1">and</span><span class="s2">, </span><span
+    class="s1">not</span><span class="s2">, </span><span class="s1">operators</span><span class="s2">, </span><span
+    class="s1">Code</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">toHash</span><span class="s2">, </span><span
+    class="s1">schemaRefOrVal</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../util&quot;</span>
+
+<span class="s0">export enum </span><span class="s1">DataType </span><span class="s2">{</span>
+  <span class="s1">Correct</span><span class="s2">,</span>
+  <span class="s1">Wrong</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">getSchemaTypes</span><span class="s2">(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">AnySchemaObject</span><span class="s2">): </span><span
+    class="s1">JSONType</span><span class="s2">[] {</span>
+  <span class="s0">const </span><span class="s1">types </span><span class="s2">= </span><span
+    class="s1">getJSONTypes</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">.</span><span
+    class="s1">type</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">hasNull </span><span class="s2">= </span><span
+    class="s1">types</span><span class="s2">.</span><span class="s1">includes</span><span class="s2">(</span><span
+    class="s3">&quot;null&quot;</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">hasNull</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">schema</span><span class="s2">.</span><span
+    class="s1">nullable </span><span class="s2">=== </span><span class="s0">false</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;type: null contradicts nullable: false&quot;</span><span
+    class="s2">)</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">types</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">&amp;&amp; </span><span class="s1">schema</span><span
+    class="s2">.</span><span class="s1">nullable </span><span class="s2">!== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+      <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'&quot;nullable&quot; cannot be used without &quot;type&quot;'</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">schema</span><span class="s2">.</span><span
+    class="s1">nullable </span><span class="s2">=== </span><span class="s0">true</span><span class="s2">) </span><span
+    class="s1">types</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s3">&quot;null&quot;</span><span class="s2">)</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">types</span>
+<span class="s2">}</span>
+
+<span class="s4">// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents</span>
+<span class="s0">export function </span><span class="s1">getJSONTypes</span><span class="s2">(</span><span
+    class="s1">ts</span><span class="s2">: </span><span class="s1">unknown </span><span class="s2">| </span><span
+    class="s1">unknown</span><span class="s2">[]): </span><span class="s1">JSONType</span><span class="s2">[] {</span>
+  <span class="s0">const </span><span class="s1">types</span><span class="s2">: </span><span
+    class="s1">unknown</span><span class="s2">[] = </span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">ts</span><span class="s2">) ? </span><span
+    class="s1">ts </span><span class="s2">: </span><span class="s1">ts </span><span class="s2">? [</span><span
+    class="s1">ts</span><span class="s2">] : []</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">types</span><span class="s2">.</span><span
+    class="s1">every</span><span class="s2">(</span><span class="s1">isJSONType</span><span class="s2">)) </span><span
+    class="s0">return </span><span class="s1">types</span>
+  <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;type must be JSONType or JSONType[]: &quot; </span><span
+    class="s2">+ </span><span class="s1">types</span><span class="s2">.</span><span class="s1">join</span><span
+    class="s2">(</span><span class="s3">&quot;,&quot;</span><span class="s2">))</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">coerceAndCheckDataType</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaObjCxt</span><span class="s2">, </span><span
+    class="s1">types</span><span class="s2">: </span><span class="s1">JSONType</span><span class="s2">[]): </span><span
+    class="s1">boolean </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">opts</span><span class="s2">} = </span><span
+    class="s1">it</span>
+  <span class="s0">const </span><span class="s1">coerceTo </span><span class="s2">= </span><span class="s1">coerceToTypes</span><span
+    class="s2">(</span><span class="s1">types</span><span class="s2">, </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">coerceTypes</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">checkTypes </span><span class="s2">=</span>
+    <span class="s1">types</span><span class="s2">.</span><span class="s1">length </span><span
+    class="s2">&gt; </span><span class="s5">0 </span><span class="s2">&amp;&amp;</span>
+    <span class="s2">!(</span><span class="s1">coerceTo</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">=== </span><span class="s5">0 </span><span
+    class="s2">&amp;&amp; </span><span class="s1">types</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">=== </span><span class="s5">1 </span><span
+    class="s2">&amp;&amp; </span><span class="s1">schemaHasRulesForType</span><span class="s2">(</span><span class="s1">it</span><span
+    class="s2">, </span><span class="s1">types</span><span class="s2">[</span><span class="s5">0</span><span class="s2">]))</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">checkTypes</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">wrongType </span><span class="s2">= </span><span class="s1">checkDataTypes</span><span
+    class="s2">(</span><span class="s1">types</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">strictNumbers</span><span
+    class="s2">, </span><span class="s1">DataType</span><span class="s2">.</span><span class="s1">Wrong</span><span
+    class="s2">)</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">wrongType</span><span class="s2">, () =&gt; {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">coerceTo</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">) </span><span class="s1">coerceData</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">, </span><span class="s1">types</span><span class="s2">, </span><span
+    class="s1">coerceTo</span><span class="s2">)</span>
+      <span class="s0">else </span><span class="s1">reportTypeError</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">)</span>
+    <span class="s2">})</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">checkTypes</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">COERCIBLE</span><span class="s2">: </span><span
+    class="s1">Set</span><span class="s2">&lt;</span><span class="s1">JSONType</span><span
+    class="s2">&gt; = </span><span class="s0">new </span><span class="s1">Set</span><span class="s2">([</span><span
+    class="s3">&quot;string&quot;</span><span class="s2">, </span><span class="s3">&quot;number&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;integer&quot;</span><span class="s2">, </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;null&quot;</span><span class="s2">])</span>
+<span class="s0">function </span><span class="s1">coerceToTypes</span><span class="s2">(</span><span
+    class="s1">types</span><span class="s2">: </span><span class="s1">JSONType</span><span class="s2">[], </span><span
+    class="s1">coerceTypes</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;array&quot;</span><span class="s2">): </span><span
+    class="s1">JSONType</span><span class="s2">[] {</span>
+  <span class="s0">return </span><span class="s1">coerceTypes</span>
+    <span class="s2">? </span><span class="s1">types</span><span class="s2">.</span><span class="s1">filter</span><span
+    class="s2">((</span><span class="s1">t</span><span class="s2">) =&gt; </span><span class="s1">COERCIBLE</span><span
+    class="s2">.</span><span class="s1">has</span><span class="s2">(</span><span class="s1">t</span><span class="s2">) || (</span><span
+    class="s1">coerceTypes </span><span class="s2">=== </span><span class="s3">&quot;array&quot; </span><span
+    class="s2">&amp;&amp; </span><span class="s1">t </span><span class="s2">=== </span><span class="s3">&quot;array&quot;</span><span
+    class="s2">))</span>
+    <span class="s2">: []</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">coerceData</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaObjCxt</span><span class="s2">, </span><span
+    class="s1">types</span><span class="s2">: </span><span class="s1">JSONType</span><span class="s2">[], </span><span
+    class="s1">coerceTo</span><span class="s2">: </span><span class="s1">JSONType</span><span
+    class="s2">[]): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">opts</span><span class="s2">} = </span><span
+    class="s1">it</span>
+  <span class="s0">const </span><span class="s1">dataType </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;dataType&quot;</span><span
+    class="s2">, </span><span class="s1">_</span><span class="s3">`typeof </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">`</span><span
+    class="s2">)</span>
+  <span class="s0">const </span><span class="s1">coerced </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;coerced&quot;</span><span
+    class="s2">, </span><span class="s1">_</span><span class="s3">`undefined`</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">coerceTypes </span><span class="s2">=== </span><span class="s3">&quot;array&quot;</span><span class="s2">) {</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">dataType</span><span
+    class="s2">} </span><span class="s3">== 'object' &amp;&amp; Array.isArray(</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">) &amp;&amp; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">.length == 1`</span><span
+    class="s2">, () =&gt;</span>
+      <span class="s1">gen</span>
+        <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">[0]`</span><span
+    class="s2">)</span>
+        <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span class="s1">dataType</span><span
+    class="s2">, </span><span class="s1">_</span><span class="s3">`typeof </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">`</span><span
+    class="s2">)</span>
+        <span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">checkDataTypes</span><span class="s2">(</span><span class="s1">types</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">strictNumbers</span><span class="s2">), () =&gt; </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s1">data</span><span class="s2">))</span>
+    <span class="s2">)</span>
+  <span class="s2">}</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">coerced</span><span
+    class="s2">} </span><span class="s3">!== undefined`</span><span class="s2">)</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">t of coerceTo</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">COERCIBLE</span><span class="s2">.</span><span
+    class="s1">has</span><span class="s2">(</span><span class="s1">t</span><span class="s2">) || (</span><span
+    class="s1">t </span><span class="s2">=== </span><span class="s3">&quot;array&quot; </span><span class="s2">&amp;&amp; </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">coerceTypes </span><span class="s2">=== </span><span
+    class="s3">&quot;array&quot;</span><span class="s2">)) {</span>
+      <span class="s1">coerceSpecificType</span><span class="s2">(</span><span class="s1">t</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">else</span><span class="s2">()</span>
+  <span class="s1">reportTypeError</span><span class="s2">(</span><span class="s1">it</span><span class="s2">)</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">endIf</span><span class="s2">()</span>
+
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">coerced</span><span
+    class="s2">} </span><span class="s3">!== undefined`</span><span class="s2">, () =&gt; {</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">coerced</span><span class="s2">)</span>
+    <span class="s1">assignParentData</span><span class="s2">(</span><span class="s1">it</span><span
+    class="s2">, </span><span class="s1">coerced</span><span class="s2">)</span>
+  <span class="s2">})</span>
+
+  <span class="s0">function </span><span class="s1">coerceSpecificType</span><span class="s2">(</span><span
+    class="s1">t</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+    <span class="s0">switch </span><span class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+      <span class="s0">case </span><span class="s3">&quot;string&quot;</span><span class="s2">:</span>
+        <span class="s1">gen</span>
+          <span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">dataType</span><span
+    class="s2">} </span><span class="s3">== &quot;number&quot; || </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">dataType</span><span class="s2">} </span><span class="s3">== &quot;boolean&quot;`</span><span
+    class="s2">)</span>
+          <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`&quot;&quot; + </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">`</span><span class="s2">)</span>
+          <span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">} </span><span class="s3">=== null`</span><span class="s2">)</span>
+          <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s1">_</span><span
+    class="s3">`&quot;&quot;`</span><span class="s2">)</span>
+        <span class="s0">return</span>
+      <span class="s0">case </span><span class="s3">&quot;number&quot;</span><span class="s2">:</span>
+        <span class="s1">gen</span>
+          <span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span>
+            <span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">dataType</span><span class="s2">} </span><span class="s3">== &quot;boolean&quot; || </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== null
+              || (</span><span class="s1">$</span><span class="s2">{</span><span class="s1">dataType</span><span
+    class="s2">} </span><span class="s3">== &quot;string&quot; &amp;&amp; </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">&amp;&amp; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">== +</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">)`</span>
+          <span class="s2">)</span>
+          <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`+</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">`</span><span class="s2">)</span>
+        <span class="s0">return</span>
+      <span class="s0">case </span><span class="s3">&quot;integer&quot;</span><span class="s2">:</span>
+        <span class="s1">gen</span>
+          <span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span>
+            <span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">dataType</span><span class="s2">} </span><span class="s3">=== &quot;boolean&quot; || </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== null
+              || (</span><span class="s1">$</span><span class="s2">{</span><span class="s1">dataType</span><span
+    class="s2">} </span><span class="s3">=== &quot;string&quot; &amp;&amp; </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">&amp;&amp; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">== +</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">&amp;&amp; !(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">% 1))`</span>
+          <span class="s2">)</span>
+          <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`+</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">`</span><span class="s2">)</span>
+        <span class="s0">return</span>
+      <span class="s0">case </span><span class="s3">&quot;boolean&quot;</span><span class="s2">:</span>
+        <span class="s1">gen</span>
+          <span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">} </span><span class="s3">=== &quot;false&quot; || </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== 0 || </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== null`</span><span
+    class="s2">)</span>
+          <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s0">false</span><span class="s2">)</span>
+          <span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">} </span><span class="s3">=== &quot;true&quot; || </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== 1`</span><span
+    class="s2">)</span>
+          <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+        <span class="s0">return</span>
+      <span class="s0">case </span><span class="s3">&quot;null&quot;</span><span class="s2">:</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">} </span><span class="s3">=== &quot;&quot; || </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== 0 || </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== false`</span><span
+    class="s2">)</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s0">null</span><span class="s2">)</span>
+        <span class="s0">return</span>
+
+      <span class="s0">case </span><span class="s3">&quot;array&quot;</span><span class="s2">:</span>
+        <span class="s1">gen</span>
+          <span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span>
+            <span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">dataType</span><span class="s2">} </span><span class="s3">=== &quot;string&quot; || </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">dataType</span><span class="s2">} </span><span
+    class="s3">=== &quot;number&quot;
+              || </span><span class="s1">$</span><span class="s2">{</span><span class="s1">dataType</span><span
+    class="s2">} </span><span class="s3">=== &quot;boolean&quot; || </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== null`</span>
+          <span class="s2">)</span>
+          <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">coerced</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`[</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">]`</span><span class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">assignParentData</span><span class="s2">({</span><span
+    class="s1">gen</span><span class="s2">, </span><span class="s1">parentData</span><span class="s2">, </span><span
+    class="s1">parentDataProperty</span><span class="s2">}: </span><span class="s1">SchemaObjCxt</span><span class="s2">, </span><span
+    class="s1">expr</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s4">// TODO use gen.property</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">parentData</span><span
+    class="s2">} </span><span class="s3">!== undefined`</span><span class="s2">, () =&gt;</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">parentData</span><span
+    class="s2">}</span><span class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span class="s1">parentDataProperty</span><span
+    class="s2">}</span><span class="s3">]`</span><span class="s2">, </span><span class="s1">expr</span><span class="s2">)</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">checkDataType</span><span class="s2">(</span>
+  <span class="s1">dataType</span><span class="s2">: </span><span class="s1">JSONType</span><span class="s2">,</span>
+  <span class="s1">data</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">,</span>
+  <span class="s1">strictNums</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span><span class="s2">,</span>
+  <span class="s1">correct </span><span class="s2">= </span><span class="s1">DataType</span><span
+    class="s2">.</span><span class="s1">Correct</span>
+<span class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">EQ </span><span class="s2">= </span><span
+    class="s1">correct </span><span class="s2">=== </span><span class="s1">DataType</span><span class="s2">.</span><span
+    class="s1">Correct </span><span class="s2">? </span><span class="s1">operators</span><span class="s2">.</span><span
+    class="s1">EQ </span><span class="s2">: </span><span class="s1">operators</span><span class="s2">.</span><span
+    class="s1">NEQ</span>
+  <span class="s0">let </span><span class="s1">cond</span><span class="s2">: </span><span class="s1">Code</span>
+  <span class="s0">switch </span><span class="s2">(</span><span class="s1">dataType</span><span class="s2">) {</span>
+    <span class="s0">case </span><span class="s3">&quot;null&quot;</span><span class="s2">:</span>
+      <span class="s0">return </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">EQ</span><span class="s2">} </span><span class="s3">null`</span>
+    <span class="s0">case </span><span class="s3">&quot;array&quot;</span><span class="s2">:</span>
+      <span class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span
+    class="s3">`Array.isArray(</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s3">)`</span>
+      <span class="s0">break</span>
+    <span class="s0">case </span><span class="s3">&quot;object&quot;</span><span class="s2">:</span>
+      <span class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">&amp;&amp; typeof </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">== &quot;object&quot; &amp;&amp; !Array.isArray(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">)`</span>
+      <span class="s0">break</span>
+    <span class="s0">case </span><span class="s3">&quot;integer&quot;</span><span class="s2">:</span>
+      <span class="s1">cond </span><span class="s2">= </span><span class="s1">numCond</span><span
+    class="s2">(</span><span class="s1">_</span><span class="s3">`!(</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span
+    class="s3">% 1) &amp;&amp; !isNaN(</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">}</span><span class="s3">)`</span><span class="s2">)</span>
+      <span class="s0">break</span>
+    <span class="s0">case </span><span class="s3">&quot;number&quot;</span><span class="s2">:</span>
+      <span class="s1">cond </span><span class="s2">= </span><span class="s1">numCond</span><span class="s2">()</span>
+      <span class="s0">break</span>
+    <span class="s0">default</span><span class="s2">:</span>
+      <span class="s0">return </span><span class="s1">_</span><span class="s3">`typeof </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">EQ</span><span class="s2">} </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">dataType</span><span class="s2">}</span><span
+    class="s3">`</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">correct </span><span class="s2">=== </span><span
+    class="s1">DataType</span><span class="s2">.</span><span class="s1">Correct </span><span class="s2">? </span><span
+    class="s1">cond </span><span class="s2">: </span><span class="s1">not</span><span class="s2">(</span><span
+    class="s1">cond</span><span class="s2">)</span>
+
+  <span class="s0">function </span><span class="s1">numCond</span><span class="s2">(</span><span class="s1">_cond</span><span
+    class="s2">: </span><span class="s1">Code </span><span class="s2">= </span><span class="s1">nil</span><span
+    class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+    <span class="s0">return </span><span class="s1">and</span><span class="s2">(</span><span class="s1">_</span><span
+    class="s3">`typeof </span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">} </span><span class="s3">== &quot;number&quot;`</span><span class="s2">, </span><span
+    class="s1">_cond</span><span class="s2">, </span><span class="s1">strictNums </span><span class="s2">? </span><span
+    class="s1">_</span><span class="s3">`isFinite(</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">}</span><span class="s3">)` </span><span class="s2">: </span><span
+    class="s1">nil</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">checkDataTypes</span><span class="s2">(</span>
+  <span class="s1">dataTypes</span><span class="s2">: </span><span class="s1">JSONType</span><span class="s2">[],</span>
+  <span class="s1">data</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">,</span>
+  <span class="s1">strictNums</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span><span class="s2">,</span>
+  <span class="s1">correct</span><span class="s2">?: </span><span class="s1">DataType</span>
+<span class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">dataTypes</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">=== </span><span class="s5">1</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">checkDataType</span><span class="s2">(</span><span class="s1">dataTypes</span><span
+    class="s2">[</span><span class="s5">0</span><span class="s2">], </span><span class="s1">data</span><span class="s2">, </span><span
+    class="s1">strictNums</span><span class="s2">, </span><span class="s1">correct</span><span class="s2">)</span>
+  <span class="s2">}</span>
+  <span class="s0">let </span><span class="s1">cond</span><span class="s2">: </span><span class="s1">Code</span>
+  <span class="s0">const </span><span class="s1">types </span><span class="s2">= </span><span
+    class="s1">toHash</span><span class="s2">(</span><span class="s1">dataTypes</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">types</span><span class="s2">.</span><span
+    class="s1">array </span><span class="s2">&amp;&amp; </span><span class="s1">types</span><span
+    class="s2">.</span><span class="s1">object</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">notObj </span><span class="s2">= </span><span
+    class="s1">_</span><span class="s3">`typeof </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">} </span><span class="s3">!= &quot;object&quot;`</span>
+    <span class="s1">cond </span><span class="s2">= </span><span class="s1">types</span><span class="s2">.</span><span
+    class="s1">null </span><span class="s2">? </span><span class="s1">notObj </span><span class="s2">: </span><span
+    class="s1">_</span><span class="s3">`!</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">} </span><span class="s3">|| </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">notObj</span><span class="s2">}</span><span class="s3">`</span>
+    <span class="s0">delete </span><span class="s1">types</span><span class="s2">.</span><span class="s1">null</span>
+    <span class="s0">delete </span><span class="s1">types</span><span class="s2">.</span><span class="s1">array</span>
+    <span class="s0">delete </span><span class="s1">types</span><span class="s2">.</span><span class="s1">object</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">cond </span><span class="s2">= </span><span class="s1">nil</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">types</span><span class="s2">.</span><span
+    class="s1">number</span><span class="s2">) </span><span class="s0">delete </span><span class="s1">types</span><span
+    class="s2">.</span><span class="s1">integer</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">t </span><span
+    class="s0">in </span><span class="s1">types</span><span class="s2">) </span><span class="s1">cond </span><span
+    class="s2">= </span><span class="s1">and</span><span class="s2">(</span><span class="s1">cond</span><span
+    class="s2">, </span><span class="s1">checkDataType</span><span class="s2">(</span><span class="s1">t </span><span
+    class="s2">as </span><span class="s1">JSONType</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">strictNums</span><span class="s2">, </span><span class="s1">correct</span><span
+    class="s2">))</span>
+  <span class="s0">return </span><span class="s1">cond</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type TypeError </span><span class="s2">= </span><span class="s1">ErrorObject</span><span
+    class="s2">&lt;</span><span class="s3">&quot;type&quot;</span><span class="s2">, {</span><span
+    class="s1">type</span><span class="s2">: </span><span class="s1">string</span><span class="s2">}&gt;</span>
+
+<span class="s0">const </span><span class="s1">typeError</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: ({</span><span class="s1">schema</span><span
+    class="s2">}) =&gt; </span><span class="s3">`must be </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">schema</span><span class="s2">}</span><span class="s3">`</span><span class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">schema</span><span
+    class="s2">, </span><span class="s1">schemaValue</span><span class="s2">}) =&gt;</span>
+    <span class="s0">typeof </span><span class="s1">schema </span><span class="s2">== </span><span class="s3">&quot;string&quot; </span><span
+    class="s2">? </span><span class="s1">_</span><span class="s3">`{type: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schema</span><span class="s2">}</span><span class="s3">}` </span><span
+    class="s2">: </span><span class="s1">_</span><span class="s3">`{type: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schemaValue</span><span class="s2">}</span><span class="s3">}`</span><span
+    class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">reportTypeError</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaObjCxt</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">cxt </span><span class="s2">= </span><span class="s1">getTypeErrorContext</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">)</span>
+  <span class="s1">reportError</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">, </span><span
+    class="s1">typeError</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">getTypeErrorContext</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaObjCxt</span><span class="s2">): </span><span
+    class="s1">KeywordErrorCxt </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">} = </span><span
+    class="s1">it</span>
+  <span class="s0">const </span><span class="s1">schemaCode </span><span class="s2">= </span><span class="s1">schemaRefOrVal</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span class="s1">schema</span><span
+    class="s2">, </span><span class="s3">&quot;type&quot;</span><span class="s2">)</span>
+  <span class="s0">return </span><span class="s2">{</span>
+    <span class="s1">gen</span><span class="s2">,</span>
+    <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;type&quot;</span><span
+    class="s2">,</span>
+    <span class="s1">data</span><span class="s2">,</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">schema</span><span class="s2">.</span><span
+    class="s1">type</span><span class="s2">,</span>
+    <span class="s1">schemaCode</span><span class="s2">,</span>
+    <span class="s1">schemaValue</span><span class="s2">: </span><span class="s1">schemaCode</span><span
+    class="s2">,</span>
+    <span class="s1">parentSchema</span><span class="s2">: </span><span class="s1">schema</span><span
+    class="s2">,</span>
+    <span class="s1">params</span><span class="s2">: {},</span>
+    <span class="s1">it</span><span class="s2">,</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

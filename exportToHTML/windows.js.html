@@ -1,0 +1,119 @@
+<html>
+<head>
+  <title>windows.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          windows.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">module</span><span class="s1">.</span><span class="s0">exports </span><span
+  class="s1">= </span><span class="s0">isexe</span>
+<span class="s0">isexe</span><span class="s1">.</span><span class="s0">sync </span><span class="s1">= </span><span
+    class="s0">sync</span>
+
+<span class="s2">var </span><span class="s0">fs </span><span class="s1">= </span><span class="s0">require</span><span
+    class="s1">(</span><span class="s3">'fs'</span><span class="s1">)</span>
+
+<span class="s2">function </span><span class="s0">checkPathExt </span><span class="s1">(</span><span
+    class="s0">path</span><span class="s1">, </span><span class="s0">options</span><span class="s1">) {</span>
+  <span class="s2">var </span><span class="s0">pathext </span><span class="s1">= </span><span
+    class="s0">options</span><span class="s1">.</span><span class="s0">pathExt </span><span class="s1">!== </span><span
+    class="s0">undefined </span><span class="s1">?</span>
+    <span class="s0">options</span><span class="s1">.</span><span class="s0">pathExt </span><span
+    class="s1">: </span><span class="s0">process</span><span class="s1">.</span><span class="s0">env</span><span
+    class="s1">.</span><span class="s0">PATHEXT</span>
+
+  <span class="s2">if </span><span class="s1">(!</span><span class="s0">pathext</span><span class="s1">) {</span>
+    <span class="s2">return true</span>
+  <span class="s1">}</span>
+
+  <span class="s0">pathext </span><span class="s1">= </span><span class="s0">pathext</span><span
+    class="s1">.</span><span class="s0">split</span><span class="s1">(</span><span class="s3">';'</span><span
+    class="s1">)</span>
+  <span class="s2">if </span><span class="s1">(</span><span class="s0">pathext</span><span class="s1">.</span><span
+    class="s0">indexOf</span><span class="s1">(</span><span class="s3">''</span><span class="s1">) !== -</span><span
+    class="s4">1</span><span class="s1">) {</span>
+    <span class="s2">return true</span>
+  <span class="s1">}</span>
+  <span class="s2">for </span><span class="s1">(</span><span class="s2">var </span><span class="s0">i </span><span
+    class="s1">= </span><span class="s4">0</span><span class="s1">; </span><span class="s0">i </span><span class="s1">&lt; </span><span
+    class="s0">pathext</span><span class="s1">.</span><span class="s0">length</span><span class="s1">; </span><span
+    class="s0">i</span><span class="s1">++) {</span>
+    <span class="s2">var </span><span class="s0">p </span><span class="s1">= </span><span class="s0">pathext</span><span
+    class="s1">[</span><span class="s0">i</span><span class="s1">].</span><span class="s0">toLowerCase</span><span
+    class="s1">()</span>
+    <span class="s2">if </span><span class="s1">(</span><span class="s0">p </span><span
+    class="s1">&amp;&amp; </span><span class="s0">path</span><span class="s1">.</span><span
+    class="s0">substr</span><span class="s1">(-</span><span class="s0">p</span><span class="s1">.</span><span
+    class="s0">length</span><span class="s1">).</span><span class="s0">toLowerCase</span><span class="s1">() === </span><span
+    class="s0">p</span><span class="s1">) {</span>
+      <span class="s2">return true</span>
+    <span class="s1">}</span>
+  <span class="s1">}</span>
+  <span class="s2">return false</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">checkStat </span><span class="s1">(</span><span class="s0">stat</span><span
+    class="s1">, </span><span class="s0">path</span><span class="s1">, </span><span class="s0">options</span><span
+    class="s1">) {</span>
+  <span class="s2">if </span><span class="s1">(!</span><span class="s0">stat</span><span class="s1">.</span><span
+    class="s0">isSymbolicLink</span><span class="s1">() &amp;&amp; !</span><span class="s0">stat</span><span class="s1">.</span><span
+    class="s0">isFile</span><span class="s1">()) {</span>
+    <span class="s2">return false</span>
+  <span class="s1">}</span>
+  <span class="s2">return </span><span class="s0">checkPathExt</span><span class="s1">(</span><span
+    class="s0">path</span><span class="s1">, </span><span class="s0">options</span><span class="s1">)</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">isexe </span><span class="s1">(</span><span
+    class="s0">path</span><span class="s1">, </span><span class="s0">options</span><span class="s1">, </span><span
+    class="s0">cb</span><span class="s1">) {</span>
+  <span class="s0">fs</span><span class="s1">.</span><span class="s0">stat</span><span class="s1">(</span><span
+    class="s0">path</span><span class="s1">, </span><span class="s2">function </span><span class="s1">(</span><span
+    class="s0">er</span><span class="s1">, </span><span class="s0">stat</span><span class="s1">) {</span>
+    <span class="s0">cb</span><span class="s1">(</span><span class="s0">er</span><span class="s1">, </span><span
+    class="s0">er </span><span class="s1">? </span><span class="s2">false </span><span class="s1">: </span><span
+    class="s0">checkStat</span><span class="s1">(</span><span class="s0">stat</span><span class="s1">, </span><span
+    class="s0">path</span><span class="s1">, </span><span class="s0">options</span><span class="s1">))</span>
+  <span class="s1">})</span>
+<span class="s1">}</span>
+
+<span class="s2">function </span><span class="s0">sync </span><span class="s1">(</span><span class="s0">path</span><span
+    class="s1">, </span><span class="s0">options</span><span class="s1">) {</span>
+  <span class="s2">return </span><span class="s0">checkStat</span><span class="s1">(</span><span
+    class="s0">fs</span><span class="s1">.</span><span class="s0">statSync</span><span class="s1">(</span><span
+    class="s0">path</span><span class="s1">), </span><span class="s0">path</span><span class="s1">, </span><span
+    class="s0">options</span><span class="s1">)</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

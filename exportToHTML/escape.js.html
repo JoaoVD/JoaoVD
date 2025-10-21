@@ -1,0 +1,105 @@
+<html>
+<head>
+  <title>escape.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          escape.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">escapeHtmlChar </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_escapeHtmlChar'</span><span class="s2">),</span>
+    <span class="s1">toString </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./toString'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to match HTML entities and HTML characters. */</span>
+<span class="s0">var </span><span class="s1">reUnescapedHtml </span><span class="s2">= </span><span class="s5">/[&amp;&lt;&gt;&quot;']/g</span><span
+    class="s2">,</span>
+    <span class="s1">reHasUnescapedHtml </span><span class="s2">= </span><span class="s1">RegExp</span><span class="s2">(</span><span
+    class="s1">reUnescapedHtml</span><span class="s2">.</span><span class="s1">source</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Converts the characters &quot;&amp;&quot;, &quot;&lt;&quot;, &quot;&gt;&quot;, '&quot;', and &quot;'&quot; in `string` to their</span>
+ <span class="s4">* corresponding HTML entities.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** No other characters are escaped. To escape additional</span>
+ <span class="s4">* characters use a third-party library like [_he_](https://mths.be/he).</span>
+ <span class="s4">*</span>
+ <span class="s4">* Though the &quot;&gt;&quot; character is escaped for symmetry, characters like</span>
+ <span class="s4">* &quot;&gt;&quot; and &quot;/&quot; don't need escaping in HTML and have no special meaning</span>
+ <span class="s4">* unless they're part of a tag or unquoted attribute value. See</span>
+ <span class="s4">* [Mathias Bynens's article](https://mathiasbynens.be/notes/ambiguous-ampersands)</span>
+ <span class="s4">* (under &quot;semi-related fun fact&quot;) for more details.</span>
+ <span class="s4">*</span>
+ <span class="s4">* When working with HTML you should always</span>
+ <span class="s4">* [quote attribute values](http://wonko.com/post/html-escaping) to reduce</span>
+ <span class="s4">* XSS vectors.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">String</span>
+ <span class="s4">* </span><span class="s6">@param </span><span
+    class="s4">{string} [string=''] The string to escape.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{string} Returns the escaped string.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.escape('fred, barney, &amp; pebbles');</span>
+ <span class="s4">* // =&gt; 'fred, barney, &amp;amp; pebbles'</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">escape</span><span class="s2">(</span><span
+    class="s1">string</span><span class="s2">) {</span>
+  <span class="s1">string </span><span class="s2">= </span><span class="s1">toString</span><span
+    class="s2">(</span><span class="s1">string</span><span class="s2">);</span>
+  <span class="s0">return </span><span class="s2">(</span><span class="s1">string </span><span
+    class="s2">&amp;&amp; </span><span class="s1">reHasUnescapedHtml</span><span class="s2">.</span><span class="s1">test</span><span
+    class="s2">(</span><span class="s1">string</span><span class="s2">))</span>
+    <span class="s2">? </span><span class="s1">string</span><span class="s2">.</span><span
+    class="s1">replace</span><span class="s2">(</span><span class="s1">reUnescapedHtml</span><span
+    class="s2">, </span><span class="s1">escapeHtmlChar</span><span class="s2">)</span>
+    <span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">escape</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

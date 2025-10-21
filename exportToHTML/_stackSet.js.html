@@ -1,0 +1,104 @@
+<html>
+<head>
+  <title>_stackSet.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _stackSet.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">ListCache </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_ListCache'</span><span class="s2">),</span>
+    <span class="s1">Map </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_Map'</span><span class="s2">),</span>
+    <span class="s1">MapCache </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_MapCache'</span><span class="s2">);</span>
+
+<span class="s4">/** Used as the size to enable large array optimizations. */</span>
+<span class="s0">var </span><span class="s1">LARGE_ARRAY_SIZE </span><span class="s2">= </span><span
+    class="s5">200</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Sets the stack `key` to `value`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@private</span>
+ <span class="s4">* </span><span class="s6">@name </span><span class="s4">set</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">Stack</span>
+ <span class="s4">* </span><span class="s6">@param </span><span
+    class="s4">{string} key The key of the value to set.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{*} value The value to set.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span
+    class="s4">{Object} Returns the stack cache instance.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">stackSet</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">value</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">data </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__data__</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">data </span><span
+    class="s0">instanceof </span><span class="s1">ListCache</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">pairs </span><span class="s2">= </span><span
+    class="s1">data</span><span class="s2">.</span><span class="s1">__data__</span><span class="s2">;</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">Map </span><span class="s2">|| (</span><span
+    class="s1">pairs</span><span class="s2">.</span><span class="s1">length </span><span class="s2">&lt; </span><span
+    class="s1">LARGE_ARRAY_SIZE </span><span class="s2">- </span><span class="s5">1</span><span class="s2">)) {</span>
+      <span class="s1">pairs</span><span class="s2">.</span><span class="s1">push</span><span class="s2">([</span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">value</span><span class="s2">]);</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">size </span><span
+    class="s2">= ++</span><span class="s1">data</span><span class="s2">.</span><span class="s1">size</span><span
+    class="s2">;</span>
+      <span class="s0">return this</span><span class="s2">;</span>
+    <span class="s2">}</span>
+    <span class="s1">data </span><span class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">__data__ </span><span class="s2">= </span><span class="s0">new </span><span
+    class="s1">MapCache</span><span class="s2">(</span><span class="s1">pairs</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s1">data</span><span class="s2">.</span><span class="s1">set</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">value</span><span class="s2">);</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">size </span><span class="s2">= </span><span
+    class="s1">data</span><span class="s2">.</span><span class="s1">size</span><span class="s2">;</span>
+  <span class="s0">return this</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">stackSet</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

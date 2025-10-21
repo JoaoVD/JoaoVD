@@ -1,0 +1,130 @@
+<html>
+<head>
+  <title>ci.yml</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          ci.yml</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">name</span><span class="s1">: </span><span class="s3">ci</span>
+
+<span class="s0">on</span><span class="s1">: [</span><span class="s3">push</span><span class="s1">, </span><span
+    class="s3">pull_request</span><span class="s1">]</span>
+
+<span class="s0">jobs</span><span class="s1">:</span>
+  <span class="s0">legacy</span><span class="s1">:</span>
+    <span class="s0">runs-on</span><span class="s1">: </span><span class="s3">ubuntu-latest</span>
+
+    <span class="s0">strategy</span><span class="s1">:</span>
+      <span class="s0">matrix</span><span class="s1">:</span>
+        <span class="s0">node-version</span><span class="s1">: [</span><span class="s4">'0.10'</span><span
+    class="s1">, </span><span class="s4">'0.12'</span><span class="s1">, </span><span class="s3">4.x</span><span
+    class="s1">, </span><span class="s3">6.x</span><span class="s1">, </span><span class="s3">8.x</span><span
+    class="s1">, </span><span class="s3">10.x</span><span class="s1">, </span><span class="s3">12.x</span><span
+    class="s1">, </span><span class="s3">13.x</span><span class="s1">, </span><span class="s3">14.x</span><span
+    class="s1">, </span><span class="s3">15.x</span><span class="s1">, </span><span class="s3">16.x</span><span
+    class="s1">]</span>
+
+    <span class="s0">steps</span><span class="s1">:</span>
+      <span class="s1">- </span><span class="s0">uses</span><span class="s1">: </span><span class="s3">actions/checkout@v3</span>
+        <span class="s0">with</span><span class="s1">:</span>
+          <span class="s0">persist-credentials</span><span class="s1">: </span><span class="s3">false</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span
+    class="s3">Use Node.js</span>
+        <span class="s0">uses</span><span class="s1">: </span><span class="s3">actions/setup-node@v1</span>
+        <span class="s0">with</span><span class="s1">:</span>
+          <span class="s0">node-version</span><span class="s1">: </span><span
+    class="s3">${{ matrix.node-version }}</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span class="s3">Install</span>
+        <span class="s0">run</span><span class="s1">: </span><span class="s3">|</span>
+          <span class="s3">npm install --production &amp;&amp; npm install tape</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span class="s3">Run tests</span>
+        <span class="s0">run</span><span class="s1">: </span><span class="s3">|</span>
+          <span class="s3">npm run legacy</span>
+
+  <span class="s0">test</span><span class="s1">:</span>
+    <span class="s0">runs-on</span><span class="s1">: </span><span class="s3">ubuntu-latest</span>
+
+    <span class="s0">strategy</span><span class="s1">:</span>
+      <span class="s0">matrix</span><span class="s1">:</span>
+        <span class="s0">node-version</span><span class="s1">: [</span><span class="s3">18.x</span><span
+    class="s1">, </span><span class="s3">20.x</span><span class="s1">, </span><span class="s3">22.x</span><span
+    class="s1">]</span>
+
+    <span class="s0">steps</span><span class="s1">:</span>
+      <span class="s1">- </span><span class="s0">uses</span><span class="s1">: </span><span class="s3">actions/checkout@v3</span>
+        <span class="s0">with</span><span class="s1">:</span>
+          <span class="s0">persist-credentials</span><span class="s1">: </span><span class="s3">false</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span
+    class="s3">Use Node.js</span>
+        <span class="s0">uses</span><span class="s1">: </span><span class="s3">actions/setup-node@v3</span>
+        <span class="s0">with</span><span class="s1">:</span>
+          <span class="s0">node-version</span><span class="s1">: </span><span
+    class="s3">${{ matrix.node-version }}</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span class="s3">Install</span>
+        <span class="s0">run</span><span class="s1">: </span><span class="s3">|</span>
+          <span class="s3">npm install</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span class="s3">Run tests</span>
+        <span class="s0">run</span><span class="s1">: </span><span class="s3">|</span>
+          <span class="s3">npm run test</span>
+
+  <span class="s0">types</span><span class="s1">:</span>
+    <span class="s0">runs-on</span><span class="s1">: </span><span class="s3">ubuntu-latest</span>
+
+    <span class="s0">steps</span><span class="s1">:</span>
+      <span class="s1">- </span><span class="s0">uses</span><span class="s1">: </span><span class="s3">actions/checkout@v3</span>
+        <span class="s0">with</span><span class="s1">:</span>
+          <span class="s0">persist-credentials</span><span class="s1">: </span><span class="s3">false</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span
+    class="s3">Use Node.js</span>
+        <span class="s0">uses</span><span class="s1">: </span><span class="s3">actions/setup-node@v3</span>
+        <span class="s0">with</span><span class="s1">:</span>
+          <span class="s0">node-version</span><span class="s1">: </span><span class="s3">16</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span class="s3">Install</span>
+        <span class="s0">run</span><span class="s1">: </span><span class="s3">|</span>
+          <span class="s3">npm install</span>
+
+      <span class="s1">- </span><span class="s0">name</span><span class="s1">: </span><span
+    class="s3">Run types tests</span>
+        <span class="s0">run</span><span class="s1">: </span><span class="s3">|</span>
+          <span class="s3">npm run typescript</span>
+</pre>
+</body>
+</html>

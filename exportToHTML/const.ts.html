@@ -1,0 +1,95 @@
+<html>
+<head>
+  <title>const.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          const.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">ErrorObject</span><span class="s2">, </span><span class="s1">KeywordErrorDefinition</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">useFunc</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/util&quot;</span>
+<span class="s0">import </span><span class="s1">equal from </span><span
+    class="s3">&quot;../../runtime/equal&quot;</span>
+
+<span class="s0">export </span><span class="s1">type ConstError </span><span class="s2">= </span><span class="s1">ErrorObject</span><span
+    class="s2">&lt;</span><span class="s3">&quot;const&quot;</span><span class="s2">, {</span><span class="s1">allowedValue</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">}&gt;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: </span><span class="s3">&quot;must be equal to constant&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">schemaCode</span><span
+    class="s2">}) =&gt; </span><span class="s1">_</span><span class="s3">`{allowedValue: </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span
+    class="s3">}`</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;const&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">$data</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">$data</span><span class="s2">, </span><span
+    class="s1">schemaCode</span><span class="s2">, </span><span class="s1">schema</span><span
+    class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">$data </span><span class="s2">|| (</span><span
+    class="s1">schema </span><span class="s2">&amp;&amp; </span><span class="s0">typeof </span><span
+    class="s1">schema </span><span class="s2">== </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">)) {</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">fail$data</span><span
+    class="s2">(</span><span class="s1">_</span><span class="s3">`!</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">useFunc</span><span class="s2">(</span><span class="s1">gen</span><span
+    class="s2">, </span><span class="s1">equal</span><span class="s2">)}</span><span class="s3">(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">, </span><span class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span
+    class="s2">}</span><span class="s3">)`</span><span class="s2">)</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">fail</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">schema</span><span
+    class="s2">} </span><span class="s3">!== </span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s3">`</span><span class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

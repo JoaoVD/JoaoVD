@@ -1,0 +1,65 @@
+<html>
+<head>
+  <title>strip-trailing-slashes.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          strip-trailing-slashes.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// warning: extremely hot code path.</span>
+<span class="s0">// This has been meticulously optimized for use</span>
+<span class="s0">// within npm install on large package trees.</span>
+<span class="s0">// Do not edit without careful benchmarking.</span>
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">str </span><span class="s2">=&gt; {</span>
+  <span class="s3">let </span><span class="s1">i </span><span class="s2">= </span><span class="s1">str</span><span
+    class="s2">.</span><span class="s1">length </span><span class="s2">- </span><span class="s4">1</span>
+  <span class="s3">let </span><span class="s1">slashesStart </span><span class="s2">= -</span><span class="s4">1</span>
+  <span class="s3">while </span><span class="s2">(</span><span class="s1">i </span><span class="s2">&gt; -</span><span
+    class="s4">1 </span><span class="s2">&amp;&amp; </span><span class="s1">str</span><span class="s2">.</span><span
+    class="s1">charAt</span><span class="s2">(</span><span class="s1">i</span><span class="s2">) === </span><span
+    class="s5">'/'</span><span class="s2">) {</span>
+    <span class="s1">slashesStart </span><span class="s2">= </span><span class="s1">i</span>
+    <span class="s1">i</span><span class="s2">--</span>
+  <span class="s2">}</span>
+  <span class="s3">return </span><span class="s1">slashesStart </span><span class="s2">=== -</span><span
+    class="s4">1 </span><span class="s2">? </span><span class="s1">str </span><span class="s2">: </span><span
+    class="s1">str</span><span class="s2">.</span><span class="s1">slice</span><span class="s2">(</span><span
+    class="s4">0</span><span class="s2">, </span><span class="s1">slashesStart</span><span class="s2">)</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

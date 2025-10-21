@@ -1,0 +1,96 @@
+<html>
+<head>
+  <title>next.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          next.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">toArray </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./toArray'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Gets the next value on a wrapped object following the</span>
+ <span class="s4">* [iterator protocol](https://mdn.io/iteration_protocols#iterator).</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@name </span><span class="s4">next</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">4.0.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Seq</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span
+    class="s4">{Object} Returns the next iterator value.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var wrapped = _([1, 2]);</span>
+ <span class="s4">*</span>
+ <span class="s4">* wrapped.next();</span>
+ <span class="s4">* // =&gt; { 'done': false, 'value': 1 }</span>
+ <span class="s4">*</span>
+ <span class="s4">* wrapped.next();</span>
+ <span class="s4">* // =&gt; { 'done': false, 'value': 2 }</span>
+ <span class="s4">*</span>
+ <span class="s4">* wrapped.next();</span>
+ <span class="s4">* // =&gt; { 'done': true, 'value': undefined }</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">wrapperNext</span><span class="s2">() {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">__values__ </span><span class="s2">=== </span><span class="s1">undefined</span><span
+    class="s2">) {</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">__values__ </span><span
+    class="s2">= </span><span class="s1">toArray</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">value</span><span class="s2">());</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">done </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__index__ </span><span class="s2">&gt;= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__values__</span><span class="s2">.</span><span class="s1">length</span><span
+    class="s2">,</span>
+      <span class="s1">value </span><span class="s2">= </span><span class="s1">done </span><span
+    class="s2">? </span><span class="s1">undefined </span><span class="s2">: </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__values__</span><span class="s2">[</span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__index__</span><span class="s2">++];</span>
+
+  <span class="s0">return </span><span class="s2">{ </span><span class="s3">'done'</span><span class="s2">: </span><span
+    class="s1">done</span><span class="s2">, </span><span class="s3">'value'</span><span class="s2">: </span><span
+    class="s1">value </span><span class="s2">};</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">wrapperNext</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

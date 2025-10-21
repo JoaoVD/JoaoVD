@@ -1,0 +1,117 @@
+<html>
+<head>
+  <title>_hasPath.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _hasPath.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">castPath </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_castPath'</span><span class="s2">),</span>
+    <span class="s1">isArguments </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArguments'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">),</span>
+    <span class="s1">isIndex </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_isIndex'</span><span class="s2">),</span>
+    <span class="s1">isLength </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isLength'</span><span class="s2">),</span>
+    <span class="s1">toKey </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_toKey'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Checks if `path` exists on `object`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} object The object to query.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array|string} path The path to check.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} hasFunc The function to check properties.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{boolean} Returns `true` if `path` exists, else `false`.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">hasPath</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">path</span><span class="s2">, </span><span
+    class="s1">hasFunc</span><span class="s2">) {</span>
+  <span class="s1">path </span><span class="s2">= </span><span class="s1">castPath</span><span class="s2">(</span><span
+    class="s1">path</span><span class="s2">, </span><span class="s1">object</span><span class="s2">);</span>
+
+  <span class="s0">var </span><span class="s1">index </span><span class="s2">= -</span><span class="s6">1</span><span
+    class="s2">,</span>
+      <span class="s1">length </span><span class="s2">= </span><span class="s1">path</span><span
+    class="s2">.</span><span class="s1">length</span><span class="s2">,</span>
+      <span class="s1">result </span><span class="s2">= </span><span class="s0">false</span><span class="s2">;</span>
+
+  <span class="s0">while </span><span class="s2">(++</span><span class="s1">index </span><span
+    class="s2">&lt; </span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">key </span><span class="s2">= </span><span class="s1">toKey</span><span
+    class="s2">(</span><span class="s1">path</span><span class="s2">[</span><span class="s1">index</span><span
+    class="s2">]);</span>
+    <span class="s0">if </span><span class="s2">(!(</span><span class="s1">result </span><span class="s2">= </span><span
+    class="s1">object </span><span class="s2">!= </span><span class="s0">null </span><span class="s2">&amp;&amp; </span><span
+    class="s1">hasFunc</span><span class="s2">(</span><span class="s1">object</span><span class="s2">, </span><span
+    class="s1">key</span><span class="s2">))) {</span>
+      <span class="s0">break</span><span class="s2">;</span>
+    <span class="s2">}</span>
+    <span class="s1">object </span><span class="s2">= </span><span class="s1">object</span><span
+    class="s2">[</span><span class="s1">key</span><span class="s2">];</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">result </span><span class="s2">|| ++</span><span
+    class="s1">index </span><span class="s2">!= </span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s1">length </span><span class="s2">= </span><span class="s1">object </span><span
+    class="s2">== </span><span class="s0">null </span><span class="s2">? </span><span class="s6">0 </span><span
+    class="s2">: </span><span class="s1">object</span><span class="s2">.</span><span class="s1">length</span><span
+    class="s2">;</span>
+  <span class="s0">return </span><span class="s2">!!</span><span class="s1">length </span><span
+    class="s2">&amp;&amp; </span><span class="s1">isLength</span><span class="s2">(</span><span class="s1">length</span><span
+    class="s2">) &amp;&amp; </span><span class="s1">isIndex</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">length</span><span class="s2">) &amp;&amp;</span>
+    <span class="s2">(</span><span class="s1">isArray</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">) || </span><span class="s1">isArguments</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">));</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">hasPath</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

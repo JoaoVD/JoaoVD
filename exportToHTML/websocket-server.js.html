@@ -1,0 +1,929 @@
+<html>
+<head>
+  <title>websocket-server.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #6aab73;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #cf8e6d;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+
+    .s7 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s8 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          websocket-server.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/* eslint no-unused-vars: [&quot;error&quot;, { &quot;varsIgnorePattern&quot;: &quot;^Duplex$&quot;, &quot;caughtErrors&quot;: &quot;none&quot; }] */</span>
+
+<span class="s2">'use strict'</span><span class="s3">;</span>
+
+<span class="s4">const </span><span class="s1">EventEmitter </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s2">'events'</span><span class="s3">);</span>
+<span class="s4">const </span><span class="s1">http </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s2">'http'</span><span class="s3">);</span>
+<span class="s4">const </span><span class="s3">{ </span><span class="s1">Duplex </span><span class="s3">} = </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s2">'stream'</span><span class="s3">);</span>
+<span class="s4">const </span><span class="s3">{ </span><span class="s1">createHash </span><span
+    class="s3">} = </span><span class="s1">require</span><span class="s3">(</span><span class="s2">'crypto'</span><span
+    class="s3">);</span>
+
+<span class="s4">const </span><span class="s1">extension </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s2">'./extension'</span><span class="s3">);</span>
+<span class="s4">const </span><span class="s1">PerMessageDeflate </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s2">'./permessage-deflate'</span><span class="s3">);</span>
+<span class="s4">const </span><span class="s1">subprotocol </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s2">'./subprotocol'</span><span class="s3">);</span>
+<span class="s4">const </span><span class="s1">WebSocket </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s2">'./websocket'</span><span class="s3">);</span>
+<span class="s4">const </span><span class="s3">{ </span><span class="s1">GUID</span><span class="s3">, </span><span
+    class="s1">kWebSocket </span><span class="s3">} = </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s2">'./constants'</span><span class="s3">);</span>
+
+<span class="s4">const </span><span class="s1">keyRegex </span><span class="s3">= </span><span class="s5">/^[+/0-9A-Za-z]{22}==$/</span><span
+    class="s3">;</span>
+
+<span class="s4">const </span><span class="s1">RUNNING </span><span class="s3">= </span><span class="s6">0</span><span
+    class="s3">;</span>
+<span class="s4">const </span><span class="s1">CLOSING </span><span class="s3">= </span><span class="s6">1</span><span
+    class="s3">;</span>
+<span class="s4">const </span><span class="s1">CLOSED </span><span class="s3">= </span><span class="s6">2</span><span
+    class="s3">;</span>
+
+<span class="s7">/**</span>
+ <span class="s7">* Class representing a WebSocket server.</span>
+ <span class="s7">*</span>
+ <span class="s7">* </span><span class="s8">@extends </span><span class="s7">EventEmitter</span>
+ <span class="s7">*/</span>
+<span class="s4">class </span><span class="s1">WebSocketServer </span><span class="s4">extends </span><span class="s1">EventEmitter </span><span
+    class="s3">{</span>
+  <span class="s7">/**</span>
+   <span class="s7">* Create a `WebSocketServer` instance.</span>
+   <span class="s7">*</span>
+   <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{Object} options Configuration options</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Boolean} [options.allowSynchronousEvents=true] Specifies whether</span>
+   <span class="s7">*     any of the `'message'`, `'ping'`, and `'pong'` events can be emitted</span>
+   <span class="s7">*     multiple times in the same tick</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Boolean} [options.autoPong=true] Specifies whether or not to</span>
+   <span class="s7">*     automatically send a pong in response to a ping</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Number} [options.backlog=511] The maximum length of the queue of</span>
+   <span class="s7">*     pending connections</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Boolean} [options.clientTracking=true] Specifies whether or not to</span>
+   <span class="s7">*     track clients</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Function} [options.handleProtocols] A hook to handle protocols</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{String} [options.host] The hostname where to bind the server</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Number} [options.maxPayload=104857600] The maximum allowed message</span>
+   <span class="s7">*     size</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Boolean} [options.noServer=false] Enable no server mode</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{String} [options.path] Accept only connections matching this path</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{(Boolean|Object)} [options.perMessageDeflate=false] Enable/disable</span>
+   <span class="s7">*     permessage-deflate</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Number} [options.port] The port where to bind the server</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{(http.Server|https.Server)} [options.server] A pre-created HTTP/S</span>
+   <span class="s7">*     server to use</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Boolean} [options.skipUTF8Validation=false] Specifies whether or</span>
+   <span class="s7">*     not to skip UTF-8 validation for text and close messages</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Function} [options.verifyClient] A hook to reject connections</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Function} [options.WebSocket=WebSocket] Specifies the `WebSocket`</span>
+   <span class="s7">*     class to use. It must be the `WebSocket` class or class that extends it</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Function} [callback] A listener for the `listening` event</span>
+   <span class="s7">*/</span>
+  <span class="s1">constructor</span><span class="s3">(</span><span class="s1">options</span><span
+    class="s3">, </span><span class="s1">callback</span><span class="s3">) {</span>
+    <span class="s4">super</span><span class="s3">();</span>
+
+    <span class="s1">options </span><span class="s3">= {</span>
+      <span class="s1">allowSynchronousEvents</span><span class="s3">: </span><span class="s4">true</span><span
+    class="s3">,</span>
+      <span class="s1">autoPong</span><span class="s3">: </span><span class="s4">true</span><span class="s3">,</span>
+      <span class="s1">maxPayload</span><span class="s3">: </span><span class="s6">100 </span><span class="s3">* </span><span
+    class="s6">1024 </span><span class="s3">* </span><span class="s6">1024</span><span class="s3">,</span>
+      <span class="s1">skipUTF8Validation</span><span class="s3">: </span><span class="s4">false</span><span class="s3">,</span>
+      <span class="s1">perMessageDeflate</span><span class="s3">: </span><span class="s4">false</span><span
+    class="s3">,</span>
+      <span class="s1">handleProtocols</span><span class="s3">: </span><span class="s4">null</span><span
+    class="s3">,</span>
+      <span class="s1">clientTracking</span><span class="s3">: </span><span class="s4">true</span><span
+    class="s3">,</span>
+      <span class="s1">verifyClient</span><span class="s3">: </span><span class="s4">null</span><span
+    class="s3">,</span>
+      <span class="s1">noServer</span><span class="s3">: </span><span class="s4">false</span><span class="s3">,</span>
+      <span class="s1">backlog</span><span class="s3">: </span><span class="s4">null</span><span
+    class="s3">, </span><span class="s0">// use default (511 as implemented in net.js)</span>
+      <span class="s1">server</span><span class="s3">: </span><span class="s4">null</span><span class="s3">,</span>
+      <span class="s1">host</span><span class="s3">: </span><span class="s4">null</span><span class="s3">,</span>
+      <span class="s1">path</span><span class="s3">: </span><span class="s4">null</span><span class="s3">,</span>
+      <span class="s1">port</span><span class="s3">: </span><span class="s4">null</span><span class="s3">,</span>
+      <span class="s1">WebSocket</span><span class="s3">,</span>
+      <span class="s1">...options</span>
+    <span class="s3">};</span>
+
+    <span class="s4">if </span><span class="s3">(</span>
+      <span class="s3">(</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">port </span><span class="s3">== </span><span class="s4">null </span><span
+    class="s3">&amp;&amp; !</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">server </span><span class="s3">&amp;&amp; !</span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">noServer</span><span class="s3">) ||</span>
+      <span class="s3">(</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">port </span><span class="s3">!= </span><span class="s4">null </span><span
+    class="s3">&amp;&amp; (</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">server </span><span class="s3">|| </span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">noServer</span><span class="s3">)) ||</span>
+      <span class="s3">(</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">server </span><span class="s3">&amp;&amp; </span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">noServer</span><span class="s3">)</span>
+    <span class="s3">) {</span>
+      <span class="s4">throw new </span><span class="s1">TypeError</span><span class="s3">(</span>
+        <span class="s2">'One and only one of the &quot;port&quot;, &quot;server&quot;, or &quot;noServer&quot; options ' </span><span
+    class="s3">+</span>
+          <span class="s2">'must be specified'</span>
+      <span class="s3">);</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">port </span><span class="s3">!= </span><span class="s4">null</span><span class="s3">) {</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">_server </span><span
+    class="s3">= </span><span class="s1">http</span><span class="s3">.</span><span class="s1">createServer</span><span
+    class="s3">((</span><span class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span
+    class="s3">) =&gt; {</span>
+        <span class="s4">const </span><span class="s1">body </span><span class="s3">= </span><span
+    class="s1">http</span><span class="s3">.</span><span class="s1">STATUS_CODES</span><span class="s3">[</span><span
+    class="s6">426</span><span class="s3">];</span>
+
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span
+    class="s3">(</span><span class="s6">426</span><span class="s3">, {</span>
+          <span class="s2">'Content-Length'</span><span class="s3">: </span><span class="s1">body</span><span
+    class="s3">.</span><span class="s1">length</span><span class="s3">,</span>
+          <span class="s2">'Content-Type'</span><span class="s3">: </span><span class="s2">'text/plain'</span>
+        <span class="s3">});</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s1">body</span><span class="s3">);</span>
+      <span class="s3">});</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">_server</span><span class="s3">.</span><span
+    class="s1">listen</span><span class="s3">(</span>
+        <span class="s1">options</span><span class="s3">.</span><span class="s1">port</span><span class="s3">,</span>
+        <span class="s1">options</span><span class="s3">.</span><span class="s1">host</span><span class="s3">,</span>
+        <span class="s1">options</span><span class="s3">.</span><span class="s1">backlog</span><span class="s3">,</span>
+        <span class="s1">callback</span>
+      <span class="s3">);</span>
+    <span class="s3">} </span><span class="s4">else if </span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">server</span><span class="s3">) {</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">_server </span><span
+    class="s3">= </span><span class="s1">options</span><span class="s3">.</span><span class="s1">server</span><span
+    class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_server</span><span class="s3">) {</span>
+      <span class="s4">const </span><span class="s1">emitConnection </span><span class="s3">= </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">emit</span><span class="s3">.</span><span class="s1">bind</span><span
+    class="s3">(</span><span class="s4">this</span><span class="s3">, </span><span class="s2">'connection'</span><span
+    class="s3">);</span>
+
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">_removeListeners </span><span
+    class="s3">= </span><span class="s1">addListeners</span><span class="s3">(</span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">_server</span><span class="s3">, {</span>
+        <span class="s1">listening</span><span class="s3">: </span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">emit</span><span class="s3">.</span><span class="s1">bind</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s2">'listening'</span><span class="s3">),</span>
+        <span class="s1">error</span><span class="s3">: </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">emit</span><span class="s3">.</span><span class="s1">bind</span><span
+    class="s3">(</span><span class="s4">this</span><span class="s3">, </span><span class="s2">'error'</span><span
+    class="s3">),</span>
+        <span class="s1">upgrade</span><span class="s3">: (</span><span class="s1">req</span><span
+    class="s3">, </span><span class="s1">socket</span><span class="s3">, </span><span class="s1">head</span><span
+    class="s3">) =&gt; {</span>
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">handleUpgrade</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">, </span><span class="s1">socket</span><span
+    class="s3">, </span><span class="s1">head</span><span class="s3">, </span><span
+    class="s1">emitConnection</span><span class="s3">);</span>
+        <span class="s3">}</span>
+      <span class="s3">});</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">perMessageDeflate </span><span class="s3">=== </span><span class="s4">true</span><span
+    class="s3">) </span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">perMessageDeflate </span><span class="s3">= {};</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">clientTracking</span><span class="s3">) {</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">clients </span><span
+    class="s3">= </span><span class="s4">new </span><span class="s1">Set</span><span class="s3">();</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">_shouldEmitClose </span><span
+    class="s3">= </span><span class="s4">false</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">options </span><span class="s3">= </span><span
+    class="s1">options</span><span class="s3">;</span>
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">_state </span><span class="s3">= </span><span
+    class="s1">RUNNING</span><span class="s3">;</span>
+  <span class="s3">}</span>
+
+  <span class="s7">/**</span>
+   <span class="s7">* Returns the bound address, the address family name, and port of the server</span>
+   <span class="s7">* as reported by the operating system if listening on an IP socket.</span>
+   <span class="s7">* If the server is listening on a pipe or UNIX domain socket, the name is</span>
+   <span class="s7">* returned as a string.</span>
+   <span class="s7">*</span>
+   <span class="s7">* </span><span class="s8">@return </span><span class="s7">{(Object|String|null)} The address of the server</span>
+   <span class="s7">* </span><span class="s8">@public</span>
+   <span class="s7">*/</span>
+  <span class="s1">address</span><span class="s3">() {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">noServer</span><span class="s3">) {</span>
+      <span class="s4">throw new </span><span class="s1">Error</span><span class="s3">(</span><span class="s2">'The server is operating in &quot;noServer&quot; mode'</span><span
+    class="s3">);</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(!</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_server</span><span class="s3">) </span><span class="s4">return null</span><span class="s3">;</span>
+    <span class="s4">return this</span><span class="s3">.</span><span class="s1">_server</span><span class="s3">.</span><span
+    class="s1">address</span><span class="s3">();</span>
+  <span class="s3">}</span>
+
+  <span class="s7">/**</span>
+   <span class="s7">* Stop the server from accepting new connections and emit the `'close'` event</span>
+   <span class="s7">* when all existing connections are closed.</span>
+   <span class="s7">*</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Function} [cb] A one-time listener for the `'close'` event</span>
+   <span class="s7">* </span><span class="s8">@public</span>
+   <span class="s7">*/</span>
+  <span class="s1">close</span><span class="s3">(</span><span class="s1">cb</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_state </span><span class="s3">=== </span><span class="s1">CLOSED</span><span class="s3">) {</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">cb</span><span class="s3">) {</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s2">'close'</span><span class="s3">, () =&gt; {</span>
+          <span class="s1">cb</span><span class="s3">(</span><span class="s4">new </span><span
+    class="s1">Error</span><span class="s3">(</span><span class="s2">'The server is not running'</span><span class="s3">));</span>
+        <span class="s3">});</span>
+      <span class="s3">}</span>
+
+      <span class="s1">process</span><span class="s3">.</span><span class="s1">nextTick</span><span
+    class="s3">(</span><span class="s1">emitClose</span><span class="s3">, </span><span class="s4">this</span><span
+    class="s3">);</span>
+      <span class="s4">return</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">cb</span><span class="s3">) </span><span
+    class="s4">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s2">'close'</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">);</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_state </span><span class="s3">=== </span><span class="s1">CLOSING</span><span class="s3">) </span><span
+    class="s4">return</span><span class="s3">;</span>
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">_state </span><span class="s3">= </span><span
+    class="s1">CLOSING</span><span class="s3">;</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">noServer </span><span class="s3">|| </span><span
+    class="s4">this</span><span class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">server</span><span class="s3">) {</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_server</span><span class="s3">) {</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">_removeListeners</span><span class="s3">();</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">_removeListeners </span><span
+    class="s3">= </span><span class="s4">this</span><span class="s3">.</span><span class="s1">_server </span><span
+    class="s3">= </span><span class="s4">null</span><span class="s3">;</span>
+      <span class="s3">}</span>
+
+      <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">clients</span><span class="s3">) {</span>
+        <span class="s4">if </span><span class="s3">(!</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">clients</span><span class="s3">.</span><span class="s1">size</span><span class="s3">) {</span>
+          <span class="s1">process</span><span class="s3">.</span><span class="s1">nextTick</span><span
+    class="s3">(</span><span class="s1">emitClose</span><span class="s3">, </span><span class="s4">this</span><span
+    class="s3">);</span>
+        <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">_shouldEmitClose </span><span
+    class="s3">= </span><span class="s4">true</span><span class="s3">;</span>
+        <span class="s3">}</span>
+      <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+        <span class="s1">process</span><span class="s3">.</span><span class="s1">nextTick</span><span
+    class="s3">(</span><span class="s1">emitClose</span><span class="s3">, </span><span class="s4">this</span><span
+    class="s3">);</span>
+      <span class="s3">}</span>
+    <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+      <span class="s4">const </span><span class="s1">server </span><span class="s3">= </span><span
+    class="s4">this</span><span class="s3">.</span><span class="s1">_server</span><span class="s3">;</span>
+
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">_removeListeners</span><span
+    class="s3">();</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">_removeListeners </span><span
+    class="s3">= </span><span class="s4">this</span><span class="s3">.</span><span class="s1">_server </span><span
+    class="s3">= </span><span class="s4">null</span><span class="s3">;</span>
+
+      <span class="s0">//</span>
+      <span class="s0">// The HTTP/S server was created internally. Close it, and rely on its</span>
+      <span class="s0">// `'close'` event.</span>
+      <span class="s0">//</span>
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">close</span><span
+    class="s3">(() =&gt; {</span>
+        <span class="s1">emitClose</span><span class="s3">(</span><span class="s4">this</span><span class="s3">);</span>
+      <span class="s3">});</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s7">/**</span>
+   <span class="s7">* See if a given request should be handled by this server instance.</span>
+   <span class="s7">*</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{http.IncomingMessage} req Request object to inspect</span>
+   <span class="s7">* </span><span class="s8">@return </span><span class="s7">{Boolean} `true` if the request is valid, else `false`</span>
+   <span class="s7">* </span><span class="s8">@public</span>
+   <span class="s7">*/</span>
+  <span class="s1">shouldHandle</span><span class="s3">(</span><span class="s1">req</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">path</span><span class="s3">) {</span>
+      <span class="s4">const </span><span class="s1">index </span><span class="s3">= </span><span
+    class="s1">req</span><span class="s3">.</span><span class="s1">url</span><span class="s3">.</span><span class="s1">indexOf</span><span
+    class="s3">(</span><span class="s2">'?'</span><span class="s3">);</span>
+      <span class="s4">const </span><span class="s1">pathname </span><span class="s3">= </span><span
+    class="s1">index </span><span class="s3">!== -</span><span class="s6">1 </span><span class="s3">? </span><span
+    class="s1">req</span><span class="s3">.</span><span class="s1">url</span><span class="s3">.</span><span class="s1">slice</span><span
+    class="s3">(</span><span class="s6">0</span><span class="s3">, </span><span class="s1">index</span><span class="s3">) : </span><span
+    class="s1">req</span><span class="s3">.</span><span class="s1">url</span><span class="s3">;</span>
+
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">pathname </span><span
+    class="s3">!== </span><span class="s4">this</span><span class="s3">.</span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">path</span><span class="s3">) </span><span class="s4">return false</span><span
+    class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">return true</span><span class="s3">;</span>
+  <span class="s3">}</span>
+
+  <span class="s7">/**</span>
+   <span class="s7">* Handle a HTTP Upgrade request.</span>
+   <span class="s7">*</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{http.IncomingMessage} req The request object</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Duplex} socket The network socket between the server and client</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Buffer} head The first packet of the upgraded stream</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Function} cb Callback</span>
+   <span class="s7">* </span><span class="s8">@public</span>
+   <span class="s7">*/</span>
+  <span class="s1">handleUpgrade</span><span class="s3">(</span><span class="s1">req</span><span
+    class="s3">, </span><span class="s1">socket</span><span class="s3">, </span><span class="s1">head</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">) {</span>
+    <span class="s1">socket</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s2">'error'</span><span class="s3">, </span><span class="s1">socketOnError</span><span class="s3">);</span>
+
+    <span class="s4">const </span><span class="s1">key </span><span class="s3">= </span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">headers</span><span class="s3">[</span><span
+    class="s2">'sec-websocket-key'</span><span class="s3">];</span>
+    <span class="s4">const </span><span class="s1">upgrade </span><span class="s3">= </span><span
+    class="s1">req</span><span class="s3">.</span><span class="s1">headers</span><span class="s3">.</span><span
+    class="s1">upgrade</span><span class="s3">;</span>
+    <span class="s4">const </span><span class="s1">version </span><span class="s3">= +</span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">headers</span><span class="s3">[</span><span
+    class="s2">'sec-websocket-version'</span><span class="s3">];</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">method </span><span class="s3">!== </span><span class="s2">'GET'</span><span class="s3">) {</span>
+      <span class="s4">const </span><span class="s1">message </span><span class="s3">= </span><span class="s2">'Invalid HTTP method'</span><span
+    class="s3">;</span>
+      <span class="s1">abortHandshakeOrEmitwsClientError</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s6">405</span><span class="s3">, </span><span
+    class="s1">message</span><span class="s3">);</span>
+      <span class="s4">return</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">upgrade </span><span
+    class="s3">=== </span><span class="s1">undefined </span><span class="s3">|| </span><span
+    class="s1">upgrade</span><span class="s3">.</span><span class="s1">toLowerCase</span><span class="s3">() !== </span><span
+    class="s2">'websocket'</span><span class="s3">) {</span>
+      <span class="s4">const </span><span class="s1">message </span><span class="s3">= </span><span class="s2">'Invalid Upgrade header'</span><span
+    class="s3">;</span>
+      <span class="s1">abortHandshakeOrEmitwsClientError</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s6">400</span><span class="s3">, </span><span
+    class="s1">message</span><span class="s3">);</span>
+      <span class="s4">return</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">key </span><span class="s3">=== </span><span
+    class="s1">undefined </span><span class="s3">|| !</span><span class="s1">keyRegex</span><span
+    class="s3">.</span><span class="s1">test</span><span class="s3">(</span><span class="s1">key</span><span class="s3">)) {</span>
+      <span class="s4">const </span><span class="s1">message </span><span class="s3">= </span><span class="s2">'Missing or invalid Sec-WebSocket-Key header'</span><span
+    class="s3">;</span>
+      <span class="s1">abortHandshakeOrEmitwsClientError</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s6">400</span><span class="s3">, </span><span
+    class="s1">message</span><span class="s3">);</span>
+      <span class="s4">return</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">version </span><span
+    class="s3">!== </span><span class="s6">13 </span><span class="s3">&amp;&amp; </span><span class="s1">version </span><span
+    class="s3">!== </span><span class="s6">8</span><span class="s3">) {</span>
+      <span class="s4">const </span><span class="s1">message </span><span class="s3">= </span><span class="s2">'Missing or invalid Sec-WebSocket-Version header'</span><span
+    class="s3">;</span>
+      <span class="s1">abortHandshakeOrEmitwsClientError</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s6">400</span><span class="s3">, </span><span
+    class="s1">message</span><span class="s3">, {</span>
+        <span class="s2">'Sec-WebSocket-Version'</span><span class="s3">: </span><span class="s2">'13, 8'</span>
+      <span class="s3">});</span>
+      <span class="s4">return</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(!</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">shouldHandle</span><span class="s3">(</span><span class="s1">req</span><span class="s3">)) {</span>
+      <span class="s1">abortHandshake</span><span class="s3">(</span><span class="s1">socket</span><span
+    class="s3">, </span><span class="s6">400</span><span class="s3">);</span>
+      <span class="s4">return</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s4">const </span><span class="s1">secWebSocketProtocol </span><span class="s3">= </span><span
+    class="s1">req</span><span class="s3">.</span><span class="s1">headers</span><span class="s3">[</span><span
+    class="s2">'sec-websocket-protocol'</span><span class="s3">];</span>
+    <span class="s4">let </span><span class="s1">protocols </span><span class="s3">= </span><span class="s4">new </span><span
+    class="s1">Set</span><span class="s3">();</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">secWebSocketProtocol </span><span class="s3">!== </span><span
+    class="s1">undefined</span><span class="s3">) {</span>
+      <span class="s4">try </span><span class="s3">{</span>
+        <span class="s1">protocols </span><span class="s3">= </span><span class="s1">subprotocol</span><span class="s3">.</span><span
+    class="s1">parse</span><span class="s3">(</span><span class="s1">secWebSocketProtocol</span><span
+    class="s3">);</span>
+      <span class="s3">} </span><span class="s4">catch </span><span class="s3">(</span><span class="s1">err</span><span
+    class="s3">) {</span>
+        <span class="s4">const </span><span class="s1">message </span><span class="s3">= </span><span class="s2">'Invalid Sec-WebSocket-Protocol header'</span><span
+    class="s3">;</span>
+        <span class="s1">abortHandshakeOrEmitwsClientError</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s6">400</span><span class="s3">, </span><span
+    class="s1">message</span><span class="s3">);</span>
+        <span class="s4">return</span><span class="s3">;</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s4">const </span><span class="s1">secWebSocketExtensions </span><span class="s3">= </span><span
+    class="s1">req</span><span class="s3">.</span><span class="s1">headers</span><span class="s3">[</span><span
+    class="s2">'sec-websocket-extensions'</span><span class="s3">];</span>
+    <span class="s4">const </span><span class="s1">extensions </span><span class="s3">= {};</span>
+
+    <span class="s4">if </span><span class="s3">(</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">perMessageDeflate </span><span class="s3">&amp;&amp;</span>
+      <span class="s1">secWebSocketExtensions </span><span class="s3">!== </span><span class="s1">undefined</span>
+    <span class="s3">) {</span>
+      <span class="s4">const </span><span class="s1">perMessageDeflate </span><span class="s3">= </span><span
+    class="s4">new </span><span class="s1">PerMessageDeflate</span><span class="s3">(</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">perMessageDeflate</span><span class="s3">,</span>
+        <span class="s4">true</span><span class="s3">,</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">maxPayload</span>
+      <span class="s3">);</span>
+
+      <span class="s4">try </span><span class="s3">{</span>
+        <span class="s4">const </span><span class="s1">offers </span><span class="s3">= </span><span class="s1">extension</span><span
+    class="s3">.</span><span class="s1">parse</span><span class="s3">(</span><span
+    class="s1">secWebSocketExtensions</span><span class="s3">);</span>
+
+        <span class="s4">if </span><span class="s3">(</span><span class="s1">offers</span><span class="s3">[</span><span
+    class="s1">PerMessageDeflate</span><span class="s3">.</span><span class="s1">extensionName</span><span class="s3">]) {</span>
+          <span class="s1">perMessageDeflate</span><span class="s3">.</span><span class="s1">accept</span><span
+    class="s3">(</span><span class="s1">offers</span><span class="s3">[</span><span
+    class="s1">PerMessageDeflate</span><span class="s3">.</span><span class="s1">extensionName</span><span class="s3">]);</span>
+          <span class="s1">extensions</span><span class="s3">[</span><span class="s1">PerMessageDeflate</span><span
+    class="s3">.</span><span class="s1">extensionName</span><span class="s3">] = </span><span class="s1">perMessageDeflate</span><span
+    class="s3">;</span>
+        <span class="s3">}</span>
+      <span class="s3">} </span><span class="s4">catch </span><span class="s3">(</span><span class="s1">err</span><span
+    class="s3">) {</span>
+        <span class="s4">const </span><span class="s1">message </span><span class="s3">=</span>
+          <span class="s2">'Invalid or unacceptable Sec-WebSocket-Extensions header'</span><span class="s3">;</span>
+        <span class="s1">abortHandshakeOrEmitwsClientError</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s6">400</span><span class="s3">, </span><span
+    class="s1">message</span><span class="s3">);</span>
+        <span class="s4">return</span><span class="s3">;</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s0">//</span>
+    <span class="s0">// Optionally call external client verification handler.</span>
+    <span class="s0">//</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">verifyClient</span><span class="s3">) {</span>
+      <span class="s4">const </span><span class="s1">info </span><span class="s3">= {</span>
+        <span class="s1">origin</span><span class="s3">:</span>
+          <span class="s1">req</span><span class="s3">.</span><span class="s1">headers</span><span
+    class="s3">[</span><span class="s2">`</span><span class="s1">$</span><span class="s3">{</span><span class="s1">version </span><span
+    class="s3">=== </span><span class="s6">8 </span><span class="s3">? </span><span
+    class="s2">'sec-websocket-origin' </span><span class="s3">: </span><span class="s2">'origin'</span><span class="s3">}</span><span
+    class="s2">`</span><span class="s3">],</span>
+        <span class="s1">secure</span><span class="s3">: !!(</span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span class="s1">authorized </span><span
+    class="s3">|| </span><span class="s1">req</span><span class="s3">.</span><span class="s1">socket</span><span
+    class="s3">.</span><span class="s1">encrypted</span><span class="s3">),</span>
+        <span class="s1">req</span>
+      <span class="s3">};</span>
+
+      <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">verifyClient</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s6">2</span><span class="s3">) {</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">verifyClient</span><span class="s3">(</span><span class="s1">info</span><span
+    class="s3">, (</span><span class="s1">verified</span><span class="s3">, </span><span class="s1">code</span><span
+    class="s3">, </span><span class="s1">message</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) =&gt; {</span>
+          <span class="s4">if </span><span class="s3">(!</span><span class="s1">verified</span><span
+    class="s3">) {</span>
+            <span class="s4">return </span><span class="s1">abortHandshake</span><span class="s3">(</span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s1">code </span><span class="s3">|| </span><span
+    class="s6">401</span><span class="s3">, </span><span class="s1">message</span><span class="s3">, </span><span
+    class="s1">headers</span><span class="s3">);</span>
+          <span class="s3">}</span>
+
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">completeUpgrade</span><span
+    class="s3">(</span>
+            <span class="s1">extensions</span><span class="s3">,</span>
+            <span class="s1">key</span><span class="s3">,</span>
+            <span class="s1">protocols</span><span class="s3">,</span>
+            <span class="s1">req</span><span class="s3">,</span>
+            <span class="s1">socket</span><span class="s3">,</span>
+            <span class="s1">head</span><span class="s3">,</span>
+            <span class="s1">cb</span>
+          <span class="s3">);</span>
+        <span class="s3">});</span>
+        <span class="s4">return</span><span class="s3">;</span>
+      <span class="s3">}</span>
+
+      <span class="s4">if </span><span class="s3">(!</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">verifyClient</span><span class="s3">(</span><span
+    class="s1">info</span><span class="s3">)) </span><span class="s4">return </span><span
+    class="s1">abortHandshake</span><span class="s3">(</span><span class="s1">socket</span><span
+    class="s3">, </span><span class="s6">401</span><span class="s3">);</span>
+    <span class="s3">}</span>
+
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">completeUpgrade</span><span
+    class="s3">(</span><span class="s1">extensions</span><span class="s3">, </span><span class="s1">key</span><span
+    class="s3">, </span><span class="s1">protocols</span><span class="s3">, </span><span class="s1">req</span><span
+    class="s3">, </span><span class="s1">socket</span><span class="s3">, </span><span class="s1">head</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">);</span>
+  <span class="s3">}</span>
+
+  <span class="s7">/**</span>
+   <span class="s7">* Upgrade the connection to WebSocket.</span>
+   <span class="s7">*</span>
+   <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{Object} extensions The accepted extensions</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{String} key The value of the `Sec-WebSocket-Key` header</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Set} protocols The subprotocols</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{http.IncomingMessage} req The request object</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Duplex} socket The network socket between the server and client</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Buffer} head The first packet of the upgraded stream</span>
+   <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Function} cb Callback</span>
+   <span class="s7">* </span><span class="s8">@throws </span><span class="s7">{Error} If called more than once with the same socket</span>
+   <span class="s7">* </span><span class="s8">@private</span>
+   <span class="s7">*/</span>
+  <span class="s1">completeUpgrade</span><span class="s3">(</span><span class="s1">extensions</span><span
+    class="s3">, </span><span class="s1">key</span><span class="s3">, </span><span class="s1">protocols</span><span
+    class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span class="s1">socket</span><span
+    class="s3">, </span><span class="s1">head</span><span class="s3">, </span><span class="s1">cb</span><span
+    class="s3">) {</span>
+    <span class="s0">//</span>
+    <span class="s0">// Destroy the socket if the client has already sent a FIN packet.</span>
+    <span class="s0">//</span>
+    <span class="s4">if </span><span class="s3">(!</span><span class="s1">socket</span><span class="s3">.</span><span
+    class="s1">readable </span><span class="s3">|| !</span><span class="s1">socket</span><span class="s3">.</span><span
+    class="s1">writable</span><span class="s3">) </span><span class="s4">return </span><span
+    class="s1">socket</span><span class="s3">.</span><span class="s1">destroy</span><span class="s3">();</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">socket</span><span class="s3">[</span><span
+    class="s1">kWebSocket</span><span class="s3">]) {</span>
+      <span class="s4">throw new </span><span class="s1">Error</span><span class="s3">(</span>
+        <span class="s2">'server.handleUpgrade() was called more than once with the same ' </span><span
+    class="s3">+</span>
+          <span class="s2">'socket, possibly due to a misconfiguration'</span>
+      <span class="s3">);</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_state </span><span class="s3">&gt; </span><span class="s1">RUNNING</span><span class="s3">) </span><span
+    class="s4">return </span><span class="s1">abortHandshake</span><span class="s3">(</span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s6">503</span><span class="s3">);</span>
+
+    <span class="s4">const </span><span class="s1">digest </span><span class="s3">= </span><span
+    class="s1">createHash</span><span class="s3">(</span><span class="s2">'sha1'</span><span class="s3">)</span>
+      <span class="s3">.</span><span class="s1">update</span><span class="s3">(</span><span class="s1">key </span><span
+    class="s3">+ </span><span class="s1">GUID</span><span class="s3">)</span>
+      <span class="s3">.</span><span class="s1">digest</span><span class="s3">(</span><span
+    class="s2">'base64'</span><span class="s3">);</span>
+
+    <span class="s4">const </span><span class="s1">headers </span><span class="s3">= [</span>
+      <span class="s2">'HTTP/1.1 101 Switching Protocols'</span><span class="s3">,</span>
+      <span class="s2">'Upgrade: websocket'</span><span class="s3">,</span>
+      <span class="s2">'Connection: Upgrade'</span><span class="s3">,</span>
+      <span class="s2">`Sec-WebSocket-Accept: </span><span class="s1">$</span><span class="s3">{</span><span class="s1">digest</span><span
+    class="s3">}</span><span class="s2">`</span>
+    <span class="s3">];</span>
+
+    <span class="s4">const </span><span class="s1">ws </span><span class="s3">= </span><span
+    class="s4">new this</span><span class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">WebSocket</span><span class="s3">(</span><span class="s4">null</span><span class="s3">, </span><span
+    class="s1">undefined</span><span class="s3">, </span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">);</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">protocols</span><span class="s3">.</span><span
+    class="s1">size</span><span class="s3">) {</span>
+      <span class="s0">//</span>
+      <span class="s0">// Optionally call external protocol selection handler.</span>
+      <span class="s0">//</span>
+      <span class="s4">const </span><span class="s1">protocol </span><span class="s3">= </span><span
+    class="s4">this</span><span class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">handleProtocols</span>
+        <span class="s3">? </span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">handleProtocols</span><span
+    class="s3">(</span><span class="s1">protocols</span><span class="s3">, </span><span class="s1">req</span><span
+    class="s3">)</span>
+        <span class="s3">: </span><span class="s1">protocols</span><span class="s3">.</span><span
+    class="s1">values</span><span class="s3">().</span><span class="s1">next</span><span class="s3">().</span><span
+    class="s1">value</span><span class="s3">;</span>
+
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">protocol</span><span class="s3">) {</span>
+        <span class="s1">headers</span><span class="s3">.</span><span class="s1">push</span><span
+    class="s3">(</span><span class="s2">`Sec-WebSocket-Protocol: </span><span class="s1">$</span><span
+    class="s3">{</span><span class="s1">protocol</span><span class="s3">}</span><span class="s2">`</span><span
+    class="s3">);</span>
+        <span class="s1">ws</span><span class="s3">.</span><span class="s1">_protocol </span><span
+    class="s3">= </span><span class="s1">protocol</span><span class="s3">;</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">extensions</span><span class="s3">[</span><span
+    class="s1">PerMessageDeflate</span><span class="s3">.</span><span class="s1">extensionName</span><span class="s3">]) {</span>
+      <span class="s4">const </span><span class="s1">params </span><span class="s3">= </span><span
+    class="s1">extensions</span><span class="s3">[</span><span class="s1">PerMessageDeflate</span><span
+    class="s3">.</span><span class="s1">extensionName</span><span class="s3">].</span><span
+    class="s1">params</span><span class="s3">;</span>
+      <span class="s4">const </span><span class="s1">value </span><span class="s3">= </span><span
+    class="s1">extension</span><span class="s3">.</span><span class="s1">format</span><span class="s3">({</span>
+        <span class="s3">[</span><span class="s1">PerMessageDeflate</span><span class="s3">.</span><span class="s1">extensionName</span><span
+    class="s3">]: [</span><span class="s1">params</span><span class="s3">]</span>
+      <span class="s3">});</span>
+      <span class="s1">headers</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s2">`Sec-WebSocket-Extensions: </span><span class="s1">$</span><span class="s3">{</span><span class="s1">value</span><span
+    class="s3">}</span><span class="s2">`</span><span class="s3">);</span>
+      <span class="s1">ws</span><span class="s3">.</span><span class="s1">_extensions </span><span
+    class="s3">= </span><span class="s1">extensions</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s0">//</span>
+    <span class="s0">// Allow external modification/inspection of handshake headers.</span>
+    <span class="s0">//</span>
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s2">'headers'</span><span class="s3">, </span><span class="s1">headers</span><span class="s3">, </span><span
+    class="s1">req</span><span class="s3">);</span>
+
+    <span class="s1">socket</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s1">headers</span><span class="s3">.</span><span class="s1">concat</span><span class="s3">(</span><span
+    class="s2">'</span><span class="s4">\r\n</span><span class="s2">'</span><span class="s3">).</span><span class="s1">join</span><span
+    class="s3">(</span><span class="s2">'</span><span class="s4">\r\n</span><span class="s2">'</span><span class="s3">));</span>
+    <span class="s1">socket</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s2">'error'</span><span class="s3">, </span><span
+    class="s1">socketOnError</span><span class="s3">);</span>
+
+    <span class="s1">ws</span><span class="s3">.</span><span class="s1">setSocket</span><span class="s3">(</span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s1">head</span><span class="s3">, {</span>
+      <span class="s1">allowSynchronousEvents</span><span class="s3">: </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">allowSynchronousEvents</span><span class="s3">,</span>
+      <span class="s1">maxPayload</span><span class="s3">: </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span class="s1">maxPayload</span><span
+    class="s3">,</span>
+      <span class="s1">skipUTF8Validation</span><span class="s3">: </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">skipUTF8Validation</span>
+    <span class="s3">});</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">clients</span><span class="s3">) {</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">clients</span><span class="s3">.</span><span
+    class="s1">add</span><span class="s3">(</span><span class="s1">ws</span><span class="s3">);</span>
+      <span class="s1">ws</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s2">'close'</span><span class="s3">, () =&gt; {</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">clients</span><span
+    class="s3">.</span><span class="s1">delete</span><span class="s3">(</span><span class="s1">ws</span><span
+    class="s3">);</span>
+
+        <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_shouldEmitClose </span><span class="s3">&amp;&amp; !</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">clients</span><span class="s3">.</span><span class="s1">size</span><span class="s3">) {</span>
+          <span class="s1">process</span><span class="s3">.</span><span class="s1">nextTick</span><span
+    class="s3">(</span><span class="s1">emitClose</span><span class="s3">, </span><span class="s4">this</span><span
+    class="s3">);</span>
+        <span class="s3">}</span>
+      <span class="s3">});</span>
+    <span class="s3">}</span>
+
+    <span class="s1">cb</span><span class="s3">(</span><span class="s1">ws</span><span class="s3">, </span><span
+    class="s1">req</span><span class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">WebSocketServer</span><span class="s3">;</span>
+
+<span class="s7">/**</span>
+ <span class="s7">* Add event listeners on an `EventEmitter` using a map of &lt;event, listener&gt;</span>
+ <span class="s7">* pairs.</span>
+ <span class="s7">*</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{EventEmitter} server The event emitter</span>
+ <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Object.&lt;String, Function&gt;} map The listeners to add</span>
+ <span class="s7">* </span><span class="s8">@return </span><span class="s7">{Function} A function that will remove the added listeners when</span>
+ <span class="s7">*     called</span>
+ <span class="s7">* </span><span class="s8">@private</span>
+ <span class="s7">*/</span>
+<span class="s4">function </span><span class="s1">addListeners</span><span class="s3">(</span><span
+    class="s1">server</span><span class="s3">, </span><span class="s1">map</span><span class="s3">) {</span>
+  <span class="s4">for </span><span class="s3">(</span><span class="s4">const </span><span
+    class="s1">event of Object</span><span class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span
+    class="s1">map</span><span class="s3">)) </span><span class="s1">server</span><span class="s3">.</span><span
+    class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">, </span><span
+    class="s1">map</span><span class="s3">[</span><span class="s1">event</span><span class="s3">]);</span>
+
+  <span class="s4">return function </span><span class="s1">removeListeners</span><span class="s3">() {</span>
+    <span class="s4">for </span><span class="s3">(</span><span class="s4">const </span><span
+    class="s1">event of Object</span><span class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span
+    class="s1">map</span><span class="s3">)) {</span>
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">event</span><span class="s3">, </span><span class="s1">map</span><span
+    class="s3">[</span><span class="s1">event</span><span class="s3">]);</span>
+    <span class="s3">}</span>
+  <span class="s3">};</span>
+<span class="s3">}</span>
+
+<span class="s7">/**</span>
+ <span class="s7">* Emit a `'close'` event on an `EventEmitter`.</span>
+ <span class="s7">*</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{EventEmitter} server The event emitter</span>
+ <span class="s7">* </span><span class="s8">@private</span>
+ <span class="s7">*/</span>
+<span class="s4">function </span><span class="s1">emitClose</span><span class="s3">(</span><span
+    class="s1">server</span><span class="s3">) {</span>
+  <span class="s1">server</span><span class="s3">.</span><span class="s1">_state </span><span class="s3">= </span><span
+    class="s1">CLOSED</span><span class="s3">;</span>
+  <span class="s1">server</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s2">'close'</span><span class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s7">/**</span>
+ <span class="s7">* Handle socket errors.</span>
+ <span class="s7">*</span>
+ <span class="s7">* </span><span class="s8">@private</span>
+ <span class="s7">*/</span>
+<span class="s4">function </span><span class="s1">socketOnError</span><span class="s3">() {</span>
+  <span class="s4">this</span><span class="s3">.</span><span class="s1">destroy</span><span class="s3">();</span>
+<span class="s3">}</span>
+
+<span class="s7">/**</span>
+ <span class="s7">* Close the connection when preconditions are not fulfilled.</span>
+ <span class="s7">*</span>
+ <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Duplex} socket The socket of the upgrade request</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{Number} code The HTTP response status code</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{String} [message] The HTTP response body</span>
+ <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Object} [headers] Additional HTTP response headers</span>
+ <span class="s7">* </span><span class="s8">@private</span>
+ <span class="s7">*/</span>
+<span class="s4">function </span><span class="s1">abortHandshake</span><span class="s3">(</span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s1">code</span><span class="s3">, </span><span
+    class="s1">message</span><span class="s3">, </span><span class="s1">headers</span><span class="s3">) {</span>
+  <span class="s0">//</span>
+  <span class="s0">// The socket is writable unless the user destroyed or ended it before calling</span>
+  <span class="s0">// `server.handleUpgrade()` or in the `verifyClient` function, which is a user</span>
+  <span class="s0">// error. Handling this does not make much sense as the worst that can happen</span>
+  <span class="s0">// is that some of the data written by the user might be discarded due to the</span>
+  <span class="s0">// call to `socket.end()` below, which triggers an `'error'` event that in</span>
+  <span class="s0">// turn causes the socket to be destroyed.</span>
+  <span class="s0">//</span>
+  <span class="s1">message </span><span class="s3">= </span><span class="s1">message </span><span
+    class="s3">|| </span><span class="s1">http</span><span class="s3">.</span><span class="s1">STATUS_CODES</span><span
+    class="s3">[</span><span class="s1">code</span><span class="s3">];</span>
+  <span class="s1">headers </span><span class="s3">= {</span>
+    <span class="s1">Connection</span><span class="s3">: </span><span class="s2">'close'</span><span class="s3">,</span>
+    <span class="s2">'Content-Type'</span><span class="s3">: </span><span class="s2">'text/html'</span><span class="s3">,</span>
+    <span class="s2">'Content-Length'</span><span class="s3">: </span><span class="s1">Buffer</span><span
+    class="s3">.</span><span class="s1">byteLength</span><span class="s3">(</span><span class="s1">message</span><span
+    class="s3">),</span>
+    <span class="s1">...headers</span>
+  <span class="s3">};</span>
+
+  <span class="s1">socket</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s2">'finish'</span><span class="s3">, </span><span class="s1">socket</span><span class="s3">.</span><span
+    class="s1">destroy</span><span class="s3">);</span>
+
+  <span class="s1">socket</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span>
+    <span class="s2">`HTTP/1.1 </span><span class="s1">$</span><span class="s3">{</span><span
+    class="s1">code</span><span class="s3">} </span><span class="s1">$</span><span class="s3">{</span><span class="s1">http</span><span
+    class="s3">.</span><span class="s1">STATUS_CODES</span><span class="s3">[</span><span class="s1">code</span><span
+    class="s3">]}</span><span class="s4">\r\n</span><span class="s2">` </span><span class="s3">+</span>
+      <span class="s1">Object</span><span class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span
+    class="s1">headers</span><span class="s3">)</span>
+        <span class="s3">.</span><span class="s1">map</span><span class="s3">((</span><span class="s1">h</span><span
+    class="s3">) =&gt; </span><span class="s2">`</span><span class="s1">$</span><span class="s3">{</span><span
+    class="s1">h</span><span class="s3">}</span><span class="s2">: </span><span class="s1">$</span><span
+    class="s3">{</span><span class="s1">headers</span><span class="s3">[</span><span class="s1">h</span><span
+    class="s3">]}</span><span class="s2">`</span><span class="s3">)</span>
+        <span class="s3">.</span><span class="s1">join</span><span class="s3">(</span><span class="s2">'</span><span
+    class="s4">\r\n</span><span class="s2">'</span><span class="s3">) +</span>
+      <span class="s2">'</span><span class="s4">\r\n\r\n</span><span class="s2">' </span><span class="s3">+</span>
+      <span class="s1">message</span>
+  <span class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s7">/**</span>
+ <span class="s7">* Emit a `'wsClientError'` event on a `WebSocketServer` if there is at least</span>
+ <span class="s7">* one listener for it, otherwise call `abortHandshake()`.</span>
+ <span class="s7">*</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{WebSocketServer} server The WebSocket server</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{http.IncomingMessage} req The request object</span>
+ <span class="s7">* </span><span class="s8">@param </span><span class="s7">{Duplex} socket The socket of the upgrade request</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{Number} code The HTTP response status code</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{String} message The HTTP response body</span>
+ <span class="s7">* </span><span class="s8">@param </span><span
+    class="s7">{Object} [headers] The HTTP response headers</span>
+ <span class="s7">* </span><span class="s8">@private</span>
+ <span class="s7">*/</span>
+<span class="s4">function </span><span class="s1">abortHandshakeOrEmitwsClientError</span><span class="s3">(</span>
+  <span class="s1">server</span><span class="s3">,</span>
+  <span class="s1">req</span><span class="s3">,</span>
+  <span class="s1">socket</span><span class="s3">,</span>
+  <span class="s1">code</span><span class="s3">,</span>
+  <span class="s1">message</span><span class="s3">,</span>
+  <span class="s1">headers</span>
+<span class="s3">) {</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">server</span><span class="s3">.</span><span
+    class="s1">listenerCount</span><span class="s3">(</span><span class="s2">'wsClientError'</span><span
+    class="s3">)) {</span>
+    <span class="s4">const </span><span class="s1">err </span><span class="s3">= </span><span
+    class="s4">new </span><span class="s1">Error</span><span class="s3">(</span><span class="s1">message</span><span
+    class="s3">);</span>
+    <span class="s1">Error</span><span class="s3">.</span><span class="s1">captureStackTrace</span><span
+    class="s3">(</span><span class="s1">err</span><span class="s3">, </span><span class="s1">abortHandshakeOrEmitwsClientError</span><span
+    class="s3">);</span>
+
+    <span class="s1">server</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s2">'wsClientError'</span><span class="s3">, </span><span class="s1">err</span><span
+    class="s3">, </span><span class="s1">socket</span><span class="s3">, </span><span class="s1">req</span><span
+    class="s3">);</span>
+  <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+    <span class="s1">abortHandshake</span><span class="s3">(</span><span class="s1">socket</span><span
+    class="s3">, </span><span class="s1">code</span><span class="s3">, </span><span class="s1">message</span><span
+    class="s3">, </span><span class="s1">headers</span><span class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

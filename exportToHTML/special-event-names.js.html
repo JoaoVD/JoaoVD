@@ -1,0 +1,147 @@
+<html>
+<head>
+  <title>special-event-names.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          special-event-names.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span><span class="s1">;</span>
+
+<span class="s3">var </span><span class="s2">common </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'./common'</span><span class="s1">);</span>
+<span class="s3">var </span><span class="s2">EventEmitter </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'../'</span><span class="s1">);</span>
+<span class="s3">var </span><span class="s2">assert </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'assert'</span><span class="s1">);</span>
+
+<span class="s3">var </span><span class="s2">ee </span><span class="s1">= </span><span class="s3">new </span><span
+    class="s2">EventEmitter</span><span class="s1">();</span>
+<span class="s3">var </span><span class="s2">handler </span><span class="s1">= </span><span
+    class="s3">function</span><span class="s1">() {};</span>
+
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">eventNames</span><span class="s1">().</span><span
+    class="s2">length</span><span class="s1">, </span><span class="s4">0</span><span class="s1">);</span>
+
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">_events</span><span class="s1">.</span><span
+    class="s2">hasOwnProperty</span><span class="s1">, </span><span class="s2">undefined</span><span
+    class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">_events</span><span class="s1">.</span><span
+    class="s2">toString</span><span class="s1">, </span><span class="s2">undefined</span><span class="s1">);</span>
+
+<span class="s2">ee</span><span class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s0">'__defineGetter__'</span><span
+    class="s1">, </span><span class="s2">handler</span><span class="s1">);</span>
+<span class="s2">ee</span><span class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s0">'toString'</span><span
+    class="s1">, </span><span class="s2">handler</span><span class="s1">);</span>
+<span class="s2">ee</span><span class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s0">'__proto__'</span><span
+    class="s1">, </span><span class="s2">handler</span><span class="s1">);</span>
+
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">eventNames</span><span class="s1">()[</span><span
+    class="s4">0</span><span class="s1">], </span><span class="s0">'__defineGetter__'</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">eventNames</span><span class="s1">()[</span><span
+    class="s4">1</span><span class="s1">], </span><span class="s0">'toString'</span><span class="s1">);</span>
+
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s0">'__defineGetter__'</span><span class="s1">).</span><span class="s2">length</span><span
+    class="s1">, </span><span class="s4">1</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s0">'__defineGetter__'</span><span class="s1">)[</span><span class="s4">0</span><span
+    class="s1">], </span><span class="s2">handler</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s0">'toString'</span><span class="s1">).</span><span class="s2">length</span><span class="s1">, </span><span
+    class="s4">1</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s0">'toString'</span><span class="s1">)[</span><span class="s4">0</span><span class="s1">], </span><span
+    class="s2">handler</span><span class="s1">);</span>
+
+<span class="s5">// Only run __proto__ tests if that property can actually be set</span>
+<span class="s3">if </span><span class="s1">({ </span><span class="s2">__proto__</span><span class="s1">: </span><span
+    class="s0">'ok' </span><span class="s1">}.</span><span class="s2">__proto__ </span><span class="s1">=== </span><span
+    class="s0">'ok'</span><span class="s1">) {</span>
+  <span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span
+    class="s1">(</span><span class="s2">ee</span><span class="s1">.</span><span class="s2">eventNames</span><span
+    class="s1">().</span><span class="s2">length</span><span class="s1">, </span><span class="s4">3</span><span
+    class="s1">);</span>
+  <span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span
+    class="s1">(</span><span class="s2">ee</span><span class="s1">.</span><span class="s2">eventNames</span><span
+    class="s1">()[</span><span class="s4">2</span><span class="s1">], </span><span class="s0">'__proto__'</span><span
+    class="s1">);</span>
+  <span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span
+    class="s1">(</span><span class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span
+    class="s1">(</span><span class="s0">'__proto__'</span><span class="s1">).</span><span class="s2">length</span><span
+    class="s1">, </span><span class="s4">1</span><span class="s1">);</span>
+  <span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span
+    class="s1">(</span><span class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span
+    class="s1">(</span><span class="s0">'__proto__'</span><span class="s1">)[</span><span class="s4">0</span><span
+    class="s1">], </span><span class="s2">handler</span><span class="s1">);</span>
+
+  <span class="s2">ee</span><span class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span
+    class="s0">'__proto__'</span><span class="s1">, </span><span class="s2">common</span><span class="s1">.</span><span
+    class="s2">mustCall</span><span class="s1">(</span><span class="s3">function</span><span class="s1">(</span><span
+    class="s2">val</span><span class="s1">) {</span>
+    <span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span
+    class="s1">(</span><span class="s2">val</span><span class="s1">, </span><span class="s4">1</span><span
+    class="s1">);</span>
+  <span class="s1">}));</span>
+  <span class="s2">ee</span><span class="s1">.</span><span class="s2">emit</span><span class="s1">(</span><span
+    class="s0">'__proto__'</span><span class="s1">, </span><span class="s4">1</span><span class="s1">);</span>
+
+  <span class="s2">process</span><span class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span
+    class="s0">'__proto__'</span><span class="s1">, </span><span class="s2">common</span><span class="s1">.</span><span
+    class="s2">mustCall</span><span class="s1">(</span><span class="s3">function</span><span class="s1">(</span><span
+    class="s2">val</span><span class="s1">) {</span>
+    <span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span
+    class="s1">(</span><span class="s2">val</span><span class="s1">, </span><span class="s4">1</span><span
+    class="s1">);</span>
+  <span class="s1">}));</span>
+  <span class="s2">process</span><span class="s1">.</span><span class="s2">emit</span><span class="s1">(</span><span
+    class="s0">'__proto__'</span><span class="s1">, </span><span class="s4">1</span><span class="s1">);</span>
+<span class="s1">} </span><span class="s3">else </span><span class="s1">{</span>
+  <span class="s2">console</span><span class="s1">.</span><span class="s2">log</span><span class="s1">(</span><span
+    class="s0">'# skipped __proto__'</span><span class="s1">)</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

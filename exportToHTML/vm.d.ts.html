@@ -1,0 +1,1324 @@
+<html>
+<head>
+  <title>vm.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          vm.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:vm` module enables compiling and running code within V8 Virtual</span>
+ <span class="s0">* Machine contexts.</span>
+ <span class="s0">*</span>
+ <span class="s0">* **The `node:vm` module is not a security**</span>
+ <span class="s0">* **mechanism. Do not use it to run untrusted code.**</span>
+ <span class="s0">*</span>
+ <span class="s0">* JavaScript code can be compiled and run immediately or</span>
+ <span class="s0">* compiled, saved, and run later.</span>
+ <span class="s0">*</span>
+ <span class="s0">* A common use case is to run the code in a different V8 Context. This means</span>
+ <span class="s0">* invoked code has a different global object than the invoking code.</span>
+ <span class="s0">*</span>
+ <span class="s0">* One can provide the context by `contextifying` an</span>
+ <span class="s0">* object. The invoked code treats any property in the context like a</span>
+ <span class="s0">* global variable. Any changes to global variables caused by the invoked</span>
+ <span class="s0">* code are reflected in the context object.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import vm from 'node:vm';</span>
+ <span class="s0">*</span>
+ <span class="s0">* const x = 1;</span>
+ <span class="s0">*</span>
+ <span class="s0">* const context = { x: 2 };</span>
+ <span class="s0">* vm.createContext(context); // Contextify the object.</span>
+ <span class="s0">*</span>
+ <span class="s0">* const code = 'x += 40; var y = 17;';</span>
+ <span class="s0">* // `x` and `y` are global variables in the context.</span>
+ <span class="s0">* // Initially, x has the value 2 because that is the value of context.x.</span>
+ <span class="s0">* vm.runInContext(code, context);</span>
+ <span class="s0">*</span>
+ <span class="s0">* console.log(context.x); // 42</span>
+ <span class="s0">* console.log(context.y); // 17</span>
+ <span class="s0">*</span>
+ <span class="s0">* console.log(x); // 1; y is not defined.</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/vm.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;vm&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">ImportAttributes</span><span
+    class="s4">, </span><span class="s2">ImportPhase </span><span class="s4">} </span><span class="s2">from </span><span
+    class="s3">&quot;node:module&quot;</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">Context </span><span class="s5">extends </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Dict</span><span class="s4">&lt;</span><span class="s2">any</span><span
+    class="s4">&gt; {}</span>
+    <span class="s5">interface </span><span class="s2">BaseOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specifies the filename used in stack traces produced by this script.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">''</span>
+         <span class="s0">*/</span>
+        <span class="s2">filename</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Specifies the line number offset that is displayed in stack traces produced by this script.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">lineOffset</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specifies the column number offset that is displayed in stack traces produced by this script.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">columnOffset</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type DynamicModuleLoader</span><span class="s4">&lt;</span><span class="s2">T</span><span
+    class="s4">&gt; = (</span>
+        <span class="s2">specifier</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">referrer</span><span class="s4">: </span><span class="s2">T</span><span class="s4">,</span>
+        <span class="s2">importAttributes</span><span class="s4">: </span><span class="s2">ImportAttributes</span><span
+    class="s4">,</span>
+        <span class="s2">phase</span><span class="s4">: </span><span class="s2">ImportPhase</span><span
+    class="s4">,</span>
+    <span class="s4">) =&gt; </span><span class="s2">Module </span><span class="s4">| </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Module</span><span class="s4">&gt;;</span>
+    <span class="s5">interface </span><span class="s2">ScriptOptions </span><span class="s5">extends </span><span
+    class="s2">BaseOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Provides an optional data with V8's code cache data for the supplied source.</span>
+         <span class="s0">*/</span>
+        <span class="s2">cachedData</span><span class="s4">?: </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">in favor of `script.createCachedData()` */</span>
+        <span class="s2">produceCachedData</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Used to specify how the modules should be loaded during the evaluation of this script when `import()` is called. This option is</span>
+         <span class="s0">* part of the experimental modules API. We do not recommend using it in a production environment. For detailed information, see</span>
+         <span class="s0">* [Support of dynamic `import()` in compilation APIs](https://nodejs.org/docs/latest-v24.x/api/vm.html#support-of-dynamic-import-in-compilation-apis).</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">importModuleDynamically</span><span class="s4">?:</span>
+            <span class="s4">| </span><span class="s2">DynamicModuleLoader</span><span class="s4">&lt;</span><span
+    class="s2">Script</span><span class="s4">&gt;</span>
+            <span class="s4">| </span><span class="s5">typeof </span><span class="s2">constants</span><span
+    class="s4">.</span><span class="s2">USE_MAIN_CONTEXT_DEFAULT_LOADER</span>
+            <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">RunningScriptOptions </span><span class="s5">extends </span><span
+    class="s2">BaseOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When `true`, if an `Error` occurs while compiling the `code`, the line of code causing the error is attached to the stack trace.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">displayErrors</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specifies the number of milliseconds to execute code before terminating execution.</span>
+         <span class="s0">* If execution is terminated, an `Error` will be thrown. This value must be a strictly positive integer.</span>
+         <span class="s0">*/</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, the execution will be terminated when `SIGINT` (Ctrl+C) is received.</span>
+         <span class="s0">* Existing handlers for the event that have been attached via `process.on('SIGINT')` will be disabled during script execution, but will continue to work after that.</span>
+         <span class="s0">* If execution is terminated, an `Error` will be thrown.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">breakOnSigint</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">RunningScriptInNewContextOptions </span><span
+    class="s5">extends </span><span class="s2">RunningScriptOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Human-readable name of the newly created context.</span>
+         <span class="s0">*/</span>
+        <span class="s2">contextName</span><span class="s4">?: </span><span class="s2">CreateContextOptions</span><span
+    class="s4">[</span><span class="s3">&quot;name&quot;</span><span class="s4">];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Origin corresponding to the newly created context for display purposes. The origin should be formatted like a URL,</span>
+         <span class="s0">* but with only the scheme, host, and port (if necessary), like the value of the `url.origin` property of a `URL` object.</span>
+         <span class="s0">* Most notably, this string should omit the trailing slash, as that denotes a path.</span>
+         <span class="s0">*/</span>
+        <span class="s2">contextOrigin</span><span class="s4">?: </span><span
+    class="s2">CreateContextOptions</span><span class="s4">[</span><span class="s3">&quot;origin&quot;</span><span
+    class="s4">];</span>
+        <span class="s2">contextCodeGeneration</span><span class="s4">?: </span><span
+    class="s2">CreateContextOptions</span><span class="s4">[</span><span
+    class="s3">&quot;codeGeneration&quot;</span><span class="s4">];</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* If set to `afterEvaluate`, microtasks will be run immediately after the script has run.</span>
+         <span class="s0">*/</span>
+        <span class="s2">microtaskMode</span><span class="s4">?: </span><span
+    class="s2">CreateContextOptions</span><span class="s4">[</span><span
+    class="s3">&quot;microtaskMode&quot;</span><span class="s4">];</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">RunningCodeOptions </span><span class="s5">extends </span><span
+    class="s2">RunningScriptOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Provides an optional data with V8's code cache data for the supplied source.</span>
+         <span class="s0">*/</span>
+        <span class="s2">cachedData</span><span class="s4">?: </span><span class="s2">ScriptOptions</span><span
+    class="s4">[</span><span class="s3">&quot;cachedData&quot;</span><span class="s4">] | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Used to specify how the modules should be loaded during the evaluation of this script when `import()` is called. This option is</span>
+         <span class="s0">* part of the experimental modules API. We do not recommend using it in a production environment. For detailed information, see</span>
+         <span class="s0">* [Support of dynamic `import()` in compilation APIs](https://nodejs.org/docs/latest-v24.x/api/vm.html#support-of-dynamic-import-in-compilation-apis).</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">importModuleDynamically</span><span class="s4">?:</span>
+            <span class="s4">| </span><span class="s2">DynamicModuleLoader</span><span class="s4">&lt;</span><span
+    class="s2">Script</span><span class="s4">&gt;</span>
+            <span class="s4">| </span><span class="s5">typeof </span><span class="s2">constants</span><span
+    class="s4">.</span><span class="s2">USE_MAIN_CONTEXT_DEFAULT_LOADER</span>
+            <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">RunningCodeInNewContextOptions </span><span
+    class="s5">extends </span><span class="s2">RunningScriptInNewContextOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Provides an optional data with V8's code cache data for the supplied source.</span>
+         <span class="s0">*/</span>
+        <span class="s2">cachedData</span><span class="s4">?: </span><span class="s2">ScriptOptions</span><span
+    class="s4">[</span><span class="s3">&quot;cachedData&quot;</span><span class="s4">] | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Used to specify how the modules should be loaded during the evaluation of this script when `import()` is called. This option is</span>
+         <span class="s0">* part of the experimental modules API. We do not recommend using it in a production environment. For detailed information, see</span>
+         <span class="s0">* [Support of dynamic `import()` in compilation APIs](https://nodejs.org/docs/latest-v24.x/api/vm.html#support-of-dynamic-import-in-compilation-apis).</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">importModuleDynamically</span><span class="s4">?:</span>
+            <span class="s4">| </span><span class="s2">DynamicModuleLoader</span><span class="s4">&lt;</span><span
+    class="s2">Script</span><span class="s4">&gt;</span>
+            <span class="s4">| </span><span class="s5">typeof </span><span class="s2">constants</span><span
+    class="s4">.</span><span class="s2">USE_MAIN_CONTEXT_DEFAULT_LOADER</span>
+            <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">CompileFunctionOptions </span><span
+    class="s5">extends </span><span class="s2">BaseOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Provides an optional data with V8's code cache data for the supplied source.</span>
+         <span class="s0">*/</span>
+        <span class="s2">cachedData</span><span class="s4">?: </span><span class="s2">ScriptOptions</span><span
+    class="s4">[</span><span class="s3">&quot;cachedData&quot;</span><span class="s4">] | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specifies whether to produce new cache data.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">produceCachedData</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The sandbox/context in which the said function should be compiled in.</span>
+         <span class="s0">*/</span>
+        <span class="s2">parsingContext</span><span class="s4">?: </span><span class="s2">Context </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An array containing a collection of context extensions (objects wrapping the current scope) to be applied while compiling</span>
+         <span class="s0">*/</span>
+        <span class="s2">contextExtensions</span><span class="s4">?: </span><span class="s2">Object</span><span
+    class="s4">[] | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Used to specify how the modules should be loaded during the evaluation of this script when `import()` is called. This option is</span>
+         <span class="s0">* part of the experimental modules API. We do not recommend using it in a production environment. For detailed information, see</span>
+         <span class="s0">* [Support of dynamic `import()` in compilation APIs](https://nodejs.org/docs/latest-v24.x/api/vm.html#support-of-dynamic-import-in-compilation-apis).</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">importModuleDynamically</span><span class="s4">?:</span>
+            <span class="s4">| </span><span class="s2">DynamicModuleLoader</span><span class="s4">&lt;</span><span
+    class="s2">ReturnType</span><span class="s4">&lt;</span><span class="s5">typeof </span><span class="s2">compileFunction</span><span
+    class="s4">&gt;&gt;</span>
+            <span class="s4">| </span><span class="s5">typeof </span><span class="s2">constants</span><span
+    class="s4">.</span><span class="s2">USE_MAIN_CONTEXT_DEFAULT_LOADER</span>
+            <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">CreateContextOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Human-readable name of the newly created context.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'VM Context i' Where i is an ascending numerical index of the created context.</span>
+         <span class="s0">*/</span>
+        <span class="s2">name</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Corresponds to the newly created context for display purposes.</span>
+         <span class="s0">* The origin should be formatted like a `URL`, but with only the scheme, host, and port (if necessary),</span>
+         <span class="s0">* like the value of the `url.origin` property of a URL object.</span>
+         <span class="s0">* Most notably, this string should omit the trailing slash, as that denotes a path.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">''</span>
+         <span class="s0">*/</span>
+        <span class="s2">origin</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">codeGeneration</span><span class="s4">?:</span>
+            <span class="s4">| {</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* If set to false any calls to eval or function constructors (Function, GeneratorFunction, etc)</span>
+                 <span class="s0">* will throw an EvalError.</span>
+                 <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+                 <span class="s0">*/</span>
+                <span class="s2">strings</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* If set to false any attempt to compile a WebAssembly module will throw a WebAssembly.CompileError.</span>
+                 <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+                 <span class="s0">*/</span>
+                <span class="s2">wasm</span><span class="s4">?: </span><span class="s2">boolean </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+            <span class="s4">}</span>
+            <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* If set to `afterEvaluate`, microtasks will be run immediately after the script has run.</span>
+         <span class="s0">*/</span>
+        <span class="s2">microtaskMode</span><span class="s4">?: </span><span
+    class="s3">&quot;afterEvaluate&quot; </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Used to specify how the modules should be loaded during the evaluation of this script when `import()` is called. This option is</span>
+         <span class="s0">* part of the experimental modules API. We do not recommend using it in a production environment. For detailed information, see</span>
+         <span class="s0">* [Support of dynamic `import()` in compilation APIs](https://nodejs.org/docs/latest-v24.x/api/vm.html#support-of-dynamic-import-in-compilation-apis).</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">importModuleDynamically</span><span class="s4">?:</span>
+            <span class="s4">| </span><span class="s2">DynamicModuleLoader</span><span class="s4">&lt;</span><span
+    class="s2">Context</span><span class="s4">&gt;</span>
+            <span class="s4">| </span><span class="s5">typeof </span><span class="s2">constants</span><span
+    class="s4">.</span><span class="s2">USE_MAIN_CONTEXT_DEFAULT_LOADER</span>
+            <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type MeasureMemoryMode </span><span class="s4">= </span><span
+    class="s3">&quot;summary&quot; </span><span class="s4">| </span><span class="s3">&quot;detailed&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">MeasureMemoryOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'summary'</span>
+         <span class="s0">*/</span>
+        <span class="s2">mode</span><span class="s4">?: </span><span class="s2">MeasureMemoryMode </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'default'</span>
+         <span class="s0">*/</span>
+        <span class="s2">execution</span><span class="s4">?: </span><span class="s3">&quot;default&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;eager&quot; </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">MemoryMeasurement </span><span class="s4">{</span>
+        <span class="s2">total</span><span class="s4">: {</span>
+            <span class="s2">jsMemoryEstimate</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+            <span class="s2">jsMemoryRange</span><span class="s4">: [</span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">number</span><span class="s4">];</span>
+        <span class="s4">};</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Instances of the `vm.Script` class contain precompiled scripts that can be</span>
+     <span class="s0">* executed in specific contexts.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.1</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Script </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">code</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ScriptOptions </span><span class="s4">| </span><span
+    class="s2">string</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Runs the compiled code contained by the `vm.Script` object within the given `contextifiedObject` and returns the result. Running code does not have access</span>
+         <span class="s0">* to local scope.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The following example compiles code that increments a global variable, sets</span>
+         <span class="s0">* the value of another global variable, then execute the code multiple times.</span>
+         <span class="s0">* The globals are contained in the `context` object.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import vm from 'node:vm';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const context = {</span>
+         <span class="s0">*   animal: 'cat',</span>
+         <span class="s0">*   count: 2,</span>
+         <span class="s0">* };</span>
+         <span class="s0">*</span>
+         <span class="s0">* const script = new vm.Script('count += 1; name = &quot;kitty&quot;;');</span>
+         <span class="s0">*</span>
+         <span class="s0">* vm.createContext(context);</span>
+         <span class="s0">* for (let i = 0; i &lt; 10; ++i) {</span>
+         <span class="s0">*   script.runInContext(context);</span>
+         <span class="s0">* }</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(context);</span>
+         <span class="s0">* // Prints: { animal: 'cat', count: 12, name: 'kitty' }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Using the `timeout` or `breakOnSigint` options will result in new event loops</span>
+         <span class="s0">* and corresponding threads being started, which have a non-zero performance</span>
+         <span class="s0">* overhead.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.1</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">contextifiedObject A `contextified` object as returned by the `vm.createContext()` method.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">the result of the very last statement executed in the script.</span>
+         <span class="s0">*/</span>
+        <span class="s2">runInContext</span><span class="s4">(</span><span class="s2">contextifiedObject</span><span
+    class="s4">: </span><span class="s2">Context</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">RunningScriptOptions</span><span class="s4">): </span><span
+    class="s2">any</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* This method is a shortcut to `script.runInContext(vm.createContext(options), options)`.</span>
+         <span class="s0">* It does several things at once:</span>
+         <span class="s0">*</span>
+         <span class="s0">* 1. Creates a new context.</span>
+         <span class="s0">* 2. If `contextObject` is an object, contextifies it with the new context.</span>
+         <span class="s0">*    If  `contextObject` is undefined, creates a new object and contextifies it.</span>
+         <span class="s0">*    If `contextObject` is `vm.constants.DONT_CONTEXTIFY`, don't contextify anything.</span>
+         <span class="s0">* 3. Runs the compiled code contained by the `vm.Script` object within the created context. The code</span>
+         <span class="s0">*    does not have access to the scope in which this method is called.</span>
+         <span class="s0">* 4. Returns the result.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The following example compiles code that sets a global variable, then executes</span>
+         <span class="s0">* the code multiple times in different contexts. The globals are set on and</span>
+         <span class="s0">* contained within each individual `context`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const vm = require('node:vm');</span>
+         <span class="s0">*</span>
+         <span class="s0">* const script = new vm.Script('globalVar = &quot;set&quot;');</span>
+         <span class="s0">*</span>
+         <span class="s0">* const contexts = [{}, {}, {}];</span>
+         <span class="s0">* contexts.forEach((context) =&gt; {</span>
+         <span class="s0">*   script.runInNewContext(context);</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(contexts);</span>
+         <span class="s0">* // Prints: [{ globalVar: 'set' }, { globalVar: 'set' }, { globalVar: 'set' }]</span>
+         <span class="s0">*</span>
+         <span class="s0">* // This would throw if the context is created from a contextified object.</span>
+         <span class="s0">* // vm.constants.DONT_CONTEXTIFY allows creating contexts with ordinary</span>
+         <span class="s0">* // global objects that can be frozen.</span>
+         <span class="s0">* const freezeScript = new vm.Script('Object.freeze(globalThis); globalThis;');</span>
+         <span class="s0">* const frozenContext = freezeScript.runInNewContext(vm.constants.DONT_CONTEXTIFY);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.1</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">contextObject Either `vm.constants.DONT_CONTEXTIFY` or an object that will be contextified.</span>
+         <span
+           class="s0">* If `undefined`, an empty contextified object will be created for backwards compatibility.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">the result of the very last statement executed in the script.</span>
+         <span class="s0">*/</span>
+        <span class="s2">runInNewContext</span><span class="s4">(</span>
+            <span class="s2">contextObject</span><span class="s4">?: </span><span class="s2">Context </span><span
+    class="s4">| </span><span class="s5">typeof </span><span class="s2">constants</span><span class="s4">.</span><span
+    class="s2">DONT_CONTEXTIFY</span><span class="s4">,</span>
+            <span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">RunningScriptInNewContextOptions</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">any</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Runs the compiled code contained by the `vm.Script` within the context of the</span>
+         <span class="s0">* current `global` object. Running code does not have access to local scope, but _does_ have access to the current `global` object.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The following example compiles code that increments a `global` variable then</span>
+         <span class="s0">* executes that code multiple times:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import vm from 'node:vm';</span>
+         <span class="s0">*</span>
+         <span class="s0">* global.globalVar = 0;</span>
+         <span class="s0">*</span>
+         <span class="s0">* const script = new vm.Script('globalVar += 1', { filename: 'myfile.vm' });</span>
+         <span class="s0">*</span>
+         <span class="s0">* for (let i = 0; i &lt; 1000; ++i) {</span>
+         <span class="s0">*   script.runInThisContext();</span>
+         <span class="s0">* }</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(globalVar);</span>
+         <span class="s0">*</span>
+         <span class="s0">* // 1000</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.1</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">the result of the very last statement executed in the script.</span>
+         <span class="s0">*/</span>
+        <span class="s2">runInThisContext</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">RunningScriptOptions</span><span class="s4">): </span><span
+    class="s2">any</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Creates a code cache that can be used with the `Script` constructor's `cachedData` option. Returns a `Buffer`. This method may be called at any</span>
+         <span class="s0">* time and any number of times.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The code cache of the `Script` doesn't contain any JavaScript observable</span>
+         <span class="s0">* states. The code cache is safe to be saved along side the script source and</span>
+         <span class="s0">* used to construct new `Script` instances multiple times.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Functions in the `Script` source can be marked as lazily compiled and they are</span>
+         <span class="s0">* not compiled at construction of the `Script`. These functions are going to be</span>
+         <span class="s0">* compiled when they are invoked the first time. The code cache serializes the</span>
+         <span class="s0">* metadata that V8 currently knows about the `Script` that it can use to speed up</span>
+         <span class="s0">* future compilations.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const script = new vm.Script(`</span>
+         <span class="s0">* function add(a, b) {</span>
+         <span class="s0">*   return a + b;</span>
+         <span class="s0">* }</span>
+         <span class="s0">*</span>
+         <span class="s0">* const x = add(1, 2);</span>
+         <span class="s0">* `);</span>
+         <span class="s0">*</span>
+         <span class="s0">* const cacheWithoutAdd = script.createCachedData();</span>
+         <span class="s0">* // In `cacheWithoutAdd` the function `add()` is marked for full compilation</span>
+         <span class="s0">* // upon invocation.</span>
+         <span class="s0">*</span>
+         <span class="s0">* script.runInThisContext();</span>
+         <span class="s0">*</span>
+         <span class="s0">* const cacheWithAdd = script.createCachedData();</span>
+         <span class="s0">* // `cacheWithAdd` contains fully compiled function `add()`.</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">createCachedData</span><span class="s4">(): </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+        <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">in favor of `script.createCachedData()` */</span>
+        <span class="s2">cachedDataProduced</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When `cachedData` is supplied to create the `vm.Script`, this value will be set</span>
+         <span class="s0">* to either `true` or `false` depending on acceptance of the data by V8.</span>
+         <span class="s0">* Otherwise the value is `undefined`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v5.7.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">cachedDataRejected</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">cachedData</span><span class="s4">?: </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When the script is compiled from a source that contains a source map magic</span>
+         <span class="s0">* comment, this property will be set to the URL of the source map.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import vm from 'node:vm';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const script = new vm.Script(`</span>
+         <span class="s0">* function myFunc() {}</span>
+         <span class="s0">* //# sourceMappingURL=sourcemap.json</span>
+         <span class="s0">* `);</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(script.sourceMapURL);</span>
+         <span class="s0">* // Prints: sourcemap.json</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.1.0, v18.13.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">sourceMapURL</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* If the given `contextObject` is an object, the `vm.createContext()` method will</span>
+     <span class="s0">* [prepare that object](https://nodejs.org/docs/latest-v24.x/api/vm.html#what-does-it-mean-to-contextify-an-object)</span>
+     <span class="s0">* and return a reference to it so that it can be used in calls to {</span><span
+    class="s1">@link </span><span class="s0">runInContext} or</span>
+     <span class="s0">* [`script.runInContext()`](https://nodejs.org/docs/latest-v24.x/api/vm.html#scriptrunincontextcontextifiedobject-options).</span>
+     <span class="s0">* Inside such scripts, the global object will be wrapped by the `contextObject`, retaining all of its</span>
+     <span class="s0">* existing properties but also having the built-in objects and functions any standard</span>
+     <span class="s0">* [global object](https://es5.github.io/#x15.1) has. Outside of scripts run by the vm module, global</span>
+     <span class="s0">* variables will remain unchanged.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const vm = require('node:vm');</span>
+     <span class="s0">*</span>
+     <span class="s0">* global.globalVar = 3;</span>
+     <span class="s0">*</span>
+     <span class="s0">* const context = { globalVar: 1 };</span>
+     <span class="s0">* vm.createContext(context);</span>
+     <span class="s0">*</span>
+     <span class="s0">* vm.runInContext('globalVar *= 2;', context);</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log(context);</span>
+     <span class="s0">* // Prints: { globalVar: 2 }</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log(global.globalVar);</span>
+     <span class="s0">* // Prints: 3</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `contextObject` is omitted (or passed explicitly as `undefined`), a new,</span>
+     <span class="s0">* empty contextified object will be returned.</span>
+     <span class="s0">*</span>
+     <span class="s0">* When the global object in the newly created context is contextified, it has some quirks</span>
+     <span
+       class="s0">* compared to ordinary global objects. For example, it cannot be frozen. To create a context</span>
+     <span
+       class="s0">* without the contextifying quirks, pass `vm.constants.DONT_CONTEXTIFY` as the `contextObject`</span>
+     <span class="s0">* argument. See the documentation of `vm.constants.DONT_CONTEXTIFY` for details.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `vm.createContext()` method is primarily useful for creating a single</span>
+     <span class="s0">* context that can be used to run multiple scripts. For instance, if emulating a</span>
+     <span class="s0">* web browser, the method can be used to create a single context representing a</span>
+     <span class="s0">* window's global object, then run all `&lt;script&gt;` tags together within that</span>
+     <span class="s0">* context.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The provided `name` and `origin` of the context are made visible through the</span>
+     <span class="s0">* Inspector API.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.1</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">contextObject Either `vm.constants.DONT_CONTEXTIFY` or an object that will be contextified.</span>
+     <span class="s0">* If `undefined`, an empty contextified object will be created for backwards compatibility.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">contextified object.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createContext</span><span class="s4">(</span>
+        <span class="s2">contextObject</span><span class="s4">?: </span><span class="s2">Context </span><span
+    class="s4">| </span><span class="s5">typeof </span><span class="s2">constants</span><span class="s4">.</span><span
+    class="s2">DONT_CONTEXTIFY</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">?: </span><span class="s2">CreateContextOptions</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">Context</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns `true` if the given `object` object has been contextified using {</span><span
+    class="s1">@link </span><span class="s0">createContext},</span>
+     <span class="s0">* or if it's the global object of a context created using `vm.constants.DONT_CONTEXTIFY`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.7</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">isContext</span><span class="s4">(</span><span
+    class="s2">sandbox</span><span class="s4">: </span><span class="s2">Context</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `vm.runInContext()` method compiles `code`, runs it within the context of</span>
+     <span class="s0">* the `contextifiedObject`, then returns the result. Running code does not have</span>
+     <span class="s0">* access to the local scope. The `contextifiedObject` object _must_ have been</span>
+     <span class="s0">* previously `contextified` using the {</span><span class="s1">@link </span><span class="s0">createContext} method.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `options` is a string, then it specifies the filename.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following example compiles and executes different scripts using a single `contextified` object:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import vm from 'node:vm';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const contextObject = { globalVar: 1 };</span>
+     <span class="s0">* vm.createContext(contextObject);</span>
+     <span class="s0">*</span>
+     <span class="s0">* for (let i = 0; i &lt; 10; ++i) {</span>
+     <span class="s0">*   vm.runInContext('globalVar *= 2;', contextObject);</span>
+     <span class="s0">* }</span>
+     <span class="s0">* console.log(contextObject);</span>
+     <span class="s0">* // Prints: { globalVar: 1024 }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.1</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">code The JavaScript code to compile and run.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">contextifiedObject The `contextified` object that will be used as the `global` when the `code` is compiled and run.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">the result of the very last statement executed in the script.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">runInContext</span><span class="s4">(</span><span
+    class="s2">code</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">contextifiedObject</span><span class="s4">: </span><span class="s2">Context</span><span
+    class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">RunningCodeOptions </span><span class="s4">| </span><span class="s2">string</span><span
+    class="s4">): </span><span class="s2">any</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This method is a shortcut to</span>
+     <span class="s0">* `(new vm.Script(code, options)).runInContext(vm.createContext(options), options)`.</span>
+     <span class="s0">* If `options` is a string, then it specifies the filename.</span>
+     <span class="s0">*</span>
+     <span class="s0">* It does several things at once:</span>
+     <span class="s0">*</span>
+     <span class="s0">* 1. Creates a new context.</span>
+     <span class="s0">* 2. If `contextObject` is an object, contextifies it with the new context.</span>
+     <span class="s0">*    If  `contextObject` is undefined, creates a new object and contextifies it.</span>
+     <span class="s0">*    If `contextObject` is `vm.constants.DONT_CONTEXTIFY`, don't contextify anything.</span>
+     <span class="s0">* 3. Compiles the code as a`vm.Script`</span>
+     <span class="s0">* 4. Runs the compield code within the created context. The code does not have access to the scope in</span>
+     <span class="s0">*    which this method is called.</span>
+     <span class="s0">* 5. Returns the result.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following example compiles and executes code that increments a global</span>
+     <span class="s0">* variable and sets a new one. These globals are contained in the `contextObject`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const vm = require('node:vm');</span>
+     <span class="s0">*</span>
+     <span class="s0">* const contextObject = {</span>
+     <span class="s0">*   animal: 'cat',</span>
+     <span class="s0">*   count: 2,</span>
+     <span class="s0">* };</span>
+     <span class="s0">*</span>
+     <span class="s0">* vm.runInNewContext('count += 1; name = &quot;kitty&quot;', contextObject);</span>
+     <span class="s0">* console.log(contextObject);</span>
+     <span class="s0">* // Prints: { animal: 'cat', count: 3, name: 'kitty' }</span>
+     <span class="s0">*</span>
+     <span class="s0">* // This would throw if the context is created from a contextified object.</span>
+     <span
+       class="s0">* // vm.constants.DONT_CONTEXTIFY allows creating contexts with ordinary global objects that</span>
+     <span class="s0">* // can be frozen.</span>
+     <span class="s0">* const frozenContext = vm.runInNewContext('Object.freeze(globalThis); globalThis;', vm.constants.DONT_CONTEXTIFY);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.1</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">code The JavaScript code to compile and run.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">contextObject Either `vm.constants.DONT_CONTEXTIFY` or an object that will be contextified.</span>
+     <span class="s0">* If `undefined`, an empty contextified object will be created for backwards compatibility.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">the result of the very last statement executed in the script.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">runInNewContext</span><span class="s4">(</span>
+        <span class="s2">code</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">contextObject</span><span class="s4">?: </span><span class="s2">Context </span><span
+    class="s4">| </span><span class="s5">typeof </span><span class="s2">constants</span><span class="s4">.</span><span
+    class="s2">DONT_CONTEXTIFY</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">RunningCodeInNewContextOptions </span><span class="s4">| </span><span class="s2">string</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">any</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* `vm.runInThisContext()` compiles `code`, runs it within the context of the</span>
+     <span class="s0">* current `global` and returns the result. Running code does not have access to</span>
+     <span class="s0">* local scope, but does have access to the current `global` object.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `options` is a string, then it specifies the filename.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following example illustrates using both `vm.runInThisContext()` and</span>
+     <span class="s0">* the JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) function to run the same code:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import vm from 'node:vm';</span>
+     <span class="s0">* let localVar = 'initial value';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const vmResult = vm.runInThisContext('localVar = &quot;vm&quot;;');</span>
+     <span class="s0">* console.log(`vmResult: '${vmResult}', localVar: '${localVar}'`);</span>
+     <span class="s0">* // Prints: vmResult: 'vm', localVar: 'initial value'</span>
+     <span class="s0">*</span>
+     <span class="s0">* const evalResult = eval('localVar = &quot;eval&quot;;');</span>
+     <span class="s0">* console.log(`evalResult: '${evalResult}', localVar: '${localVar}'`);</span>
+     <span class="s0">* // Prints: evalResult: 'eval', localVar: 'eval'</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Because `vm.runInThisContext()` does not have access to the local scope, `localVar` is unchanged. In contrast,</span>
+     <span class="s0">* [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) _does_ have access to the</span>
+     <span class="s0">* local scope, so the value `localVar` is changed. In this way `vm.runInThisContext()` is much like an [indirect `eval()` call](https://es5.github.io/#x10.4.2), e.g.`(0,eval)('code')`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ## Example: Running an HTTP server within a VM</span>
+     <span class="s0">*</span>
+     <span class="s0">* When using either `script.runInThisContext()` or {</span><span class="s1">@link </span><span
+    class="s0">runInThisContext}, the code is executed within the current V8 global</span>
+     <span class="s0">* context. The code passed to this VM context will have its own isolated scope.</span>
+     <span class="s0">*</span>
+     <span class="s0">* In order to run a simple web server using the `node:http` module the code passed</span>
+     <span class="s0">* to the context must either import `node:http` on its own, or have a</span>
+     <span class="s0">* reference to the `node:http` module passed to it. For instance:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* 'use strict';</span>
+     <span class="s0">* import vm from 'node:vm';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const code = `</span>
+     <span class="s0">* ((require) =&gt; {</span>
+     <span class="s0">* const http = require('node:http');</span>
+     <span class="s0">*</span>
+     <span class="s0">*   http.createServer((request, response) =&gt; {</span>
+     <span class="s0">*     response.writeHead(200, { 'Content-Type': 'text/plain' });</span>
+     <span class="s0">*     response.end('Hello World\\n');</span>
+     <span class="s0">*   }).listen(8124);</span>
+     <span class="s0">*</span>
+     <span class="s0">*   console.log('Server running at http://127.0.0.1:8124/');</span>
+     <span class="s0">* })`;</span>
+     <span class="s0">*</span>
+     <span class="s0">* vm.runInThisContext(code)(require);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `require()` in the above case shares the state with the context it is</span>
+     <span class="s0">* passed from. This may introduce risks when untrusted code is executed, e.g.</span>
+     <span class="s0">* altering objects in the context in unwanted ways.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.1</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">code The JavaScript code to compile and run.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">the result of the very last statement executed in the script.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">runInThisContext</span><span class="s4">(</span><span class="s2">code</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">RunningCodeOptions </span><span class="s4">| </span><span
+    class="s2">string</span><span class="s4">): </span><span class="s2">any</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Compiles the given code into the provided context (if no context is</span>
+     <span class="s0">* supplied, the current context is used), and returns it wrapped inside a</span>
+     <span class="s0">* function with the given `params`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.10.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">code The body of the function to compile.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">params An array of strings containing all parameters for the function.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">compileFunction</span><span class="s4">(</span>
+        <span class="s2">code</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">params</span><span class="s4">?: </span><span class="s2">readonly string</span><span
+    class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">?: </span><span class="s2">CompileFunctionOptions</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">Function </span><span class="s4">&amp; {</span>
+        <span class="s2">cachedData</span><span class="s4">?: </span><span class="s2">Script</span><span
+    class="s4">[</span><span class="s3">&quot;cachedData&quot;</span><span class="s4">] | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">cachedDataProduced</span><span class="s4">?: </span><span class="s2">Script</span><span
+    class="s4">[</span><span class="s3">&quot;cachedDataProduced&quot;</span><span class="s4">] | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">cachedDataRejected</span><span class="s4">?: </span><span class="s2">Script</span><span
+    class="s4">[</span><span class="s3">&quot;cachedDataRejected&quot;</span><span class="s4">] | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">};</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Measure the memory known to V8 and used by all contexts known to the</span>
+     <span class="s0">* current V8 isolate, or the main context.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The format of the object that the returned Promise may resolve with is</span>
+     <span class="s0">* specific to the V8 engine and may change from one version of V8 to the next.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The returned result is different from the statistics returned by `v8.getHeapSpaceStatistics()` in that `vm.measureMemory()` measure the</span>
+     <span class="s0">* memory reachable by each V8 specific contexts in the current instance of</span>
+     <span class="s0">* the V8 engine, while the result of `v8.getHeapSpaceStatistics()` measure</span>
+     <span class="s0">* the memory occupied by each heap space in the current V8 instance.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import vm from 'node:vm';</span>
+     <span class="s0">* // Measure the memory used by the main context.</span>
+     <span class="s0">* vm.measureMemory({ mode: 'summary' })</span>
+     <span class="s0">*   // This is the same as vm.measureMemory()</span>
+     <span class="s0">*   .then((result) =&gt; {</span>
+     <span class="s0">*     // The current format is:</span>
+     <span class="s0">*     // {</span>
+     <span class="s0">*     //   total: {</span>
+     <span class="s0">*     //      jsMemoryEstimate: 2418479, jsMemoryRange: [ 2418479, 2745799 ]</span>
+     <span class="s0">*     //    }</span>
+     <span class="s0">*     // }</span>
+     <span class="s0">*     console.log(result);</span>
+     <span class="s0">*   });</span>
+     <span class="s0">*</span>
+     <span class="s0">* const context = vm.createContext({ a: 1 });</span>
+     <span class="s0">* vm.measureMemory({ mode: 'detailed', execution: 'eager' })</span>
+     <span class="s0">*   .then((result) =&gt; {</span>
+     <span class="s0">*     // Reference the context here so that it won't be GC'ed</span>
+     <span class="s0">*     // until the measurement is complete.</span>
+     <span class="s0">*     console.log(context.a);</span>
+     <span class="s0">*     // {</span>
+     <span class="s0">*     //   total: {</span>
+     <span class="s0">*     //     jsMemoryEstimate: 2574732,</span>
+     <span class="s0">*     //     jsMemoryRange: [ 2574732, 2904372 ]</span>
+     <span class="s0">*     //   },</span>
+     <span class="s0">*     //   current: {</span>
+     <span class="s0">*     //     jsMemoryEstimate: 2438996,</span>
+     <span class="s0">*     //     jsMemoryRange: [ 2438996, 2768636 ]</span>
+     <span class="s0">*     //   },</span>
+     <span class="s0">*     //   other: [</span>
+     <span class="s0">*     //     {</span>
+     <span class="s0">*     //       jsMemoryEstimate: 135736,</span>
+     <span class="s0">*     //       jsMemoryRange: [ 135736, 465376 ]</span>
+     <span class="s0">*     //     }</span>
+     <span class="s0">*     //   ]</span>
+     <span class="s0">*     // }</span>
+     <span class="s0">*     console.log(result);</span>
+     <span class="s0">*   });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.10.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">measureMemory</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">MeasureMemoryOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">MemoryMeasurement</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">interface </span><span class="s2">ModuleEvaluateOptions </span><span class="s4">{</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">RunningScriptOptions</span><span
+    class="s4">[</span><span class="s3">&quot;timeout&quot;</span><span class="s4">] | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">breakOnSigint</span><span class="s4">?: </span><span
+    class="s2">RunningScriptOptions</span><span class="s4">[</span><span
+    class="s3">&quot;breakOnSigint&quot;</span><span class="s4">] | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type ModuleLinker </span><span class="s4">= (</span>
+        <span class="s2">specifier</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">referencingModule</span><span class="s4">: </span><span class="s2">Module</span><span
+    class="s4">,</span>
+        <span class="s2">extra</span><span class="s4">: {</span>
+            <span class="s2">attributes</span><span class="s4">: </span><span class="s2">ImportAttributes</span><span
+    class="s4">;</span>
+        <span class="s4">},</span>
+    <span class="s4">) =&gt; </span><span class="s2">Module </span><span class="s4">| </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">Module</span><span class="s4">&gt;;</span>
+    <span class="s2">type ModuleStatus </span><span class="s4">= </span><span
+    class="s3">&quot;unlinked&quot; </span><span class="s4">| </span><span class="s3">&quot;linking&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;linked&quot; </span><span class="s4">| </span><span class="s3">&quot;evaluating&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;evaluated&quot; </span><span class="s4">| </span><span class="s3">&quot;errored&quot;</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This feature is only available with the `--experimental-vm-modules` command</span>
+     <span class="s0">* flag enabled.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `vm.Module` class provides a low-level interface for using</span>
+     <span class="s0">* ECMAScript modules in VM contexts. It is the counterpart of the `vm.Script` class that closely mirrors [Module Record](https://262.ecma-international.org/14.0/#sec-abstract-module-records) s as</span>
+     <span class="s0">* defined in the ECMAScript</span>
+     <span class="s0">* specification.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Unlike `vm.Script` however, every `vm.Module` object is bound to a context from</span>
+     <span class="s0">* its creation. Operations on `vm.Module` objects are intrinsically asynchronous,</span>
+     <span class="s0">* in contrast with the synchronous nature of `vm.Script` objects. The use of</span>
+     <span class="s0">* 'async' functions can help with manipulating `vm.Module` objects.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Using a `vm.Module` object requires three distinct steps: creation/parsing,</span>
+     <span class="s0">* linking, and evaluation. These three steps are illustrated in the following</span>
+     <span class="s0">* example.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This implementation lies at a lower level than the `ECMAScript Module</span>
+     <span class="s0">* loader`. There is also no way to interact with the Loader yet, though</span>
+     <span class="s0">* support is planned.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import vm from 'node:vm';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const contextifiedObject = vm.createContext({</span>
+     <span class="s0">*   secret: 42,</span>
+     <span class="s0">*   print: console.log,</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Step 1</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // Create a Module by constructing a new `vm.SourceTextModule` object. This</span>
+     <span class="s0">* // parses the provided source text, throwing a `SyntaxError` if anything goes</span>
+     <span class="s0">* // wrong. By default, a Module is created in the top context. But here, we</span>
+     <span class="s0">* // specify `contextifiedObject` as the context this Module belongs to.</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // Here, we attempt to obtain the default export from the module &quot;foo&quot;, and</span>
+     <span class="s0">* // put it into local binding &quot;secret&quot;.</span>
+     <span class="s0">*</span>
+     <span class="s0">* const bar = new vm.SourceTextModule(`</span>
+     <span class="s0">*   import s from 'foo';</span>
+     <span class="s0">*   s;</span>
+     <span class="s0">*   print(s);</span>
+     <span class="s0">* `, { context: contextifiedObject });</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Step 2</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // &quot;Link&quot; the imported dependencies of this Module to it.</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // The provided linking callback (the &quot;linker&quot;) accepts two arguments: the</span>
+     <span class="s0">* // parent module (`bar` in this case) and the string that is the specifier of</span>
+     <span class="s0">* // the imported module. The callback is expected to return a Module that</span>
+     <span class="s0">* // corresponds to the provided specifier, with certain requirements documented</span>
+     <span class="s0">* // in `module.link()`.</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // If linking has not started for the returned Module, the same linker</span>
+     <span class="s0">* // callback will be called on the returned Module.</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // Even top-level Modules without dependencies must be explicitly linked. The</span>
+     <span class="s0">* // callback provided would never be called, however.</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // The link() method returns a Promise that will be resolved when all the</span>
+     <span class="s0">* // Promises returned by the linker resolve.</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // Note: This is a contrived example in that the linker function creates a new</span>
+     <span class="s0">* // &quot;foo&quot; module every time it is called. In a full-fledged module system, a</span>
+     <span class="s0">* // cache would probably be used to avoid duplicated modules.</span>
+     <span class="s0">*</span>
+     <span class="s0">* async function linker(specifier, referencingModule) {</span>
+     <span class="s0">*   if (specifier === 'foo') {</span>
+     <span class="s0">*     return new vm.SourceTextModule(`</span>
+     <span class="s0">*       // The &quot;secret&quot; variable refers to the global variable we added to</span>
+     <span class="s0">*       // &quot;contextifiedObject&quot; when creating the context.</span>
+     <span class="s0">*       export default secret;</span>
+     <span class="s0">*     `, { context: referencingModule.context });</span>
+     <span class="s0">*</span>
+     <span class="s0">*     // Using `contextifiedObject` instead of `referencingModule.context`</span>
+     <span class="s0">*     // here would work as well.</span>
+     <span class="s0">*   }</span>
+     <span class="s0">*   throw new Error(`Unable to resolve dependency: ${specifier}`);</span>
+     <span class="s0">* }</span>
+     <span class="s0">* await bar.link(linker);</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Step 3</span>
+     <span class="s0">* //</span>
+     <span class="s0">* // Evaluate the Module. The evaluate() method returns a promise which will</span>
+     <span class="s0">* // resolve after the module has finished evaluating.</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Prints 42.</span>
+     <span class="s0">* await bar.evaluate();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.0.0, v12.16.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Module </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If the `module.status` is `'errored'`, this property contains the exception</span>
+         <span class="s0">* thrown by the module during evaluation. If the status is anything else,</span>
+         <span class="s0">* accessing this property will result in a thrown exception.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The value `undefined` cannot be used for cases where there is not a thrown</span>
+         <span class="s0">* exception due to possible ambiguity with `throw undefined;`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Corresponds to the `[[EvaluationError]]` field of [Cyclic Module Record](https://tc39.es/ecma262/#sec-cyclic-module-records) s</span>
+         <span class="s0">* in the ECMAScript specification.</span>
+         <span class="s0">*/</span>
+        <span class="s2">error</span><span class="s4">: </span><span class="s2">any</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The identifier of the current module, as set in the constructor.</span>
+         <span class="s0">*/</span>
+        <span class="s2">identifier</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">context</span><span class="s4">: </span><span class="s2">Context</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The namespace object of the module. This is only available after linking</span>
+         <span class="s0">* (`module.link()`) has completed.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Corresponds to the [GetModuleNamespace](https://tc39.es/ecma262/#sec-getmodulenamespace) abstract operation in the ECMAScript</span>
+         <span class="s0">* specification.</span>
+         <span class="s0">*/</span>
+        <span class="s2">namespace</span><span class="s4">: </span><span class="s2">Object</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The current status of the module. Will be one of:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `'unlinked'`: `module.link()` has not yet been called.</span>
+         <span class="s0">* * `'linking'`: `module.link()` has been called, but not all Promises returned</span>
+         <span class="s0">* by the linker function have been resolved yet.</span>
+         <span class="s0">* * `'linked'`: The module has been linked successfully, and all of its</span>
+         <span class="s0">* dependencies are linked, but `module.evaluate()` has not yet been called.</span>
+         <span class="s0">* * `'evaluating'`: The module is being evaluated through a `module.evaluate()` on</span>
+         <span class="s0">* itself or a parent module.</span>
+         <span class="s0">* * `'evaluated'`: The module has been successfully evaluated.</span>
+         <span class="s0">* * `'errored'`: The module has been evaluated, but an exception was thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Other than `'errored'`, this status string corresponds to the specification's [Cyclic Module Record](https://tc39.es/ecma262/#sec-cyclic-module-records)'s `[[Status]]` field. `'errored'`</span>
+         <span
+           class="s0">* corresponds to `'evaluated'` in the specification, but with `[[EvaluationError]]` set to a</span>
+         <span class="s0">* value that is not `undefined`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">status</span><span class="s4">: </span><span class="s2">ModuleStatus</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Evaluate the module.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This must be called after the module has been linked; otherwise it will reject.</span>
+         <span class="s0">* It could be called also when the module has already been evaluated, in which</span>
+         <span class="s0">* case it will either do nothing if the initial evaluation ended in success</span>
+         <span class="s0">* (`module.status` is `'evaluated'`) or it will re-throw the exception that the</span>
+         <span class="s0">* initial evaluation resulted in (`module.status` is `'errored'`).</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method cannot be called while the module is being evaluated</span>
+         <span class="s0">* (`module.status` is `'evaluating'`).</span>
+         <span class="s0">*</span>
+         <span class="s0">* Corresponds to the [Evaluate() concrete method](https://tc39.es/ecma262/#sec-moduleevaluation) field of [Cyclic Module Record](https://tc39.es/ecma262/#sec-cyclic-module-records) s in the</span>
+         <span class="s0">* ECMAScript specification.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">Fulfills with `undefined` upon success.</span>
+         <span class="s0">*/</span>
+        <span class="s2">evaluate</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ModuleEvaluateOptions</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s5">void</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Link module dependencies. This method must be called before evaluation, and</span>
+         <span class="s0">* can only be called once per module.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The function is expected to return a `Module` object or a `Promise` that</span>
+         <span class="s0">* eventually resolves to a `Module` object. The returned `Module` must satisfy the</span>
+         <span class="s0">* following two invariants:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * It must belong to the same context as the parent `Module`.</span>
+         <span class="s0">* * Its `status` must not be `'errored'`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the returned `Module`'s `status` is `'unlinked'`, this method will be</span>
+         <span class="s0">* recursively called on the returned `Module` with the same provided `linker` function.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `link()` returns a `Promise` that will either get resolved when all linking</span>
+         <span class="s0">* instances resolve to a valid `Module`, or rejected if the linker function either</span>
+         <span class="s0">* throws an exception or returns an invalid `Module`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The linker function roughly corresponds to the implementation-defined [HostResolveImportedModule](https://tc39.es/ecma262/#sec-hostresolveimportedmodule) abstract operation in the</span>
+         <span class="s0">* ECMAScript</span>
+         <span class="s0">* specification, with a few key differences:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * The linker function is allowed to be asynchronous while [HostResolveImportedModule](https://tc39.es/ecma262/#sec-hostresolveimportedmodule) is synchronous.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The actual [HostResolveImportedModule](https://tc39.es/ecma262/#sec-hostresolveimportedmodule) implementation used during module</span>
+         <span class="s0">* linking is one that returns the modules linked during linking. Since at</span>
+         <span class="s0">* that point all modules would have been fully linked already, the [HostResolveImportedModule](https://tc39.es/ecma262/#sec-hostresolveimportedmodule) implementation is fully synchronous per</span>
+         <span class="s0">* specification.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Corresponds to the [Link() concrete method](https://tc39.es/ecma262/#sec-moduledeclarationlinking) field of [Cyclic Module Record](https://tc39.es/ecma262/#sec-cyclic-module-records) s in</span>
+         <span class="s0">* the ECMAScript specification.</span>
+         <span class="s0">*/</span>
+        <span class="s2">link</span><span class="s4">(</span><span class="s2">linker</span><span
+    class="s4">: </span><span class="s2">ModuleLinker</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s5">void</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SourceTextModuleOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* String used in stack traces.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'vm:module(i)' where i is a context-specific ascending index.</span>
+         <span class="s0">*/</span>
+        <span class="s2">identifier</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Provides an optional data with V8's code cache data for the supplied source.</span>
+         <span class="s0">*/</span>
+        <span class="s2">cachedData</span><span class="s4">?: </span><span class="s2">ScriptOptions</span><span
+    class="s4">[</span><span class="s3">&quot;cachedData&quot;</span><span class="s4">] | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">context</span><span class="s4">?: </span><span class="s2">Context </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">lineOffset</span><span class="s4">?: </span><span class="s2">BaseOptions</span><span
+    class="s4">[</span><span class="s3">&quot;lineOffset&quot;</span><span class="s4">] | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">columnOffset</span><span class="s4">?: </span><span class="s2">BaseOptions</span><span
+    class="s4">[</span><span class="s3">&quot;columnOffset&quot;</span><span class="s4">] | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Called during evaluation of this module to initialize the `import.meta`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">initializeImportMeta</span><span class="s4">?: ((</span><span class="s2">meta</span><span
+    class="s4">: </span><span class="s2">ImportMeta</span><span class="s4">, </span><span class="s2">module</span><span
+    class="s4">: </span><span class="s2">SourceTextModule</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">) | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Used to specify how the modules should be loaded during the evaluation of this script when `import()` is called. This option is</span>
+         <span class="s0">* part of the experimental modules API. We do not recommend using it in a production environment. For detailed information, see</span>
+         <span class="s0">* [Support of dynamic `import()` in compilation APIs](https://nodejs.org/docs/latest-v24.x/api/vm.html#support-of-dynamic-import-in-compilation-apis).</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">importModuleDynamically</span><span class="s4">?: </span><span
+    class="s2">DynamicModuleLoader</span><span class="s4">&lt;</span><span class="s2">SourceTextModule</span><span
+    class="s4">&gt; | </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* A `ModuleRequest` represents the request to import a module with given import attributes and phase.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">24.4.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">ModuleRequest </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The specifier of the requested module.</span>
+         <span class="s0">*/</span>
+        <span class="s2">specifier</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `&quot;with&quot;` value passed to the `WithClause` in a `ImportDeclaration`, or an empty object if no value was</span>
+         <span class="s0">* provided.</span>
+         <span class="s0">*/</span>
+        <span class="s2">attributes</span><span class="s4">: </span><span class="s2">ImportAttributes</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The phase of the requested module (`&quot;source&quot;` or `&quot;evaluation&quot;`).</span>
+         <span class="s0">*/</span>
+        <span class="s2">phase</span><span class="s4">: </span><span class="s2">ImportPhase</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This feature is only available with the `--experimental-vm-modules` command</span>
+     <span class="s0">* flag enabled.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `vm.SourceTextModule` class provides the [Source Text Module Record](https://tc39.es/ecma262/#sec-source-text-module-records) as</span>
+     <span class="s0">* defined in the ECMAScript specification.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.6.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">SourceTextModule </span><span class="s5">extends </span><span
+    class="s2">Module </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Creates a new `SourceTextModule` instance.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">code JavaScript Module code to parse</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">code</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">SourceTextModuleOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@deprecated </span><span class="s0">Use `sourceTextModule.moduleRequests` instead.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly dependencySpecifiers</span><span class="s4">: </span><span
+    class="s2">readonly string</span><span class="s4">[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The requested import dependencies of this module. The returned array is frozen</span>
+         <span class="s0">* to disallow any changes to it.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For example, given a source text:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import foo from 'foo';</span>
+         <span class="s0">* import fooAlias from 'foo';</span>
+         <span class="s0">* import bar from './bar.js';</span>
+         <span class="s0">* import withAttrs from '../with-attrs.ts' with { arbitraryAttr: 'attr-val' };</span>
+         <span class="s0">* import source Module from 'wasm-mod.wasm';</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The value of the `sourceTextModule.moduleRequests` will be:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* [</span>
+         <span class="s0">*   {</span>
+         <span class="s0">*     specifier: 'foo',</span>
+         <span class="s0">*     attributes: {},</span>
+         <span class="s0">*     phase: 'evaluation',</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   {</span>
+         <span class="s0">*     specifier: 'foo',</span>
+         <span class="s0">*     attributes: {},</span>
+         <span class="s0">*     phase: 'evaluation',</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   {</span>
+         <span class="s0">*     specifier: './bar.js',</span>
+         <span class="s0">*     attributes: {},</span>
+         <span class="s0">*     phase: 'evaluation',</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   {</span>
+         <span class="s0">*     specifier: '../with-attrs.ts',</span>
+         <span class="s0">*     attributes: { arbitraryAttr: 'attr-val' },</span>
+         <span class="s0">*     phase: 'evaluation',</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   {</span>
+         <span class="s0">*     specifier: 'wasm-mod.wasm',</span>
+         <span class="s0">*     attributes: {},</span>
+         <span class="s0">*     phase: 'source',</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* ];</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.4.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly moduleRequests</span><span class="s4">: </span><span
+    class="s2">readonly ModuleRequest</span><span class="s4">[];</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SyntheticModuleOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* String used in stack traces.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'vm:module(i)' where i is a context-specific ascending index.</span>
+         <span class="s0">*/</span>
+        <span class="s2">identifier</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The contextified object as returned by the `vm.createContext()` method, to compile and evaluate this module in.</span>
+         <span class="s0">*/</span>
+        <span class="s2">context</span><span class="s4">?: </span><span class="s2">Context </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This feature is only available with the `--experimental-vm-modules` command</span>
+     <span class="s0">* flag enabled.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `vm.SyntheticModule` class provides the [Synthetic Module Record](https://heycam.github.io/webidl/#synthetic-module-records) as</span>
+     <span class="s0">* defined in the WebIDL specification. The purpose of synthetic modules is to</span>
+     <span class="s0">* provide a generic interface for exposing non-JavaScript sources to ECMAScript</span>
+     <span class="s0">* module graphs.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import vm from 'node:vm';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const source = '{ &quot;a&quot;: 1 }';</span>
+     <span class="s0">* const module = new vm.SyntheticModule(['default'], function() {</span>
+     <span class="s0">*   const obj = JSON.parse(source);</span>
+     <span class="s0">*   this.setExport('default', obj);</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Use `module` in linking...</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.0.0, v12.16.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">SyntheticModule </span><span class="s5">extends </span><span
+    class="s2">Module </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Creates a new `SyntheticModule` instance.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">exportNames Array of names that will be exported from the module.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">evaluateCallback Called when the module is evaluated.</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">(</span>
+            <span class="s2">exportNames</span><span class="s4">: </span><span class="s2">string</span><span class="s4">[],</span>
+            <span class="s2">evaluateCallback</span><span class="s4">: (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">SyntheticModule</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+            <span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">SyntheticModuleOptions</span><span class="s4">,</span>
+        <span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method is used after the module is linked to set the values of exports. If</span>
+         <span class="s0">* it is called before the module is linked, an `ERR_VM_MODULE_STATUS` error</span>
+         <span class="s0">* will be thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import vm from 'node:vm';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const m = new vm.SyntheticModule(['x'], () =&gt; {</span>
+         <span class="s0">*   m.setExport('x', 1);</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* await m.link(() =&gt; {});</span>
+         <span class="s0">* await m.evaluate();</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.strictEqual(m.namespace.x, 1);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.0.0, v12.16.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">name Name of the export to set.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">value The value to set the export to.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setExport</span><span class="s4">(</span><span class="s2">name</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns an object containing commonly used constants for VM operations.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v21.7.0, v20.12.0</span>
+     <span class="s0">*/</span>
+    <span class="s2">namespace constants </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A constant that can be used as the `importModuleDynamically` option to `vm.Script`</span>
+         <span class="s0">* and `vm.compileFunction()` so that Node.js uses the default ESM loader from the main</span>
+         <span class="s0">* context to load the requested module.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For detailed information, see [Support of dynamic `import()` in compilation APIs](https://nodejs.org/docs/latest-v24.x/api/vm.html#support-of-dynamic-import-in-compilation-apis).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v21.7.0, v20.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">USE_MAIN_CONTEXT_DEFAULT_LOADER</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This constant, when used as the `contextObject` argument in vm APIs, instructs Node.js to create</span>
+         <span class="s0">* a context without wrapping its global object with another object in a Node.js-specific manner.</span>
+         <span class="s0">* As a result, the `globalThis` value inside the new context would behave more closely to an ordinary</span>
+         <span class="s0">* one.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When `vm.constants.DONT_CONTEXTIFY` is used as the `contextObject` argument to {</span><span
+    class="s1">@link </span><span class="s0">createContext},</span>
+         <span class="s0">* the returned object is a proxy-like object to the global object in the newly created context with</span>
+         <span class="s0">* fewer Node.js-specific quirks. It is reference equal to the `globalThis` value in the new context,</span>
+         <span class="s0">* can be modified from outside the context, and can be used to access built-ins in the new context directly.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.8.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">DONT_CONTEXTIFY</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:vm&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;vm&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

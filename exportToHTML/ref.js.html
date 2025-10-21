@@ -1,0 +1,370 @@
+<html>
+<head>
+  <title>ref.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          ref.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">callRef </span><span class="s1">= </span><span
+    class="s2">exports</span><span class="s1">.</span><span class="s2">getValidate </span><span
+    class="s1">= </span><span class="s3">void </span><span class="s4">0</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s2">ref_error_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../../compile/ref_error&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">code_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../code&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">codegen_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../../compile/codegen&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">names_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../../compile/names&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">compile_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../../compile&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">util_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../../compile/util&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">def </span><span class="s1">= {</span>
+    <span class="s2">keyword</span><span class="s1">: </span><span class="s0">&quot;$ref&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">schemaType</span><span class="s1">: </span><span class="s0">&quot;string&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">code</span><span class="s1">(</span><span class="s2">cxt</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s1">{ </span><span class="s2">gen</span><span
+    class="s1">, </span><span class="s2">schema</span><span class="s1">: </span><span class="s2">$ref</span><span
+    class="s1">, </span><span class="s2">it </span><span class="s1">} = </span><span class="s2">cxt</span><span
+    class="s1">;</span>
+        <span class="s3">const </span><span class="s1">{ </span><span class="s2">baseId</span><span class="s1">, </span><span
+    class="s2">schemaEnv</span><span class="s1">: </span><span class="s2">env</span><span class="s1">, </span><span
+    class="s2">validateName</span><span class="s1">, </span><span class="s2">opts</span><span class="s1">, </span><span
+    class="s2">self </span><span class="s1">} = </span><span class="s2">it</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s1">{ </span><span class="s2">root </span><span
+    class="s1">} = </span><span class="s2">env</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">((</span><span class="s2">$ref </span><span
+    class="s1">=== </span><span class="s0">&quot;#&quot; </span><span class="s1">|| </span><span class="s2">$ref </span><span
+    class="s1">=== </span><span class="s0">&quot;#/&quot;</span><span class="s1">) &amp;&amp; </span><span class="s2">baseId </span><span
+    class="s1">=== </span><span class="s2">root</span><span class="s1">.</span><span class="s2">baseId</span><span
+    class="s1">)</span>
+            <span class="s3">return </span><span class="s2">callRootRef</span><span class="s1">();</span>
+        <span class="s3">const </span><span class="s2">schOrEnv </span><span class="s1">= </span><span class="s2">compile_1</span><span
+    class="s1">.</span><span class="s2">resolveRef</span><span class="s1">.</span><span class="s2">call</span><span
+    class="s1">(</span><span class="s2">self</span><span class="s1">, </span><span class="s2">root</span><span
+    class="s1">, </span><span class="s2">baseId</span><span class="s1">, </span><span class="s2">$ref</span><span
+    class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">schOrEnv </span><span
+    class="s1">=== </span><span class="s2">undefined</span><span class="s1">)</span>
+            <span class="s3">throw new </span><span class="s2">ref_error_1</span><span class="s1">.</span><span
+    class="s2">default</span><span class="s1">(</span><span class="s2">it</span><span class="s1">.</span><span
+    class="s2">opts</span><span class="s1">.</span><span class="s2">uriResolver</span><span class="s1">, </span><span
+    class="s2">baseId</span><span class="s1">, </span><span class="s2">$ref</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">schOrEnv </span><span
+    class="s3">instanceof </span><span class="s2">compile_1</span><span class="s1">.</span><span
+    class="s2">SchemaEnv</span><span class="s1">)</span>
+            <span class="s3">return </span><span class="s2">callValidate</span><span class="s1">(</span><span
+    class="s2">schOrEnv</span><span class="s1">);</span>
+        <span class="s3">return </span><span class="s2">inlineRefSchema</span><span class="s1">(</span><span class="s2">schOrEnv</span><span
+    class="s1">);</span>
+        <span class="s3">function </span><span class="s2">callRootRef</span><span class="s1">() {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">env </span><span class="s1">=== </span><span
+    class="s2">root</span><span class="s1">)</span>
+                <span class="s3">return </span><span class="s2">callRef</span><span class="s1">(</span><span class="s2">cxt</span><span
+    class="s1">, </span><span class="s2">validateName</span><span class="s1">, </span><span class="s2">env</span><span
+    class="s1">, </span><span class="s2">env</span><span class="s1">.</span><span class="s2">$async</span><span
+    class="s1">);</span>
+            <span class="s3">const </span><span class="s2">rootName </span><span class="s1">= </span><span class="s2">gen</span><span
+    class="s1">.</span><span class="s2">scopeValue</span><span class="s1">(</span><span
+    class="s0">&quot;root&quot;</span><span class="s1">, { </span><span class="s2">ref</span><span
+    class="s1">: </span><span class="s2">root </span><span class="s1">});</span>
+            <span class="s3">return </span><span class="s2">callRef</span><span class="s1">(</span><span
+    class="s2">cxt</span><span class="s1">, (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">codegen_1</span><span
+    class="s1">.</span><span class="s2">_</span><span class="s1">) </span><span class="s0">`</span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">rootName</span><span class="s1">}</span><span
+    class="s0">.validate`</span><span class="s1">, </span><span class="s2">root</span><span class="s1">, </span><span
+    class="s2">root</span><span class="s1">.</span><span class="s2">$async</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">function </span><span class="s2">callValidate</span><span class="s1">(</span><span class="s2">sch</span><span
+    class="s1">) {</span>
+            <span class="s3">const </span><span class="s2">v </span><span class="s1">= </span><span class="s2">getValidate</span><span
+    class="s1">(</span><span class="s2">cxt</span><span class="s1">, </span><span class="s2">sch</span><span class="s1">);</span>
+            <span class="s2">callRef</span><span class="s1">(</span><span class="s2">cxt</span><span
+    class="s1">, </span><span class="s2">v</span><span class="s1">, </span><span class="s2">sch</span><span
+    class="s1">, </span><span class="s2">sch</span><span class="s1">.</span><span class="s2">$async</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">function </span><span class="s2">inlineRefSchema</span><span class="s1">(</span><span
+    class="s2">sch</span><span class="s1">) {</span>
+            <span class="s3">const </span><span class="s2">schName </span><span class="s1">= </span><span
+    class="s2">gen</span><span class="s1">.</span><span class="s2">scopeValue</span><span class="s1">(</span><span
+    class="s0">&quot;schema&quot;</span><span class="s1">, </span><span class="s2">opts</span><span
+    class="s1">.</span><span class="s2">code</span><span class="s1">.</span><span class="s2">source </span><span
+    class="s1">=== </span><span class="s3">true </span><span class="s1">? { </span><span class="s2">ref</span><span
+    class="s1">: </span><span class="s2">sch</span><span class="s1">, </span><span class="s2">code</span><span
+    class="s1">: (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">codegen_1</span><span
+    class="s1">.</span><span class="s2">stringify</span><span class="s1">)(</span><span class="s2">sch</span><span
+    class="s1">) } : { </span><span class="s2">ref</span><span class="s1">: </span><span class="s2">sch </span><span
+    class="s1">});</span>
+            <span class="s3">const </span><span class="s2">valid </span><span class="s1">= </span><span
+    class="s2">gen</span><span class="s1">.</span><span class="s2">name</span><span class="s1">(</span><span class="s0">&quot;valid&quot;</span><span
+    class="s1">);</span>
+            <span class="s3">const </span><span class="s2">schCxt </span><span class="s1">= </span><span
+    class="s2">cxt</span><span class="s1">.</span><span class="s2">subschema</span><span class="s1">({</span>
+                <span class="s2">schema</span><span class="s1">: </span><span class="s2">sch</span><span
+    class="s1">,</span>
+                <span class="s2">dataTypes</span><span class="s1">: [],</span>
+                <span class="s2">schemaPath</span><span class="s1">: </span><span class="s2">codegen_1</span><span
+    class="s1">.</span><span class="s2">nil</span><span class="s1">,</span>
+                <span class="s2">topSchemaRef</span><span class="s1">: </span><span class="s2">schName</span><span
+    class="s1">,</span>
+                <span class="s2">errSchemaPath</span><span class="s1">: </span><span class="s2">$ref</span><span
+    class="s1">,</span>
+            <span class="s1">}, </span><span class="s2">valid</span><span class="s1">);</span>
+            <span class="s2">cxt</span><span class="s1">.</span><span class="s2">mergeEvaluated</span><span
+    class="s1">(</span><span class="s2">schCxt</span><span class="s1">);</span>
+            <span class="s2">cxt</span><span class="s1">.</span><span class="s2">ok</span><span class="s1">(</span><span
+    class="s2">valid</span><span class="s1">);</span>
+        <span class="s1">}</span>
+    <span class="s1">},</span>
+<span class="s1">};</span>
+<span class="s3">function </span><span class="s2">getValidate</span><span class="s1">(</span><span class="s2">cxt</span><span
+    class="s1">, </span><span class="s2">sch</span><span class="s1">) {</span>
+    <span class="s3">const </span><span class="s1">{ </span><span class="s2">gen </span><span
+    class="s1">} = </span><span class="s2">cxt</span><span class="s1">;</span>
+    <span class="s3">return </span><span class="s2">sch</span><span class="s1">.</span><span class="s2">validate</span>
+        <span class="s1">? </span><span class="s2">gen</span><span class="s1">.</span><span class="s2">scopeValue</span><span
+    class="s1">(</span><span class="s0">&quot;validate&quot;</span><span class="s1">, { </span><span
+    class="s2">ref</span><span class="s1">: </span><span class="s2">sch</span><span class="s1">.</span><span class="s2">validate </span><span
+    class="s1">})</span>
+        <span class="s1">: (</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">codegen_1</span><span class="s1">.</span><span class="s2">_</span><span class="s1">) </span><span
+    class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">gen</span><span
+    class="s1">.</span><span class="s2">scopeValue</span><span class="s1">(</span><span
+    class="s0">&quot;wrapper&quot;</span><span class="s1">, { </span><span class="s2">ref</span><span
+    class="s1">: </span><span class="s2">sch </span><span class="s1">})}</span><span class="s0">.validate`</span><span
+    class="s1">;</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">getValidate </span><span
+    class="s1">= </span><span class="s2">getValidate</span><span class="s1">;</span>
+<span class="s3">function </span><span class="s2">callRef</span><span class="s1">(</span><span
+    class="s2">cxt</span><span class="s1">, </span><span class="s2">v</span><span class="s1">, </span><span class="s2">sch</span><span
+    class="s1">, </span><span class="s2">$async</span><span class="s1">) {</span>
+    <span class="s3">const </span><span class="s1">{ </span><span class="s2">gen</span><span class="s1">, </span><span
+    class="s2">it </span><span class="s1">} = </span><span class="s2">cxt</span><span class="s1">;</span>
+    <span class="s3">const </span><span class="s1">{ </span><span class="s2">allErrors</span><span
+    class="s1">, </span><span class="s2">schemaEnv</span><span class="s1">: </span><span class="s2">env</span><span
+    class="s1">, </span><span class="s2">opts </span><span class="s1">} = </span><span class="s2">it</span><span
+    class="s1">;</span>
+    <span class="s3">const </span><span class="s2">passCxt </span><span class="s1">= </span><span class="s2">opts</span><span
+    class="s1">.</span><span class="s2">passContext </span><span class="s1">? </span><span
+    class="s2">names_1</span><span class="s1">.</span><span class="s2">default</span><span class="s1">.</span><span
+    class="s2">this </span><span class="s1">: </span><span class="s2">codegen_1</span><span class="s1">.</span><span
+    class="s2">nil</span><span class="s1">;</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s2">$async</span><span class="s1">)</span>
+        <span class="s2">callAsyncRef</span><span class="s1">();</span>
+    <span class="s3">else</span>
+        <span class="s2">callSyncRef</span><span class="s1">();</span>
+    <span class="s3">function </span><span class="s2">callAsyncRef</span><span class="s1">() {</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">env</span><span class="s1">.</span><span
+    class="s2">$async</span><span class="s1">)</span>
+            <span class="s3">throw new </span><span class="s2">Error</span><span class="s1">(</span><span class="s0">&quot;async schema referenced by sync schema&quot;</span><span
+    class="s1">);</span>
+        <span class="s3">const </span><span class="s2">valid </span><span class="s1">= </span><span
+    class="s2">gen</span><span class="s1">.</span><span class="s2">let</span><span class="s1">(</span><span class="s0">&quot;valid&quot;</span><span
+    class="s1">);</span>
+        <span class="s2">gen</span><span class="s1">.</span><span class="s2">try</span><span
+    class="s1">(() =&gt; {</span>
+            <span class="s2">gen</span><span class="s1">.</span><span class="s2">code</span><span
+    class="s1">((</span><span class="s4">0</span><span class="s1">, </span><span class="s2">codegen_1</span><span
+    class="s1">.</span><span class="s2">_</span><span class="s1">) </span><span class="s0">`await </span><span
+    class="s2">$</span><span class="s1">{(</span><span class="s4">0</span><span class="s1">, </span><span class="s2">code_1</span><span
+    class="s1">.</span><span class="s2">callValidateCode</span><span class="s1">)(</span><span
+    class="s2">cxt</span><span class="s1">, </span><span class="s2">v</span><span class="s1">, </span><span class="s2">passCxt</span><span
+    class="s1">)}</span><span class="s0">`</span><span class="s1">);</span>
+            <span class="s2">addEvaluatedFrom</span><span class="s1">(</span><span class="s2">v</span><span class="s1">); </span><span
+    class="s5">// TODO will not work with async, it has to be returned with the result</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">allErrors</span><span
+    class="s1">)</span>
+                <span class="s2">gen</span><span class="s1">.</span><span class="s2">assign</span><span
+    class="s1">(</span><span class="s2">valid</span><span class="s1">, </span><span class="s3">true</span><span
+    class="s1">);</span>
+        <span class="s1">}, (</span><span class="s2">e</span><span class="s1">) =&gt; {</span>
+            <span class="s2">gen</span><span class="s1">.</span><span class="s2">if</span><span
+    class="s1">((</span><span class="s4">0</span><span class="s1">, </span><span class="s2">codegen_1</span><span
+    class="s1">.</span><span class="s2">_</span><span class="s1">) </span><span class="s0">`!(</span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">e</span><span class="s1">} </span><span class="s0">instanceof </span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">it</span><span class="s1">.</span><span class="s2">ValidationError</span><span
+    class="s1">}</span><span class="s0">)`</span><span class="s1">, () =&gt; </span><span class="s2">gen</span><span
+    class="s1">.</span><span class="s2">throw</span><span class="s1">(</span><span class="s2">e</span><span class="s1">));</span>
+            <span class="s2">addErrorsFrom</span><span class="s1">(</span><span class="s2">e</span><span
+    class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">allErrors</span><span
+    class="s1">)</span>
+                <span class="s2">gen</span><span class="s1">.</span><span class="s2">assign</span><span
+    class="s1">(</span><span class="s2">valid</span><span class="s1">, </span><span class="s3">false</span><span
+    class="s1">);</span>
+        <span class="s1">});</span>
+        <span class="s2">cxt</span><span class="s1">.</span><span class="s2">ok</span><span class="s1">(</span><span
+    class="s2">valid</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s3">function </span><span class="s2">callSyncRef</span><span class="s1">() {</span>
+        <span class="s2">cxt</span><span class="s1">.</span><span class="s2">result</span><span
+    class="s1">((</span><span class="s4">0</span><span class="s1">, </span><span class="s2">code_1</span><span
+    class="s1">.</span><span class="s2">callValidateCode</span><span class="s1">)(</span><span
+    class="s2">cxt</span><span class="s1">, </span><span class="s2">v</span><span class="s1">, </span><span class="s2">passCxt</span><span
+    class="s1">), () =&gt; </span><span class="s2">addEvaluatedFrom</span><span class="s1">(</span><span
+    class="s2">v</span><span class="s1">), () =&gt; </span><span class="s2">addErrorsFrom</span><span
+    class="s1">(</span><span class="s2">v</span><span class="s1">));</span>
+    <span class="s1">}</span>
+    <span class="s3">function </span><span class="s2">addErrorsFrom</span><span class="s1">(</span><span class="s2">source</span><span
+    class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">errs </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">codegen_1</span><span class="s1">.</span><span
+    class="s2">_</span><span class="s1">) </span><span class="s0">`</span><span class="s2">$</span><span
+    class="s1">{</span><span class="s2">source</span><span class="s1">}</span><span class="s0">.errors`</span><span
+    class="s1">;</span>
+        <span class="s2">gen</span><span class="s1">.</span><span class="s2">assign</span><span class="s1">(</span><span
+    class="s2">names_1</span><span class="s1">.</span><span class="s2">default</span><span class="s1">.</span><span
+    class="s2">vErrors</span><span class="s1">, (</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">codegen_1</span><span class="s1">.</span><span class="s2">_</span><span class="s1">) </span><span
+    class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">names_1</span><span
+    class="s1">.</span><span class="s2">default</span><span class="s1">.</span><span class="s2">vErrors</span><span
+    class="s1">} </span><span class="s0">=== null ? </span><span class="s2">$</span><span class="s1">{</span><span
+    class="s2">errs</span><span class="s1">} </span><span class="s0">: </span><span class="s2">$</span><span class="s1">{</span><span
+    class="s2">names_1</span><span class="s1">.</span><span class="s2">default</span><span class="s1">.</span><span
+    class="s2">vErrors</span><span class="s1">}</span><span class="s0">.concat(</span><span class="s2">$</span><span
+    class="s1">{</span><span class="s2">errs</span><span class="s1">}</span><span class="s0">)`</span><span class="s1">); </span><span
+    class="s5">// TODO tagged</span>
+        <span class="s2">gen</span><span class="s1">.</span><span class="s2">assign</span><span class="s1">(</span><span
+    class="s2">names_1</span><span class="s1">.</span><span class="s2">default</span><span class="s1">.</span><span
+    class="s2">errors</span><span class="s1">, (</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">codegen_1</span><span class="s1">.</span><span class="s2">_</span><span class="s1">) </span><span
+    class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">names_1</span><span
+    class="s1">.</span><span class="s2">default</span><span class="s1">.</span><span class="s2">vErrors</span><span
+    class="s1">}</span><span class="s0">.length`</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s3">function </span><span class="s2">addEvaluatedFrom</span><span class="s1">(</span><span class="s2">source</span><span
+    class="s1">) {</span>
+        <span class="s3">var </span><span class="s2">_a</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">it</span><span class="s1">.</span><span
+    class="s2">opts</span><span class="s1">.</span><span class="s2">unevaluated</span><span class="s1">)</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">schEvaluated </span><span class="s1">= (</span><span class="s2">_a </span><span
+    class="s1">= </span><span class="s2">sch </span><span class="s1">=== </span><span class="s3">null </span><span
+    class="s1">|| </span><span class="s2">sch </span><span class="s1">=== </span><span class="s3">void </span><span
+    class="s4">0 </span><span class="s1">? </span><span class="s3">void </span><span class="s4">0 </span><span
+    class="s1">: </span><span class="s2">sch</span><span class="s1">.</span><span class="s2">validate</span><span
+    class="s1">) === </span><span class="s3">null </span><span class="s1">|| </span><span class="s2">_a </span><span
+    class="s1">=== </span><span class="s3">void </span><span class="s4">0 </span><span class="s1">? </span><span
+    class="s3">void </span><span class="s4">0 </span><span class="s1">: </span><span class="s2">_a</span><span
+    class="s1">.</span><span class="s2">evaluated</span><span class="s1">;</span>
+        <span class="s5">// TODO refactor</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">it</span><span class="s1">.</span><span
+    class="s2">props </span><span class="s1">!== </span><span class="s3">true</span><span class="s1">) {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">schEvaluated </span><span class="s1">&amp;&amp; !</span><span
+    class="s2">schEvaluated</span><span class="s1">.</span><span class="s2">dynamicProps</span><span
+    class="s1">) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">schEvaluated</span><span
+    class="s1">.</span><span class="s2">props </span><span class="s1">!== </span><span class="s2">undefined</span><span
+    class="s1">) {</span>
+                    <span class="s2">it</span><span class="s1">.</span><span class="s2">props </span><span
+    class="s1">= </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">mergeEvaluated</span><span class="s1">.</span><span class="s2">props</span><span class="s1">(</span><span
+    class="s2">gen</span><span class="s1">, </span><span class="s2">schEvaluated</span><span class="s1">.</span><span
+    class="s2">props</span><span class="s1">, </span><span class="s2">it</span><span class="s1">.</span><span
+    class="s2">props</span><span class="s1">);</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">const </span><span class="s2">props </span><span class="s1">= </span><span class="s2">gen</span><span
+    class="s1">.</span><span class="s2">var</span><span class="s1">(</span><span
+    class="s0">&quot;props&quot;</span><span class="s1">, (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">codegen_1</span><span class="s1">.</span><span class="s2">_</span><span
+    class="s1">) </span><span class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">source</span><span
+    class="s1">}</span><span class="s0">.evaluated.props`</span><span class="s1">);</span>
+                <span class="s2">it</span><span class="s1">.</span><span class="s2">props </span><span
+    class="s1">= </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">mergeEvaluated</span><span class="s1">.</span><span class="s2">props</span><span class="s1">(</span><span
+    class="s2">gen</span><span class="s1">, </span><span class="s2">props</span><span class="s1">, </span><span
+    class="s2">it</span><span class="s1">.</span><span class="s2">props</span><span class="s1">, </span><span
+    class="s2">codegen_1</span><span class="s1">.</span><span class="s2">Name</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">it</span><span class="s1">.</span><span
+    class="s2">items </span><span class="s1">!== </span><span class="s3">true</span><span class="s1">) {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">schEvaluated </span><span class="s1">&amp;&amp; !</span><span
+    class="s2">schEvaluated</span><span class="s1">.</span><span class="s2">dynamicItems</span><span
+    class="s1">) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">schEvaluated</span><span
+    class="s1">.</span><span class="s2">items </span><span class="s1">!== </span><span class="s2">undefined</span><span
+    class="s1">) {</span>
+                    <span class="s2">it</span><span class="s1">.</span><span class="s2">items </span><span
+    class="s1">= </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">mergeEvaluated</span><span class="s1">.</span><span class="s2">items</span><span class="s1">(</span><span
+    class="s2">gen</span><span class="s1">, </span><span class="s2">schEvaluated</span><span class="s1">.</span><span
+    class="s2">items</span><span class="s1">, </span><span class="s2">it</span><span class="s1">.</span><span
+    class="s2">items</span><span class="s1">);</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">const </span><span class="s2">items </span><span class="s1">= </span><span class="s2">gen</span><span
+    class="s1">.</span><span class="s2">var</span><span class="s1">(</span><span
+    class="s0">&quot;items&quot;</span><span class="s1">, (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">codegen_1</span><span class="s1">.</span><span class="s2">_</span><span
+    class="s1">) </span><span class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">source</span><span
+    class="s1">}</span><span class="s0">.evaluated.items`</span><span class="s1">);</span>
+                <span class="s2">it</span><span class="s1">.</span><span class="s2">items </span><span
+    class="s1">= </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">mergeEvaluated</span><span class="s1">.</span><span class="s2">items</span><span class="s1">(</span><span
+    class="s2">gen</span><span class="s1">, </span><span class="s2">items</span><span class="s1">, </span><span
+    class="s2">it</span><span class="s1">.</span><span class="s2">items</span><span class="s1">, </span><span
+    class="s2">codegen_1</span><span class="s1">.</span><span class="s2">Name</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">callRef </span><span class="s1">= </span><span
+    class="s2">callRef</span><span class="s1">;</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">default </span><span class="s1">= </span><span
+    class="s2">def</span><span class="s1">;</span>
+<span class="s5">//# sourceMappingURL=ref.js.map</span></pre>
+</body>
+</html>

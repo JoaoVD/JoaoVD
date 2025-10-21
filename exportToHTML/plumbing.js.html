@@ -1,0 +1,134 @@
+<html>
+<head>
+  <title>plumbing.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          plumbing.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">var </span><span class="s1">consoleControl </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'console-control-strings'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">renderTemplate </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./render-template.js'</span><span
+    class="s3">)</span>
+<span class="s2">var </span><span class="s1">validate </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'aproba'</span><span class="s3">)</span>
+
+<span class="s2">var </span><span class="s1">Plumbing </span><span class="s3">= </span><span
+    class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">theme</span><span class="s3">, </span><span
+    class="s1">template</span><span class="s3">, </span><span class="s1">width</span><span class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">width</span><span class="s3">) {</span>
+    <span class="s1">width </span><span class="s3">= </span><span class="s4">80</span>
+  <span class="s3">}</span>
+  <span class="s1">validate</span><span class="s3">(</span><span class="s0">'OAN'</span><span class="s3">, [</span><span
+    class="s1">theme</span><span class="s3">, </span><span class="s1">template</span><span class="s3">, </span><span
+    class="s1">width</span><span class="s3">])</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">showing </span><span class="s3">= </span><span
+    class="s2">false</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">theme </span><span class="s3">= </span><span
+    class="s1">theme</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">width </span><span class="s3">= </span><span
+    class="s1">width</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">template </span><span class="s3">= </span><span
+    class="s1">template</span>
+<span class="s3">}</span>
+<span class="s1">Plumbing</span><span class="s3">.</span><span class="s1">prototype </span><span class="s3">= {}</span>
+
+<span class="s1">Plumbing</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">setTheme </span><span class="s3">= </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">theme</span><span class="s3">) {</span>
+  <span class="s1">validate</span><span class="s3">(</span><span class="s0">'O'</span><span class="s3">, [</span><span
+    class="s1">theme</span><span class="s3">])</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">theme </span><span class="s3">= </span><span
+    class="s1">theme</span>
+<span class="s3">}</span>
+
+<span class="s1">Plumbing</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">setTemplate </span><span class="s3">= </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">template</span><span class="s3">) {</span>
+  <span class="s1">validate</span><span class="s3">(</span><span class="s0">'A'</span><span class="s3">, [</span><span
+    class="s1">template</span><span class="s3">])</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">template </span><span class="s3">= </span><span
+    class="s1">template</span>
+<span class="s3">}</span>
+
+<span class="s1">Plumbing</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">setWidth </span><span class="s3">= </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">width</span><span class="s3">) {</span>
+  <span class="s1">validate</span><span class="s3">(</span><span class="s0">'N'</span><span class="s3">, [</span><span
+    class="s1">width</span><span class="s3">])</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">width </span><span class="s3">= </span><span
+    class="s1">width</span>
+<span class="s3">}</span>
+
+<span class="s1">Plumbing</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">hide </span><span class="s3">= </span><span class="s2">function </span><span class="s3">() {</span>
+  <span class="s2">return </span><span class="s1">consoleControl</span><span class="s3">.</span><span
+    class="s1">gotoSOL</span><span class="s3">() + </span><span class="s1">consoleControl</span><span
+    class="s3">.</span><span class="s1">eraseLine</span><span class="s3">()</span>
+<span class="s3">}</span>
+
+<span class="s1">Plumbing</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">hideCursor </span><span class="s3">= </span><span class="s1">consoleControl</span><span
+    class="s3">.</span><span class="s1">hideCursor</span>
+
+<span class="s1">Plumbing</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">showCursor </span><span class="s3">= </span><span class="s1">consoleControl</span><span
+    class="s3">.</span><span class="s1">showCursor</span>
+
+<span class="s1">Plumbing</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">show </span><span class="s3">= </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">status</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">values </span><span class="s3">= </span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">theme</span><span class="s3">)</span>
+  <span class="s2">for </span><span class="s3">(</span><span class="s2">var </span><span class="s1">key </span><span
+    class="s2">in </span><span class="s1">status</span><span class="s3">) {</span>
+    <span class="s1">values</span><span class="s3">[</span><span class="s1">key</span><span class="s3">] = </span><span
+    class="s1">status</span><span class="s3">[</span><span class="s1">key</span><span class="s3">]</span>
+  <span class="s3">}</span>
+
+  <span class="s2">return </span><span class="s1">renderTemplate</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">width</span><span class="s3">, </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">template</span><span class="s3">, </span><span
+    class="s1">values</span><span class="s3">).</span><span class="s1">trim</span><span class="s3">() +</span>
+         <span class="s1">consoleControl</span><span class="s3">.</span><span class="s1">color</span><span
+    class="s3">(</span><span class="s0">'reset'</span><span class="s3">) +</span>
+         <span class="s1">consoleControl</span><span class="s3">.</span><span class="s1">eraseLine</span><span
+    class="s3">() + </span><span class="s1">consoleControl</span><span class="s3">.</span><span
+    class="s1">gotoSOL</span><span class="s3">()</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

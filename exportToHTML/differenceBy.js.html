@@ -1,0 +1,113 @@
+<html>
+<head>
+  <title>differenceBy.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          differenceBy.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseDifference </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_baseDifference'</span><span class="s2">),</span>
+    <span class="s1">baseFlatten </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseFlatten'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">),</span>
+    <span class="s1">baseRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">),</span>
+    <span class="s1">isArrayLikeObject </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./isArrayLikeObject'</span><span class="s2">),</span>
+    <span class="s1">last </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./last'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* This method is like `_.difference` except that it accepts `iteratee` which</span>
+ <span class="s4">* is invoked for each element of `array` and `values` to generate the criterion</span>
+ <span class="s4">* by which they're compared. The order and references of result values are</span>
+ <span class="s4">* determined by the first array. The iteratee is invoked with one argument:</span>
+ <span class="s4">* (value).</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** Unlike `_.pullAllBy`, this method returns a new array.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">4.0.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Array</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array} array The array to inspect.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{...Array} [values] The values to exclude.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [iteratee=_.identity] The iteratee invoked per element.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Array} Returns the new array of filtered values.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.differenceBy([2.1, 1.2], [2.3, 3.4], Math.floor);</span>
+ <span class="s4">* // =&gt; [1.2]</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.property` iteratee shorthand.</span>
+ <span class="s4">* _.differenceBy([{ 'x': 2 }, { 'x': 1 }], [{ 'x': 1 }], 'x');</span>
+ <span class="s4">* // =&gt; [{ 'x': 2 }]</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">differenceBy </span><span class="s2">= </span><span
+    class="s1">baseRest</span><span class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span
+    class="s1">array</span><span class="s2">, </span><span class="s1">values</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">iteratee </span><span class="s2">= </span><span
+    class="s1">last</span><span class="s2">(</span><span class="s1">values</span><span class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isArrayLikeObject</span><span class="s2">(</span><span
+    class="s1">iteratee</span><span class="s2">)) {</span>
+    <span class="s1">iteratee </span><span class="s2">= </span><span class="s1">undefined</span><span
+    class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">isArrayLikeObject</span><span class="s2">(</span><span class="s1">array</span><span
+    class="s2">)</span>
+    <span class="s2">? </span><span class="s1">baseDifference</span><span class="s2">(</span><span
+    class="s1">array</span><span class="s2">, </span><span class="s1">baseFlatten</span><span class="s2">(</span><span
+    class="s1">values</span><span class="s2">, </span><span class="s6">1</span><span class="s2">, </span><span
+    class="s1">isArrayLikeObject</span><span class="s2">, </span><span class="s0">true</span><span class="s2">), </span><span
+    class="s1">baseIteratee</span><span class="s2">(</span><span class="s1">iteratee</span><span
+    class="s2">, </span><span class="s6">2</span><span class="s2">))</span>
+    <span class="s2">: [];</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">differenceBy</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<html>
+<head>
+  <title>unzipWith.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          unzipWith.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">apply </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_apply'</span><span class="s2">),</span>
+    <span class="s1">arrayMap </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_arrayMap'</span><span class="s2">),</span>
+    <span class="s1">unzip </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./unzip'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* This method is like `_.unzip` except that it accepts `iteratee` to specify</span>
+ <span class="s4">* how regrouped values should be combined. The iteratee is invoked with the</span>
+ <span class="s4">* elements of each group: (...group).</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">3.8.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Array</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array} array The array of grouped elements to process.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [iteratee=_.identity] The function to combine</span>
+ <span class="s4">*  regrouped values.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Array} Returns the new array of regrouped elements.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var zipped = _.zip([1, 2], [10, 20], [100, 200]);</span>
+ <span class="s4">* // =&gt; [[1, 10, 100], [2, 20, 200]]</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.unzipWith(zipped, _.add);</span>
+ <span class="s4">* // =&gt; [3, 30, 300]</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">unzipWith</span><span class="s2">(</span><span class="s1">array</span><span
+    class="s2">, </span><span class="s1">iteratee</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(!(</span><span class="s1">array </span><span
+    class="s2">&amp;&amp; </span><span class="s1">array</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">)) {</span>
+    <span class="s0">return </span><span class="s2">[];</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">result </span><span class="s2">= </span><span
+    class="s1">unzip</span><span class="s2">(</span><span class="s1">array</span><span class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">iteratee </span><span class="s2">== </span><span
+    class="s0">null</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">arrayMap</span><span class="s2">(</span><span class="s1">result</span><span
+    class="s2">, </span><span class="s0">function</span><span class="s2">(</span><span class="s1">group</span><span
+    class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">apply</span><span class="s2">(</span><span
+    class="s1">iteratee</span><span class="s2">, </span><span class="s1">undefined</span><span class="s2">, </span><span
+    class="s1">group</span><span class="s2">);</span>
+  <span class="s2">});</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">unzipWith</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

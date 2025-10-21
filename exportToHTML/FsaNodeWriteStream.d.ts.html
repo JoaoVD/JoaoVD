@@ -1,0 +1,136 @@
+<html>
+<head>
+  <title>FsaNodeWriteStream.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsaNodeWriteStream.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">Writable </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'../vendor/node/stream'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">FsaNodeFsOpenFile </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./FsaNodeFsOpenFile'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">IFileSystemWritableFileStream </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../fsa/types'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">IWriteStream </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types/misc'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">IWriteStreamOptions </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types/options'</span><span
+    class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* This WriteStream implementation does not build on top of the `fs` module,</span>
+ <span class="s4">* but instead uses the lower-level `FileSystemFileHandle` interface. The reason</span>
+ <span class="s4">* is the different semantics in `fs` and FSA (File System Access API) write streams.</span>
+ <span class="s4">*</span>
+ <span class="s4">* When data is written to an FSA file, a new FSA stream is created, it copies</span>
+ <span class="s4">* the file to a temporary swap file. After each written chunk, that swap file</span>
+ <span class="s4">* is closed and the original file is replaced with the swap file. This means,</span>
+ <span class="s4">* if WriteStream was built on top of `fs`, each chunk write would result in</span>
+ <span class="s4">* a file copy, write, close, rename operations, which is not what we want.</span>
+ <span class="s4">*</span>
+ <span class="s4">* Instead this implementation hooks into the lower-level and closes the swap</span>
+ <span class="s4">* file only once the stream is closed. The downside is that the written data</span>
+ <span class="s4">* is not immediately visible to other processes (because it is written to the</span>
+ <span class="s4">* swap file), but that is the trade-off we have to make.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@todo </span><span class="s4">Could make this flush the data to the original file periodically, so that</span>
+ <span class="s4">*       the data is visible to other processes.</span>
+ <span class="s4">* </span><span class="s5">@todo </span><span class="s4">This stream could work through `FileSystemSyncAccessHandle.write` in a</span>
+ <span class="s4">*       Worker thread instead.</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">FsaNodeWriteStream </span><span
+    class="s0">extends </span><span class="s1">Writable </span><span class="s0">implements </span><span class="s1">IWriteStream </span><span
+    class="s2">{</span>
+    <span class="s1">readonly path</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly options</span><span class="s2">: </span><span
+    class="s1">IWriteStreamOptions</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">__pending__</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">__closed__</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">__bytes__</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly __stream__</span><span class="s2">: </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">IFileSystemWritableFileStream</span><span
+    class="s2">&gt;;</span>
+    <span class="s0">protected </span><span class="s1">readonly __mutex__</span><span class="s2">: &lt;</span><span
+    class="s1">T </span><span class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span
+    class="s1">code</span><span class="s2">: </span><span class="s0">import</span><span class="s2">(</span><span
+    class="s3">&quot;thingies&quot;</span><span class="s2">).</span><span class="s1">Code</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">handle</span><span class="s2">: </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">FsaNodeFsOpenFile</span><span
+    class="s2">&gt;, </span><span class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">IWriteStreamOptions</span><span class="s2">);</span>
+    <span class="s0">private </span><span class="s1">___write___</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">__close__</span><span class="s2">;</span>
+    <span class="s1">get bytesWritten</span><span class="s2">(): </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">get pending</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">close</span><span class="s2">(</span><span class="s1">cb</span><span class="s2">: </span><span
+    class="s1">any</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">_write</span><span class="s2">(</span><span class="s1">chunk</span><span class="s2">: </span><span
+    class="s1">any</span><span class="s2">, </span><span class="s1">encoding</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span
+    class="s1">error</span><span class="s2">?: </span><span class="s1">Error </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">_writev</span><span class="s2">(</span><span class="s1">chunks</span><span
+    class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;{</span>
+        <span class="s1">chunk</span><span class="s2">: </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s1">encoding</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s2">}&gt;, </span><span class="s1">callback</span><span class="s2">: (</span><span
+    class="s1">error</span><span class="s2">?: </span><span class="s1">Error </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">_final</span><span class="s2">(</span><span class="s1">callback</span><span
+    class="s2">: (</span><span class="s1">error</span><span class="s2">?: </span><span class="s1">Error </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

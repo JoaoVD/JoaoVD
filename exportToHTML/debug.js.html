@@ -1,0 +1,372 @@
+<html>
+<head>
+  <title>debug.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #cf8e6d;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+
+    .s8 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          debug.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre>
+<span class="s1">/**</span>
+ <span class="s1">* This is the common logic for both the Node.js and web browser</span>
+ <span class="s1">* implementations of `debug()`.</span>
+ <span class="s1">*</span>
+ <span class="s1">* Expose `debug()` as the module.</span>
+ <span class="s1">*/</span>
+
+<span class="s0">exports </span><span class="s2">= </span><span class="s0">module</span><span class="s2">.</span><span
+  class="s0">exports </span><span class="s2">= </span><span class="s0">createDebug</span><span class="s2">.</span><span
+  class="s0">debug </span><span class="s2">= </span><span class="s0">createDebug</span><span class="s2">[</span><span
+  class="s3">'default'</span><span class="s2">] = </span><span class="s0">createDebug</span><span class="s2">;</span>
+<span class="s0">exports</span><span class="s2">.</span><span class="s0">coerce </span><span class="s2">= </span><span
+  class="s0">coerce</span><span class="s2">;</span>
+<span class="s0">exports</span><span class="s2">.</span><span class="s0">disable </span><span class="s2">= </span><span
+  class="s0">disable</span><span class="s2">;</span>
+<span class="s0">exports</span><span class="s2">.</span><span class="s0">enable </span><span class="s2">= </span><span
+  class="s0">enable</span><span class="s2">;</span>
+<span class="s0">exports</span><span class="s2">.</span><span class="s0">enabled </span><span class="s2">= </span><span
+  class="s0">enabled</span><span class="s2">;</span>
+<span class="s0">exports</span><span class="s2">.</span><span class="s0">humanize </span><span class="s2">= </span><span
+  class="s0">require</span><span class="s2">(</span><span class="s3">'ms'</span><span class="s2">);</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* The currently active debug mode names, and names to skip.</span>
+ <span class="s1">*/</span>
+
+<span class="s0">exports</span><span class="s2">.</span><span class="s0">names </span><span class="s2">= [];</span>
+<span class="s0">exports</span><span class="s2">.</span><span class="s0">skips </span><span class="s2">= [];</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* Map of special &quot;%n&quot; handling functions, for the debug &quot;format&quot; argument.</span>
+ <span class="s1">*</span>
+ <span
+   class="s1">* Valid key names are a single, lower or upper-case letter, i.e. &quot;n&quot; and &quot;N&quot;.</span>
+ <span class="s1">*/</span>
+
+<span class="s0">exports</span><span class="s2">.</span><span class="s0">formatters </span><span class="s2">= {};</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* Previous log timestamp.</span>
+ <span class="s1">*/</span>
+
+<span class="s4">var </span><span class="s0">prevTime</span><span class="s2">;</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* Select a color.</span>
+ <span class="s1">* </span><span class="s5">@param </span><span class="s1">{String} namespace</span>
+ <span class="s1">* </span><span class="s5">@return </span><span class="s1">{Number}</span>
+ <span class="s1">* </span><span class="s5">@api </span><span class="s1">private</span>
+ <span class="s1">*/</span>
+
+<span class="s4">function </span><span class="s0">selectColor</span><span class="s2">(</span><span
+  class="s0">namespace</span><span class="s2">) {</span>
+  <span class="s4">var </span><span class="s0">hash </span><span class="s2">= </span><span class="s6">0</span><span
+  class="s2">, </span><span class="s0">i</span><span class="s2">;</span>
+
+  <span class="s4">for </span><span class="s2">(</span><span class="s0">i </span><span class="s4">in </span><span
+  class="s0">namespace</span><span class="s2">) {</span>
+    <span class="s0">hash  </span><span class="s2">= ((</span><span class="s0">hash </span><span
+  class="s2">&lt;&lt; </span><span class="s6">5</span><span class="s2">) - </span><span class="s0">hash</span><span
+  class="s2">) + </span><span class="s0">namespace</span><span class="s2">.</span><span
+  class="s0">charCodeAt</span><span class="s2">(</span><span class="s0">i</span><span class="s2">);</span>
+    <span class="s0">hash </span><span class="s2">|= </span><span class="s6">0</span><span class="s2">; </span><span
+  class="s7">// Convert to 32bit integer</span>
+  <span class="s2">}</span>
+
+  <span class="s4">return </span><span class="s0">exports</span><span class="s2">.</span><span
+  class="s0">colors</span><span class="s2">[</span><span class="s0">Math</span><span class="s2">.</span><span
+  class="s0">abs</span><span class="s2">(</span><span class="s0">hash</span><span class="s2">) % </span><span
+  class="s0">exports</span><span class="s2">.</span><span class="s0">colors</span><span class="s2">.</span><span
+  class="s0">length</span><span class="s2">];</span>
+<span class="s2">}</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* Create a debugger with the given `namespace`.</span>
+ <span class="s1">*</span>
+ <span class="s1">* </span><span class="s5">@param </span><span class="s1">{String} namespace</span>
+ <span class="s1">* </span><span class="s5">@return </span><span class="s1">{Function}</span>
+ <span class="s1">* </span><span class="s5">@api </span><span class="s1">public</span>
+ <span class="s1">*/</span>
+
+<span class="s4">function </span><span class="s0">createDebug</span><span class="s2">(</span><span
+  class="s0">namespace</span><span class="s2">) {</span>
+
+  <span class="s4">function </span><span class="s0">debug</span><span class="s2">() {</span>
+    <span class="s7">// disabled?</span>
+    <span class="s4">if </span><span class="s2">(!</span><span class="s0">debug</span><span class="s2">.</span><span
+  class="s0">enabled</span><span class="s2">) </span><span class="s4">return</span><span class="s2">;</span>
+
+    <span class="s4">var </span><span class="s0">self </span><span class="s2">= </span><span
+  class="s0">debug</span><span class="s2">;</span>
+
+    <span class="s7">// set `diff` timestamp</span>
+    <span class="s4">var </span><span class="s0">curr </span><span class="s2">= +</span><span
+  class="s4">new </span><span class="s0">Date</span><span class="s2">();</span>
+    <span class="s4">var </span><span class="s0">ms </span><span class="s2">= </span><span class="s0">curr </span><span
+  class="s2">- (</span><span class="s0">prevTime </span><span class="s2">|| </span><span class="s0">curr</span><span
+  class="s2">);</span>
+    <span class="s0">self</span><span class="s2">.</span><span class="s0">diff </span><span class="s2">= </span><span
+  class="s0">ms</span><span class="s2">;</span>
+    <span class="s0">self</span><span class="s2">.</span><span class="s0">prev </span><span class="s2">= </span><span
+  class="s0">prevTime</span><span class="s2">;</span>
+    <span class="s0">self</span><span class="s2">.</span><span class="s0">curr </span><span class="s2">= </span><span
+  class="s0">curr</span><span class="s2">;</span>
+    <span class="s0">prevTime </span><span class="s2">= </span><span class="s0">curr</span><span class="s2">;</span>
+
+    <span class="s7">// turn the `arguments` into a proper Array</span>
+    <span class="s4">var </span><span class="s0">args </span><span class="s2">= </span><span class="s4">new </span><span
+  class="s0">Array</span><span class="s2">(</span><span class="s0">arguments</span><span class="s2">.</span><span
+  class="s0">length</span><span class="s2">);</span>
+    <span class="s4">for </span><span class="s2">(</span><span class="s4">var </span><span class="s0">i </span><span
+  class="s2">= </span><span class="s6">0</span><span class="s2">; </span><span class="s0">i </span><span
+  class="s2">&lt; </span><span class="s0">args</span><span class="s2">.</span><span class="s0">length</span><span
+  class="s2">; </span><span class="s0">i</span><span class="s2">++) {</span>
+      <span class="s0">args</span><span class="s2">[</span><span class="s0">i</span><span class="s2">] = </span><span
+  class="s0">arguments</span><span class="s2">[</span><span class="s0">i</span><span class="s2">];</span>
+    <span class="s2">}</span>
+
+    <span class="s0">args</span><span class="s2">[</span><span class="s6">0</span><span class="s2">] = </span><span
+  class="s0">exports</span><span class="s2">.</span><span class="s0">coerce</span><span class="s2">(</span><span
+  class="s0">args</span><span class="s2">[</span><span class="s6">0</span><span class="s2">]);</span>
+
+    <span class="s4">if </span><span class="s2">(</span><span class="s3">'string' </span><span
+  class="s2">!== </span><span class="s4">typeof </span><span class="s0">args</span><span class="s2">[</span><span
+  class="s6">0</span><span class="s2">]) {</span>
+      <span class="s7">// anything else let's inspect with %O</span>
+      <span class="s0">args</span><span class="s2">.</span><span class="s0">unshift</span><span class="s2">(</span><span
+  class="s3">'%O'</span><span class="s2">);</span>
+    <span class="s2">}</span>
+
+    <span class="s7">// apply any `formatters` transformations</span>
+    <span class="s4">var </span><span class="s0">index </span><span class="s2">= </span><span class="s6">0</span><span
+  class="s2">;</span>
+    <span class="s0">args</span><span class="s2">[</span><span class="s6">0</span><span class="s2">] = </span><span
+  class="s0">args</span><span class="s2">[</span><span class="s6">0</span><span class="s2">].</span><span class="s0">replace</span><span
+  class="s2">(</span><span class="s8">/%([a-zA-Z%])/g</span><span class="s2">, </span><span
+  class="s4">function</span><span class="s2">(</span><span class="s0">match</span><span class="s2">, </span><span
+  class="s0">format</span><span class="s2">) {</span>
+      <span class="s7">// if we encounter an escaped % then don't increase the array index</span>
+      <span class="s4">if </span><span class="s2">(</span><span class="s0">match </span><span
+  class="s2">=== </span><span class="s3">'%%'</span><span class="s2">) </span><span class="s4">return </span><span
+  class="s0">match</span><span class="s2">;</span>
+      <span class="s0">index</span><span class="s2">++;</span>
+      <span class="s4">var </span><span class="s0">formatter </span><span class="s2">= </span><span
+  class="s0">exports</span><span class="s2">.</span><span class="s0">formatters</span><span class="s2">[</span><span
+  class="s0">format</span><span class="s2">];</span>
+      <span class="s4">if </span><span class="s2">(</span><span class="s3">'function' </span><span
+  class="s2">=== </span><span class="s4">typeof </span><span class="s0">formatter</span><span class="s2">) {</span>
+        <span class="s4">var </span><span class="s0">val </span><span class="s2">= </span><span
+  class="s0">args</span><span class="s2">[</span><span class="s0">index</span><span class="s2">];</span>
+        <span class="s0">match </span><span class="s2">= </span><span class="s0">formatter</span><span
+  class="s2">.</span><span class="s0">call</span><span class="s2">(</span><span class="s0">self</span><span
+  class="s2">, </span><span class="s0">val</span><span class="s2">);</span>
+
+        <span class="s7">// now we need to remove `args[index]` since it's inlined in the `format`</span>
+        <span class="s0">args</span><span class="s2">.</span><span class="s0">splice</span><span
+  class="s2">(</span><span class="s0">index</span><span class="s2">, </span><span class="s6">1</span><span
+  class="s2">);</span>
+        <span class="s0">index</span><span class="s2">--;</span>
+      <span class="s2">}</span>
+      <span class="s4">return </span><span class="s0">match</span><span class="s2">;</span>
+    <span class="s2">});</span>
+
+    <span class="s7">// apply env-specific formatting (colors, etc.)</span>
+    <span class="s0">exports</span><span class="s2">.</span><span class="s0">formatArgs</span><span
+  class="s2">.</span><span class="s0">call</span><span class="s2">(</span><span class="s0">self</span><span
+  class="s2">, </span><span class="s0">args</span><span class="s2">);</span>
+
+    <span class="s4">var </span><span class="s0">logFn </span><span class="s2">= </span><span
+  class="s0">debug</span><span class="s2">.</span><span class="s0">log </span><span class="s2">|| </span><span
+  class="s0">exports</span><span class="s2">.</span><span class="s0">log </span><span class="s2">|| </span><span
+  class="s0">console</span><span class="s2">.</span><span class="s0">log</span><span class="s2">.</span><span
+  class="s0">bind</span><span class="s2">(</span><span class="s0">console</span><span class="s2">);</span>
+    <span class="s0">logFn</span><span class="s2">.</span><span class="s0">apply</span><span class="s2">(</span><span
+  class="s0">self</span><span class="s2">, </span><span class="s0">args</span><span class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s0">debug</span><span class="s2">.</span><span class="s0">namespace </span><span
+  class="s2">= </span><span class="s0">namespace</span><span class="s2">;</span>
+  <span class="s0">debug</span><span class="s2">.</span><span class="s0">enabled </span><span class="s2">= </span><span
+  class="s0">exports</span><span class="s2">.</span><span class="s0">enabled</span><span class="s2">(</span><span
+  class="s0">namespace</span><span class="s2">);</span>
+  <span class="s0">debug</span><span class="s2">.</span><span class="s0">useColors </span><span
+  class="s2">= </span><span class="s0">exports</span><span class="s2">.</span><span class="s0">useColors</span><span
+  class="s2">();</span>
+  <span class="s0">debug</span><span class="s2">.</span><span class="s0">color </span><span class="s2">= </span><span
+  class="s0">selectColor</span><span class="s2">(</span><span class="s0">namespace</span><span class="s2">);</span>
+
+  <span class="s7">// env-specific initialization logic for debug instances</span>
+  <span class="s4">if </span><span class="s2">(</span><span class="s3">'function' </span><span
+  class="s2">=== </span><span class="s4">typeof </span><span class="s0">exports</span><span class="s2">.</span><span
+  class="s0">init</span><span class="s2">) {</span>
+    <span class="s0">exports</span><span class="s2">.</span><span class="s0">init</span><span class="s2">(</span><span
+  class="s0">debug</span><span class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s4">return </span><span class="s0">debug</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* Enables a debug mode by namespaces. This can include modes</span>
+ <span class="s1">* separated by a colon and wildcards.</span>
+ <span class="s1">*</span>
+ <span class="s1">* </span><span class="s5">@param </span><span class="s1">{String} namespaces</span>
+ <span class="s1">* </span><span class="s5">@api </span><span class="s1">public</span>
+ <span class="s1">*/</span>
+
+<span class="s4">function </span><span class="s0">enable</span><span class="s2">(</span><span
+  class="s0">namespaces</span><span class="s2">) {</span>
+  <span class="s0">exports</span><span class="s2">.</span><span class="s0">save</span><span class="s2">(</span><span
+  class="s0">namespaces</span><span class="s2">);</span>
+
+  <span class="s0">exports</span><span class="s2">.</span><span class="s0">names </span><span class="s2">= [];</span>
+  <span class="s0">exports</span><span class="s2">.</span><span class="s0">skips </span><span class="s2">= [];</span>
+
+  <span class="s4">var </span><span class="s0">split </span><span class="s2">= (</span><span
+  class="s4">typeof </span><span class="s0">namespaces </span><span class="s2">=== </span><span
+  class="s3">'string' </span><span class="s2">? </span><span class="s0">namespaces </span><span
+  class="s2">: </span><span class="s3">''</span><span class="s2">).</span><span class="s0">split</span><span class="s2">(</span><span
+  class="s8">/[\s,]+/</span><span class="s2">);</span>
+  <span class="s4">var </span><span class="s0">len </span><span class="s2">= </span><span class="s0">split</span><span
+  class="s2">.</span><span class="s0">length</span><span class="s2">;</span>
+
+  <span class="s4">for </span><span class="s2">(</span><span class="s4">var </span><span class="s0">i </span><span
+  class="s2">= </span><span class="s6">0</span><span class="s2">; </span><span class="s0">i </span><span
+  class="s2">&lt; </span><span class="s0">len</span><span class="s2">; </span><span class="s0">i</span><span class="s2">++) {</span>
+    <span class="s4">if </span><span class="s2">(!</span><span class="s0">split</span><span class="s2">[</span><span
+  class="s0">i</span><span class="s2">]) </span><span class="s4">continue</span><span class="s2">; </span><span
+  class="s7">// ignore empty strings</span>
+    <span class="s0">namespaces </span><span class="s2">= </span><span class="s0">split</span><span
+  class="s2">[</span><span class="s0">i</span><span class="s2">].</span><span class="s0">replace</span><span class="s2">(</span><span
+  class="s8">/\*/g</span><span class="s2">, </span><span class="s3">'.*?'</span><span class="s2">);</span>
+    <span class="s4">if </span><span class="s2">(</span><span class="s0">namespaces</span><span class="s2">[</span><span
+  class="s6">0</span><span class="s2">] === </span><span class="s3">'-'</span><span class="s2">) {</span>
+      <span class="s0">exports</span><span class="s2">.</span><span class="s0">skips</span><span
+  class="s2">.</span><span class="s0">push</span><span class="s2">(</span><span class="s4">new </span><span class="s0">RegExp</span><span
+  class="s2">(</span><span class="s3">'^' </span><span class="s2">+ </span><span class="s0">namespaces</span><span
+  class="s2">.</span><span class="s0">substr</span><span class="s2">(</span><span class="s6">1</span><span class="s2">) + </span><span
+  class="s3">'$'</span><span class="s2">));</span>
+    <span class="s2">} </span><span class="s4">else </span><span class="s2">{</span>
+      <span class="s0">exports</span><span class="s2">.</span><span class="s0">names</span><span
+  class="s2">.</span><span class="s0">push</span><span class="s2">(</span><span class="s4">new </span><span class="s0">RegExp</span><span
+  class="s2">(</span><span class="s3">'^' </span><span class="s2">+ </span><span class="s0">namespaces </span><span
+  class="s2">+ </span><span class="s3">'$'</span><span class="s2">));</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* Disable debug output.</span>
+ <span class="s1">*</span>
+ <span class="s1">* </span><span class="s5">@api </span><span class="s1">public</span>
+ <span class="s1">*/</span>
+
+<span class="s4">function </span><span class="s0">disable</span><span class="s2">() {</span>
+  <span class="s0">exports</span><span class="s2">.</span><span class="s0">enable</span><span class="s2">(</span><span
+  class="s3">''</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* Returns true if the given mode name is enabled, false otherwise.</span>
+ <span class="s1">*</span>
+ <span class="s1">* </span><span class="s5">@param </span><span class="s1">{String} name</span>
+ <span class="s1">* </span><span class="s5">@return </span><span class="s1">{Boolean}</span>
+ <span class="s1">* </span><span class="s5">@api </span><span class="s1">public</span>
+ <span class="s1">*/</span>
+
+<span class="s4">function </span><span class="s0">enabled</span><span class="s2">(</span><span
+  class="s0">name</span><span class="s2">) {</span>
+  <span class="s4">var </span><span class="s0">i</span><span class="s2">, </span><span class="s0">len</span><span
+  class="s2">;</span>
+  <span class="s4">for </span><span class="s2">(</span><span class="s0">i </span><span class="s2">= </span><span
+  class="s6">0</span><span class="s2">, </span><span class="s0">len </span><span class="s2">= </span><span class="s0">exports</span><span
+  class="s2">.</span><span class="s0">skips</span><span class="s2">.</span><span class="s0">length</span><span
+  class="s2">; </span><span class="s0">i </span><span class="s2">&lt; </span><span class="s0">len</span><span
+  class="s2">; </span><span class="s0">i</span><span class="s2">++) {</span>
+    <span class="s4">if </span><span class="s2">(</span><span class="s0">exports</span><span class="s2">.</span><span
+  class="s0">skips</span><span class="s2">[</span><span class="s0">i</span><span class="s2">].</span><span class="s0">test</span><span
+  class="s2">(</span><span class="s0">name</span><span class="s2">)) {</span>
+      <span class="s4">return false</span><span class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s4">for </span><span class="s2">(</span><span class="s0">i </span><span class="s2">= </span><span
+  class="s6">0</span><span class="s2">, </span><span class="s0">len </span><span class="s2">= </span><span class="s0">exports</span><span
+  class="s2">.</span><span class="s0">names</span><span class="s2">.</span><span class="s0">length</span><span
+  class="s2">; </span><span class="s0">i </span><span class="s2">&lt; </span><span class="s0">len</span><span
+  class="s2">; </span><span class="s0">i</span><span class="s2">++) {</span>
+    <span class="s4">if </span><span class="s2">(</span><span class="s0">exports</span><span class="s2">.</span><span
+  class="s0">names</span><span class="s2">[</span><span class="s0">i</span><span class="s2">].</span><span class="s0">test</span><span
+  class="s2">(</span><span class="s0">name</span><span class="s2">)) {</span>
+      <span class="s4">return true</span><span class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s4">return false</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">/**</span>
+ <span class="s1">* Coerce `val`.</span>
+ <span class="s1">*</span>
+ <span class="s1">* </span><span class="s5">@param </span><span class="s1">{Mixed} val</span>
+ <span class="s1">* </span><span class="s5">@return </span><span class="s1">{Mixed}</span>
+ <span class="s1">* </span><span class="s5">@api </span><span class="s1">private</span>
+ <span class="s1">*/</span>
+
+<span class="s4">function </span><span class="s0">coerce</span><span class="s2">(</span><span class="s0">val</span><span
+  class="s2">) {</span>
+  <span class="s4">if </span><span class="s2">(</span><span class="s0">val </span><span
+  class="s4">instanceof </span><span class="s0">Error</span><span class="s2">) </span><span
+  class="s4">return </span><span class="s0">val</span><span class="s2">.</span><span class="s0">stack </span><span
+  class="s2">|| </span><span class="s0">val</span><span class="s2">.</span><span class="s0">message</span><span
+  class="s2">;</span>
+  <span class="s4">return </span><span class="s0">val</span><span class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

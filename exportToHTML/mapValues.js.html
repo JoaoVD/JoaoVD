@@ -1,0 +1,108 @@
+<html>
+<head>
+  <title>mapValues.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          mapValues.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseAssignValue </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_baseAssignValue'</span><span class="s2">),</span>
+    <span class="s1">baseForOwn </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseForOwn'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates an object with the same keys as `object` and values generated</span>
+ <span class="s4">* by running each own enumerable string keyed property of `object` thru</span>
+ <span class="s4">* `iteratee`. The iteratee is invoked with three arguments:</span>
+ <span class="s4">* (value, key, object).</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">2.4.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Object</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Object} object The object to iterate over.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [iteratee=_.identity] The function invoked per iteration.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span
+    class="s4">{Object} Returns the new mapped object.</span>
+ <span class="s4">* </span><span class="s5">@see </span><span class="s4">_.mapKeys</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var users = {</span>
+ <span class="s4">*   'fred':    { 'user': 'fred',    'age': 40 },</span>
+ <span class="s4">*   'pebbles': { 'user': 'pebbles', 'age': 1 }</span>
+ <span class="s4">* };</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.mapValues(users, function(o) { return o.age; });</span>
+ <span class="s4">* // =&gt; { 'fred': 40, 'pebbles': 1 } (iteration order is not guaranteed)</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.property` iteratee shorthand.</span>
+ <span class="s4">* _.mapValues(users, 'age');</span>
+ <span class="s4">* // =&gt; { 'fred': 40, 'pebbles': 1 } (iteration order is not guaranteed)</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">mapValues</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">iteratee</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">result </span><span class="s2">= {};</span>
+  <span class="s1">iteratee </span><span class="s2">= </span><span class="s1">baseIteratee</span><span
+    class="s2">(</span><span class="s1">iteratee</span><span class="s2">, </span><span class="s6">3</span><span
+    class="s2">);</span>
+
+  <span class="s1">baseForOwn</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">, </span><span class="s0">function</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span class="s1">object</span><span
+    class="s2">) {</span>
+    <span class="s1">baseAssignValue</span><span class="s2">(</span><span class="s1">result</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span class="s1">iteratee</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">, </span><span class="s1">key</span><span
+    class="s2">, </span><span class="s1">object</span><span class="s2">));</span>
+  <span class="s2">});</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">mapValues</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

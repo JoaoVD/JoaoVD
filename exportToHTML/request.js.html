@@ -1,0 +1,90 @@
+<html>
+<head>
+  <title>request.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          request.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">function </span><span class="s1">attachPush </span><span class="s3">(</span><span class="s1">req</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">handle </span><span class="s3">= </span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span class="s1">_handle</span>
+
+  <span class="s1">handle</span><span class="s3">.</span><span class="s1">getStream</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">stream</span><span class="s3">) {</span>
+    <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'pushPromise'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">push</span><span class="s3">) {</span>
+      <span class="s1">req</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'push'</span><span class="s3">, </span><span class="s1">push</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s1">exports</span><span class="s3">.</span><span class="s1">onNewListener </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">onNewListener </span><span class="s3">(</span><span
+    class="s1">type</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">req </span><span class="s3">= </span><span class="s2">this</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">type </span><span class="s3">!== </span><span
+    class="s0">'push'</span><span class="s3">) {</span>
+    <span class="s2">return</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// Not first listener</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">listeners</span><span class="s3">(</span><span class="s0">'push'</span><span class="s3">).</span><span
+    class="s1">length </span><span class="s3">!== </span><span class="s5">0</span><span class="s3">) {</span>
+    <span class="s2">return</span>
+  <span class="s3">}</span>
+
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">socket</span><span class="s3">) {</span>
+    <span class="s1">req</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'socket'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+      <span class="s1">attachPush</span><span class="s3">(</span><span class="s1">req</span><span class="s3">)</span>
+    <span class="s3">})</span>
+    <span class="s2">return</span>
+  <span class="s3">}</span>
+
+  <span class="s1">attachPush</span><span class="s3">(</span><span class="s1">req</span><span class="s3">)</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

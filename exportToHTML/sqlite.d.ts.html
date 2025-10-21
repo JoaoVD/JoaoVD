@@ -1,0 +1,927 @@
+<html>
+<head>
+  <title>sqlite.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          sqlite.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:sqlite` module facilitates working with SQLite databases.</span>
+ <span class="s0">* To access it:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import sqlite from 'node:sqlite';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* This module is only available under the `node:` scheme. The following will not</span>
+ <span class="s0">* work:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import sqlite from 'sqlite';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* The following example shows the basic usage of the `node:sqlite` module to open</span>
+ <span class="s0">* an in-memory database, write data to the database, and then read the data back.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { DatabaseSync } from 'node:sqlite';</span>
+ <span class="s0">* const database = new DatabaseSync(':memory:');</span>
+ <span class="s0">*</span>
+ <span class="s0">* // Execute SQL statements from strings.</span>
+ <span class="s0">* database.exec(`</span>
+ <span class="s0">*   CREATE TABLE data(</span>
+ <span class="s0">*     key INTEGER PRIMARY KEY,</span>
+ <span class="s0">*     value TEXT</span>
+ <span class="s0">*   ) STRICT</span>
+ <span class="s0">* `);</span>
+ <span class="s0">* // Create a prepared statement to insert data into the database.</span>
+ <span class="s0">* const insert = database.prepare('INSERT INTO data (key, value) VALUES (?, ?)');</span>
+ <span class="s0">* // Execute the prepared statement with bound values.</span>
+ <span class="s0">* insert.run(1, 'hello');</span>
+ <span class="s0">* insert.run(2, 'world');</span>
+ <span class="s0">* // Create a prepared statement to read data from the database.</span>
+ <span class="s0">* const query = database.prepare('SELECT * FROM data ORDER BY key');</span>
+ <span class="s0">* // Execute the prepared statement and log the result set.</span>
+ <span class="s0">* console.log(query.all());</span>
+ <span class="s0">* // Prints: [ { key: 1, value: 'hello' }, { key: 2, value: 'world' } ]</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+ <span class="s0">* </span><span class="s1">@experimental</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/sqlite.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:sqlite&quot; </span><span class="s4">{</span>
+    <span class="s2">type SQLInputValue </span><span class="s4">= </span><span class="s5">null </span><span
+    class="s4">| </span><span class="s2">number </span><span class="s4">| </span><span class="s2">bigint </span><span
+    class="s4">| </span><span class="s2">string </span><span class="s4">| </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ArrayBufferView</span><span class="s4">;</span>
+    <span class="s2">type SQLOutputValue </span><span class="s4">= </span><span class="s5">null </span><span class="s4">| </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s2">bigint </span><span class="s4">| </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">Uint8Array</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `SQLInputValue` or `SQLOutputValue` instead. */</span>
+    <span class="s2">type SupportedValueType </span><span class="s4">= </span><span
+    class="s2">SQLOutputValue</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">DatabaseSyncOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, the database is opened by the constructor. When</span>
+         <span class="s0">* this value is `false`, the database must be opened via the `open()` method.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">open</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, foreign key constraints</span>
+         <span class="s0">* are enabled. This is recommended but can be disabled for compatibility with</span>
+         <span class="s0">* legacy database schemas. The enforcement of foreign key constraints can be</span>
+         <span class="s0">* enabled and disabled after opening the database using</span>
+         <span class="s0">* [`PRAGMA foreign_keys`](https://www.sqlite.org/pragma.html#pragma_foreign_keys).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.10.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">enableForeignKeyConstraints</span><span class="s4">?: </span><span
+    class="s2">boolean </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, SQLite will accept</span>
+         <span class="s0">* [double-quoted string literals](https://www.sqlite.org/quirks.html#dblquote).</span>
+         <span class="s0">* This is not recommended but can be</span>
+         <span class="s0">* enabled for compatibility with legacy database schemas.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.10.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">enableDoubleQuotedStringLiterals</span><span class="s4">?: </span><span
+    class="s2">boolean </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, the database is opened in read-only mode.</span>
+         <span class="s0">* If the database does not exist, opening it will fail.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">readOnly</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, the `loadExtension` SQL function</span>
+         <span class="s0">* and the `loadExtension()` method are enabled.</span>
+         <span class="s0">* You can call `enableLoadExtension(false)` later to disable this feature.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">allowExtension</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The [busy timeout](https://sqlite.org/c3ref/busy_timeout.html) in milliseconds. This is the maximum amount of</span>
+         <span class="s0">* time that SQLite will wait for a database lock to be released before</span>
+         <span class="s0">* returning an error.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.0.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, integer fields are read as JavaScript `BigInt` values. If `false`,</span>
+         <span class="s0">* integer fields are read as JavaScript numbers.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.4.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">readBigInts</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, query results are returned as arrays instead of objects.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.4.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">returnArrays</span><span class="s4">?: </span><span class="s2">boolean </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, allows binding named parameters without the prefix</span>
+         <span class="s0">* character (e.g., `foo` instead of `:foo`).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.4.40</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">allowBareNamedParameters</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, unknown named parameters are ignored when binding.</span>
+         <span class="s0">* If `false`, an exception is thrown for unknown named parameters.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.4.40</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">allowUnknownNamedParameters</span><span class="s4">?: </span><span
+    class="s2">boolean </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">CreateSessionOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A specific table to track changes for. By default, changes to all tables are tracked.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">table</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Name of the database to track. This is useful when multiple databases have been added using</span>
+         <span class="s0">* [`ATTACH DATABASE`](https://www.sqlite.org/lang_attach.html).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'main'</span>
+         <span class="s0">*/</span>
+        <span class="s2">db</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ApplyChangesetOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Skip changes that, when targeted table name is supplied to this function, return a truthy value.</span>
+         <span class="s0">* By default, all changes are attempted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">filter</span><span class="s4">?: ((</span><span class="s2">tableName</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">) =&gt; </span><span
+    class="s2">boolean</span><span class="s4">) | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* A function that determines how to handle conflicts. The function receives one argument,</span>
+         <span class="s0">* which can be one of the following values:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `SQLITE_CHANGESET_DATA`: A `DELETE` or `UPDATE` change does not contain the expected &quot;before&quot; values.</span>
+         <span class="s0">* * `SQLITE_CHANGESET_NOTFOUND`: A row matching the primary key of the `DELETE` or `UPDATE` change does not exist.</span>
+         <span class="s0">* * `SQLITE_CHANGESET_CONFLICT`: An `INSERT` change results in a duplicate primary key.</span>
+         <span
+           class="s0">* * `SQLITE_CHANGESET_FOREIGN_KEY`: Applying a change would result in a foreign key violation.</span>
+         <span class="s0">* * `SQLITE_CHANGESET_CONSTRAINT`: Applying a change results in a `UNIQUE`, `CHECK`, or `NOT NULL` constraint</span>
+         <span class="s0">* violation.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The function should return one of the following values:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `SQLITE_CHANGESET_OMIT`: Omit conflicting changes.</span>
+         <span class="s0">* * `SQLITE_CHANGESET_REPLACE`: Replace existing values with conflicting changes (only valid with</span>
+             <span class="s0">`SQLITE_CHANGESET_DATA` or `SQLITE_CHANGESET_CONFLICT` conflicts).</span>
+         <span class="s0">* * `SQLITE_CHANGESET_ABORT`: Abort on conflict and roll back the database.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When an error is thrown in the conflict handler or when any other value is returned from the handler,</span>
+         <span class="s0">* applying the changeset is aborted and the database is rolled back.</span>
+         <span class="s0">*</span>
+         <span class="s0">* **Default**: A function that returns `SQLITE_CHANGESET_ABORT`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">onConflict</span><span class="s4">?: ((</span><span class="s2">conflictType</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span
+    class="s2">number</span><span class="s4">) | </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">FunctionOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, the [`SQLITE_DETERMINISTIC`](https://www.sqlite.org/c3ref/c_deterministic.html) flag is</span>
+         <span class="s0">* set on the created function.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">deterministic</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, the [`SQLITE_DIRECTONLY`](https://www.sqlite.org/c3ref/c_directonly.html) flag is set on</span>
+         <span class="s0">* the created function.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">directOnly</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, integer arguments to `function`</span>
+         <span class="s0">* are converted to `BigInt`s. If `false`, integer arguments are passed as</span>
+         <span class="s0">* JavaScript numbers.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">useBigIntArguments</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, `function` may be invoked with any number of</span>
+         <span class="s0">* arguments (between zero and</span>
+         <span class="s0">* [`SQLITE_MAX_FUNCTION_ARG`](https://www.sqlite.org/limits.html#max_function_arg)). If `false`,</span>
+         <span class="s0">* `function` must be invoked with exactly `function.length` arguments.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">varargs</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">AggregateOptions</span><span class="s4">&lt;</span><span
+    class="s2">T </span><span class="s5">extends </span><span class="s2">SQLInputValue </span><span class="s4">= </span><span
+    class="s2">SQLInputValue</span><span class="s4">&gt; </span><span class="s5">extends </span><span class="s2">FunctionOptions </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* The identity value for the aggregation function. This value is used when the aggregation</span>
+         <span
+           class="s0">* function is initialized. When a `Function` is passed the identity will be its return value.</span>
+         <span class="s0">*/</span>
+        <span class="s2">start</span><span class="s4">: </span><span class="s2">T </span><span
+    class="s4">| (() =&gt; </span><span class="s2">T</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The function to call for each row in the aggregation. The</span>
+         <span class="s0">* function receives the current state and the row value. The return value of</span>
+         <span class="s0">* this function should be the new state.</span>
+         <span class="s0">*/</span>
+        <span class="s2">step</span><span class="s4">: (</span><span class="s2">accumulator</span><span
+    class="s4">: </span><span class="s2">T</span><span class="s4">, </span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">SQLOutputValue</span><span class="s4">[]) =&gt; </span><span
+    class="s2">T</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The function to call to get the result of the</span>
+         <span class="s0">* aggregation. The function receives the final state and should return the</span>
+         <span class="s0">* result of the aggregation.</span>
+         <span class="s0">*/</span>
+        <span class="s2">result</span><span class="s4">?: ((</span><span class="s2">accumulator</span><span
+    class="s4">: </span><span class="s2">T</span><span class="s4">) =&gt; </span><span
+    class="s2">SQLInputValue</span><span class="s4">) | </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* When this function is provided, the `aggregate` method will work as a window function.</span>
+         <span class="s0">* The function receives the current state and the dropped row value. The return value of this function should be the</span>
+         <span class="s0">* new state.</span>
+         <span class="s0">*/</span>
+        <span class="s2">inverse</span><span class="s4">?: ((</span><span class="s2">accumulator</span><span class="s4">: </span><span
+    class="s2">T</span><span class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span
+    class="s2">SQLOutputValue</span><span class="s4">[]) =&gt; </span><span class="s2">T</span><span
+    class="s4">) | </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This class represents a single [connection](https://www.sqlite.org/c3ref/sqlite3.html) to a SQLite database. All APIs</span>
+     <span class="s0">* exposed by this class execute synchronously.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">DatabaseSync </span><span class="s5">implements </span><span
+    class="s2">Disposable </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Constructs a new `DatabaseSync` instance.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">path The path of the database.</span>
+         <span class="s0">* A SQLite database can be stored in a file or completely [in memory](https://www.sqlite.org/inmemorydb.html).</span>
+         <span class="s0">* To use a file-backed database, the path should be a file path.</span>
+         <span class="s0">* To use an in-memory database, the path should be the special name `':memory:'`.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">options Configuration options for the database connection.</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">path</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">URL</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">DatabaseSyncOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Registers a new aggregate function with the SQLite database. This method is a wrapper around</span>
+         <span
+           class="s0">* [`sqlite3_create_window_function()`](https://www.sqlite.org/c3ref/create_function.html).</span>
+         <span class="s0">*</span>
+         <span class="s0">* When used as a window function, the `result` function will be called multiple times.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { DatabaseSync } from 'node:sqlite';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const db = new DatabaseSync(':memory:');</span>
+         <span class="s0">* db.exec(`</span>
+         <span class="s0">*   CREATE TABLE t3(x, y);</span>
+         <span class="s0">*   INSERT INTO t3 VALUES ('a', 4),</span>
+         <span class="s0">*                         ('b', 5),</span>
+         <span class="s0">*                         ('c', 3),</span>
+         <span class="s0">*                         ('d', 8),</span>
+         <span class="s0">*                         ('e', 1);</span>
+         <span class="s0">* `);</span>
+         <span class="s0">*</span>
+         <span class="s0">* db.aggregate('sumint', {</span>
+         <span class="s0">*   start: 0,</span>
+         <span class="s0">*   step: (acc, value) =&gt; acc + value,</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* db.prepare('SELECT sumint(y) as total FROM t3').get(); // { total: 21 }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.0.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">name The name of the SQLite function to create.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">options Function configuration settings.</span>
+         <span class="s0">*/</span>
+        <span class="s2">aggregate</span><span class="s4">(</span><span class="s2">name</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span class="s4">: </span><span
+    class="s2">AggregateOptions</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">aggregate</span><span class="s4">&lt;</span><span class="s2">T </span><span
+    class="s5">extends </span><span class="s2">SQLInputValue</span><span class="s4">&gt;(</span><span
+    class="s2">name</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">AggregateOptions</span><span
+    class="s4">&lt;</span><span class="s2">T</span><span class="s4">&gt;): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Closes the database connection. An exception is thrown if the database is not</span>
+         <span class="s0">* open. This method is a wrapper around [`sqlite3_close_v2()`](https://www.sqlite.org/c3ref/close.html).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">close</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Loads a shared library into the database connection. This method is a wrapper</span>
+         <span class="s0">* around [`sqlite3_load_extension()`](https://www.sqlite.org/c3ref/load_extension.html). It is required to enable the</span>
+         <span class="s0">* `allowExtension` option when constructing the `DatabaseSync` instance.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">path The path to the shared library to load.</span>
+         <span class="s0">*/</span>
+        <span class="s2">loadExtension</span><span class="s4">(</span><span class="s2">path</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Enables or disables the `loadExtension` SQL function, and the `loadExtension()`</span>
+         <span class="s0">* method. When `allowExtension` is `false` when constructing, you cannot enable</span>
+         <span class="s0">* loading extensions for security reasons.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">allow Whether to allow loading extensions.</span>
+         <span class="s0">*/</span>
+        <span class="s2">enableLoadExtension</span><span class="s4">(</span><span class="s2">allow</span><span
+    class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method is a wrapper around [`sqlite3_db_filename()`](https://sqlite.org/c3ref/db_filename.html)</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.0.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">dbName Name of the database. This can be `'main'` (the default primary database) or any other</span>
+         <span class="s0">* database that has been added with [`ATTACH DATABASE`](https://www.sqlite.org/lang_attach.html) **Default:** `'main'`.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">The location of the database file. When using an in-memory database,</span>
+         <span class="s0">* this method returns null.</span>
+         <span class="s0">*/</span>
+        <span class="s2">location</span><span class="s4">(</span><span class="s2">dbName</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method allows one or more SQL statements to be executed without returning</span>
+         <span class="s0">* any results. This method is useful when executing SQL statements read from a</span>
+         <span class="s0">* file. This method is a wrapper around [`sqlite3_exec()`](https://www.sqlite.org/c3ref/exec.html).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">sql A SQL string to execute.</span>
+         <span class="s0">*/</span>
+        <span class="s2">exec</span><span class="s4">(</span><span class="s2">sql</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method is used to create SQLite user-defined functions. This method is a</span>
+         <span class="s0">* wrapper around [`sqlite3_create_function_v2()`](https://www.sqlite.org/c3ref/create_function.html).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">name The name of the SQLite function to create.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">options Optional configuration settings for the function.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">func The JavaScript function to call when the SQLite</span>
+         <span class="s0">* function is invoked. The return value of this function should be a valid</span>
+         <span class="s0">* SQLite data type: see</span>
+         <span class="s0">* [Type conversion between JavaScript and SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html#type-conversion-between-javascript-and-sqlite).</span>
+         <span class="s0">* The result defaults to `NULL` if the return value is `undefined`.</span>
+         <span class="s0">*/</span>
+        <span class="s5">function</span><span class="s4">(</span>
+            <span class="s2">name</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span class="s2">FunctionOptions</span><span
+    class="s4">,</span>
+            <span class="s2">func</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">SQLOutputValue</span><span class="s4">[]) =&gt; </span><span class="s2">SQLInputValue</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s5">function</span><span class="s4">(</span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">func</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">SQLOutputValue</span><span
+    class="s4">[]) =&gt; </span><span class="s2">SQLInputValue</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Whether the database is currently open or not.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly isOpen</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Whether the database is currently within a transaction. This method</span>
+         <span class="s0">* is a wrapper around [`sqlite3_get_autocommit()`](https://sqlite.org/c3ref/get_autocommit.html).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly isTransaction</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Opens the database specified in the `path` argument of the `DatabaseSync`constructor. This method should only be used when the database is not opened via</span>
+         <span class="s0">* the constructor. An exception is thrown if the database is already open.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">open</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Compiles a SQL statement into a [prepared statement](https://www.sqlite.org/c3ref/stmt.html). This method is a wrapper</span>
+         <span class="s0">* around [`sqlite3_prepare_v2()`](https://www.sqlite.org/c3ref/prepare.html).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">sql A SQL string to compile to a prepared statement.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The prepared statement.</span>
+         <span class="s0">*/</span>
+        <span class="s2">prepare</span><span class="s4">(</span><span class="s2">sql</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">StatementSync</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Creates and attaches a session to the database. This method is a wrapper around</span>
+         <span
+           class="s0">* [`sqlite3session_create()`](https://www.sqlite.org/session/sqlite3session_create.html) and</span>
+         <span
+           class="s0">* [`sqlite3session_attach()`](https://www.sqlite.org/session/sqlite3session_attach.html).</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">options The configuration options for the session.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">A session handle.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">createSession</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">CreateSessionOptions</span><span class="s4">): </span><span
+    class="s2">Session</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An exception is thrown if the database is not</span>
+         <span class="s0">* open. This method is a wrapper around</span>
+         <span
+           class="s0">* [`sqlite3changeset_apply()`](https://www.sqlite.org/session/sqlite3changeset_apply.html).</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const sourceDb = new DatabaseSync(':memory:');</span>
+         <span class="s0">* const targetDb = new DatabaseSync(':memory:');</span>
+         <span class="s0">*</span>
+         <span class="s0">* sourceDb.exec('CREATE TABLE data(key INTEGER PRIMARY KEY, value TEXT)');</span>
+         <span class="s0">* targetDb.exec('CREATE TABLE data(key INTEGER PRIMARY KEY, value TEXT)');</span>
+         <span class="s0">*</span>
+         <span class="s0">* const session = sourceDb.createSession();</span>
+         <span class="s0">*</span>
+         <span class="s0">* const insert = sourceDb.prepare('INSERT INTO data (key, value) VALUES (?, ?)');</span>
+         <span class="s0">* insert.run(1, 'hello');</span>
+         <span class="s0">* insert.run(2, 'world');</span>
+         <span class="s0">*</span>
+         <span class="s0">* const changeset = session.changeset();</span>
+         <span class="s0">* targetDb.applyChangeset(changeset);</span>
+         <span
+           class="s0">* // Now that the changeset has been applied, targetDb contains the same data as sourceDb.</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">changeset A binary changeset or patchset.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">options The configuration options for how the changes will be applied.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">Whether the changeset was applied successfully without being aborted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">applyChangeset</span><span class="s4">(</span><span class="s2">changeset</span><span
+    class="s4">: </span><span class="s2">Uint8Array</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ApplyChangesetOptions</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Closes the database connection. If the database connection is already closed</span>
+         <span class="s0">* then this is a no-op.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+         <span class="s0">*/</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">dispose</span><span class="s4">](): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">Session </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Retrieves a changeset containing all changes since the changeset was created. Can be called multiple times.</span>
+         <span class="s0">* An exception is thrown if the database or the session is not open. This method is a wrapper around</span>
+         <span class="s0">* [`sqlite3session_changeset()`](https://www.sqlite.org/session/sqlite3session_changeset.html).</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">Binary changeset that can be applied to other databases.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">changeset</span><span class="s4">(): </span><span class="s2">Uint8Array</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Similar to the method above, but generates a more compact patchset. See</span>
+         <span class="s0">* [Changesets and Patchsets](https://www.sqlite.org/sessionintro.html#changesets_and_patchsets)</span>
+         <span class="s0">* in the documentation of SQLite. An exception is thrown if the database or the session is not open. This method is a</span>
+         <span class="s0">* wrapper around</span>
+         <span
+           class="s0">* [`sqlite3session_patchset()`](https://www.sqlite.org/session/sqlite3session_patchset.html).</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">Binary patchset that can be applied to other databases.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">patchset</span><span class="s4">(): </span><span class="s2">Uint8Array</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Closes the session. An exception is thrown if the database or the session is not open. This method is a</span>
+         <span class="s0">* wrapper around</span>
+         <span
+           class="s0">* [`sqlite3session_delete()`](https://www.sqlite.org/session/sqlite3session_delete.html).</span>
+         <span class="s0">*/</span>
+        <span class="s2">close</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">StatementColumnMetadata </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The unaliased name of the column in the origin</span>
+         <span class="s0">* table, or `null` if the column is the result of an expression or subquery.</span>
+         <span class="s0">* This property is the result of [`sqlite3_column_origin_name()`](https://www.sqlite.org/c3ref/column_database_name.html).</span>
+         <span class="s0">*/</span>
+        <span class="s2">column</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The unaliased name of the origin database, or</span>
+         <span class="s0">* `null` if the column is the result of an expression or subquery. This</span>
+         <span class="s0">* property is the result of [`sqlite3_column_database_name()`](https://www.sqlite.org/c3ref/column_database_name.html).</span>
+         <span class="s0">*/</span>
+        <span class="s2">database</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The name assigned to the column in the result set of a</span>
+         <span class="s0">* `SELECT` statement. This property is the result of</span>
+         <span class="s0">* [`sqlite3_column_name()`](https://www.sqlite.org/c3ref/column_name.html).</span>
+         <span class="s0">*/</span>
+        <span class="s2">name</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The unaliased name of the origin table, or `null` if</span>
+         <span class="s0">* the column is the result of an expression or subquery. This property is the</span>
+         <span class="s0">* result of [`sqlite3_column_table_name()`](https://www.sqlite.org/c3ref/column_database_name.html).</span>
+         <span class="s0">*/</span>
+        <span class="s2">table</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The declared data type of the column, or `null` if the</span>
+         <span class="s0">* column is the result of an expression or subquery. This property is the</span>
+         <span
+           class="s0">* result of [`sqlite3_column_decltype()`](https://www.sqlite.org/c3ref/column_decltype.html).</span>
+         <span class="s0">*/</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">StatementResultingChanges </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The number of rows modified, inserted, or deleted by the most recently completed `INSERT`, `UPDATE`, or `DELETE` statement.</span>
+         <span class="s0">* This field is either a number or a `BigInt` depending on the prepared statement's configuration.</span>
+         <span class="s0">* This property is the result of [`sqlite3_changes64()`](https://www.sqlite.org/c3ref/changes.html).</span>
+         <span class="s0">*/</span>
+        <span class="s2">changes</span><span class="s4">: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">bigint</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The most recently inserted rowid.</span>
+         <span class="s0">* This field is either a number or a `BigInt` depending on the prepared statement's configuration.</span>
+         <span class="s0">* This property is the result of [`sqlite3_last_insert_rowid()`](https://www.sqlite.org/c3ref/last_insert_rowid.html).</span>
+         <span class="s0">*/</span>
+        <span class="s2">lastInsertRowid</span><span class="s4">: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">bigint</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This class represents a single [prepared statement](https://www.sqlite.org/c3ref/stmt.html). This class cannot be</span>
+     <span class="s0">* instantiated via its constructor. Instead, instances are created via the`database.prepare()` method. All APIs exposed by this class execute</span>
+     <span class="s0">* synchronously.</span>
+     <span class="s0">*</span>
+     <span class="s0">* A prepared statement is an efficient binary representation of the SQL used to</span>
+     <span class="s0">* create it. Prepared statements are parameterizable, and can be invoked multiple</span>
+     <span class="s0">* times with different bound values. Parameters also offer protection against [SQL injection](https://en.wikipedia.org/wiki/SQL_injection) attacks. For these reasons, prepared statements are</span>
+     <span class="s0">* preferred</span>
+     <span class="s0">* over hand-crafted SQL strings when handling user input.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">StatementSync </span><span class="s4">{</span>
+        <span class="s5">private </span><span class="s2">constructor</span><span class="s4">();</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method executes a prepared statement and returns all results as an array of</span>
+         <span class="s0">* objects. If the prepared statement does not return any results, this method</span>
+         <span class="s0">* returns an empty array. The prepared statement [parameters are bound](https://www.sqlite.org/c3ref/bind_blob.html) using</span>
+         <span class="s0">* the values in `namedParameters` and `anonymousParameters`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">namedParameters An optional object used to bind named parameters. The keys of this object are used to configure the mapping.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">anonymousParameters Zero or more values to bind to anonymous parameters.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">An array of objects. Each object corresponds to a row returned by executing the prepared statement. The keys and values of each object correspond to the column names and values of</span>
+         <span class="s0">* the row.</span>
+         <span class="s0">*/</span>
+        <span class="s2">all</span><span class="s4">(</span><span class="s2">...anonymousParameters</span><span
+    class="s4">: </span><span class="s2">SQLInputValue</span><span class="s4">[]): </span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span class="s2">SQLOutputValue</span><span
+    class="s4">&gt;[];</span>
+        <span class="s2">all</span><span class="s4">(</span>
+            <span class="s2">namedParameters</span><span class="s4">: </span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">SQLInputValue</span><span class="s4">&gt;,</span>
+            <span class="s2">...anonymousParameters</span><span class="s4">: </span><span
+    class="s2">SQLInputValue</span><span class="s4">[]</span>
+        <span class="s4">): </span><span class="s2">Record</span><span class="s4">&lt;</span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">SQLOutputValue</span><span
+    class="s4">&gt;[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method is used to retrieve information about the columns returned by the</span>
+         <span class="s0">* prepared statement.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v23.11.0</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">An array of objects. Each object corresponds to a column</span>
+         <span class="s0">* in the prepared statement, and contains the following properties:</span>
+         <span class="s0">*/</span>
+        <span class="s2">columns</span><span class="s4">(): </span><span class="s2">StatementColumnMetadata</span><span
+    class="s4">[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The source SQL text of the prepared statement with parameter</span>
+         <span class="s0">* placeholders replaced by the values that were used during the most recent</span>
+         <span class="s0">* execution of this prepared statement. This property is a wrapper around</span>
+         <span class="s0">* [`sqlite3_expanded_sql()`](https://www.sqlite.org/c3ref/expanded_sql.html).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly expandedSQL</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method executes a prepared statement and returns the first result as an</span>
+         <span class="s0">* object. If the prepared statement does not return any results, this method</span>
+         <span class="s0">* returns `undefined`. The prepared statement [parameters are bound](https://www.sqlite.org/c3ref/bind_blob.html) using the</span>
+         <span class="s0">* values in `namedParameters` and `anonymousParameters`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">namedParameters An optional object used to bind named parameters. The keys of this object are used to configure the mapping.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">anonymousParameters Zero or more values to bind to anonymous parameters.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">An object corresponding to the first row returned by executing the prepared statement. The keys and values of the object correspond to the column names and values of the row. If no</span>
+         <span class="s0">* rows were returned from the database then this method returns `undefined`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">get</span><span class="s4">(</span><span class="s2">...anonymousParameters</span><span
+    class="s4">: </span><span class="s2">SQLInputValue</span><span class="s4">[]): </span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span class="s2">SQLOutputValue</span><span
+    class="s4">&gt; | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">get</span><span class="s4">(</span>
+            <span class="s2">namedParameters</span><span class="s4">: </span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">SQLInputValue</span><span class="s4">&gt;,</span>
+            <span class="s2">...anonymousParameters</span><span class="s4">: </span><span
+    class="s2">SQLInputValue</span><span class="s4">[]</span>
+        <span class="s4">): </span><span class="s2">Record</span><span class="s4">&lt;</span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">SQLOutputValue</span><span
+    class="s4">&gt; | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method executes a prepared statement and returns an iterator of</span>
+         <span class="s0">* objects. If the prepared statement does not return any results, this method</span>
+         <span class="s0">* returns an empty iterator. The prepared statement [parameters are bound](https://www.sqlite.org/c3ref/bind_blob.html) using</span>
+         <span class="s0">* the values in `namedParameters` and `anonymousParameters`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">namedParameters An optional object used to bind named parameters.</span>
+         <span class="s0">* The keys of this object are used to configure the mapping.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">anonymousParameters Zero or more values to bind to anonymous parameters.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">An iterable iterator of objects. Each object corresponds to a row</span>
+         <span class="s0">* returned by executing the prepared statement. The keys and values of each</span>
+         <span class="s0">* object correspond to the column names and values of the row.</span>
+         <span class="s0">*/</span>
+        <span class="s2">iterate</span><span class="s4">(</span><span class="s2">...anonymousParameters</span><span
+    class="s4">: </span><span class="s2">SQLInputValue</span><span class="s4">[]): </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Iterator</span><span class="s4">&lt;</span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span class="s2">SQLOutputValue</span><span
+    class="s4">&gt;&gt;;</span>
+        <span class="s2">iterate</span><span class="s4">(</span>
+            <span class="s2">namedParameters</span><span class="s4">: </span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">SQLInputValue</span><span class="s4">&gt;,</span>
+            <span class="s2">...anonymousParameters</span><span class="s4">: </span><span
+    class="s2">SQLInputValue</span><span class="s4">[]</span>
+        <span class="s4">): </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Iterator</span><span class="s4">&lt;</span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span class="s2">SQLOutputValue</span><span
+    class="s4">&gt;&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method executes a prepared statement and returns an object summarizing the</span>
+         <span class="s0">* resulting changes. The prepared statement [parameters are bound](https://www.sqlite.org/c3ref/bind_blob.html) using the</span>
+         <span class="s0">* values in `namedParameters` and `anonymousParameters`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">namedParameters An optional object used to bind named parameters. The keys of this object are used to configure the mapping.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">anonymousParameters Zero or more values to bind to anonymous parameters.</span>
+         <span class="s0">*/</span>
+        <span class="s2">run</span><span class="s4">(</span><span class="s2">...anonymousParameters</span><span
+    class="s4">: </span><span class="s2">SQLInputValue</span><span class="s4">[]): </span><span class="s2">StatementResultingChanges</span><span
+    class="s4">;</span>
+        <span class="s2">run</span><span class="s4">(</span>
+            <span class="s2">namedParameters</span><span class="s4">: </span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">SQLInputValue</span><span class="s4">&gt;,</span>
+            <span class="s2">...anonymousParameters</span><span class="s4">: </span><span
+    class="s2">SQLInputValue</span><span class="s4">[]</span>
+        <span class="s4">): </span><span class="s2">StatementResultingChanges</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The names of SQLite parameters begin with a prefix character. By default,`node:sqlite` requires that this prefix character is present when binding</span>
+         <span class="s0">* parameters. However, with the exception of dollar sign character, these</span>
+         <span class="s0">* prefix characters also require extra quoting when used in object keys.</span>
+         <span class="s0">*</span>
+         <span class="s0">* To improve ergonomics, this method can be used to also allow bare named</span>
+         <span class="s0">* parameters, which do not require the prefix character in JavaScript code. There</span>
+         <span class="s0">* are several caveats to be aware of when enabling bare named parameters:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * The prefix character is still required in SQL.</span>
+         <span class="s0">* * The prefix character is still allowed in JavaScript. In fact, prefixed names</span>
+         <span class="s0">* will have slightly better binding performance.</span>
+         <span class="s0">* * Using ambiguous named parameters, such as `$k` and `@k`, in the same prepared</span>
+         <span class="s0">* statement will result in an exception as it cannot be determined how to bind</span>
+         <span class="s0">* a bare name.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">enabled Enables or disables support for binding named parameters without the prefix character.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setAllowBareNamedParameters</span><span class="s4">(</span><span class="s2">enabled</span><span
+    class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* By default, if an unknown name is encountered while binding parameters, an</span>
+         <span class="s0">* exception is thrown. This method allows unknown named parameters to be ignored.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">enabled Enables or disables support for unknown named parameters.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setAllowUnknownNamedParameters</span><span class="s4">(</span><span
+    class="s2">enabled</span><span class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When enabled, query results returned by the `all()`, `get()`, and `iterate()` methods will be returned as arrays instead</span>
+         <span class="s0">* of objects.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.0.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">enabled Enables or disables the return of query results as arrays.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setReturnArrays</span><span class="s4">(</span><span class="s2">enabled</span><span class="s4">: </span><span
+    class="s2">boolean</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When reading from the database, SQLite `INTEGER`s are mapped to JavaScript</span>
+         <span class="s0">* numbers by default. However, SQLite `INTEGER`s can store values larger than</span>
+         <span class="s0">* JavaScript numbers are capable of representing. In such cases, this method can</span>
+         <span class="s0">* be used to read `INTEGER` data using JavaScript `BigInt`s. This method has no</span>
+         <span class="s0">* impact on database write operations where numbers and `BigInt`s are both</span>
+         <span class="s0">* supported at all times.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">enabled Enables or disables the use of `BigInt`s when reading `INTEGER` fields from the database.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setReadBigInts</span><span class="s4">(</span><span class="s2">enabled</span><span
+    class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The source SQL text of the prepared statement. This property is a</span>
+         <span class="s0">* wrapper around [`sqlite3_sql()`](https://www.sqlite.org/c3ref/expanded_sql.html).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly sourceSQL</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">BackupOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Name of the source database. This can be `'main'` (the default primary database) or any other</span>
+         <span class="s0">* database that have been added with [`ATTACH DATABASE`](https://www.sqlite.org/lang_attach.html)</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'main'</span>
+         <span class="s0">*/</span>
+        <span class="s2">source</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Name of the target database. This can be `'main'` (the default primary database) or any other</span>
+         <span class="s0">* database that have been added with [`ATTACH DATABASE`](https://www.sqlite.org/lang_attach.html)</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'main'</span>
+         <span class="s0">*/</span>
+        <span class="s2">target</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Number of pages to be transmitted in each batch of the backup.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">100</span>
+         <span class="s0">*/</span>
+        <span class="s2">rate</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Callback function that will be called with the number of pages copied and the total number of</span>
+         <span class="s0">* pages.</span>
+         <span class="s0">*/</span>
+        <span class="s2">progress</span><span class="s4">?: ((</span><span class="s2">progressInfo</span><span
+    class="s4">: </span><span class="s2">BackupProgressInfo</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">) | </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">BackupProgressInfo </span><span class="s4">{</span>
+        <span class="s2">totalPages</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">remainingPages</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This method makes a database backup. This method abstracts the</span>
+     <span
+       class="s0">* [`sqlite3_backup_init()`](https://www.sqlite.org/c3ref/backup_finish.html#sqlite3backupinit),</span>
+     <span
+       class="s0">* [`sqlite3_backup_step()`](https://www.sqlite.org/c3ref/backup_finish.html#sqlite3backupstep)</span>
+     <span class="s0">* and [`sqlite3_backup_finish()`](https://www.sqlite.org/c3ref/backup_finish.html#sqlite3backupfinish) functions.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The backed-up database can be used normally during the backup process. Mutations coming from the same connection - same</span>
+     <span class="s0">* `DatabaseSync` - object will be reflected in the backup right away. However, mutations from other connections will cause</span>
+     <span class="s0">* the backup process to restart.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { backup, DatabaseSync } from 'node:sqlite';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const sourceDb = new DatabaseSync('source.db');</span>
+     <span class="s0">* const totalPagesTransferred = await backup(sourceDb, 'backup.db', {</span>
+     <span class="s0">*   rate: 1, // Copy one page at a time.</span>
+     <span class="s0">*   progress: ({ totalPages, remainingPages }) =&gt; {</span>
+     <span class="s0">*     console.log('Backup in progress', { totalPages, remainingPages });</span>
+     <span class="s0">*   },</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log('Backup completed', totalPagesTransferred);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v23.8.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">sourceDb The database to backup. The source database must be open.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">path The path where the backup will be created. If the file already exists,</span>
+     <span class="s0">* the contents will be overwritten.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">options Optional configuration for the backup. The</span>
+     <span class="s0">* following properties are supported:</span>
+     <span class="s0">* </span><span class="s1">@returns </span><span class="s0">A promise that resolves when the backup is completed and rejects if an error occurs.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">backup</span><span class="s4">(</span><span
+    class="s2">sourceDb</span><span class="s4">: </span><span class="s2">DatabaseSync</span><span
+    class="s4">, </span><span class="s2">path</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s2">URL</span><span
+    class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">BackupOptions</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s5">void</span><span class="s4">&gt;;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+     <span class="s0">*/</span>
+    <span class="s2">namespace constants </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The conflict handler is invoked with this constant when processing a DELETE or UPDATE change if a row with the required PRIMARY KEY fields is present in the database, but one or more other (non primary-key) fields modified by the update do not contain the expected &quot;before&quot; values.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.14.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">SQLITE_CHANGESET_DATA</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The conflict handler is invoked with this constant when processing a DELETE or UPDATE change if a row with the required PRIMARY KEY fields is not present in the database.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.14.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">SQLITE_CHANGESET_NOTFOUND</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This constant is passed to the conflict handler while processing an INSERT change if the operation would result in duplicate primary key values.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.14.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">SQLITE_CHANGESET_CONFLICT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If foreign key handling is enabled, and applying a changeset leaves the database in a state containing foreign key violations, the conflict handler is invoked with this constant exactly once before the changeset is committed. If the conflict handler returns `SQLITE_CHANGESET_OMIT`, the changes, including those that caused the foreign key constraint violation, are committed. Or, if it returns `SQLITE_CHANGESET_ABORT`, the changeset is rolled back.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.14.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">SQLITE_CHANGESET_FOREIGN_KEY</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Conflicting changes are omitted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">SQLITE_CHANGESET_OMIT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Conflicting changes replace existing values. Note that this value can only be returned when the type of conflict is either `SQLITE_CHANGESET_DATA` or `SQLITE_CHANGESET_CONFLICT`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">SQLITE_CHANGESET_REPLACE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Abort when a change encounters a conflict and roll back database.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.12.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">const </span><span class="s2">SQLITE_CHANGESET_ABORT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

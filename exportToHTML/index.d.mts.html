@@ -1,0 +1,1131 @@
+<html>
+<head>
+  <title>index.d.mts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          index.d.mts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/// &lt;reference types=&quot;node&quot; /&gt;</span>
+
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">EventEmitter </span><span class="s3">} </span><span
+    class="s1">from </span><span class="s4">&quot;events&quot;</span><span class="s3">;</span>
+<span class="s2">import </span><span class="s3">{</span>
+    <span class="s1">Agent</span><span class="s3">,</span>
+    <span class="s1">ClientRequest</span><span class="s3">,</span>
+    <span class="s1">ClientRequestArgs</span><span class="s3">,</span>
+    <span class="s1">IncomingMessage</span><span class="s3">,</span>
+    <span class="s1">OutgoingHttpHeaders</span><span class="s3">,</span>
+    <span class="s1">Server </span><span class="s3">as </span><span class="s1">HTTPServer</span><span
+    class="s3">,</span>
+<span class="s3">} </span><span class="s1">from </span><span class="s4">&quot;http&quot;</span><span class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">Server </span><span class="s3">as </span><span
+    class="s1">HTTPSServer </span><span class="s3">} </span><span class="s1">from </span><span class="s4">&quot;https&quot;</span><span
+    class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">createConnection </span><span
+    class="s3">} </span><span class="s1">from </span><span class="s4">&quot;net&quot;</span><span class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">Duplex</span><span class="s3">, </span><span
+    class="s1">DuplexOptions </span><span class="s3">} </span><span class="s1">from </span><span class="s4">&quot;stream&quot;</span><span
+    class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">SecureContextOptions </span><span
+    class="s3">} </span><span class="s1">from </span><span class="s4">&quot;tls&quot;</span><span class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">URL </span><span class="s3">} </span><span
+    class="s1">from </span><span class="s4">&quot;url&quot;</span><span class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">ZlibOptions </span><span
+    class="s3">} </span><span class="s1">from </span><span class="s4">&quot;zlib&quot;</span><span class="s3">;</span>
+
+<span
+  class="s0">// can not get all overload of BufferConstructor['from'], need to copy all it's first arguments here</span>
+<span class="s0">// https://github.com/microsoft/TypeScript/issues/32164</span>
+<span class="s1">type BufferLike </span><span class="s3">=</span>
+    <span class="s3">| </span><span class="s1">string</span>
+    <span class="s3">| </span><span class="s1">Buffer</span>
+    <span class="s3">| </span><span class="s1">DataView</span>
+    <span class="s3">| </span><span class="s1">number</span>
+    <span class="s3">| </span><span class="s1">ArrayBufferView</span>
+    <span class="s3">| </span><span class="s1">Uint8Array</span>
+    <span class="s3">| </span><span class="s1">ArrayBuffer</span>
+    <span class="s3">| </span><span class="s1">SharedArrayBuffer</span>
+    <span class="s3">| </span><span class="s1">Blob</span>
+    <span class="s3">| </span><span class="s1">readonly any</span><span class="s3">[]</span>
+    <span class="s3">| </span><span class="s1">readonly number</span><span class="s3">[]</span>
+    <span class="s3">| { </span><span class="s1">valueOf</span><span class="s3">(): </span><span
+    class="s1">ArrayBuffer </span><span class="s3">}</span>
+    <span class="s3">| { </span><span class="s1">valueOf</span><span class="s3">(): </span><span class="s1">SharedArrayBuffer </span><span
+    class="s3">}</span>
+    <span class="s3">| { </span><span class="s1">valueOf</span><span class="s3">(): </span><span
+    class="s1">Uint8Array </span><span class="s3">}</span>
+    <span class="s3">| { </span><span class="s1">valueOf</span><span class="s3">(): </span><span class="s1">readonly number</span><span
+    class="s3">[] }</span>
+    <span class="s3">| { </span><span class="s1">valueOf</span><span class="s3">(): </span><span
+    class="s1">string </span><span class="s3">}</span>
+    <span class="s3">| { [</span><span class="s1">Symbol</span><span class="s3">.</span><span
+    class="s1">toPrimitive</span><span class="s3">](</span><span class="s1">hint</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">): </span><span class="s1">string </span><span class="s3">};</span>
+
+<span class="s0">// WebSocket socket.</span>
+<span class="s1">declare </span><span class="s2">class </span><span class="s1">WebSocket </span><span
+    class="s2">extends </span><span class="s1">EventEmitter </span><span class="s3">{</span>
+    <span class="s5">/** The connection is not yet open. */</span>
+    <span class="s2">static </span><span class="s1">readonly CONNECTING</span><span class="s3">: </span><span
+    class="s6">0</span><span class="s3">;</span>
+    <span class="s5">/** The connection is open and ready to communicate. */</span>
+    <span class="s2">static </span><span class="s1">readonly OPEN</span><span class="s3">: </span><span
+    class="s6">1</span><span class="s3">;</span>
+    <span class="s5">/** The connection is in the process of closing. */</span>
+    <span class="s2">static </span><span class="s1">readonly CLOSING</span><span class="s3">: </span><span
+    class="s6">2</span><span class="s3">;</span>
+    <span class="s5">/** The connection is closed. */</span>
+    <span class="s2">static </span><span class="s1">readonly CLOSED</span><span class="s3">: </span><span
+    class="s6">3</span><span class="s3">;</span>
+
+    <span class="s1">binaryType</span><span class="s3">: </span><span class="s4">&quot;nodebuffer&quot; </span><span
+    class="s3">| </span><span class="s4">&quot;arraybuffer&quot; </span><span class="s3">| </span><span class="s4">&quot;fragments&quot;</span><span
+    class="s3">;</span>
+    <span class="s1">readonly bufferedAmount</span><span class="s3">: </span><span class="s1">number</span><span
+    class="s3">;</span>
+    <span class="s1">readonly extensions</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+    <span class="s5">/** Indicates whether the websocket is paused */</span>
+    <span class="s1">readonly isPaused</span><span class="s3">: </span><span class="s1">boolean</span><span
+    class="s3">;</span>
+    <span class="s1">readonly protocol</span><span class="s3">: </span><span class="s1">string</span><span
+    class="s3">;</span>
+    <span class="s5">/** The current state of the connection */</span>
+    <span class="s1">readonly readyState</span><span class="s3">:</span>
+        <span class="s3">| </span><span class="s2">typeof </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">CONNECTING</span>
+        <span class="s3">| </span><span class="s2">typeof </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">OPEN</span>
+        <span class="s3">| </span><span class="s2">typeof </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">CLOSING</span>
+        <span class="s3">| </span><span class="s2">typeof </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">CLOSED</span><span class="s3">;</span>
+    <span class="s1">readonly url</span><span class="s3">: </span><span class="s1">string</span><span
+    class="s3">;</span>
+
+    <span class="s5">/** The connection is not yet open. */</span>
+    <span class="s1">readonly CONNECTING</span><span class="s3">: </span><span class="s6">0</span><span
+    class="s3">;</span>
+    <span class="s5">/** The connection is open and ready to communicate. */</span>
+    <span class="s1">readonly OPEN</span><span class="s3">: </span><span class="s6">1</span><span class="s3">;</span>
+    <span class="s5">/** The connection is in the process of closing. */</span>
+    <span class="s1">readonly CLOSING</span><span class="s3">: </span><span class="s6">2</span><span class="s3">;</span>
+    <span class="s5">/** The connection is closed. */</span>
+    <span class="s1">readonly CLOSED</span><span class="s3">: </span><span class="s6">3</span><span class="s3">;</span>
+
+    <span class="s1">onopen</span><span class="s3">: ((</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">.</span><span class="s1">Event</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">) | </span><span class="s2">null</span><span
+    class="s3">;</span>
+    <span class="s1">onerror</span><span class="s3">: ((</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">.</span><span
+    class="s1">ErrorEvent</span><span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">) | </span><span
+    class="s2">null</span><span class="s3">;</span>
+    <span class="s1">onclose</span><span class="s3">: ((</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">.</span><span
+    class="s1">CloseEvent</span><span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">) | </span><span
+    class="s2">null</span><span class="s3">;</span>
+    <span class="s1">onmessage</span><span class="s3">: ((</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">MessageEvent</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">) | </span><span class="s2">null</span><span
+    class="s3">;</span>
+
+    <span class="s1">constructor</span><span class="s3">(</span><span class="s1">address</span><span
+    class="s3">: </span><span class="s2">null</span><span class="s3">);</span>
+    <span class="s1">constructor</span><span class="s3">(</span><span class="s1">address</span><span
+    class="s3">: </span><span class="s1">string </span><span class="s3">| </span><span class="s1">URL</span><span
+    class="s3">, </span><span class="s1">options</span><span class="s3">?: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">ClientOptions </span><span class="s3">| </span><span class="s1">ClientRequestArgs</span><span
+    class="s3">);</span>
+    <span class="s1">constructor</span><span class="s3">(</span>
+        <span class="s1">address</span><span class="s3">: </span><span class="s1">string </span><span
+    class="s3">| </span><span class="s1">URL</span><span class="s3">,</span>
+        <span class="s1">protocols</span><span class="s3">?: </span><span class="s1">string </span><span
+    class="s3">| </span><span class="s1">string</span><span class="s3">[],</span>
+        <span class="s1">options</span><span class="s3">?: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">ClientOptions </span><span class="s3">| </span><span class="s1">ClientRequestArgs</span><span
+    class="s3">,</span>
+    <span class="s3">);</span>
+
+    <span class="s1">close</span><span class="s3">(</span><span class="s1">code</span><span class="s3">?: </span><span
+    class="s1">number</span><span class="s3">, </span><span class="s1">data</span><span class="s3">?: </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s1">Buffer</span><span class="s3">): </span><span
+    class="s2">void</span><span class="s3">;</span>
+    <span class="s1">ping</span><span class="s3">(</span><span class="s1">data</span><span class="s3">?: </span><span
+    class="s1">any</span><span class="s3">, </span><span class="s1">mask</span><span class="s3">?: </span><span
+    class="s1">boolean</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">?: (</span><span
+    class="s1">err</span><span class="s3">: </span><span class="s1">Error</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">void</span><span class="s3">;</span>
+    <span class="s1">pong</span><span class="s3">(</span><span class="s1">data</span><span class="s3">?: </span><span
+    class="s1">any</span><span class="s3">, </span><span class="s1">mask</span><span class="s3">?: </span><span
+    class="s1">boolean</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">?: (</span><span
+    class="s1">err</span><span class="s3">: </span><span class="s1">Error</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">void</span><span class="s3">;</span>
+    <span class="s0">// https://github.com/websockets/ws/issues/2076#issuecomment-1250354722</span>
+    <span class="s1">send</span><span class="s3">(</span><span class="s1">data</span><span class="s3">: </span><span
+    class="s1">BufferLike</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">?: (</span><span
+    class="s1">err</span><span class="s3">?: </span><span class="s1">Error</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">void</span><span class="s3">;</span>
+    <span class="s1">send</span><span class="s3">(</span>
+        <span class="s1">data</span><span class="s3">: </span><span class="s1">BufferLike</span><span
+    class="s3">,</span>
+        <span class="s1">options</span><span class="s3">: {</span>
+            <span class="s1">mask</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+            <span class="s1">binary</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+            <span class="s1">compress</span><span class="s3">?: </span><span class="s1">boolean </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+            <span class="s1">fin</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s3">},</span>
+        <span class="s1">cb</span><span class="s3">?: (</span><span class="s1">err</span><span
+    class="s3">?: </span><span class="s1">Error</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">,</span>
+    <span class="s3">): </span><span class="s2">void</span><span class="s3">;</span>
+    <span class="s1">terminate</span><span class="s3">(): </span><span class="s2">void</span><span class="s3">;</span>
+
+    <span class="s5">/**</span>
+     <span class="s5">* Pause the websocket causing it to stop emitting events. Some events can still be</span>
+     <span class="s5">* emitted after this is called, until all buffered data is consumed. This method</span>
+     <span class="s5">* is a noop if the ready state is `CONNECTING` or `CLOSED`.</span>
+     <span class="s5">*/</span>
+    <span class="s1">pause</span><span class="s3">(): </span><span class="s2">void</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Make a paused socket resume emitting events. This method is a noop if the ready</span>
+     <span class="s5">* state is `CONNECTING` or `CLOSED`.</span>
+     <span class="s5">*/</span>
+    <span class="s1">resume</span><span class="s3">(): </span><span class="s2">void</span><span class="s3">;</span>
+
+    <span class="s0">// HTML5 WebSocket events</span>
+    <span class="s1">addEventListener</span><span class="s3">&lt;</span><span class="s1">K </span><span class="s2">extends </span><span
+    class="s1">keyof WebSocket</span><span class="s3">.</span><span class="s1">WebSocketEventMap</span><span class="s3">&gt;(</span>
+        <span class="s1">type</span><span class="s3">: </span><span class="s1">K</span><span class="s3">,</span>
+        <span class="s1">listener</span><span class="s3">:</span>
+            <span class="s3">| ((</span><span class="s1">event</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">WebSocketEventMap</span><span class="s3">[</span><span class="s1">K</span><span
+    class="s3">]) =&gt; </span><span class="s2">void</span><span class="s3">)</span>
+            <span class="s3">| { </span><span class="s1">handleEvent</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">.</span><span
+    class="s1">WebSocketEventMap</span><span class="s3">[</span><span class="s1">K</span><span
+    class="s3">]): </span><span class="s2">void </span><span class="s3">},</span>
+        <span class="s1">options</span><span class="s3">?: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">EventListenerOptions</span><span class="s3">,</span>
+    <span class="s3">): </span><span class="s2">void</span><span class="s3">;</span>
+    <span class="s1">removeEventListener</span><span class="s3">&lt;</span><span class="s1">K </span><span class="s2">extends </span><span
+    class="s1">keyof WebSocket</span><span class="s3">.</span><span class="s1">WebSocketEventMap</span><span class="s3">&gt;(</span>
+        <span class="s1">type</span><span class="s3">: </span><span class="s1">K</span><span class="s3">,</span>
+        <span class="s1">listener</span><span class="s3">:</span>
+            <span class="s3">| ((</span><span class="s1">event</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">WebSocketEventMap</span><span class="s3">[</span><span class="s1">K</span><span
+    class="s3">]) =&gt; </span><span class="s2">void</span><span class="s3">)</span>
+            <span class="s3">| { </span><span class="s1">handleEvent</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">.</span><span
+    class="s1">WebSocketEventMap</span><span class="s3">[</span><span class="s1">K</span><span
+    class="s3">]): </span><span class="s2">void </span><span class="s3">},</span>
+    <span class="s3">): </span><span class="s2">void</span><span class="s3">;</span>
+
+    <span class="s0">// Events</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;close&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">code</span><span class="s3">: </span><span class="s1">number</span><span
+    class="s3">, </span><span class="s1">reason</span><span class="s3">: </span><span class="s1">Buffer</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;error&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">error</span><span class="s3">: </span><span class="s1">Error</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;upgrade&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span class="s1">IncomingMessage</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;message&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">data</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">RawData</span><span class="s3">, </span><span class="s1">isBinary</span><span
+    class="s3">: </span><span class="s1">boolean</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;open&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;ping&quot; </span><span class="s3">| </span><span class="s4">&quot;pong&quot;</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">, </span><span class="s1">data</span><span
+    class="s3">: </span><span class="s1">Buffer</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;redirect&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">url</span><span class="s3">: </span><span class="s1">string</span><span
+    class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">ClientRequest</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;unexpected-response&quot;</span><span class="s3">,</span>
+        <span class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">, </span><span class="s1">request</span><span
+    class="s3">: </span><span class="s1">ClientRequest</span><span class="s3">, </span><span
+    class="s1">response</span><span class="s3">: </span><span class="s1">IncomingMessage</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">WebSocket</span><span class="s3">, </span><span class="s1">...args</span><span class="s3">: </span><span
+    class="s1">any</span><span class="s3">[]) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;close&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">code</span><span class="s3">: </span><span class="s1">number</span><span
+    class="s3">, </span><span class="s1">reason</span><span class="s3">: </span><span class="s1">Buffer</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;error&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">error</span><span class="s3">: </span><span class="s1">Error</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;upgrade&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span class="s1">IncomingMessage</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;message&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">data</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">RawData</span><span class="s3">, </span><span class="s1">isBinary</span><span
+    class="s3">: </span><span class="s1">boolean</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;open&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;ping&quot; </span><span class="s3">| </span><span class="s4">&quot;pong&quot;</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">, </span><span class="s1">data</span><span
+    class="s3">: </span><span class="s1">Buffer</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;redirect&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">url</span><span class="s3">: </span><span class="s1">string</span><span
+    class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">ClientRequest</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;unexpected-response&quot;</span><span class="s3">,</span>
+        <span class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">, </span><span class="s1">request</span><span
+    class="s3">: </span><span class="s1">ClientRequest</span><span class="s3">, </span><span
+    class="s1">response</span><span class="s3">: </span><span class="s1">IncomingMessage</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">WebSocket</span><span class="s3">, </span><span class="s1">...args</span><span class="s3">: </span><span
+    class="s1">any</span><span class="s3">[]) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;close&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">code</span><span class="s3">: </span><span class="s1">number</span><span
+    class="s3">, </span><span class="s1">reason</span><span class="s3">: </span><span class="s1">Buffer</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;error&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">error</span><span class="s3">: </span><span class="s1">Error</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;upgrade&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span class="s1">IncomingMessage</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;message&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">data</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">RawData</span><span class="s3">, </span><span class="s1">isBinary</span><span
+    class="s3">: </span><span class="s1">boolean</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;open&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;ping&quot; </span><span class="s3">| </span><span class="s4">&quot;pong&quot;</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">, </span><span class="s1">data</span><span
+    class="s3">: </span><span class="s1">Buffer</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;redirect&quot;</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">url</span><span class="s3">: </span><span class="s1">string</span><span
+    class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">ClientRequest</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;unexpected-response&quot;</span><span class="s3">,</span>
+        <span class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">, </span><span class="s1">request</span><span
+    class="s3">: </span><span class="s1">ClientRequest</span><span class="s3">, </span><span
+    class="s1">response</span><span class="s3">: </span><span class="s1">IncomingMessage</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">WebSocket</span><span class="s3">, </span><span class="s1">...args</span><span class="s3">: </span><span
+    class="s1">any</span><span class="s3">[]) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;close&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">code</span><span class="s3">: </span><span
+    class="s1">number</span><span class="s3">, </span><span class="s1">reason</span><span class="s3">: </span><span
+    class="s1">Buffer</span><span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;error&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">error</span><span class="s3">: </span><span
+    class="s1">Error</span><span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;upgrade&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">IncomingMessage</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;message&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">data</span><span class="s3">: </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">RawData</span><span class="s3">, </span><span
+    class="s1">isBinary</span><span class="s3">: </span><span class="s1">boolean</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;open&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: () =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;ping&quot; </span><span class="s3">| </span><span class="s4">&quot;pong&quot;</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s1">data</span><span
+    class="s3">: </span><span class="s1">Buffer</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;redirect&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">url</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">ClientRequest</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;unexpected-response&quot;</span><span class="s3">,</span>
+        <span class="s1">listener</span><span class="s3">: (</span><span class="s1">request</span><span
+    class="s3">: </span><span class="s1">ClientRequest</span><span class="s3">, </span><span
+    class="s1">response</span><span class="s3">: </span><span class="s1">IncomingMessage</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s1">...args</span><span
+    class="s3">: </span><span class="s1">any</span><span class="s3">[]) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;close&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">code</span><span class="s3">: </span><span
+    class="s1">number</span><span class="s3">, </span><span class="s1">reason</span><span class="s3">: </span><span
+    class="s1">Buffer</span><span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;error&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">error</span><span class="s3">: </span><span
+    class="s1">Error</span><span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;upgrade&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">IncomingMessage</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;message&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">data</span><span class="s3">: </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">RawData</span><span class="s3">, </span><span
+    class="s1">isBinary</span><span class="s3">: </span><span class="s1">boolean</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;open&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: () =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;ping&quot; </span><span class="s3">| </span><span class="s4">&quot;pong&quot;</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s1">data</span><span
+    class="s3">: </span><span class="s1">Buffer</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;redirect&quot;</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s1">url</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">ClientRequest</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;unexpected-response&quot;</span><span class="s3">,</span>
+        <span class="s1">listener</span><span class="s3">: (</span><span class="s1">request</span><span
+    class="s3">: </span><span class="s1">ClientRequest</span><span class="s3">, </span><span
+    class="s1">response</span><span class="s3">: </span><span class="s1">IncomingMessage</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s1">...args</span><span
+    class="s3">: </span><span class="s1">any</span><span class="s3">[]) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s1">declare namespace WebSocket </span><span class="s3">{</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Data represents the raw message payload received over the WebSocket.</span>
+     <span class="s5">*/</span>
+    <span class="s1">type RawData </span><span class="s3">= </span><span class="s1">Buffer </span><span
+    class="s3">| </span><span class="s1">ArrayBuffer </span><span class="s3">| </span><span
+    class="s1">Buffer</span><span class="s3">[];</span>
+
+    <span class="s5">/**</span>
+     <span class="s5">* Data represents the message payload received over the WebSocket.</span>
+     <span class="s5">*/</span>
+    <span class="s1">type Data </span><span class="s3">= </span><span class="s1">string </span><span
+    class="s3">| </span><span class="s1">Buffer </span><span class="s3">| </span><span
+    class="s1">ArrayBuffer </span><span class="s3">| </span><span class="s1">Buffer</span><span class="s3">[];</span>
+
+    <span class="s5">/**</span>
+     <span class="s5">* CertMeta represents the accepted types for certificate &amp; key data.</span>
+     <span class="s5">*/</span>
+    <span class="s1">type CertMeta </span><span class="s3">= </span><span class="s1">string </span><span
+    class="s3">| </span><span class="s1">string</span><span class="s3">[] | </span><span class="s1">Buffer </span><span
+    class="s3">| </span><span class="s1">Buffer</span><span class="s3">[];</span>
+
+    <span class="s5">/**</span>
+     <span class="s5">* VerifyClientCallbackSync is a synchronous callback used to inspect the</span>
+     <span class="s5">* incoming message. The return value (boolean) of the function determines</span>
+     <span class="s5">* whether or not to accept the handshake.</span>
+     <span class="s5">*/</span>
+    <span class="s1">type VerifyClientCallbackSync</span><span class="s3">&lt;</span><span
+    class="s1">Request </span><span class="s2">extends </span><span class="s1">IncomingMessage </span><span
+    class="s3">= </span><span class="s1">IncomingMessage</span><span class="s3">&gt; = (</span><span
+    class="s1">info</span><span class="s3">: {</span>
+        <span class="s1">origin</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">secure</span><span class="s3">: </span><span class="s1">boolean</span><span class="s3">;</span>
+        <span class="s1">req</span><span class="s3">: </span><span class="s1">Request</span><span class="s3">;</span>
+    <span class="s3">}) =&gt; </span><span class="s1">boolean</span><span class="s3">;</span>
+
+    <span class="s5">/**</span>
+     <span class="s5">* VerifyClientCallbackAsync is an asynchronous callback used to inspect the</span>
+     <span class="s5">* incoming message. The return value (boolean) of the function determines</span>
+     <span class="s5">* whether or not to accept the handshake.</span>
+     <span class="s5">*/</span>
+    <span class="s1">type VerifyClientCallbackAsync</span><span class="s3">&lt;</span><span
+    class="s1">Request </span><span class="s2">extends </span><span class="s1">IncomingMessage </span><span
+    class="s3">= </span><span class="s1">IncomingMessage</span><span class="s3">&gt; = (</span>
+        <span class="s1">info</span><span class="s3">: { </span><span class="s1">origin</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">; </span><span class="s1">secure</span><span class="s3">: </span><span
+    class="s1">boolean</span><span class="s3">; </span><span class="s1">req</span><span class="s3">: </span><span
+    class="s1">Request </span><span class="s3">},</span>
+        <span class="s1">callback</span><span class="s3">: (</span><span class="s1">res</span><span class="s3">: </span><span
+    class="s1">boolean</span><span class="s3">, </span><span class="s1">code</span><span class="s3">?: </span><span
+    class="s1">number</span><span class="s3">, </span><span class="s1">message</span><span class="s3">?: </span><span
+    class="s1">string</span><span class="s3">, </span><span class="s1">headers</span><span class="s3">?: </span><span
+    class="s1">OutgoingHttpHeaders</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">,</span>
+    <span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">;</span>
+
+    <span class="s5">/**</span>
+     <span class="s5">* FinishRequestCallback is a callback for last minute customization of the</span>
+     <span class="s5">* headers. If finishRequest is set, then it has the responsibility to call</span>
+     <span class="s5">* request.end() once it is done setting request headers.</span>
+     <span class="s5">*/</span>
+    <span class="s1">type FinishRequestCallback </span><span class="s3">= (</span><span class="s1">request</span><span
+    class="s3">: </span><span class="s1">ClientRequest</span><span class="s3">, </span><span class="s1">websocket</span><span
+    class="s3">: </span><span class="s1">WebSocket</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">;</span>
+
+    <span class="s2">interface </span><span class="s1">ClientOptions </span><span class="s2">extends </span><span
+    class="s1">SecureContextOptions </span><span class="s3">{</span>
+        <span class="s1">protocol</span><span class="s3">?: </span><span class="s1">string </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">followRedirects</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">generateMask</span><span class="s3">?(</span><span class="s1">mask</span><span
+    class="s3">: </span><span class="s1">Buffer</span><span class="s3">): </span><span class="s2">void</span><span
+    class="s3">;</span>
+        <span class="s1">handshakeTimeout</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">maxRedirects</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">perMessageDeflate</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">PerMessageDeflateOptions </span><span class="s3">| </span><span class="s1">undefined</span><span
+    class="s3">;</span>
+        <span class="s1">localAddress</span><span class="s3">?: </span><span class="s1">string </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">protocolVersion</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">headers</span><span class="s3">?: { [</span><span class="s1">key</span><span
+    class="s3">: </span><span class="s1">string</span><span class="s3">]: </span><span class="s1">string </span><span
+    class="s3">} | </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">origin</span><span class="s3">?: </span><span class="s1">string </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">agent</span><span class="s3">?: </span><span class="s1">Agent </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">host</span><span class="s3">?: </span><span class="s1">string </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">family</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">checkServerIdentity</span><span class="s3">?(</span><span class="s1">servername</span><span
+    class="s3">: </span><span class="s1">string</span><span class="s3">, </span><span class="s1">cert</span><span
+    class="s3">: </span><span class="s1">CertMeta</span><span class="s3">): </span><span class="s1">boolean</span><span
+    class="s3">;</span>
+        <span class="s1">rejectUnauthorized</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">allowSynchronousEvents</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">autoPong</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">maxPayload</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">skipUTF8Validation</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">createConnection</span><span class="s3">?: </span><span class="s2">typeof </span><span
+    class="s1">createConnection </span><span class="s3">| </span><span class="s1">undefined</span><span
+    class="s3">;</span>
+        <span class="s1">finishRequest</span><span class="s3">?: </span><span
+    class="s1">FinishRequestCallback </span><span class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">PerMessageDeflateOptions </span><span class="s3">{</span>
+        <span class="s1">serverNoContextTakeover</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">clientNoContextTakeover</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">serverMaxWindowBits</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">clientMaxWindowBits</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">zlibDeflateOptions</span><span class="s3">?:</span>
+            <span class="s3">| {</span>
+                <span class="s1">flush</span><span class="s3">?: </span><span class="s1">number </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+                <span class="s1">finishFlush</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+                <span class="s1">chunkSize</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+                <span class="s1">windowBits</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+                <span class="s1">level</span><span class="s3">?: </span><span class="s1">number </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+                <span class="s1">memLevel</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+                <span class="s1">strategy</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+                <span class="s1">dictionary</span><span class="s3">?: </span><span class="s1">Buffer </span><span
+    class="s3">| </span><span class="s1">Buffer</span><span class="s3">[] | </span><span
+    class="s1">DataView </span><span class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+                <span class="s1">info</span><span class="s3">?: </span><span class="s1">boolean </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+            <span class="s3">}</span>
+            <span class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">zlibInflateOptions</span><span class="s3">?: </span><span class="s1">ZlibOptions </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">threshold</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">concurrencyLimit</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">Event </span><span class="s3">{</span>
+        <span class="s1">type</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">target</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">ErrorEvent </span><span class="s3">{</span>
+        <span class="s1">error</span><span class="s3">: </span><span class="s1">any</span><span class="s3">;</span>
+        <span class="s1">message</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">type</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">target</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">CloseEvent </span><span class="s3">{</span>
+        <span class="s1">wasClean</span><span class="s3">: </span><span class="s1">boolean</span><span
+    class="s3">;</span>
+        <span class="s1">code</span><span class="s3">: </span><span class="s1">number</span><span class="s3">;</span>
+        <span class="s1">reason</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">type</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">target</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">MessageEvent </span><span class="s3">{</span>
+        <span class="s1">data</span><span class="s3">: </span><span class="s1">Data</span><span class="s3">;</span>
+        <span class="s1">type</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">target</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">WebSocketEventMap </span><span class="s3">{</span>
+        <span class="s1">open</span><span class="s3">: </span><span class="s1">Event</span><span class="s3">;</span>
+        <span class="s1">error</span><span class="s3">: </span><span class="s1">ErrorEvent</span><span
+    class="s3">;</span>
+        <span class="s1">close</span><span class="s3">: </span><span class="s1">CloseEvent</span><span
+    class="s3">;</span>
+        <span class="s1">message</span><span class="s3">: </span><span class="s1">MessageEvent</span><span
+    class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">EventListenerOptions </span><span class="s3">{</span>
+        <span class="s1">once</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">ServerOptions</span><span class="s3">&lt;</span>
+        <span class="s1">U </span><span class="s2">extends typeof </span><span class="s1">WebSocket </span><span
+    class="s3">= </span><span class="s2">typeof </span><span class="s1">WebSocket</span><span class="s3">,</span>
+        <span class="s1">V </span><span class="s2">extends typeof </span><span class="s1">IncomingMessage </span><span
+    class="s3">= </span><span class="s2">typeof </span><span class="s1">IncomingMessage</span><span class="s3">,</span>
+    <span class="s3">&gt; {</span>
+        <span class="s1">host</span><span class="s3">?: </span><span class="s1">string </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">port</span><span class="s3">?: </span><span class="s1">number </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">backlog</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">server</span><span class="s3">?: </span><span class="s1">HTTPServer</span><span
+    class="s3">&lt;</span><span class="s1">V</span><span class="s3">&gt; | </span><span
+    class="s1">HTTPSServer</span><span class="s3">&lt;</span><span class="s1">V</span><span
+    class="s3">&gt; | </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">verifyClient</span><span class="s3">?:</span>
+            <span class="s3">| </span><span class="s1">VerifyClientCallbackAsync</span><span class="s3">&lt;</span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">V</span><span class="s3">&gt;&gt;</span>
+            <span class="s3">| </span><span class="s1">VerifyClientCallbackSync</span><span class="s3">&lt;</span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">V</span><span class="s3">&gt;&gt;</span>
+            <span class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">handleProtocols</span><span class="s3">?: (</span><span class="s1">protocols</span><span
+    class="s3">: </span><span class="s1">Set</span><span class="s3">&lt;</span><span class="s1">string</span><span
+    class="s3">&gt;, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">V</span><span
+    class="s3">&gt;) =&gt; </span><span class="s1">string </span><span class="s3">| </span><span class="s2">false</span><span
+    class="s3">;</span>
+        <span class="s1">path</span><span class="s3">?: </span><span class="s1">string </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">noServer</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">allowSynchronousEvents</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">autoPong</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">clientTracking</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">perMessageDeflate</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">PerMessageDeflateOptions </span><span class="s3">| </span><span class="s1">undefined</span><span
+    class="s3">;</span>
+        <span class="s1">maxPayload</span><span class="s3">?: </span><span class="s1">number </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">skipUTF8Validation</span><span class="s3">?: </span><span class="s1">boolean </span><span
+    class="s3">| </span><span class="s1">undefined</span><span class="s3">;</span>
+        <span class="s1">WebSocket</span><span class="s3">?: </span><span class="s1">U </span><span class="s3">| </span><span
+    class="s1">undefined</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s2">interface </span><span class="s1">AddressInfo </span><span class="s3">{</span>
+        <span class="s1">address</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">family</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+        <span class="s1">port</span><span class="s3">: </span><span class="s1">number</span><span class="s3">;</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">export import </span><span class="s1">AddressInfo </span><span class="s3">= </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">AddressInfo</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">CertMeta </span><span class="s3">= </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">CertMeta</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">ClientOptions </span><span class="s3">= </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">ClientOptions</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">CloseEvent </span><span class="s3">= </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">CloseEvent</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">Data </span><span class="s3">= </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">Data</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">ErrorEvent </span><span class="s3">= </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">ErrorEvent</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">Event </span><span class="s3">= </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">Event</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">EventListenerOptions </span><span class="s3">= </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">EventListenerOptions</span><span
+    class="s3">;</span>
+<span class="s2">export import </span><span class="s1">FinishRequestCallback </span><span class="s3">= </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">FinishRequestCallback</span><span
+    class="s3">;</span>
+<span class="s2">export import </span><span class="s1">MessageEvent </span><span class="s3">= </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">MessageEvent</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">PerMessageDeflateOptions </span><span class="s3">= </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">PerMessageDeflateOptions</span><span
+    class="s3">;</span>
+<span class="s2">export import </span><span class="s1">RawData </span><span class="s3">= </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">RawData</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">ServerOptions </span><span class="s3">= </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">ServerOptions</span><span class="s3">;</span>
+<span class="s2">export import </span><span class="s1">VerifyClientCallbackAsync </span><span class="s3">= </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">VerifyClientCallbackAsync</span><span
+    class="s3">;</span>
+<span class="s2">export import </span><span class="s1">VerifyClientCallbackSync </span><span class="s3">= </span><span
+    class="s1">WebSocket</span><span class="s3">.</span><span class="s1">VerifyClientCallbackSync</span><span
+    class="s3">;</span>
+
+<span class="s0">// WebSocket Server</span>
+<span class="s1">declare </span><span class="s2">class </span><span class="s1">Server</span><span class="s3">&lt;</span>
+    <span class="s1">T </span><span class="s2">extends typeof </span><span class="s1">WebSocket </span><span class="s3">= </span><span
+    class="s2">typeof </span><span class="s1">WebSocket</span><span class="s3">,</span>
+    <span class="s1">U </span><span class="s2">extends typeof </span><span class="s1">IncomingMessage </span><span
+    class="s3">= </span><span class="s2">typeof </span><span class="s1">IncomingMessage</span><span class="s3">,</span>
+<span class="s3">&gt; </span><span class="s2">extends </span><span class="s1">EventEmitter </span><span
+    class="s3">{</span>
+    <span class="s1">options</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">ServerOptions</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">, </span><span class="s1">U</span><span class="s3">&gt;;</span>
+    <span class="s1">path</span><span class="s3">: </span><span class="s1">string</span><span class="s3">;</span>
+    <span class="s1">clients</span><span class="s3">: </span><span class="s1">Set</span><span
+    class="s3">&lt;</span><span class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;&gt;;</span>
+
+    <span class="s1">constructor</span><span class="s3">(</span><span class="s1">options</span><span
+    class="s3">?: </span><span class="s1">WebSocket</span><span class="s3">.</span><span class="s1">ServerOptions</span><span
+    class="s3">&lt;</span><span class="s1">T</span><span class="s3">, </span><span class="s1">U</span><span class="s3">&gt;, </span><span
+    class="s1">callback</span><span class="s3">?: () =&gt; </span><span class="s2">void</span><span class="s3">);</span>
+
+    <span class="s1">address</span><span class="s3">(): </span><span class="s1">WebSocket</span><span
+    class="s3">.</span><span class="s1">AddressInfo </span><span class="s3">| </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s2">null</span><span class="s3">;</span>
+    <span class="s1">close</span><span class="s3">(</span><span class="s1">cb</span><span class="s3">?: (</span><span
+    class="s1">err</span><span class="s3">?: </span><span class="s1">Error</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">void</span><span class="s3">;</span>
+    <span class="s1">handleUpgrade</span><span class="s3">(</span>
+        <span class="s1">request</span><span class="s3">: </span><span class="s1">InstanceType</span><span class="s3">&lt;</span><span
+    class="s1">U</span><span class="s3">&gt;,</span>
+        <span class="s1">socket</span><span class="s3">: </span><span class="s1">Duplex</span><span class="s3">,</span>
+        <span class="s1">upgradeHead</span><span class="s3">: </span><span class="s1">Buffer</span><span
+    class="s3">,</span>
+        <span class="s1">callback</span><span class="s3">: (</span><span class="s1">client</span><span
+    class="s3">: </span><span class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">,</span>
+    <span class="s3">): </span><span class="s2">void</span><span class="s3">;</span>
+    <span class="s1">shouldHandle</span><span class="s3">(</span><span class="s1">request</span><span
+    class="s3">: </span><span class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;): </span><span class="s1">boolean </span><span class="s3">| </span><span
+    class="s1">Promise</span><span class="s3">&lt;</span><span class="s1">boolean</span><span class="s3">&gt;;</span>
+
+    <span class="s0">// Events</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;connection&quot;</span><span class="s3">, </span><span class="s1">cb</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">Server</span><span
+    class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span class="s1">websocket</span><span
+    class="s3">: </span><span class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;error&quot;</span><span class="s3">, </span><span class="s1">cb</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">Server</span><span
+    class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span class="s1">error</span><span
+    class="s3">: </span><span class="s1">Error</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;headers&quot;</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">: (</span><span
+    class="s2">this</span><span class="s3">: </span><span class="s1">Server</span><span class="s3">&lt;</span><span
+    class="s1">T</span><span class="s3">&gt;, </span><span class="s1">headers</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">[], </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;close&quot; </span><span class="s3">| </span><span class="s4">&quot;listening&quot;</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span class="s4">&quot;wsClientError&quot;</span><span
+    class="s3">,</span>
+        <span class="s1">cb</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span
+    class="s1">error</span><span class="s3">: </span><span class="s1">Error</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">: </span><span class="s1">Duplex</span><span class="s3">, </span><span
+    class="s1">request</span><span class="s3">: </span><span class="s1">InstanceType</span><span
+    class="s3">&lt;</span><span class="s1">U</span><span class="s3">&gt;) =&gt; </span><span class="s2">void</span><span
+    class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span
+    class="s1">...args</span><span class="s3">: </span><span class="s1">any</span><span
+    class="s3">[]) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+
+    <span class="s1">once</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span class="s4">&quot;connection&quot;</span><span
+    class="s3">,</span>
+        <span class="s1">cb</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span
+    class="s1">websocket</span><span class="s3">: </span><span class="s1">InstanceType</span><span
+    class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span class="s1">request</span><span
+    class="s3">: </span><span class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;error&quot;</span><span class="s3">, </span><span class="s1">cb</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">Server</span><span
+    class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span class="s1">error</span><span
+    class="s3">: </span><span class="s1">Error</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;headers&quot;</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">: (</span><span
+    class="s2">this</span><span class="s3">: </span><span class="s1">Server</span><span class="s3">&lt;</span><span
+    class="s1">T</span><span class="s3">&gt;, </span><span class="s1">headers</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">[], </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;close&quot; </span><span class="s3">| </span><span class="s4">&quot;listening&quot;</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span class="s4">&quot;wsClientError&quot;</span><span
+    class="s3">,</span>
+        <span class="s1">cb</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span
+    class="s1">error</span><span class="s3">: </span><span class="s1">Error</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">: </span><span class="s1">Duplex</span><span class="s3">, </span><span
+    class="s1">request</span><span class="s3">: </span><span class="s1">InstanceType</span><span
+    class="s3">&lt;</span><span class="s1">U</span><span class="s3">&gt;) =&gt; </span><span class="s2">void</span><span
+    class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span
+    class="s1">...args</span><span class="s3">: </span><span class="s1">any</span><span
+    class="s3">[]) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;connection&quot;</span><span class="s3">, </span><span class="s1">cb</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">Server</span><span
+    class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span class="s1">websocket</span><span
+    class="s3">: </span><span class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;error&quot;</span><span class="s3">, </span><span class="s1">cb</span><span
+    class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span class="s1">Server</span><span
+    class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span class="s1">error</span><span
+    class="s3">: </span><span class="s1">Error</span><span class="s3">) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;headers&quot;</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">: (</span><span
+    class="s2">this</span><span class="s3">: </span><span class="s1">Server</span><span class="s3">&lt;</span><span
+    class="s1">T</span><span class="s3">&gt;, </span><span class="s1">headers</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">[], </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">&quot;close&quot; </span><span class="s3">| </span><span class="s4">&quot;listening&quot;</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">: (</span><span class="s2">this</span><span
+    class="s3">: </span><span class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span>
+        <span class="s1">event</span><span class="s3">: </span><span class="s4">&quot;wsClientError&quot;</span><span
+    class="s3">,</span>
+        <span class="s1">cb</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span
+    class="s1">error</span><span class="s3">: </span><span class="s1">Error</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">: </span><span class="s1">Duplex</span><span class="s3">, </span><span
+    class="s1">request</span><span class="s3">: </span><span class="s1">InstanceType</span><span
+    class="s3">&lt;</span><span class="s1">U</span><span class="s3">&gt;) =&gt; </span><span class="s2">void</span><span
+    class="s3">,</span>
+    <span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">off</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: (</span><span class="s2">this</span><span class="s3">: </span><span
+    class="s1">Server</span><span class="s3">&lt;</span><span class="s1">T</span><span class="s3">&gt;, </span><span
+    class="s1">...args</span><span class="s3">: </span><span class="s1">any</span><span
+    class="s3">[]) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;connection&quot;</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">: (</span><span class="s1">websocket</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;error&quot;</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">: (</span><span class="s1">error</span><span class="s3">: </span><span
+    class="s1">Error</span><span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;headers&quot;</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">: (</span><span class="s1">headers</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">[], </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;close&quot; </span><span class="s3">| </span><span class="s4">&quot;listening&quot;</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">: () =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;wsClientError&quot;</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">: (</span><span class="s1">error</span><span class="s3">: </span><span
+    class="s1">Error</span><span class="s3">, </span><span class="s1">socket</span><span class="s3">: </span><span
+    class="s1">Duplex</span><span class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">addListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s1">...args</span><span
+    class="s3">: </span><span class="s1">any</span><span class="s3">[]) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;connection&quot;</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">: (</span><span class="s1">websocket</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">&gt;, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;error&quot;</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">: (</span><span class="s1">error</span><span class="s3">: </span><span
+    class="s1">Error</span><span class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;headers&quot;</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">: (</span><span class="s1">headers</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">[], </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;close&quot; </span><span class="s3">| </span><span class="s4">&quot;listening&quot;</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">: () =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s4">&quot;wsClientError&quot;</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">: (</span><span class="s1">error</span><span class="s3">: </span><span
+    class="s1">Error</span><span class="s3">, </span><span class="s1">socket</span><span class="s3">: </span><span
+    class="s1">Duplex</span><span class="s3">, </span><span class="s1">request</span><span class="s3">: </span><span
+    class="s1">InstanceType</span><span class="s3">&lt;</span><span class="s1">U</span><span
+    class="s3">&gt;) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s2">this</span><span class="s3">;</span>
+    <span class="s1">removeListener</span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">: </span><span class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span class="s1">...args</span><span
+    class="s3">: </span><span class="s1">any</span><span class="s3">[]) =&gt; </span><span class="s2">void</span><span
+    class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+<span class="s3">}</span>
+<span class="s2">export </span><span class="s3">{ </span><span class="s1">type Server </span><span class="s3">};</span>
+
+<span class="s2">export const </span><span class="s1">WebSocketServer</span><span class="s3">: </span><span class="s2">typeof </span><span
+    class="s1">Server</span><span class="s3">;</span>
+<span class="s2">export interface </span><span class="s1">WebSocketServer </span><span class="s2">extends </span><span
+    class="s1">Server </span><span class="s3">{} </span><span class="s0">// eslint-disable-line @typescript-eslint/no-empty-interface</span>
+
+<span class="s0">// WebSocket stream</span>
+<span class="s2">export function </span><span class="s1">createWebSocketStream</span><span class="s3">(</span><span
+    class="s1">websocket</span><span class="s3">: </span><span class="s1">WebSocket</span><span
+    class="s3">, </span><span class="s1">options</span><span class="s3">?: </span><span
+    class="s1">DuplexOptions</span><span class="s3">): </span><span class="s1">Duplex</span><span class="s3">;</span>
+
+<span class="s2">export default </span><span class="s1">WebSocket</span><span class="s3">;</span>
+<span class="s2">export </span><span class="s3">{ </span><span class="s1">WebSocket </span><span class="s3">};</span>
+</pre>
+</body>
+</html>

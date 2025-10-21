@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title>mode-fix.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #2aacb8;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          mode-fix.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= (</span><span
+    class="s1">mode</span><span class="s2">, </span><span class="s1">isDir</span><span class="s2">, </span><span
+    class="s1">portable</span><span class="s2">) =&gt; {</span>
+  <span class="s1">mode </span><span class="s2">&amp;= </span><span class="s3">0o7777</span>
+
+  <span class="s4">// in portable mode, use the minimum reasonable umask</span>
+  <span class="s4">// if this system creates files with 0o664 by default</span>
+  <span class="s4">// (as some linux distros do), then we'll write the</span>
+  <span class="s4">// archive with 0o644 instead.  Also, don't ever create</span>
+  <span class="s4">// a file that is not readable/writable by the owner.</span>
+  <span class="s5">if </span><span class="s2">(</span><span class="s1">portable</span><span class="s2">) {</span>
+    <span class="s1">mode </span><span class="s2">= (</span><span class="s1">mode </span><span class="s2">| </span><span
+    class="s3">0o600</span><span class="s2">) &amp; ~</span><span class="s3">0o22</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// if dirs are readable, then they should be listable</span>
+  <span class="s5">if </span><span class="s2">(</span><span class="s1">isDir</span><span class="s2">) {</span>
+    <span class="s5">if </span><span class="s2">(</span><span class="s1">mode </span><span class="s2">&amp; </span><span
+    class="s3">0o400</span><span class="s2">) {</span>
+      <span class="s1">mode </span><span class="s2">|= </span><span class="s3">0o100</span>
+    <span class="s2">}</span>
+    <span class="s5">if </span><span class="s2">(</span><span class="s1">mode </span><span class="s2">&amp; </span><span
+    class="s3">0o40</span><span class="s2">) {</span>
+      <span class="s1">mode </span><span class="s2">|= </span><span class="s3">0o10</span>
+    <span class="s2">}</span>
+    <span class="s5">if </span><span class="s2">(</span><span class="s1">mode </span><span class="s2">&amp; </span><span
+    class="s3">0o4</span><span class="s2">) {</span>
+      <span class="s1">mode </span><span class="s2">|= </span><span class="s3">0o1</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s5">return </span><span class="s1">mode</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

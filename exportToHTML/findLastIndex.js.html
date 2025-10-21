@@ -1,0 +1,135 @@
+<html>
+<head>
+  <title>findLastIndex.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          findLastIndex.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseFindIndex </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_baseFindIndex'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">),</span>
+    <span class="s1">toInteger </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./toInteger'</span><span class="s2">);</span>
+
+<span class="s4">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMax </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">max</span><span class="s2">,</span>
+    <span class="s1">nativeMin </span><span class="s2">= </span><span class="s1">Math</span><span
+    class="s2">.</span><span class="s1">min</span><span class="s2">;</span>
+
+<span class="s5">/**</span>
+ <span class="s5">* This method is like `_.findIndex` except that it iterates over elements</span>
+ <span class="s5">* of `collection` from right to left.</span>
+ <span class="s5">*</span>
+ <span class="s5">* </span><span class="s6">@static</span>
+ <span class="s5">* </span><span class="s6">@memberOf </span><span class="s5">_</span>
+ <span class="s5">* </span><span class="s6">@since </span><span class="s5">2.0.0</span>
+ <span class="s5">* </span><span class="s6">@category </span><span class="s5">Array</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{Array} array The array to inspect.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{Function} [predicate=_.identity] The function invoked per iteration.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{number} [fromIndex=array.length-1] The index to search from.</span>
+ <span class="s5">* </span><span class="s6">@returns </span><span class="s5">{number} Returns the index of the found element, else `-1`.</span>
+ <span class="s5">* </span><span class="s6">@example</span>
+ <span class="s5">*</span>
+ <span class="s5">* var users = [</span>
+ <span class="s5">*   { 'user': 'barney',  'active': true },</span>
+ <span class="s5">*   { 'user': 'fred',    'active': false },</span>
+ <span class="s5">*   { 'user': 'pebbles', 'active': false }</span>
+ <span class="s5">* ];</span>
+ <span class="s5">*</span>
+ <span class="s5">* _.findLastIndex(users, function(o) { return o.user == 'pebbles'; });</span>
+ <span class="s5">* // =&gt; 2</span>
+ <span class="s5">*</span>
+ <span class="s5">* // The `_.matches` iteratee shorthand.</span>
+ <span class="s5">* _.findLastIndex(users, { 'user': 'barney', 'active': true });</span>
+ <span class="s5">* // =&gt; 0</span>
+ <span class="s5">*</span>
+ <span class="s5">* // The `_.matchesProperty` iteratee shorthand.</span>
+ <span class="s5">* _.findLastIndex(users, ['active', false]);</span>
+ <span class="s5">* // =&gt; 2</span>
+ <span class="s5">*</span>
+ <span class="s5">* // The `_.property` iteratee shorthand.</span>
+ <span class="s5">* _.findLastIndex(users, 'active');</span>
+ <span class="s5">* // =&gt; 0</span>
+ <span class="s5">*/</span>
+<span class="s0">function </span><span class="s1">findLastIndex</span><span class="s2">(</span><span
+    class="s1">array</span><span class="s2">, </span><span class="s1">predicate</span><span class="s2">, </span><span
+    class="s1">fromIndex</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">length </span><span class="s2">= </span><span
+    class="s1">array </span><span class="s2">== </span><span class="s0">null </span><span class="s2">? </span><span
+    class="s7">0 </span><span class="s2">: </span><span class="s1">array</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s2">-</span><span class="s7">1</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">index </span><span class="s2">= </span><span
+    class="s1">length </span><span class="s2">- </span><span class="s7">1</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">fromIndex </span><span
+    class="s2">!== </span><span class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s1">index </span><span class="s2">= </span><span class="s1">toInteger</span><span
+    class="s2">(</span><span class="s1">fromIndex</span><span class="s2">);</span>
+    <span class="s1">index </span><span class="s2">= </span><span class="s1">fromIndex </span><span
+    class="s2">&lt; </span><span class="s7">0</span>
+      <span class="s2">? </span><span class="s1">nativeMax</span><span class="s2">(</span><span
+    class="s1">length </span><span class="s2">+ </span><span class="s1">index</span><span class="s2">, </span><span
+    class="s7">0</span><span class="s2">)</span>
+      <span class="s2">: </span><span class="s1">nativeMin</span><span class="s2">(</span><span
+    class="s1">index</span><span class="s2">, </span><span class="s1">length </span><span class="s2">- </span><span
+    class="s7">1</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">baseFindIndex</span><span class="s2">(</span><span
+    class="s1">array</span><span class="s2">, </span><span class="s1">baseIteratee</span><span class="s2">(</span><span
+    class="s1">predicate</span><span class="s2">, </span><span class="s7">3</span><span class="s2">), </span><span
+    class="s1">index</span><span class="s2">, </span><span class="s0">true</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">findLastIndex</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

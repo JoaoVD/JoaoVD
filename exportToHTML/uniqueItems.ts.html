@@ -1,0 +1,249 @@
+<html>
+<head>
+  <title>uniqueItems.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          uniqueItems.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">ErrorObject</span><span class="s2">, </span><span class="s1">KeywordErrorDefinition</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">checkDataTypes</span><span class="s2">, </span><span
+    class="s1">getSchemaTypes</span><span class="s2">, </span><span class="s1">DataType</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/validate/dataType&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">useFunc</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/util&quot;</span>
+<span class="s0">import </span><span class="s1">equal from </span><span
+    class="s3">&quot;../../runtime/equal&quot;</span>
+
+<span class="s0">export </span><span class="s1">type UniqueItemsError </span><span class="s2">= </span><span class="s1">ErrorObject</span><span
+    class="s2">&lt;</span>
+  <span class="s3">&quot;uniqueItems&quot;</span><span class="s2">,</span>
+  <span class="s2">{</span><span class="s1">i</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">; </span><span class="s1">j</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">},</span>
+  <span class="s1">boolean </span><span class="s2">| {</span><span class="s1">$data</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">}</span>
+<span class="s2">&gt;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: ({</span><span class="s1">params</span><span
+    class="s2">: {</span><span class="s1">i</span><span class="s2">, </span><span class="s1">j</span><span class="s2">}}) =&gt;</span>
+    <span class="s1">str</span><span class="s3">`must NOT have duplicate items (items ## </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">j</span><span class="s2">} </span><span
+    class="s3">and </span><span class="s1">$</span><span class="s2">{</span><span class="s1">i</span><span
+    class="s2">} </span><span class="s3">are identical)`</span><span class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">params</span><span
+    class="s2">: {</span><span class="s1">i</span><span class="s2">, </span><span class="s1">j</span><span class="s2">}}) =&gt; </span><span
+    class="s1">_</span><span class="s3">`{i: </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">i</span><span class="s2">}</span><span class="s3">, j: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">j</span><span class="s2">}</span><span class="s3">}`</span><span
+    class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;uniqueItems&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;array&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">$data</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">$data</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">parentSchema</span><span
+    class="s2">, </span><span class="s1">schemaCode</span><span class="s2">, </span><span class="s1">it</span><span
+    class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">$data </span><span
+    class="s2">&amp;&amp; !</span><span class="s1">schema</span><span class="s2">) </span><span class="s0">return</span>
+    <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;valid&quot;</span><span
+    class="s2">)</span>
+    <span class="s0">const </span><span class="s1">itemTypes </span><span class="s2">= </span><span class="s1">parentSchema</span><span
+    class="s2">.</span><span class="s1">items </span><span class="s2">? </span><span
+    class="s1">getSchemaTypes</span><span class="s2">(</span><span class="s1">parentSchema</span><span
+    class="s2">.</span><span class="s1">items</span><span class="s2">) : []</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">block$data</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s1">validateUniqueItems</span><span
+    class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schemaCode</span><span class="s2">} </span><span
+    class="s3">=== false`</span><span class="s2">)</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">)</span>
+
+    <span class="s0">function </span><span class="s1">validateUniqueItems</span><span class="s2">(): </span><span
+    class="s0">void </span><span class="s2">{</span>
+      <span class="s0">const </span><span class="s1">i </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;i&quot;</span><span
+    class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">.length`</span><span
+    class="s2">)</span>
+      <span class="s0">const </span><span class="s1">j </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;j&quot;</span><span
+    class="s2">)</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">setParams</span><span
+    class="s2">({</span><span class="s1">i</span><span class="s2">, </span><span class="s1">j</span><span
+    class="s2">})</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">i</span><span class="s2">} </span><span class="s3">&gt; 1`</span><span
+    class="s2">, () =&gt; (</span><span class="s1">canOptimize</span><span class="s2">() ? </span><span
+    class="s1">loopN </span><span class="s2">: </span><span class="s1">loopN2</span><span class="s2">)(</span><span
+    class="s1">i</span><span class="s2">, </span><span class="s1">j</span><span class="s2">))</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">canOptimize</span><span class="s2">(): </span><span class="s1">boolean </span><span
+    class="s2">{</span>
+      <span class="s0">return </span><span class="s1">itemTypes</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">&gt; </span><span class="s4">0 </span><span class="s2">&amp;&amp; !</span><span
+    class="s1">itemTypes</span><span class="s2">.</span><span class="s1">some</span><span class="s2">((</span><span
+    class="s1">t</span><span class="s2">) =&gt; </span><span class="s1">t </span><span class="s2">=== </span><span
+    class="s3">&quot;object&quot; </span><span class="s2">|| </span><span class="s1">t </span><span
+    class="s2">=== </span><span class="s3">&quot;array&quot;</span><span class="s2">)</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">loopN</span><span class="s2">(</span><span
+    class="s1">i</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">, </span><span class="s1">j</span><span
+    class="s2">: </span><span class="s1">Name</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+      <span class="s0">const </span><span class="s1">item </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span class="s3">&quot;item&quot;</span><span
+    class="s2">)</span>
+      <span class="s0">const </span><span class="s1">wrongType </span><span class="s2">= </span><span class="s1">checkDataTypes</span><span
+    class="s2">(</span><span class="s1">itemTypes</span><span class="s2">, </span><span class="s1">item</span><span
+    class="s2">, </span><span class="s1">it</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">strictNumbers</span><span class="s2">, </span><span class="s1">DataType</span><span
+    class="s2">.</span><span class="s1">Wrong</span><span class="s2">)</span>
+      <span class="s0">const </span><span class="s1">indices </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">const</span><span class="s2">(</span><span
+    class="s3">&quot;indices&quot;</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`{}`</span><span
+    class="s2">)</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">for</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`;</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">i</span><span class="s2">}</span><span class="s3">--;`</span><span class="s2">, () =&gt; {</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span
+    class="s1">item</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span class="s1">i</span><span
+    class="s2">}</span><span class="s3">]`</span><span class="s2">)</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">wrongType</span><span class="s2">, </span><span class="s1">_</span><span
+    class="s3">`continue`</span><span class="s2">)</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">itemTypes</span><span
+    class="s2">.</span><span class="s1">length </span><span class="s2">&gt; </span><span class="s4">1</span><span
+    class="s2">) </span><span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span
+    class="s2">(</span><span class="s1">_</span><span class="s3">`typeof </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">item</span><span class="s2">} </span><span
+    class="s3">== &quot;string&quot;`</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">item</span><span class="s2">} </span><span class="s3">+= &quot;_&quot;`</span><span
+    class="s2">)</span>
+        <span class="s1">gen</span>
+          <span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span class="s1">_</span><span
+    class="s3">`typeof </span><span class="s1">$</span><span class="s2">{</span><span class="s1">indices</span><span
+    class="s2">}</span><span class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">item</span><span class="s2">}</span><span class="s3">] == &quot;number&quot;`</span><span class="s2">, () =&gt; {</span>
+            <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span
+    class="s2">(</span><span class="s1">j</span><span class="s2">, </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">indices</span><span
+    class="s2">}</span><span class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">item</span><span class="s2">}</span><span class="s3">]`</span><span class="s2">)</span>
+            <span class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span class="s2">()</span>
+            <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span
+    class="s2">(</span><span class="s1">valid</span><span class="s2">, </span><span class="s0">false</span><span
+    class="s2">).</span><span class="s1">break</span><span class="s2">()</span>
+          <span class="s2">})</span>
+          <span class="s2">.</span><span class="s1">code</span><span class="s2">(</span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">indices</span><span
+    class="s2">}</span><span class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">item</span><span class="s2">}</span><span class="s3">] = </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">i</span><span class="s2">}</span><span class="s3">`</span><span
+    class="s2">)</span>
+      <span class="s2">})</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">loopN2</span><span class="s2">(</span><span
+    class="s1">i</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">, </span><span class="s1">j</span><span
+    class="s2">: </span><span class="s1">Name</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+      <span class="s0">const </span><span class="s1">eql </span><span class="s2">= </span><span
+    class="s1">useFunc</span><span class="s2">(</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">equal</span><span class="s2">)</span>
+      <span class="s0">const </span><span class="s1">outer </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span class="s3">&quot;outer&quot;</span><span
+    class="s2">)</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">label</span><span class="s2">(</span><span
+    class="s1">outer</span><span class="s2">).</span><span class="s1">for</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`;</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">i</span><span class="s2">}</span><span class="s3">--;`</span><span class="s2">, () =&gt;</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">for</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">j</span><span class="s2">} </span><span class="s3">= </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">i</span><span class="s2">}</span><span class="s3">; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">j</span><span class="s2">}</span><span
+    class="s3">--;`</span><span class="s2">, () =&gt;</span>
+          <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">eql</span><span class="s2">}</span><span class="s3">(</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">[</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">i</span><span class="s2">}</span><span
+    class="s3">], </span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span class="s1">j</span><span
+    class="s2">}</span><span class="s3">])`</span><span class="s2">, () =&gt; {</span>
+            <span class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span class="s2">()</span>
+            <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span
+    class="s2">(</span><span class="s1">valid</span><span class="s2">, </span><span class="s0">false</span><span
+    class="s2">).</span><span class="s1">break</span><span class="s2">(</span><span class="s1">outer</span><span
+    class="s2">)</span>
+          <span class="s2">})</span>
+        <span class="s2">)</span>
+      <span class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

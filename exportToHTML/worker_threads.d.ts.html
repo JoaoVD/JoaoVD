@@ -1,0 +1,1307 @@
+<html>
+<head>
+  <title>worker_threads.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          worker_threads.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:worker_threads` module enables the use of threads that execute</span>
+ <span class="s0">* JavaScript in parallel. To access it:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import worker from 'node:worker_threads';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* Workers (threads) are useful for performing CPU-intensive JavaScript operations.</span>
+ <span class="s0">* They do not help much with I/O-intensive work. The Node.js built-in</span>
+ <span class="s0">* asynchronous I/O operations are more efficient than Workers can be.</span>
+ <span class="s0">*</span>
+ <span class="s0">* Unlike `child_process` or `cluster`, `worker_threads` can share memory. They do</span>
+ <span class="s0">* so by transferring `ArrayBuffer` instances or sharing `SharedArrayBuffer` instances.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import {</span>
+ <span class="s0">*   Worker,</span>
+ <span class="s0">*   isMainThread,</span>
+ <span class="s0">*   parentPort,</span>
+ <span class="s0">*   workerData,</span>
+ <span class="s0">* } from 'node:worker_threads';</span>
+ <span class="s0">*</span>
+ <span class="s0">* if (!isMainThread) {</span>
+ <span class="s0">*   const { parse } = await import('some-js-parsing-library');</span>
+ <span class="s0">*   const script = workerData;</span>
+ <span class="s0">*   parentPort.postMessage(parse(script));</span>
+ <span class="s0">* }</span>
+ <span class="s0">*</span>
+ <span class="s0">* export default function parseJSAsync(script) {</span>
+ <span class="s0">*   return new Promise((resolve, reject) =&gt; {</span>
+ <span class="s0">*     const worker = new Worker(new URL(import.meta.url), {</span>
+ <span class="s0">*       workerData: script,</span>
+ <span class="s0">*     });</span>
+ <span class="s0">*     worker.on('message', resolve);</span>
+ <span class="s0">*     worker.on('error', reject);</span>
+ <span class="s0">*     worker.on('exit', (code) =&gt; {</span>
+ <span class="s0">*       if (code !== 0)</span>
+ <span class="s0">*         reject(new Error(`Worker stopped with exit code ${code}`));</span>
+ <span class="s0">*     });</span>
+ <span class="s0">*   });</span>
+ <span class="s0">* };</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* The above example spawns a Worker thread for each `parseJSAsync()` call. In</span>
+ <span class="s0">* practice, use a pool of Workers for these kinds of tasks. Otherwise, the</span>
+ <span class="s0">* overhead of creating Workers would likely exceed their benefit.</span>
+ <span class="s0">*</span>
+ <span class="s0">* When implementing a worker pool, use the `AsyncResource` API to inform</span>
+ <span class="s0">* diagnostic tools (e.g. to provide asynchronous stack traces) about the</span>
+ <span class="s0">* correlation between tasks and their outcomes. See `&quot;Using AsyncResource for a Worker thread pool&quot;` in the `async_hooks` documentation for an example implementation.</span>
+ <span class="s0">*</span>
+ <span class="s0">* Worker threads inherit non-process-specific options by default. Refer to `Worker constructor options` to know how to customize worker thread options,</span>
+ <span class="s0">* specifically `argv` and `execArgv` options.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/worker_threads.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;worker_threads&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Context </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:vm&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">EventEmitter</span><span
+    class="s4">, </span><span class="s2">NodeEventTarget </span><span class="s4">} </span><span
+    class="s2">from </span><span class="s3">&quot;node:events&quot;</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">EventLoopUtilityFunction </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:perf_hooks&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">FileHandle </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:fs/promises&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Readable</span><span
+    class="s4">, </span><span class="s2">Writable </span><span class="s4">} </span><span class="s2">from </span><span
+    class="s3">&quot;node:stream&quot;</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">ReadableStream</span><span
+    class="s4">, </span><span class="s2">TransformStream</span><span class="s4">, </span><span
+    class="s2">WritableStream </span><span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:stream/web&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">URL </span><span class="s4">} </span><span
+    class="s2">from </span><span class="s3">&quot;node:url&quot;</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">HeapInfo </span><span class="s4">} </span><span
+    class="s2">from </span><span class="s3">&quot;node:v8&quot;</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">MessageEvent </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;undici-types&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">const </span><span class="s2">isInternalThread</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+    <span class="s5">const </span><span class="s2">isMainThread</span><span class="s4">: </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s5">const </span><span class="s2">parentPort</span><span class="s4">: </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">MessagePort</span><span class="s4">;</span>
+    <span class="s5">const </span><span class="s2">resourceLimits</span><span class="s4">: </span><span class="s2">ResourceLimits</span><span
+    class="s4">;</span>
+    <span class="s5">const </span><span class="s2">SHARE_ENV</span><span class="s4">: </span><span class="s2">unique symbol</span><span
+    class="s4">;</span>
+    <span class="s5">const </span><span class="s2">threadId</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s5">const </span><span class="s2">threadName</span><span class="s4">: </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+    <span class="s5">const </span><span class="s2">workerData</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Instances of the `worker.MessageChannel` class represent an asynchronous,</span>
+     <span class="s0">* two-way communications channel.</span>
+     <span class="s0">* The `MessageChannel` has no methods of its own. `new MessageChannel()` yields an object with `port1` and `port2` properties, which refer to linked `MessagePort` instances.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { MessageChannel } from 'node:worker_threads';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const { port1, port2 } = new MessageChannel();</span>
+     <span class="s0">* port1.on('message', (message) =&gt; console.log('received', message));</span>
+     <span class="s0">* port2.postMessage({ foo: 'bar' });</span>
+     <span class="s0">* // Prints: received { foo: 'bar' } from the `port1.on('message')` listener</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">MessageChannel </span><span class="s4">{</span>
+        <span class="s2">readonly port1</span><span class="s4">: </span><span class="s2">MessagePort</span><span
+    class="s4">;</span>
+        <span class="s2">readonly port2</span><span class="s4">: </span><span class="s2">MessagePort</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">WorkerPerformance </span><span class="s4">{</span>
+        <span class="s2">eventLoopUtilization</span><span class="s4">: </span><span
+    class="s2">EventLoopUtilityFunction</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type Transferable </span><span class="s4">=</span>
+        <span class="s4">| </span><span class="s2">ArrayBuffer</span>
+        <span class="s4">| </span><span class="s2">MessagePort</span>
+        <span class="s4">| </span><span class="s2">AbortSignal</span>
+        <span class="s4">| </span><span class="s2">FileHandle</span>
+        <span class="s4">| </span><span class="s2">ReadableStream</span>
+        <span class="s4">| </span><span class="s2">WritableStream</span>
+        <span class="s4">| </span><span class="s2">TransformStream</span><span class="s4">;</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `import { Transferable } from &quot;node:worker_threads&quot;` instead. */</span>
+    <span class="s6">// TODO: remove in a future major @types/node version.</span>
+    <span class="s2">type TransferListItem </span><span class="s4">= </span><span class="s2">Transferable</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Instances of the `worker.MessagePort` class represent one end of an</span>
+     <span class="s0">* asynchronous, two-way communications channel. It can be used to transfer</span>
+     <span class="s0">* structured data, memory regions and other `MessagePort`s between different `Worker`s.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This implementation matches [browser `MessagePort`](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) s.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">MessagePort </span><span class="s5">extends </span><span class="s2">EventTarget </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Disables further sending of messages on either side of the connection.</span>
+         <span
+           class="s0">* This method can be called when no further communication will happen over this `MessagePort`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `'close' event` is emitted on both `MessagePort` instances that</span>
+         <span class="s0">* are part of the channel.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">close</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sends a JavaScript value to the receiving side of this channel. `value` is transferred in a way which is compatible with</span>
+         <span class="s0">* the [HTML structured clone algorithm](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm).</span>
+         <span class="s0">*</span>
+         <span class="s0">* In particular, the significant differences to `JSON` are:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `value` may contain circular references.</span>
+         <span class="s0">* * `value` may contain instances of builtin JS types such as `RegExp`s, `BigInt`s, `Map`s, `Set`s, etc.</span>
+         <span class="s0">* * `value` may contain typed arrays, both using `ArrayBuffer`s</span>
+         <span class="s0">* and `SharedArrayBuffer`s.</span>
+         <span class="s0">* * `value` may contain [`WebAssembly.Module`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Module) instances.</span>
+         <span class="s0">* * `value` may not contain native (C++-backed) objects other than:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { MessageChannel } from 'node:worker_threads';</span>
+         <span class="s0">* const { port1, port2 } = new MessageChannel();</span>
+         <span class="s0">*</span>
+         <span class="s0">* port1.on('message', (message) =&gt; console.log(message));</span>
+         <span class="s0">*</span>
+         <span class="s0">* const circularData = {};</span>
+         <span class="s0">* circularData.foo = circularData;</span>
+         <span class="s0">* // Prints: { foo: [Circular] }</span>
+         <span class="s0">* port2.postMessage(circularData);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* `transferList` may be a list of [`ArrayBuffer`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer), `MessagePort`, and `FileHandle` objects.</span>
+         <span class="s0">* After transferring, they are not usable on the sending side of the channel</span>
+         <span class="s0">* anymore (even if they are not contained in `value`). Unlike with `child processes`, transferring handles such as network sockets is currently</span>
+         <span class="s0">* not supported.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `value` contains [`SharedArrayBuffer`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer) instances, those are accessible</span>
+         <span class="s0">* from either thread. They cannot be listed in `transferList`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `value` may still contain `ArrayBuffer` instances that are not in `transferList`; in that case, the underlying memory is copied rather than moved.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { MessageChannel } from 'node:worker_threads';</span>
+         <span class="s0">* const { port1, port2 } = new MessageChannel();</span>
+         <span class="s0">*</span>
+         <span class="s0">* port1.on('message', (message) =&gt; console.log(message));</span>
+         <span class="s0">*</span>
+         <span class="s0">* const uint8Array = new Uint8Array([ 1, 2, 3, 4 ]);</span>
+         <span class="s0">* // This posts a copy of `uint8Array`:</span>
+         <span class="s0">* port2.postMessage(uint8Array);</span>
+         <span class="s0">* // This does not copy data, but renders `uint8Array` unusable:</span>
+         <span class="s0">* port2.postMessage(uint8Array, [ uint8Array.buffer ]);</span>
+         <span class="s0">*</span>
+         <span class="s0">* // The memory for the `sharedUint8Array` is accessible from both the</span>
+         <span class="s0">* // original and the copy received by `.on('message')`:</span>
+         <span class="s0">* const sharedUint8Array = new Uint8Array(new SharedArrayBuffer(4));</span>
+         <span class="s0">* port2.postMessage(sharedUint8Array);</span>
+         <span class="s0">*</span>
+         <span class="s0">* // This transfers a freshly created message port to the receiver.</span>
+         <span class="s0">* // This can be used, for example, to create communication channels between</span>
+         <span class="s0">* // multiple `Worker` threads that are children of the same parent thread.</span>
+         <span class="s0">* const otherChannel = new MessageChannel();</span>
+         <span class="s0">* port2.postMessage({ port: otherChannel.port1 }, [ otherChannel.port1 ]);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The message object is cloned immediately, and can be modified after</span>
+         <span class="s0">* posting without having side effects.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For more information on the serialization and deserialization mechanisms</span>
+         <span class="s0">* behind this API, see the `serialization API of the node:v8 module`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">postMessage</span><span class="s4">(</span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">, </span><span class="s2">transferList</span><span
+    class="s4">?: </span><span class="s2">readonly Transferable</span><span class="s4">[]): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If true, the `MessagePort` object will keep the Node.js event loop active.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.1.0, v16.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">hasRef</span><span class="s4">(): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Opposite of `unref()`. Calling `ref()` on a previously `unref()`ed port does _not_ let the program exit if it's the only active handle left (the default</span>
+         <span class="s0">* behavior). If the port is `ref()`ed, calling `ref()` again has no effect.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If listeners are attached or removed using `.on('message')`, the port</span>
+         <span class="s0">* is `ref()`ed and `unref()`ed automatically depending on whether</span>
+         <span class="s0">* listeners for the event exist.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">ref</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Calling `unref()` on a port allows the thread to exit if this is the only</span>
+         <span class="s0">* active handle in the event system. If the port is already `unref()`ed calling `unref()` again has no effect.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If listeners are attached or removed using `.on('message')`, the port is `ref()`ed and `unref()`ed automatically depending on whether</span>
+         <span class="s0">* listeners for the event exist.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">unref</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Starts receiving messages on this `MessagePort`. When using this port</span>
+         <span
+           class="s0">* as an event emitter, this is called automatically once `'message'` listeners are attached.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method exists for parity with the Web `MessagePort` API. In Node.js,</span>
+         <span class="s0">* it is only useful for ignoring messages when no event listener is present.</span>
+         <span class="s0">* Node.js also diverges in its handling of `.onmessage`. Setting it</span>
+         <span class="s0">* automatically calls `.start()`, but unsetting it lets messages queue up</span>
+         <span class="s0">* until a new handler is set or the port is discarded.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">start</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">ev</span><span class="s4">: </span><span
+    class="s2">Event</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">arg</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">ev</span><span class="s4">: </span><span class="s2">Event</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span
+    class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">arg</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;close&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">ev</span><span class="s4">: </span><span class="s2">Event</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">EventListenerOptions</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;message&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">EventListenerOptions</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">EventListenerOptions</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">arg</span><span class="s4">: </span><span class="s2">any</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">EventListenerOptions</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;close&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">ev</span><span class="s4">: </span><span class="s2">Event</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;message&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">arg</span><span class="s4">: </span><span class="s2">any</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">ev</span><span class="s4">: </span><span
+    class="s2">Event</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">arg</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">ev</span><span class="s4">: </span><span
+    class="s2">Event</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">EventListenerOptions</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">EventListenerOptions</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">EventListenerOptions</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">arg</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">EventListenerOptions</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">MessagePort </span><span class="s5">extends </span><span
+    class="s2">NodeEventTarget </span><span class="s4">{}</span>
+    <span class="s5">interface </span><span class="s2">WorkerOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* List of arguments which would be stringified and appended to</span>
+         <span class="s0">* `process.argv` in the worker. This is mostly similar to the `workerData`</span>
+         <span class="s0">* but the values will be available on the global `process.argv` as if they</span>
+         <span class="s0">* were passed as CLI options to the script.</span>
+         <span class="s0">*/</span>
+        <span class="s2">argv</span><span class="s4">?: </span><span class="s2">any</span><span
+    class="s4">[] | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">env</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Dict</span><span class="s4">&lt;</span><span class="s2">string</span><span
+    class="s4">&gt; | </span><span class="s5">typeof </span><span class="s2">SHARE_ENV </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">eval</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">workerData</span><span class="s4">?: </span><span class="s2">any</span><span
+    class="s4">;</span>
+        <span class="s2">stdin</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">stdout</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">stderr</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">execArgv</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">[] | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">resourceLimits</span><span class="s4">?: </span><span class="s2">ResourceLimits </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Additional data to send in the first worker message.</span>
+         <span class="s0">*/</span>
+        <span class="s2">transferList</span><span class="s4">?: </span><span class="s2">Transferable</span><span
+    class="s4">[] | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">trackUnmanagedFds</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An optional `name` to be appended to the worker title</span>
+         <span class="s0">* for debugging/identification purposes, making the final title as</span>
+         <span class="s0">* `[worker ${id}] ${name}`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">name</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ResourceLimits </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The maximum size of a heap space for recently created objects.</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxYoungGenerationSizeMb</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The maximum size of the main heap in MB.</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxOldGenerationSizeMb</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The size of a pre-allocated memory range used for generated code.</span>
+         <span class="s0">*/</span>
+        <span class="s2">codeRangeSizeMb</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The default maximum stack size for the thread. Small values may lead to unusable Worker instances.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">4</span>
+         <span class="s0">*/</span>
+        <span class="s2">stackSizeMb</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `Worker` class represents an independent JavaScript execution thread.</span>
+     <span class="s0">* Most Node.js APIs are available inside of it.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Notable differences inside a Worker environment are:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * The `process.stdin`, `process.stdout`, and `process.stderr` streams may be redirected by the parent thread.</span>
+     <span class="s0">* * The `import { isMainThread } from 'node:worker_threads'` variable is set to `false`.</span>
+     <span class="s0">* * The `import { parentPort } from 'node:worker_threads'` message port is available.</span>
+     <span class="s0">* * `process.exit()` does not stop the whole program, just the single thread,</span>
+     <span class="s0">* and `process.abort()` is not available.</span>
+     <span class="s0">* * `process.chdir()` and `process` methods that set group or user ids</span>
+     <span class="s0">* are not available.</span>
+     <span class="s0">* * `process.env` is a copy of the parent thread's environment variables,</span>
+     <span class="s0">* unless otherwise specified. Changes to one copy are not visible in other</span>
+     <span class="s0">* threads, and are not visible to native add-ons (unless `worker.SHARE_ENV` is passed as the `env` option to the `Worker` constructor). On Windows, unlike the main thread, a copy of the</span>
+     <span class="s0">* environment variables operates in a case-sensitive manner.</span>
+     <span class="s0">* * `process.title` cannot be modified.</span>
+     <span class="s0">* * Signals are not delivered through `process.on('...')`.</span>
+     <span class="s0">* * Execution may stop at any point as a result of `worker.terminate()` being invoked.</span>
+     <span class="s0">* * IPC channels from parent processes are not accessible.</span>
+     <span class="s0">* * The `trace_events` module is not supported.</span>
+     <span
+       class="s0">* * Native add-ons can only be loaded from multiple threads if they fulfill `certain conditions`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Creating `Worker` instances inside of other `Worker`s is possible.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Like [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) and the `node:cluster module`, two-way communication</span>
+     <span class="s0">* can be achieved through inter-thread message passing. Internally, a `Worker` has</span>
+     <span class="s0">* a built-in pair of `MessagePort` s that are already associated with each</span>
+     <span class="s0">* other when the `Worker` is created. While the `MessagePort` object on the parent</span>
+     <span class="s0">* side is not directly exposed, its functionalities are exposed through `worker.postMessage()` and the `worker.on('message')` event</span>
+     <span class="s0">* on the `Worker` object for the parent thread.</span>
+     <span class="s0">*</span>
+     <span class="s0">* To create custom messaging channels (which is encouraged over using the default</span>
+     <span class="s0">* global channel because it facilitates separation of concerns), users can create</span>
+     <span class="s0">* a `MessageChannel` object on either thread and pass one of the`MessagePort`s on that `MessageChannel` to the other thread through a</span>
+     <span class="s0">* pre-existing channel, such as the global one.</span>
+     <span class="s0">*</span>
+     <span class="s0">* See `port.postMessage()` for more information on how messages are passed,</span>
+     <span class="s0">* and what kind of JavaScript values can be successfully transported through</span>
+     <span class="s0">* the thread barrier.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import assert from 'node:assert';</span>
+     <span class="s0">* import {</span>
+     <span class="s0">*   Worker, MessageChannel, MessagePort, isMainThread, parentPort,</span>
+     <span class="s0">* } from 'node:worker_threads';</span>
+     <span class="s0">* if (isMainThread) {</span>
+     <span class="s0">*   const worker = new Worker(__filename);</span>
+     <span class="s0">*   const subChannel = new MessageChannel();</span>
+     <span class="s0">*   worker.postMessage({ hereIsYourPort: subChannel.port1 }, [subChannel.port1]);</span>
+     <span class="s0">*   subChannel.port2.on('message', (value) =&gt; {</span>
+     <span class="s0">*     console.log('received:', value);</span>
+     <span class="s0">*   });</span>
+     <span class="s0">* } else {</span>
+     <span class="s0">*   parentPort.once('message', (value) =&gt; {</span>
+     <span class="s0">*     assert(value.hereIsYourPort instanceof MessagePort);</span>
+     <span class="s0">*     value.hereIsYourPort.postMessage('the worker is sending this');</span>
+     <span class="s0">*     value.hereIsYourPort.close();</span>
+     <span class="s0">*   });</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Worker </span><span class="s5">extends </span><span class="s2">EventEmitter </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `stdin: true` was passed to the `Worker` constructor, this is a</span>
+         <span class="s0">* writable stream. The data written to this stream will be made available in</span>
+         <span class="s0">* the worker thread as `process.stdin`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly stdin</span><span class="s4">: </span><span class="s2">Writable </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This is a readable stream which contains data written to `process.stdout` inside the worker thread. If `stdout: true` was not passed to the `Worker` constructor, then data is piped to the</span>
+         <span class="s0">* parent thread's `process.stdout` stream.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly stdout</span><span class="s4">: </span><span class="s2">Readable</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This is a readable stream which contains data written to `process.stderr` inside the worker thread. If `stderr: true` was not passed to the `Worker` constructor, then data is piped to the</span>
+         <span class="s0">* parent thread's `process.stderr` stream.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly stderr</span><span class="s4">: </span><span class="s2">Readable</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An integer identifier for the referenced thread. Inside the worker thread,</span>
+         <span class="s0">* it is available as `import { threadId } from 'node:worker_threads'`.</span>
+         <span class="s0">* This value is unique for each `Worker` instance inside a single process.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly threadId</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A string identifier for the referenced thread or null if the thread is not running.</span>
+         <span
+           class="s0">* Inside the worker thread, it is available as `require('node:worker_threads').threadName`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly threadName</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Provides the set of JS engine resource constraints for this Worker thread.</span>
+         <span class="s0">* If the `resourceLimits` option was passed to the `Worker` constructor,</span>
+         <span class="s0">* this matches its values.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the worker has stopped, the return value is an empty object.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.2.0, v12.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly resourceLimits</span><span class="s4">?: </span><span
+    class="s2">ResourceLimits </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An object that can be used to query performance information from a worker</span>
+         <span class="s0">* instance. Similar to `perf_hooks.performance`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0, v12.22.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly performance</span><span class="s4">: </span><span
+    class="s2">WorkerPerformance</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">filename  The path to the Worker’s main script or module.</span>
+         <span class="s0">*                  Must be either an absolute path or a relative path (i.e. relative to the current working directory) starting with ./ or ../,</span>
+         <span class="s0">*                  or a WHATWG URL object using file: protocol. If options.eval is true, this is a string containing JavaScript code rather than a path.</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">filename</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">URL</span><span
+    class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">WorkerOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Send a message to the worker that is received via `require('node:worker_threads').parentPort.on('message')`.</span>
+         <span class="s0">* See `port.postMessage()` for more details.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">postMessage</span><span class="s4">(</span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">, </span><span class="s2">transferList</span><span
+    class="s4">?: </span><span class="s2">readonly Transferable</span><span class="s4">[]): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Opposite of `unref()`, calling `ref()` on a previously `unref()`ed worker does _not_ let the program exit if it's the only active handle left (the default</span>
+         <span class="s0">* behavior). If the worker is `ref()`ed, calling `ref()` again has</span>
+         <span class="s0">* no effect.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">ref</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Calling `unref()` on a worker allows the thread to exit if this is the only</span>
+         <span class="s0">* active handle in the event system. If the worker is already `unref()`ed calling `unref()` again has no effect.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">unref</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Stop all JavaScript execution in the worker thread as soon as possible.</span>
+         <span
+           class="s0">* Returns a Promise for the exit code that is fulfilled when the `'exit' event` is emitted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">terminate</span><span class="s4">(): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s2">number</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method returns a `Promise` that will resolve to an object identical to `process.threadCpuUsage()`,</span>
+         <span class="s0">* or reject with an `ERR_WORKER_NOT_RUNNING` error if the worker is no longer running.</span>
+         <span class="s0">* This methods allows the statistics to be observed from outside the actual thread.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">cpuUsage</span><span class="s4">(</span><span class="s2">prev</span><span class="s4">?: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">CpuUsage</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">CpuUsage</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns a readable stream for a V8 snapshot of the current state of the Worker.</span>
+         <span class="s0">* See `v8.getHeapSnapshot()` for more details.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the Worker thread is no longer running, which may occur before the `'exit' event` is emitted, the returned `Promise` is rejected</span>
+         <span class="s0">* immediately with an `ERR_WORKER_NOT_RUNNING` error.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.9.0, v12.17.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">A promise for a Readable Stream containing a V8 heap snapshot</span>
+         <span class="s0">*/</span>
+        <span class="s2">getHeapSnapshot</span><span class="s4">(): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">Readable</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method returns a `Promise` that will resolve to an object identical to `v8.getHeapStatistics()`,</span>
+         <span class="s0">* or reject with an `ERR_WORKER_NOT_RUNNING` error if the worker is no longer running.</span>
+         <span class="s0">* This methods allows the statistics to be observed from outside the actual thread.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getHeapStatistics</span><span class="s4">(): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">HeapInfo</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Calls `worker.terminate()` when the dispose scope is exited.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* async function example() {</span>
+         <span class="s0">*   await using worker = new Worker('for (;;) {}', { eval: true });</span>
+         <span class="s0">*   // Worker is automatically terminate when the scope is exited.</span>
+         <span class="s0">* }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.2.0</span>
+         <span class="s0">*/</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">asyncDispose</span><span class="s4">](): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s5">void</span><span class="s4">&gt;;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">exitCode</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;online&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">exitCode</span><span class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span
+    class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;online&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;error&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;exit&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">exitCode</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;message&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;online&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">exitCode</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;online&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">exitCode</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;online&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">exitCode</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;online&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">exitCode</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;online&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">removeListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;error&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;exit&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">exitCode</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;message&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;messageerror&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">error</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;online&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">off</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">BroadcastChannel </span><span class="s5">extends </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">RefCounted </span><span class="s4">{}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Instances of `BroadcastChannel` allow asynchronous one-to-many communication</span>
+     <span class="s0">* with all other `BroadcastChannel` instances bound to the same channel name.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* 'use strict';</span>
+     <span class="s0">*</span>
+     <span class="s0">* import {</span>
+     <span class="s0">*   isMainThread,</span>
+     <span class="s0">*   BroadcastChannel,</span>
+     <span class="s0">*   Worker,</span>
+     <span class="s0">* } from 'node:worker_threads';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const bc = new BroadcastChannel('hello');</span>
+     <span class="s0">*</span>
+     <span class="s0">* if (isMainThread) {</span>
+     <span class="s0">*   let c = 0;</span>
+     <span class="s0">*   bc.onmessage = (event) =&gt; {</span>
+     <span class="s0">*     console.log(event.data);</span>
+     <span class="s0">*     if (++c === 10) bc.close();</span>
+     <span class="s0">*   };</span>
+     <span class="s0">*   for (let n = 0; n &lt; 10; n++)</span>
+     <span class="s0">*     new Worker(__filename);</span>
+     <span class="s0">* } else {</span>
+     <span class="s0">*   bc.postMessage('hello from every worker');</span>
+     <span class="s0">*   bc.close();</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.4.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">BroadcastChannel </span><span class="s5">extends </span><span
+    class="s2">EventTarget </span><span class="s4">{</span>
+        <span class="s2">readonly name</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Invoked with a single \`MessageEvent\` argument when a message is received.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.4.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">onmessage</span><span class="s4">: (</span><span class="s2">message</span><span
+    class="s4">: </span><span class="s2">MessageEvent</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Invoked with a received message cannot be deserialized.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.4.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">onmessageerror</span><span class="s4">: (</span><span class="s2">message</span><span
+    class="s4">: </span><span class="s2">MessageEvent</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Closes the `BroadcastChannel` connection.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.4.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">close</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.4.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">message Any cloneable JavaScript value.</span>
+         <span class="s0">*/</span>
+        <span class="s2">postMessage</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">Lock </span><span class="s4">{</span>
+        <span class="s2">readonly mode</span><span class="s4">: </span><span class="s2">LockMode</span><span class="s4">;</span>
+        <span class="s2">readonly name</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">LockGrantedCallback</span><span class="s4">&lt;</span><span
+    class="s2">T</span><span class="s4">&gt; {</span>
+        <span class="s4">(</span><span class="s2">lock</span><span class="s4">: </span><span
+    class="s2">Lock </span><span class="s4">| </span><span class="s5">null</span><span class="s4">): </span><span
+    class="s2">T</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">LockInfo </span><span class="s4">{</span>
+        <span class="s2">clientId</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">mode</span><span class="s4">: </span><span class="s2">LockMode</span><span class="s4">;</span>
+        <span class="s2">name</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">LockManager </span><span class="s4">{</span>
+        <span class="s2">query</span><span class="s4">(): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">LockManagerSnapshot</span><span class="s4">&gt;;</span>
+        <span class="s2">request</span><span class="s4">&lt;</span><span class="s2">T</span><span
+    class="s4">&gt;(</span><span class="s2">name</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: </span><span
+    class="s2">LockGrantedCallback</span><span class="s4">&lt;</span><span class="s2">T</span><span
+    class="s4">&gt;): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s2">Awaited</span><span class="s4">&lt;</span><span class="s2">T</span><span class="s4">&gt;&gt;;</span>
+        <span class="s2">request</span><span class="s4">&lt;</span><span class="s2">T</span><span
+    class="s4">&gt;(</span><span class="s2">name</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">options</span><span class="s4">: </span><span
+    class="s2">LockOptions</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: </span><span class="s2">LockGrantedCallback</span><span class="s4">&lt;</span><span class="s2">T</span><span
+    class="s4">&gt;): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s2">Awaited</span><span class="s4">&lt;</span><span class="s2">T</span><span class="s4">&gt;&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">LockManagerSnapshot </span><span class="s4">{</span>
+        <span class="s2">held</span><span class="s4">: </span><span class="s2">LockInfo</span><span
+    class="s4">[];</span>
+        <span class="s2">pending</span><span class="s4">: </span><span class="s2">LockInfo</span><span
+    class="s4">[];</span>
+    <span class="s4">}</span>
+    <span class="s2">type LockMode </span><span class="s4">= </span><span class="s3">&quot;exclusive&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;shared&quot;</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">LockOptions </span><span class="s4">{</span>
+        <span class="s2">ifAvailable</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">mode</span><span class="s4">?: </span><span class="s2">LockMode</span><span class="s4">;</span>
+        <span class="s2">signal</span><span class="s4">?: </span><span class="s2">AbortSignal</span><span
+    class="s4">;</span>
+        <span class="s2">steal</span><span class="s4">?: </span><span class="s2">boolean</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">var </span><span class="s2">locks</span><span class="s4">: </span><span
+    class="s2">LockManager</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Mark an object as not transferable. If `object` occurs in the transfer list of</span>
+     <span class="s0">* a `port.postMessage()` call, it is ignored.</span>
+     <span class="s0">*</span>
+     <span class="s0">* In particular, this makes sense for objects that can be cloned, rather than</span>
+     <span class="s0">* transferred, and which are used by other objects on the sending side.</span>
+     <span class="s0">* For example, Node.js marks the `ArrayBuffer`s it uses for its `Buffer pool` with this.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This operation cannot be undone.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { MessageChannel, markAsUntransferable } from 'node:worker_threads';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const pooledBuffer = new ArrayBuffer(8);</span>
+     <span class="s0">* const typedArray1 = new Uint8Array(pooledBuffer);</span>
+     <span class="s0">* const typedArray2 = new Float64Array(pooledBuffer);</span>
+     <span class="s0">*</span>
+     <span class="s0">* markAsUntransferable(pooledBuffer);</span>
+     <span class="s0">*</span>
+     <span class="s0">* const { port1 } = new MessageChannel();</span>
+     <span class="s0">* port1.postMessage(typedArray1, [ typedArray1.buffer ]);</span>
+     <span class="s0">*</span>
+     <span class="s0">* // The following line prints the contents of typedArray1 -- it still owns</span>
+     <span class="s0">* // its memory and has been cloned, not transferred. Without</span>
+     <span class="s0">* // `markAsUntransferable()`, this would print an empty Uint8Array.</span>
+     <span class="s0">* // typedArray2 is intact as well.</span>
+     <span class="s0">* console.log(typedArray1);</span>
+     <span class="s0">* console.log(typedArray2);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* There is no equivalent to this API in browsers.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.5.0, v12.19.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">markAsUntransferable</span><span class="s4">(</span><span
+    class="s2">object</span><span class="s4">: </span><span class="s2">object</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Check if an object is marked as not transferable with</span>
+     <span class="s0">* {</span><span class="s1">@link </span><span class="s0">markAsUntransferable}.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v21.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">isMarkedAsUntransferable</span><span class="s4">(</span><span
+    class="s2">object</span><span class="s4">: </span><span class="s2">object</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Mark an object as not cloneable. If `object` is used as `message` in</span>
+     <span class="s0">* a `port.postMessage()` call, an error is thrown. This is a no-op if `object` is a</span>
+     <span class="s0">* primitive value.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This has no effect on `ArrayBuffer`, or any `Buffer` like objects.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This operation cannot be undone.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const { markAsUncloneable } = require('node:worker_threads');</span>
+     <span class="s0">*</span>
+     <span class="s0">* const anyObject = { foo: 'bar' };</span>
+     <span class="s0">* markAsUncloneable(anyObject);</span>
+     <span class="s0">* const { port1 } = new MessageChannel();</span>
+     <span class="s0">* try {</span>
+     <span class="s0">*   // This will throw an error, because anyObject is not cloneable.</span>
+     <span class="s0">*   port1.postMessage(anyObject)</span>
+     <span class="s0">* } catch (error) {</span>
+     <span class="s0">*   // error.name === 'DataCloneError'</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* There is no equivalent to this API in browsers.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.10.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">markAsUncloneable</span><span class="s4">(</span><span class="s2">object</span><span
+    class="s4">: </span><span class="s2">object</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Transfer a `MessagePort` to a different `vm` Context. The original `port` object is rendered unusable, and the returned `MessagePort` instance</span>
+     <span class="s0">* takes its place.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The returned `MessagePort` is an object in the target context and</span>
+     <span class="s0">* inherits from its global `Object` class. Objects passed to the [`port.onmessage()`](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort/onmessage) listener are also created in the</span>
+     <span class="s0">* target context</span>
+     <span class="s0">* and inherit from its global `Object` class.</span>
+     <span class="s0">*</span>
+     <span class="s0">* However, the created `MessagePort` no longer inherits from [`EventTarget`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget), and only</span>
+     <span class="s0">* [`port.onmessage()`](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort/onmessage) can be used to receive</span>
+     <span class="s0">* events using it.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.13.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">port The message port to transfer.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">contextifiedSandbox A `contextified` object as returned by the `vm.createContext()` method.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">moveMessagePortToContext</span><span class="s4">(</span><span
+    class="s2">port</span><span class="s4">: </span><span class="s2">MessagePort</span><span class="s4">, </span><span
+    class="s2">contextifiedSandbox</span><span class="s4">: </span><span class="s2">Context</span><span
+    class="s4">): </span><span class="s2">MessagePort</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Receive a single message from a given `MessagePort`. If no message is available,`undefined` is returned, otherwise an object with a single `message` property</span>
+     <span class="s0">* that contains the message payload, corresponding to the oldest message in the `MessagePort`'s queue.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { MessageChannel, receiveMessageOnPort } from 'node:worker_threads';</span>
+     <span class="s0">* const { port1, port2 } = new MessageChannel();</span>
+     <span class="s0">* port1.postMessage({ hello: 'world' });</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log(receiveMessageOnPort(port2));</span>
+     <span class="s0">* // Prints: { message: { hello: 'world' } }</span>
+     <span class="s0">* console.log(receiveMessageOnPort(port2));</span>
+     <span class="s0">* // Prints: undefined</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* When this function is used, no `'message'` event is emitted and the `onmessage` listener is not invoked.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.3.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">receiveMessageOnPort</span><span class="s4">(</span><span
+    class="s2">port</span><span class="s4">: </span><span class="s2">MessagePort</span><span class="s4">):</span>
+        <span class="s4">| {</span>
+            <span class="s2">message</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">;</span>
+        <span class="s4">}</span>
+        <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s2">type Serializable </span><span class="s4">= </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">object </span><span class="s4">| </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">boolean </span><span class="s4">| </span><span class="s2">bigint</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Within a worker thread, `worker.getEnvironmentData()` returns a clone</span>
+     <span class="s0">* of data passed to the spawning thread's `worker.setEnvironmentData()`.</span>
+     <span class="s0">* Every new `Worker` receives its own copy of the environment data</span>
+     <span class="s0">* automatically.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import {</span>
+     <span class="s0">*   Worker,</span>
+     <span class="s0">*   isMainThread,</span>
+     <span class="s0">*   setEnvironmentData,</span>
+     <span class="s0">*   getEnvironmentData,</span>
+     <span class="s0">* } from 'node:worker_threads';</span>
+     <span class="s0">*</span>
+     <span class="s0">* if (isMainThread) {</span>
+     <span class="s0">*   setEnvironmentData('Hello', 'World!');</span>
+     <span class="s0">*   const worker = new Worker(__filename);</span>
+     <span class="s0">* } else {</span>
+     <span class="s0">*   console.log(getEnvironmentData('Hello'));  // Prints 'World!'.</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.12.0, v14.18.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">key Any arbitrary, cloneable JavaScript value that can be used as a {Map} key.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getEnvironmentData</span><span class="s4">(</span><span
+    class="s2">key</span><span class="s4">: </span><span class="s2">Serializable</span><span class="s4">): </span><span
+    class="s2">Serializable</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `worker.setEnvironmentData()` API sets the content of `worker.getEnvironmentData()` in the current thread and all new `Worker` instances spawned from the current context.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.12.0, v14.18.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">key Any arbitrary, cloneable JavaScript value that can be used as a {Map} key.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">value Any arbitrary, cloneable JavaScript value that will be cloned and passed automatically to all new `Worker` instances. If `value` is passed as `undefined`, any previously set value</span>
+     <span class="s0">* for the `key` will be deleted.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">setEnvironmentData</span><span class="s4">(</span><span
+    class="s2">key</span><span class="s4">: </span><span class="s2">Serializable</span><span class="s4">, </span><span
+    class="s2">value</span><span class="s4">?: </span><span class="s2">Serializable</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Sends a value to another worker, identified by its thread ID.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">threadId The target thread ID. If the thread ID is invalid, a `ERR_WORKER_MESSAGING_FAILED` error will be thrown.</span>
+     <span class="s0">* If the target thread ID is the current thread ID, a `ERR_WORKER_MESSAGING_SAME_THREAD` error will be thrown.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">value The value to send.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">transferList If one or more `MessagePort`-like objects are passed in value, a `transferList` is required for those items</span>
+     <span class="s0">* or `ERR_MISSING_MESSAGE_PORT_IN_TRANSFER_LIST` is thrown. See `port.postMessage()` for more information.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">timeout Time to wait for the message to be delivered in milliseconds. By default it's `undefined`, which means wait forever.</span>
+     <span class="s0">* If the operation times out, a `ERR_WORKER_MESSAGING_TIMEOUT` error is thrown.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">postMessageToThread</span><span class="s4">(</span><span
+    class="s2">threadId</span><span class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span class="s4">, </span><span
+    class="s2">timeout</span><span class="s4">?: </span><span class="s2">number</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s5">void</span><span class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">postMessageToThread</span><span class="s4">(</span>
+        <span class="s2">threadId</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">,</span>
+        <span class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span class="s4">,</span>
+        <span class="s2">transferList</span><span class="s4">: </span><span class="s2">readonly Transferable</span><span
+    class="s4">[],</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s5">void</span><span class="s4">&gt;;</span>
+
+    <span class="s5">import </span><span class="s4">{</span>
+        <span class="s2">BroadcastChannel </span><span class="s4">as </span><span
+    class="s2">_BroadcastChannel</span><span class="s4">,</span>
+        <span class="s2">MessageChannel </span><span class="s4">as </span><span class="s2">_MessageChannel</span><span
+    class="s4">,</span>
+        <span class="s2">MessagePort </span><span class="s4">as </span><span class="s2">_MessagePort</span><span
+    class="s4">,</span>
+    <span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;worker_threads&quot;</span><span
+    class="s4">;</span>
+    <span class="s2">global </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">structuredClone</span><span class="s4">&lt;</span><span
+    class="s2">T</span><span class="s4">&gt;(</span>
+            <span class="s2">value</span><span class="s4">: </span><span class="s2">T</span><span class="s4">,</span>
+            <span class="s2">options</span><span class="s4">?: { </span><span class="s2">transfer</span><span
+    class="s4">?: </span><span class="s2">Transferable</span><span class="s4">[] },</span>
+        <span class="s4">): </span><span class="s2">T</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `BroadcastChannel` class is a global reference for `import { BroadcastChannel } from 'worker_threads'`</span>
+         <span class="s0">* https://nodejs.org/api/globals.html#broadcastchannel</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">var </span><span class="s2">BroadcastChannel</span><span class="s4">: </span><span class="s5">typeof </span><span
+    class="s2">globalThis </span><span class="s5">extends </span><span class="s4">{</span>
+            <span class="s2">onmessage</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">;</span>
+            <span class="s2">BroadcastChannel</span><span class="s4">: </span><span class="s2">infer T</span><span
+    class="s4">;</span>
+        <span class="s4">} ? </span><span class="s2">T</span>
+            <span class="s4">: </span><span class="s5">typeof </span><span class="s2">_BroadcastChannel</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `MessageChannel` class is a global reference for `import { MessageChannel } from 'worker_threads'`</span>
+         <span class="s0">* https://nodejs.org/api/globals.html#messagechannel</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">var </span><span class="s2">MessageChannel</span><span class="s4">: </span><span class="s5">typeof </span><span
+    class="s2">globalThis </span><span class="s5">extends </span><span class="s4">{</span>
+            <span class="s2">onmessage</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">;</span>
+            <span class="s2">MessageChannel</span><span class="s4">: </span><span class="s2">infer T</span><span
+    class="s4">;</span>
+        <span class="s4">} ? </span><span class="s2">T</span>
+            <span class="s4">: </span><span class="s5">typeof </span><span class="s2">_MessageChannel</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* `MessagePort` class is a global reference for `import { MessagePort } from 'worker_threads'`</span>
+         <span class="s0">* https://nodejs.org/api/globals.html#messageport</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">var </span><span class="s2">MessagePort</span><span class="s4">: </span><span
+    class="s5">typeof </span><span class="s2">globalThis </span><span class="s5">extends </span><span
+    class="s4">{</span>
+            <span class="s2">onmessage</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">;</span>
+            <span class="s2">MessagePort</span><span class="s4">: </span><span class="s2">infer T</span><span
+    class="s4">;</span>
+        <span class="s4">} ? </span><span class="s2">T</span>
+            <span class="s4">: </span><span class="s5">typeof </span><span class="s2">_MessagePort</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:worker_threads&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;worker_threads&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

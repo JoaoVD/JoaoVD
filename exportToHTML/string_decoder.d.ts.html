@@ -1,0 +1,121 @@
+<html>
+<head>
+  <title>string_decoder.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          string_decoder.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:string_decoder` module provides an API for decoding `Buffer` objects</span>
+ <span class="s0">* into strings in a manner that preserves encoded multi-byte UTF-8 and UTF-16</span>
+ <span class="s0">* characters. It can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { StringDecoder } from 'node:string_decoder';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* The following example shows the basic use of the `StringDecoder` class.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { StringDecoder } from 'node:string_decoder';</span>
+ <span class="s0">* const decoder = new StringDecoder('utf8');</span>
+ <span class="s0">*</span>
+ <span class="s0">* const cent = Buffer.from([0xC2, 0xA2]);</span>
+ <span class="s0">* console.log(decoder.write(cent)); // Prints: ¢</span>
+ <span class="s0">*</span>
+ <span class="s0">* const euro = Buffer.from([0xE2, 0x82, 0xAC]);</span>
+ <span class="s0">* console.log(decoder.write(euro)); // Prints: €</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* When a `Buffer` instance is written to the `StringDecoder` instance, an</span>
+ <span class="s0">* internal buffer is used to ensure that the decoded string does not contain</span>
+ <span class="s0">* any incomplete multibyte characters. These are held in the buffer until the</span>
+ <span class="s0">* next call to `stringDecoder.write()` or until `stringDecoder.end()` is called.</span>
+ <span class="s0">*</span>
+ <span class="s0">* In the following example, the three UTF-8 encoded bytes of the European Euro</span>
+ <span class="s0">* symbol (`€`) are written over three separate operations:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { StringDecoder } from 'node:string_decoder';</span>
+ <span class="s0">* const decoder = new StringDecoder('utf8');</span>
+ <span class="s0">*</span>
+ <span class="s0">* decoder.write(Buffer.from([0xE2]));</span>
+ <span class="s0">* decoder.write(Buffer.from([0x82]));</span>
+ <span class="s0">* console.log(decoder.end(Buffer.from([0xAC]))); // Prints: €</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/string_decoder.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;string_decoder&quot; </span><span class="s4">{</span>
+    <span class="s5">class </span><span class="s2">StringDecoder </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">encoding</span><span
+    class="s4">?: </span><span class="s2">BufferEncoding</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns a decoded string, ensuring that any incomplete multibyte characters at</span>
+         <span class="s0">* the end of the `Buffer`, or `TypedArray`, or `DataView` are omitted from the</span>
+         <span class="s0">* returned string and stored in an internal buffer for the next call to `stringDecoder.write()` or `stringDecoder.end()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.99</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">buffer The bytes to decode.</span>
+         <span class="s0">*/</span>
+        <span class="s2">write</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView</span><span class="s4">): </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns any remaining input stored in the internal buffer as a string. Bytes</span>
+         <span class="s0">* representing incomplete UTF-8 and UTF-16 characters will be replaced with</span>
+         <span class="s0">* substitution characters appropriate for the character encoding.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the `buffer` argument is provided, one final call to `stringDecoder.write()` is performed before returning the remaining input.</span>
+         <span class="s0">* After `end()` is called, the `stringDecoder` object can be reused for new input.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.3</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">buffer The bytes to decode.</span>
+         <span class="s0">*/</span>
+        <span class="s2">end</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView</span><span class="s4">): </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:string_decoder&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;string_decoder&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

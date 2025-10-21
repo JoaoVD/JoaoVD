@@ -1,0 +1,293 @@
+<html>
+<head>
+  <title>socksclient.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          socksclient.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/// &lt;reference types=&quot;node&quot; /&gt;</span>
+<span class="s0">/// &lt;reference types=&quot;node&quot; /&gt;</span>
+<span class="s0">/// &lt;reference types=&quot;node&quot; /&gt;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">EventEmitter </span><span class="s3">} </span><span
+    class="s1">from </span><span class="s4">'events'</span><span class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">SocksClientOptions</span><span
+    class="s3">, </span><span class="s1">SocksClientChainOptions</span><span class="s3">, </span><span class="s1">SocksRemoteHost</span><span
+    class="s3">, </span><span class="s1">SocksProxy</span><span class="s3">, </span><span class="s1">SocksClientBoundEvent</span><span
+    class="s3">, </span><span class="s1">SocksClientEstablishedEvent</span><span class="s3">, </span><span class="s1">SocksUDPFrameDetails </span><span
+    class="s3">} </span><span class="s1">from </span><span class="s4">'../common/constants'</span><span
+    class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">SocksClientError </span><span
+    class="s3">} </span><span class="s1">from </span><span class="s4">'../common/util'</span><span class="s3">;</span>
+<span class="s2">import </span><span class="s3">{ </span><span class="s1">Duplex </span><span class="s3">} </span><span
+    class="s1">from </span><span class="s4">'stream'</span><span class="s3">;</span>
+<span class="s1">declare </span><span class="s2">interface </span><span class="s1">SocksClient </span><span
+    class="s3">{</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'error'</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span
+    class="s1">err</span><span class="s3">: </span><span class="s1">SocksClientError</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'bound'</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span
+    class="s1">info</span><span class="s3">: </span><span class="s1">SocksClientBoundEvent</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'established'</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span
+    class="s1">info</span><span class="s3">: </span><span class="s1">SocksClientEstablishedEvent</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">string</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span
+    class="s1">...args</span><span class="s3">: </span><span class="s1">unknown</span><span class="s3">[]) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'error'</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span
+    class="s1">err</span><span class="s3">: </span><span class="s1">SocksClientError</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span
+    class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'bound'</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span
+    class="s1">info</span><span class="s3">: </span><span class="s1">SocksClientBoundEvent</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">once</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'established'</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">: (</span><span
+    class="s1">info</span><span class="s3">: </span><span class="s1">SocksClientEstablishedEvent</span><span class="s3">) =&gt; </span><span
+    class="s2">void</span><span class="s3">): </span><span class="s2">this</span><span class="s3">;</span>
+    <span class="s1">emit</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s1">string </span><span class="s3">| </span><span class="s1">symbol</span><span class="s3">, </span><span
+    class="s1">...args</span><span class="s3">: </span><span class="s1">unknown</span><span class="s3">[]): </span><span
+    class="s1">boolean</span><span class="s3">;</span>
+    <span class="s1">emit</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'error'</span><span class="s3">, </span><span class="s1">err</span><span class="s3">: </span><span
+    class="s1">SocksClientError</span><span class="s3">): </span><span class="s1">boolean</span><span
+    class="s3">;</span>
+    <span class="s1">emit</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'bound'</span><span class="s3">, </span><span class="s1">info</span><span class="s3">: </span><span
+    class="s1">SocksClientBoundEvent</span><span class="s3">): </span><span class="s1">boolean</span><span
+    class="s3">;</span>
+    <span class="s1">emit</span><span class="s3">(</span><span class="s1">event</span><span class="s3">: </span><span
+    class="s4">'established'</span><span class="s3">, </span><span class="s1">info</span><span class="s3">: </span><span
+    class="s1">SocksClientEstablishedEvent</span><span class="s3">): </span><span class="s1">boolean</span><span
+    class="s3">;</span>
+<span class="s3">}</span>
+<span class="s1">declare </span><span class="s2">class </span><span class="s1">SocksClient </span><span class="s2">extends </span><span
+    class="s1">EventEmitter </span><span class="s2">implements </span><span class="s1">SocksClient </span><span
+    class="s3">{</span>
+    <span class="s2">private </span><span class="s1">options</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">socket</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">state</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">receiveBuffer</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">nextRequiredPacketBufferSize</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">socks5ChosenAuthType</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">onDataReceived</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">onClose</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">onError</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">onConnect</span><span class="s3">;</span>
+    <span class="s1">constructor</span><span class="s3">(</span><span class="s1">options</span><span
+    class="s3">: </span><span class="s1">SocksClientOptions</span><span class="s3">);</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Creates a new SOCKS connection.</span>
+     <span class="s5">*</span>
+     <span class="s5">* Note: Supports callbacks and promises. Only supports the connect command.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span
+    class="s5">options { SocksClientOptions } Options.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">callback { Function } An optional callback function.</span>
+     <span class="s5">* </span><span class="s6">@returns </span><span class="s5">{ Promise }</span>
+     <span class="s5">*/</span>
+    <span class="s2">static </span><span class="s1">createConnection</span><span class="s3">(</span><span class="s1">options</span><span
+    class="s3">: </span><span class="s1">SocksClientOptions</span><span class="s3">, </span><span
+    class="s1">callback</span><span class="s3">?: (</span><span class="s1">error</span><span class="s3">: </span><span
+    class="s1">Error </span><span class="s3">| </span><span class="s2">null</span><span class="s3">, </span><span
+    class="s1">info</span><span class="s3">?: </span><span class="s1">SocksClientEstablishedEvent</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s1">Promise</span><span class="s3">&lt;</span><span class="s1">SocksClientEstablishedEvent</span><span
+    class="s3">&gt;;</span>
+    <span class="s5">/**</span>
+     <span
+       class="s5">* Creates a new SOCKS connection chain to a destination host through 2 or more SOCKS proxies.</span>
+     <span class="s5">*</span>
+     <span class="s5">* Note: Supports callbacks and promises. Only supports the connect method.</span>
+     <span class="s5">* Note: Implemented via createConnection() factory function.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">options { SocksClientChainOptions } Options</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">callback { Function } An optional callback function.</span>
+     <span class="s5">* </span><span class="s6">@returns </span><span class="s5">{ Promise }</span>
+     <span class="s5">*/</span>
+    <span class="s2">static </span><span class="s1">createConnectionChain</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">: </span><span class="s1">SocksClientChainOptions</span><span
+    class="s3">, </span><span class="s1">callback</span><span class="s3">?: (</span><span class="s1">error</span><span
+    class="s3">: </span><span class="s1">Error </span><span class="s3">| </span><span class="s2">null</span><span
+    class="s3">, </span><span class="s1">socket</span><span class="s3">?: </span><span class="s1">SocksClientEstablishedEvent</span><span
+    class="s3">) =&gt; </span><span class="s2">void</span><span class="s3">): </span><span
+    class="s1">Promise</span><span class="s3">&lt;</span><span class="s1">SocksClientEstablishedEvent</span><span
+    class="s3">&gt;;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Creates a SOCKS UDP Frame.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">options</span>
+     <span class="s5">*/</span>
+    <span class="s2">static </span><span class="s1">createUDPFrame</span><span class="s3">(</span><span class="s1">options</span><span
+    class="s3">: </span><span class="s1">SocksUDPFrameDetails</span><span class="s3">): </span><span
+    class="s1">Buffer</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Parses a SOCKS UDP frame.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">data</span>
+     <span class="s5">*/</span>
+    <span class="s2">static </span><span class="s1">parseUDPFrame</span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">: </span><span class="s1">Buffer</span><span class="s3">): </span><span
+    class="s1">SocksUDPFrameDetails</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Internal state setter. If the SocksClient is in an error state, it cannot be changed to a non error state.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">setState</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Starts the connection establishment to the proxy and destination.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">existingSocket Connected socket to use instead of creating a new one (internal use).</span>
+     <span class="s5">*/</span>
+    <span class="s1">connect</span><span class="s3">(</span><span class="s1">existingSocket</span><span
+    class="s3">?: </span><span class="s1">Duplex</span><span class="s3">): </span><span class="s2">void</span><span
+    class="s3">;</span>
+    <span class="s2">private </span><span class="s1">getSocketOptions</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles internal Socks timeout callback.</span>
+     <span class="s5">* Note: If the Socks client is not BoundWaitingForConnection or Established, the connection will be closed.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">onEstablishedTimeout</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socket connect event.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">onConnectHandler</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socket data event.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">data</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">onDataReceivedHandler</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles processing of the data we have received.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">processData</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socket close event.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">had_error</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">onCloseHandler</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socket error event.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">err</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">onErrorHandler</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Removes internal event listeners on the underlying Socket.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">removeInternalSocketHandlers</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Closes and destroys the underlying Socket. Emits an error event.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">err { String } An error string to include in error event.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">closeSocket</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Sends initial Socks v4 handshake request.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">sendSocks4InitialHandshake</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socks v4 handshake response.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">data</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">handleSocks4FinalHandshakeResponse</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socks v4 incoming connection request (BIND)</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">data</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">handleSocks4IncomingConnectionResponse</span><span
+    class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Sends initial Socks v5 handshake request.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">sendSocks5InitialHandshake</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles initial Socks v5 handshake response.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">data</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">handleInitialSocks5HandshakeResponse</span><span
+    class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Sends Socks v5 user &amp; password auth handshake.</span>
+     <span class="s5">*</span>
+     <span class="s5">* Note: No auth and user/pass are currently supported.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">sendSocks5UserPassAuthentication</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">sendSocks5CustomAuthentication</span><span class="s3">;</span>
+    <span class="s2">private </span><span class="s1">handleSocks5CustomAuthHandshakeResponse</span><span
+    class="s3">;</span>
+    <span class="s2">private </span><span class="s1">handleSocks5AuthenticationNoAuthHandshakeResponse</span><span
+    class="s3">;</span>
+    <span class="s2">private </span><span class="s1">handleSocks5AuthenticationUserPassHandshakeResponse</span><span
+    class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socks v5 auth handshake response.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">data</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">handleInitialSocks5AuthenticationHandshakeResponse</span><span
+    class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Sends Socks v5 final handshake request.</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">sendSocks5CommandRequest</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socks v5 final handshake response.</span>
+     <span class="s5">* </span><span class="s6">@param </span><span class="s5">data</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">handleSocks5FinalHandshakeResponse</span><span class="s3">;</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Handles Socks v5 incoming connection request (BIND).</span>
+     <span class="s5">*/</span>
+    <span class="s2">private </span><span class="s1">handleSocks5IncomingConnectionResponse</span><span
+    class="s3">;</span>
+    <span class="s1">get socksClientOptions</span><span class="s3">(): </span><span class="s1">SocksClientOptions</span><span
+    class="s3">;</span>
+<span class="s3">}</span>
+<span class="s2">export </span><span class="s3">{ </span><span class="s1">SocksClient</span><span
+    class="s3">, </span><span class="s1">SocksClientOptions</span><span class="s3">, </span><span class="s1">SocksClientChainOptions</span><span
+    class="s3">, </span><span class="s1">SocksClientError</span><span class="s3">, </span><span class="s1">SocksRemoteHost</span><span
+    class="s3">, </span><span class="s1">SocksProxy</span><span class="s3">, </span><span class="s1">SocksUDPFrameDetails</span><span
+    class="s3">, };</span>
+</pre>
+</body>
+</html>

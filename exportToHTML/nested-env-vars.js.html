@@ -1,0 +1,147 @@
+<html>
+<head>
+  <title>nested-env-vars.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #cf8e6d;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          nested-env-vars.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre>
+<span class="s1">var </span><span class="s0">seed </span><span class="s2">= </span><span class="s0">Math</span><span
+  class="s2">.</span><span class="s0">random</span><span class="s2">();</span>
+<span class="s1">var </span><span class="s0">n </span><span class="s2">= </span><span class="s3">'rc'</span><span
+  class="s2">+ </span><span class="s0">seed</span><span class="s2">;</span>
+<span class="s1">var </span><span class="s0">N </span><span class="s2">= </span><span class="s3">'RC'</span><span
+  class="s2">+ </span><span class="s0">seed</span><span class="s2">;</span>
+<span class="s1">var </span><span class="s0">assert </span><span class="s2">= </span><span
+  class="s0">require</span><span class="s2">(</span><span class="s3">'assert'</span><span class="s2">)</span>
+
+
+<span class="s4">// Basic usage</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'_someOpt__a'</span><span class="s2">] = </span><span
+  class="s5">42</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'_someOpt__x__'</span><span class="s2">] = </span><span
+  class="s5">99</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'_someOpt__a__b'</span><span class="s2">] = </span><span
+  class="s5">186</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'_someOpt__a__b__c'</span><span
+  class="s2">] = </span><span class="s5">243</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'_someOpt__x__y'</span><span class="s2">] = </span><span
+  class="s5">1862</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'_someOpt__z'</span><span class="s2">] = </span><span
+  class="s5">186577</span>
+
+<span class="s4">// Should ignore empty strings from orphaned '__'</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'_someOpt__z__x__'</span><span
+  class="s2">] = </span><span class="s5">18629</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'_someOpt__w__w__'</span><span
+  class="s2">] = </span><span class="s5">18629</span>
+
+<span class="s4">// Leading '__' should ignore everything up to 'z'</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">n</span><span class="s2">+</span><span class="s3">'___z__i__'</span><span class="s2">] = </span><span
+  class="s5">9999</span>
+
+<span class="s4">// should ignore case for config name section.</span>
+<span class="s0">process</span><span class="s2">.</span><span class="s0">env</span><span class="s2">[</span><span
+  class="s0">N</span><span class="s2">+</span><span class="s3">'_test_upperCase'</span><span class="s2">] = </span><span
+  class="s5">187</span>
+
+<span class="s1">function </span><span class="s0">testPrefix</span><span class="s2">(</span><span
+  class="s0">prefix</span><span class="s2">) {</span>
+	<span class="s1">var </span><span class="s0">config </span><span class="s2">= </span><span
+  class="s0">require</span><span class="s2">(</span><span class="s3">'../'</span><span class="s2">)(</span><span
+  class="s0">prefix</span><span class="s2">, {</span>
+	  <span class="s0">option</span><span class="s2">: </span><span class="s1">true</span>
+	<span class="s2">})</span>
+
+	<span class="s0">console</span><span class="s2">.</span><span class="s0">log</span><span class="s2">(</span><span
+  class="s3">'</span><span class="s1">\n\n</span><span class="s3">------ nested-env-vars ------</span><span class="s1">\n</span><span
+  class="s3">'</span><span class="s2">,{</span><span class="s0">prefix</span><span class="s2">: </span><span class="s0">prefix</span><span
+  class="s2">}, </span><span class="s3">'</span><span class="s1">\n</span><span class="s3">'</span><span
+  class="s2">, </span><span class="s0">config</span><span class="s2">);</span>
+
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">option</span><span class="s2">, </span><span
+  class="s1">true</span><span class="s2">)</span>
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">someOpt</span><span class="s2">.</span><span
+  class="s0">a</span><span class="s2">, </span><span class="s5">42</span><span class="s2">)</span>
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">someOpt</span><span class="s2">.</span><span
+  class="s0">x</span><span class="s2">, </span><span class="s5">99</span><span class="s2">)</span>
+	<span class="s4">// Should not override `a` once it's been set</span>
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">someOpt</span><span class="s2">.</span><span
+  class="s0">a</span><span class="s4">/*.b*/</span><span class="s2">, </span><span class="s5">42</span><span class="s2">)</span>
+	<span class="s4">// Should not override `x` once it's been set</span>
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">someOpt</span><span class="s2">.</span><span
+  class="s0">x</span><span class="s4">/*.y*/</span><span class="s2">, </span><span class="s5">99</span><span class="s2">)</span>
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">someOpt</span><span class="s2">.</span><span
+  class="s0">z</span><span class="s2">, </span><span class="s5">186577</span><span class="s2">)</span>
+	<span class="s4">// Should not override `z` once it's been set</span>
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">someOpt</span><span class="s2">.</span><span
+  class="s0">z</span><span class="s4">/*.x*/</span><span class="s2">, </span><span class="s5">186577</span><span
+  class="s2">)</span>
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">someOpt</span><span class="s2">.</span><span
+  class="s0">w</span><span class="s2">.</span><span class="s0">w</span><span class="s2">, </span><span
+  class="s5">18629</span><span class="s2">)</span>
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">z</span><span class="s2">.</span><span
+  class="s0">i</span><span class="s2">, </span><span class="s5">9999</span><span class="s2">)</span>
+
+	<span class="s0">assert</span><span class="s2">.</span><span class="s0">equal</span><span class="s2">(</span><span
+  class="s0">config</span><span class="s2">.</span><span class="s0">test_upperCase</span><span class="s2">, </span><span
+  class="s5">187</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">testPrefix</span><span class="s2">(</span><span class="s0">n</span><span class="s2">);</span>
+<span class="s0">testPrefix</span><span class="s2">(</span><span class="s0">N</span><span class="s2">);</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,1855 @@
+<html>
+<head>
+  <title>tls.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          tls.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:tls` module provides an implementation of the Transport Layer Security</span>
+ <span class="s0">* (TLS) and Secure Socket Layer (SSL) protocols that is built on top of OpenSSL.</span>
+ <span class="s0">* The module can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import tls from 'node:tls';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/tls.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;tls&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">X509Certificate </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:crypto&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">net from </span><span class="s3">&quot;node:net&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">stream from </span><span class="s3">&quot;stream&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">const </span><span class="s2">CLIENT_RENEG_LIMIT</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s5">const </span><span class="s2">CLIENT_RENEG_WINDOW</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">Certificate </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Country code.</span>
+         <span class="s0">*/</span>
+        <span class="s2">C</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Street.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ST</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Locality.</span>
+         <span class="s0">*/</span>
+        <span class="s2">L</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Organization.</span>
+         <span class="s0">*/</span>
+        <span class="s2">O</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Organizational unit.</span>
+         <span class="s0">*/</span>
+        <span class="s2">OU</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Common name.</span>
+         <span class="s0">*/</span>
+        <span class="s2">CN</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">PeerCertificate </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `true` if a Certificate Authority (CA), `false` otherwise.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.13.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">ca</span><span class="s4">: </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The DER encoded X.509 certificate data.</span>
+         <span class="s0">*/</span>
+        <span class="s2">raw</span><span class="s4">: </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The certificate subject.</span>
+         <span class="s0">*/</span>
+        <span class="s2">subject</span><span class="s4">: </span><span class="s2">Certificate</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The certificate issuer, described in the same terms as the `subject`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">issuer</span><span class="s4">: </span><span class="s2">Certificate</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The date-time the certificate is valid from.</span>
+         <span class="s0">*/</span>
+        <span class="s2">valid_from</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The date-time the certificate is valid to.</span>
+         <span class="s0">*/</span>
+        <span class="s2">valid_to</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The certificate serial number, as a hex string.</span>
+         <span class="s0">*/</span>
+        <span class="s2">serialNumber</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The SHA-1 digest of the DER encoded certificate.</span>
+         <span class="s0">* It is returned as a `:` separated hexadecimal string.</span>
+         <span class="s0">*/</span>
+        <span class="s2">fingerprint</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The SHA-256 digest of the DER encoded certificate.</span>
+         <span class="s0">* It is returned as a `:` separated hexadecimal string.</span>
+         <span class="s0">*/</span>
+        <span class="s2">fingerprint256</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The SHA-512 digest of the DER encoded certificate.</span>
+         <span class="s0">* It is returned as a `:` separated hexadecimal string.</span>
+         <span class="s0">*/</span>
+        <span class="s2">fingerprint512</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The extended key usage, a set of OIDs.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ext_key_usage</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A string containing concatenated names for the subject,</span>
+         <span class="s0">* an alternative to the `subject` names.</span>
+         <span class="s0">*/</span>
+        <span class="s2">subjectaltname</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An array describing the AuthorityInfoAccess, used with OCSP.</span>
+         <span class="s0">*/</span>
+        <span class="s2">infoAccess</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Dict</span><span class="s4">&lt;</span><span class="s2">string</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* For RSA keys: The RSA bit size.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For EC keys: The key size in bits.</span>
+         <span class="s0">*/</span>
+        <span class="s2">bits</span><span class="s4">?: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The RSA exponent, as a string in hexadecimal number notation.</span>
+         <span class="s0">*/</span>
+        <span class="s2">exponent</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The RSA modulus, as a hexadecimal string.</span>
+         <span class="s0">*/</span>
+        <span class="s2">modulus</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The public key.</span>
+         <span class="s0">*/</span>
+        <span class="s2">pubkey</span><span class="s4">?: </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The ASN.1 name of the OID of the elliptic curve.</span>
+         <span class="s0">* Well-known curves are identified by an OID.</span>
+         <span class="s0">* While it is unusual, it is possible that the curve</span>
+         <span class="s0">* is identified by its mathematical properties,</span>
+         <span class="s0">* in which case it will not have an OID.</span>
+         <span class="s0">*/</span>
+        <span class="s2">asn1Curve</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The NIST name for the elliptic curve, if it has one</span>
+         <span class="s0">* (not all well-known curves have been assigned names by NIST).</span>
+         <span class="s0">*/</span>
+        <span class="s2">nistCurve</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">DetailedPeerCertificate </span><span
+    class="s5">extends </span><span class="s2">PeerCertificate </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The issuer certificate object.</span>
+         <span class="s0">* For self-signed certificates, this may be a circular reference.</span>
+         <span class="s0">*/</span>
+        <span class="s2">issuerCertificate</span><span class="s4">: </span><span
+    class="s2">DetailedPeerCertificate</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">CipherNameAndProtocol </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The cipher name.</span>
+         <span class="s0">*/</span>
+        <span class="s2">name</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* SSL/TLS protocol version.</span>
+         <span class="s0">*/</span>
+        <span class="s2">version</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* IETF name for the cipher suite.</span>
+         <span class="s0">*/</span>
+        <span class="s2">standardName</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">EphemeralKeyInfo </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The supported types are 'DH' and 'ECDH'.</span>
+         <span class="s0">*/</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The name property is available only when type is 'ECDH'.</span>
+         <span class="s0">*/</span>
+        <span class="s2">name</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The size of parameter of an ephemeral key exchange.</span>
+         <span class="s0">*/</span>
+        <span class="s2">size</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">KeyObject </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Private keys in PEM format.</span>
+         <span class="s0">*/</span>
+        <span class="s2">pem</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Optional passphrase.</span>
+         <span class="s0">*/</span>
+        <span class="s2">passphrase</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">PxfObject </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* PFX or PKCS12 encoded private key and certificate chain.</span>
+         <span class="s0">*/</span>
+        <span class="s2">buf</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Optional passphrase.</span>
+         <span class="s0">*/</span>
+        <span class="s2">passphrase</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">TLSSocketOptions </span><span class="s5">extends </span><span
+    class="s2">SecureContextOptions</span><span class="s4">, </span><span
+    class="s2">CommonConnectionOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If true the TLS socket will be instantiated in server-mode.</span>
+         <span class="s0">* Defaults to false.</span>
+         <span class="s0">*/</span>
+        <span class="s2">isServer</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An optional net.Server instance.</span>
+         <span class="s0">*/</span>
+        <span class="s2">server</span><span class="s4">?: </span><span class="s2">net</span><span
+    class="s4">.</span><span class="s2">Server </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An optional Buffer instance containing a TLS session.</span>
+         <span class="s0">*/</span>
+        <span class="s2">session</span><span class="s4">?: </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If true, specifies that the OCSP status request extension will be</span>
+         <span class="s0">* added to the client hello and an 'OCSPResponse' event will be</span>
+         <span class="s0">* emitted on the socket before establishing a secure communication</span>
+         <span class="s0">*/</span>
+        <span class="s2">requestOCSP</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Performs transparent encryption of written data and all required TLS</span>
+     <span class="s0">* negotiation.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Instances of `tls.TLSSocket` implement the duplex `Stream` interface.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Methods that return TLS connection metadata (e.g.{</span><span class="s1">@link </span><span
+    class="s0">TLSSocket.getPeerCertificate}) will only return data while the</span>
+     <span class="s0">* connection is open.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.4</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">TLSSocket </span><span class="s5">extends </span><span
+    class="s2">net</span><span class="s4">.</span><span class="s2">Socket </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Construct a new tls.TLSSocket object from an existing TCP socket.</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">socket</span><span
+    class="s4">: </span><span class="s2">net</span><span class="s4">.</span><span class="s2">Socket </span><span
+    class="s4">| </span><span class="s2">stream</span><span class="s4">.</span><span class="s2">Duplex</span><span
+    class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">TLSSocketOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This property is `true` if the peer certificate was signed by one of the CAs</span>
+         <span class="s0">* specified when creating the `tls.TLSSocket` instance, otherwise `false`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">authorized</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the reason why the peer's certificate was not been verified. This</span>
+         <span class="s0">* property is set only when `tlsSocket.authorized === false`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">authorizationError</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Always returns `true`. This may be used to distinguish TLS sockets from regular`net.Socket` instances.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">encrypted</span><span class="s4">: </span><span class="s5">true</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* String containing the selected ALPN protocol.</span>
+         <span class="s0">* Before a handshake has completed, this value is always null.</span>
+         <span class="s0">* When a handshake is completed but not ALPN protocol was selected, tlsSocket.alpnProtocol equals false.</span>
+         <span class="s0">*/</span>
+        <span class="s2">alpnProtocol</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">false </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an object representing the local certificate. The returned object has</span>
+         <span class="s0">* some properties corresponding to the fields of the certificate.</span>
+         <span class="s0">*</span>
+         <span class="s0">* See {</span><span class="s1">@link </span><span class="s0">TLSSocket.getPeerCertificate} for an example of the certificate</span>
+         <span class="s0">* structure.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If there is no local certificate, an empty object will be returned. If the</span>
+         <span class="s0">* socket has been destroyed, `null` will be returned.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.2.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getCertificate</span><span class="s4">(): </span><span class="s2">PeerCertificate </span><span
+    class="s4">| </span><span class="s2">object </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an object containing information on the negotiated cipher suite.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For example, a TLSv1.2 protocol with AES256-SHA cipher:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```json</span>
+         <span class="s0">* {</span>
+         <span class="s0">*     &quot;name&quot;: &quot;AES256-SHA&quot;,</span>
+         <span class="s0">*     &quot;standardName&quot;: &quot;TLS_RSA_WITH_AES_256_CBC_SHA&quot;,</span>
+         <span class="s0">*     &quot;version&quot;: &quot;SSLv3&quot;</span>
+         <span class="s0">* }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* See [SSL\_CIPHER\_get\_name](https://www.openssl.org/docs/man1.1.1/man3/SSL_CIPHER_get_name.html) for more information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">getCipher</span><span class="s4">(): </span><span class="s2">CipherNameAndProtocol</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an object representing the type, name, and size of parameter of</span>
+         <span class="s0">* an ephemeral key exchange in `perfect forward secrecy` on a client</span>
+         <span class="s0">* connection. It returns an empty object when the key exchange is not</span>
+         <span class="s0">* ephemeral. As this is only supported on a client socket; `null` is returned</span>
+         <span class="s0">* if called on a server socket. The supported types are `'DH'` and `'ECDH'`. The `name` property is available only when type is `'ECDH'`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For example: `{ type: 'ECDH', name: 'prime256v1', size: 256 }`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v5.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getEphemeralKeyInfo</span><span class="s4">(): </span><span class="s2">EphemeralKeyInfo </span><span
+    class="s4">| </span><span class="s2">object </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* As the `Finished` messages are message digests of the complete handshake</span>
+         <span class="s0">* (with a total of 192 bits for TLS 1.0 and more for SSL 3.0), they can</span>
+         <span class="s0">* be used for external authentication procedures when the authentication</span>
+         <span class="s0">* provided by SSL/TLS is not desired or is not enough.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Corresponds to the `SSL_get_finished` routine in OpenSSL and may be used</span>
+         <span class="s0">* to implement the `tls-unique` channel binding from [RFC 5929](https://tools.ietf.org/html/rfc5929).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.9.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The latest `Finished` message that has been sent to the socket as part of a SSL/TLS handshake, or `undefined` if no `Finished` message has been sent yet.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getFinished</span><span class="s4">(): </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an object representing the peer's certificate. If the peer does not</span>
+         <span class="s0">* provide a certificate, an empty object will be returned. If the socket has been</span>
+         <span class="s0">* destroyed, `null` will be returned.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the full certificate chain was requested, each certificate will include an`issuerCertificate` property containing an object representing its issuer's</span>
+         <span class="s0">* certificate.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.4</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">detailed Include the full certificate chain if `true`, otherwise include just the peer's certificate.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">A certificate object.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getPeerCertificate</span><span class="s4">(</span><span class="s2">detailed</span><span
+    class="s4">: </span><span class="s5">true</span><span class="s4">): </span><span
+    class="s2">DetailedPeerCertificate</span><span class="s4">;</span>
+        <span class="s2">getPeerCertificate</span><span class="s4">(</span><span class="s2">detailed</span><span
+    class="s4">?: </span><span class="s5">false</span><span class="s4">): </span><span class="s2">PeerCertificate</span><span
+    class="s4">;</span>
+        <span class="s2">getPeerCertificate</span><span class="s4">(</span><span class="s2">detailed</span><span
+    class="s4">?: </span><span class="s2">boolean</span><span class="s4">): </span><span
+    class="s2">PeerCertificate </span><span class="s4">| </span><span class="s2">DetailedPeerCertificate</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* As the `Finished` messages are message digests of the complete handshake</span>
+         <span class="s0">* (with a total of 192 bits for TLS 1.0 and more for SSL 3.0), they can</span>
+         <span class="s0">* be used for external authentication procedures when the authentication</span>
+         <span class="s0">* provided by SSL/TLS is not desired or is not enough.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Corresponds to the `SSL_get_peer_finished` routine in OpenSSL and may be used</span>
+         <span class="s0">* to implement the `tls-unique` channel binding from [RFC 5929](https://tools.ietf.org/html/rfc5929).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.9.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The latest `Finished` message that is expected or has actually been received from the socket as part of a SSL/TLS handshake, or `undefined` if there is no `Finished` message so</span>
+         <span class="s0">* far.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getPeerFinished</span><span class="s4">(): </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns a string containing the negotiated SSL/TLS protocol version of the</span>
+         <span class="s0">* current connection. The value `'unknown'` will be returned for connected</span>
+         <span class="s0">* sockets that have not completed the handshaking process. The value `null` will</span>
+         <span class="s0">* be returned for server sockets or disconnected client sockets.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Protocol versions are:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `'SSLv3'`</span>
+         <span class="s0">* * `'TLSv1'`</span>
+         <span class="s0">* * `'TLSv1.1'`</span>
+         <span class="s0">* * `'TLSv1.2'`</span>
+         <span class="s0">* * `'TLSv1.3'`</span>
+         <span class="s0">*</span>
+         <span class="s0">* See the OpenSSL [`SSL_get_version`](https://www.openssl.org/docs/man1.1.1/man3/SSL_get_version.html) documentation for more information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v5.7.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getProtocol</span><span class="s4">(): </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the TLS session data or `undefined` if no session was</span>
+         <span class="s0">* negotiated. On the client, the data can be provided to the `session` option of {</span><span
+    class="s1">@link </span><span class="s0">connect} to resume the connection. On the server, it may be useful</span>
+         <span class="s0">* for debugging.</span>
+         <span class="s0">*</span>
+         <span class="s0">* See `Session Resumption` for more information.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Note: `getSession()` works only for TLSv1.2 and below. For TLSv1.3, applications</span>
+         <span class="s0">* must use the `'session'` event (it also works for TLSv1.2 and below).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">getSession</span><span class="s4">(): </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* See [SSL\_get\_shared\_sigalgs](https://www.openssl.org/docs/man1.1.1/man3/SSL_get_shared_sigalgs.html) for more information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.11.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">List of signature algorithms shared between the server and the client in the order of decreasing preference.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getSharedSigalgs</span><span class="s4">(): </span><span class="s2">string</span><span
+    class="s4">[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* For a client, returns the TLS session ticket if one is available, or`undefined`. For a server, always returns `undefined`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* It may be useful for debugging.</span>
+         <span class="s0">*</span>
+         <span class="s0">* See `Session Resumption` for more information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">getTLSTicket</span><span class="s4">(): </span><span class="s2">Buffer </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* See `Session Resumption` for more information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.6</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`true` if the session was reused, `false` otherwise.</span>
+         <span class="s0">*/</span>
+        <span class="s2">isSessionReused</span><span class="s4">(): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `tlsSocket.renegotiate()` method initiates a TLS renegotiation process.</span>
+         <span class="s0">* Upon completion, the `callback` function will be passed a single argument</span>
+         <span class="s0">* that is either an `Error` (if the request failed) or `null`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method can be used to request a peer's certificate after the secure</span>
+         <span class="s0">* connection has been established.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When running as the server, the socket will be destroyed with an error after `handshakeTimeout` timeout.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For TLSv1.3, renegotiation cannot be initiated, it is not supported by the</span>
+         <span class="s0">* protocol.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.8</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback If `renegotiate()` returned `true`, callback is attached once to the `'secure'` event. If `renegotiate()` returned `false`, `callback` will be called in the next tick with</span>
+         <span class="s0">* an error, unless the `tlsSocket` has been destroyed, in which case `callback` will not be called at all.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`true` if renegotiation was initiated, `false` otherwise.</span>
+         <span class="s0">*/</span>
+        <span class="s2">renegotiate</span><span class="s4">(</span>
+            <span class="s2">options</span><span class="s4">: {</span>
+                <span class="s2">rejectUnauthorized</span><span class="s4">?: </span><span
+    class="s2">boolean </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+                <span class="s2">requestCert</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+            <span class="s4">},</span>
+            <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">undefined </span><span class="s4">| </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `tlsSocket.setKeyCert()` method sets the private key and certificate to use for the socket.</span>
+         <span class="s0">* This is mainly useful if you wish to select a server certificate from a TLS server's `ALPNCallback`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.5.0, v20.17.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">context An object containing at least `key` and `cert` properties from the {</span><span
+    class="s1">@link </span><span class="s0">createSecureContext()} `options`,</span>
+         <span class="s0">* or a TLS context object created with {</span><span class="s1">@link </span><span class="s0">createSecureContext()} itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setKeyCert</span><span class="s4">(</span><span class="s2">context</span><span
+    class="s4">: </span><span class="s2">SecureContextOptions </span><span class="s4">| </span><span class="s2">SecureContext</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `tlsSocket.setMaxSendFragment()` method sets the maximum TLS fragment size.</span>
+         <span class="s0">* Returns `true` if setting the limit succeeded; `false` otherwise.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Smaller fragment sizes decrease the buffering latency on the client: larger</span>
+         <span class="s0">* fragments are buffered by the TLS layer until the entire fragment is received</span>
+         <span class="s0">* and its integrity is verified; large fragments can span multiple roundtrips</span>
+         <span class="s0">* and their processing can be delayed due to packet loss or reordering. However,</span>
+         <span class="s0">* smaller fragments add extra TLS framing bytes and CPU overhead, which may</span>
+         <span class="s0">* decrease overall server throughput.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.11</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[size=16384] The maximum TLS fragment size. The maximum value is `16384`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setMaxSendFragment</span><span class="s4">(</span><span class="s2">size</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Disables TLS renegotiation for this `TLSSocket` instance. Once called, attempts</span>
+         <span class="s0">* to renegotiate will trigger an `'error'` event on the `TLSSocket`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.4.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">disableRenegotiation</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When enabled, TLS packet trace information is written to `stderr`. This can be</span>
+         <span class="s0">* used to debug TLS connection problems.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The format of the output is identical to the output of`openssl s_client -trace` or `openssl s_server -trace`. While it is produced by</span>
+         <span class="s0">* OpenSSL's `SSL_trace()` function, the format is undocumented, can change</span>
+         <span class="s0">* without notice, and should not be relied on.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.2.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">enableTrace</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the peer certificate as an `X509Certificate` object.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If there is no peer certificate, or the socket has been destroyed,`undefined` will be returned.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.9.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getPeerX509Certificate</span><span class="s4">(): </span><span
+    class="s2">X509Certificate </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the local certificate as an `X509Certificate` object.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If there is no local certificate, or the socket has been destroyed,`undefined` will be returned.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.9.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getX509Certificate</span><span class="s4">(): </span><span
+    class="s2">X509Certificate </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Keying material is used for validations to prevent different kind of attacks in</span>
+         <span class="s0">* network protocols, for example in the specifications of IEEE 802.1X.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const keyingMaterial = tlsSocket.exportKeyingMaterial(</span>
+         <span class="s0">*   128,</span>
+         <span class="s0">*   'client finished');</span>
+         <span class="s0">*</span>
+         <span class="s0">* /*</span>
+         <span class="s0">*  Example return value of keyingMaterial:</span>
+         <span class="s0">*  &lt;Buffer 76 26 af 99 c5 56 8e 42 09 91 ef 9f 93 cb ad 6c 7b 65 f8 53 f1 d8 d9</span>
+         <span class="s0">*     12 5a 33 b8 b5 25 df 7b 37 9f e0 e2 4f b8 67 83 a3 2f cd 5d 41 42 4c 91</span>
+         <span class="s0">*     74 ef 2c ... 78 more bytes&gt;</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* See the OpenSSL [`SSL_export_keying_material`](https://www.openssl.org/docs/man1.1.1/man3/SSL_export_keying_material.html) documentation for more</span>
+         <span class="s0">* information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.10.0, v12.17.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">length number of bytes to retrieve from keying material</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">label an application specific label, typically this will be a value from the [IANA Exporter Label</span>
+         <span class="s0">* Registry](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#exporter-labels).</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">context Optionally provide a context.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">requested bytes of the keying material</span>
+         <span class="s0">*/</span>
+        <span class="s2">exportKeyingMaterial</span><span class="s4">(</span><span class="s2">length</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">label</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">context</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">): </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;OCSPResponse&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">response</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;session&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">session</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;OCSPResponse&quot;</span><span class="s4">, </span><span class="s2">response</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnect&quot;</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;session&quot;</span><span class="s4">, </span><span
+    class="s2">session</span><span class="s4">: </span><span class="s2">Buffer</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span class="s2">line</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;OCSPResponse&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">response</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;secureConnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;session&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">session</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;OCSPResponse&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">response</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;session&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">session</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;OCSPResponse&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">response</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;session&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">session</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;OCSPResponse&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">response</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;session&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">session</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">CommonConnectionOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An optional TLS context object from tls.createSecureContext()</span>
+         <span class="s0">*/</span>
+        <span class="s2">secureContext</span><span class="s4">?: </span><span class="s2">SecureContext </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When enabled, TLS packet trace information is written to `stderr`. This can be</span>
+         <span class="s0">* used to debug TLS connection problems.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">enableTrace</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If true the server will request a certificate from clients that</span>
+         <span class="s0">* connect and attempt to verify that certificate. Defaults to</span>
+         <span class="s0">* false.</span>
+         <span class="s0">*/</span>
+        <span class="s2">requestCert</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An array of strings or a Buffer naming possible ALPN protocols.</span>
+         <span class="s0">* (Protocols should be ordered by their priority.)</span>
+         <span class="s0">*/</span>
+        <span class="s2">ALPNProtocols</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">[] | </span><span
+    class="s2">Uint8Array</span><span class="s4">[] | </span><span class="s2">Uint8Array </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* SNICallback(servername, cb) &lt;Function&gt; A function that will be</span>
+         <span class="s0">* called if the client supports SNI TLS extension. Two arguments</span>
+         <span class="s0">* will be passed when called: servername and cb. SNICallback should</span>
+         <span class="s0">* invoke cb(null, ctx), where ctx is a SecureContext instance.</span>
+         <span class="s0">* (tls.createSecureContext(...) can be used to get a proper</span>
+         <span class="s0">* SecureContext.) If SNICallback wasn't provided the default callback</span>
+         <span class="s0">* with high-level API will be used (see below).</span>
+         <span class="s0">*/</span>
+        <span class="s2">SNICallback</span><span class="s4">?: ((</span><span class="s2">servername</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">cb</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">ctx</span><span
+    class="s4">?: </span><span class="s2">SecureContext</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">) | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If true the server will reject any connection which is not</span>
+         <span class="s0">* authorized with the list of supplied CAs. This option only has an</span>
+         <span class="s0">* effect if requestCert is true.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">rejectUnauthorized</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">TlsOptions </span><span class="s5">extends </span><span
+    class="s2">SecureContextOptions</span><span class="s4">, </span><span class="s2">CommonConnectionOptions</span><span
+    class="s4">, </span><span class="s2">net</span><span class="s4">.</span><span class="s2">ServerOpts </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Abort the connection if the SSL/TLS handshake does not finish in the</span>
+         <span class="s0">* specified number of milliseconds. A 'tlsClientError' is emitted on</span>
+         <span class="s0">* the tls.Server object whenever a handshake times out. Default:</span>
+         <span class="s0">* 120000 (120 seconds).</span>
+         <span class="s0">*/</span>
+        <span class="s2">handshakeTimeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The number of seconds after which a TLS session created by the</span>
+         <span class="s0">* server will no longer be resumable. See Session Resumption for more</span>
+         <span class="s0">* information. Default: 300.</span>
+         <span class="s0">*/</span>
+        <span class="s2">sessionTimeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* 48-bytes of cryptographically strong pseudo-random data.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ticketKeys</span><span class="s4">?: </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">socket</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">identity identity parameter sent from the client.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span
+    class="s0">pre-shared key that must either be</span>
+         <span class="s0">* a buffer or `null` to stop the negotiation process. Returned PSK must be</span>
+         <span class="s0">* compatible with the selected cipher's digest.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When negotiating TLS-PSK (pre-shared keys), this function is called</span>
+         <span class="s0">* with the identity provided by the client.</span>
+         <span class="s0">* If the return value is `null` the negotiation process will stop and an</span>
+         <span class="s0">* &quot;unknown_psk_identity&quot; alert message will be sent to the other party.</span>
+         <span class="s0">* If the server wishes to hide the fact that the PSK identity was not known,</span>
+         <span class="s0">* the callback must provide some random data as `psk` to make the connection</span>
+         <span class="s0">* fail with &quot;decrypt_error&quot; before negotiation is finished.</span>
+         <span class="s0">* PSK ciphers are disabled by default, and using TLS-PSK thus</span>
+         <span class="s0">* requires explicitly specifying a cipher suite with the `ciphers` option.</span>
+         <span class="s0">* More information can be found in the RFC 4279.</span>
+         <span class="s0">*/</span>
+        <span class="s2">pskCallback</span><span class="s4">?(</span><span class="s2">socket</span><span
+    class="s4">: </span><span class="s2">TLSSocket</span><span class="s4">, </span><span class="s2">identity</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">DataView </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">TypedArray </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* hint to send to a client to help</span>
+         <span class="s0">* with selecting the identity during TLS-PSK negotiation. Will be ignored</span>
+         <span class="s0">* in TLS 1.3. Upon failing to set pskIdentityHint `tlsClientError` will be</span>
+         <span class="s0">* emitted with `ERR_TLS_PSK_SET_IDENTIY_HINT_FAILED` code.</span>
+         <span class="s0">*/</span>
+        <span class="s2">pskIdentityHint</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">PSKCallbackNegotation </span><span class="s4">{</span>
+        <span class="s2">psk</span><span class="s4">: </span><span class="s2">DataView </span><span class="s4">| </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">TypedArray</span><span class="s4">;</span>
+        <span class="s2">identity</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ConnectionOptions </span><span class="s5">extends </span><span
+    class="s2">SecureContextOptions</span><span class="s4">, </span><span
+    class="s2">CommonConnectionOptions </span><span class="s4">{</span>
+        <span class="s2">host</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">port</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">path</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">; </span><span class="s6">// Creates unix socket connection to path. If this option is specified, `host` and `port` are ignored.</span>
+        <span class="s2">socket</span><span class="s4">?: </span><span class="s2">stream</span><span class="s4">.</span><span
+    class="s2">Duplex </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">; </span><span
+    class="s6">// Establish secure connection on a given socket rather than creating a new socket</span>
+        <span class="s2">checkServerIdentity</span><span class="s4">?: </span><span class="s5">typeof </span><span
+    class="s2">checkServerIdentity </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">servername</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">; </span><span
+    class="s6">// SNI TLS Extension</span>
+        <span class="s2">session</span><span class="s4">?: </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">minDHSize</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">lookup</span><span class="s4">?: </span><span class="s2">net</span><span
+    class="s4">.</span><span class="s2">LookupFunction </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When negotiating TLS-PSK (pre-shared keys), this function is called</span>
+         <span class="s0">* with optional identity `hint` provided by the server or `null`</span>
+         <span class="s0">* in case of TLS 1.3 where `hint` was removed.</span>
+         <span class="s0">* It will be necessary to provide a custom `tls.checkServerIdentity()`</span>
+         <span class="s0">* for the connection as the default one will try to check hostname/IP</span>
+         <span class="s0">* of the server against the certificate but that's not applicable for PSK</span>
+         <span class="s0">* because there won't be a certificate present.</span>
+         <span class="s0">* More information can be found in the RFC 4279.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">hint message sent from the server to help client</span>
+         <span class="s0">* decide which identity to use during negotiation.</span>
+         <span class="s0">* Always `null` if TLS 1.3 is used.</span>
+         <span class="s0">* </span><span class="s1">@returns </span><span class="s0">Return `null` to stop the negotiation process. `psk` must be</span>
+         <span class="s0">* compatible with the selected cipher's digest.</span>
+         <span class="s0">* `identity` must use UTF-8 encoding.</span>
+         <span class="s0">*/</span>
+        <span class="s2">pskCallback</span><span class="s4">?(</span><span class="s2">hint</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">): </span><span class="s2">PSKCallbackNegotation </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Accepts encrypted connections using TLS or SSL.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.2</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Server </span><span class="s5">extends </span><span
+    class="s2">net</span><span class="s4">.</span><span class="s2">Server </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span
+    class="s2">secureConnectionListener</span><span class="s4">?: (</span><span class="s2">socket</span><span
+    class="s4">: </span><span class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">);</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">TlsOptions</span><span class="s4">, </span><span class="s2">secureConnectionListener</span><span
+    class="s4">?: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">TLSSocket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `server.addContext()` method adds a secure context that will be used if</span>
+         <span class="s0">* the client request's SNI name matches the supplied `hostname` (or wildcard).</span>
+         <span class="s0">*</span>
+         <span class="s0">* When there are multiple matching contexts, the most recently added one is</span>
+         <span class="s0">* used.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.3</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">hostname A SNI host name or wildcard (e.g. `'*'`)</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">context An object containing any of the possible properties from the {</span><span
+    class="s1">@link </span><span class="s0">createSecureContext} `options` arguments (e.g. `key`, `cert`, `ca`, etc), or a TLS context object created</span>
+         <span class="s0">* with {</span><span class="s1">@link </span><span
+    class="s0">createSecureContext} itself.</span>
+         <span class="s0">*/</span>
+        <span class="s2">addContext</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">context</span><span
+    class="s4">: </span><span class="s2">SecureContextOptions </span><span class="s4">| </span><span class="s2">SecureContext</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the session ticket keys.</span>
+         <span class="s0">*</span>
+         <span class="s0">* See `Session Resumption` for more information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v3.0.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">A 48-byte buffer containing the session ticket keys.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getTicketKeys</span><span class="s4">(): </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `server.setSecureContext()` method replaces the secure context of an</span>
+         <span class="s0">* existing server. Existing connections to the server are not interrupted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.0.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">options An object containing any of the possible properties from the {</span><span
+    class="s1">@link </span><span
+    class="s0">createSecureContext} `options` arguments (e.g. `key`, `cert`, `ca`, etc).</span>
+         <span class="s0">*/</span>
+        <span class="s2">setSecureContext</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">SecureContextOptions</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sets the session ticket keys.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Changes to the ticket keys are effective only for future server connections.</span>
+         <span class="s0">* Existing or currently pending server connections will use the previous keys.</span>
+         <span class="s0">*</span>
+         <span class="s0">* See `Session Resumption` for more information.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v3.0.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">keys A 48-byte buffer containing the session ticket keys.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setTicketKeys</span><span class="s4">(</span><span class="s2">keys</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* events.EventEmitter</span>
+         <span class="s0">* 1. tlsClientError</span>
+         <span class="s0">* 2. newSession</span>
+         <span class="s0">* 3. OCSPRequest</span>
+         <span class="s0">* 4. resumeSession</span>
+         <span class="s0">* 5. secureConnection</span>
+         <span class="s0">* 6. keylog</span>
+         <span class="s0">*/</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;tlsClientError&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;newSession&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;OCSPRequest&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span>
+                <span class="s2">certificate</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">issuer</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">resp</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+            <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resumeSession&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;tlsClientError&quot;</span><span class="s4">, </span><span
+    class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">, </span><span
+    class="s2">tlsSocket</span><span class="s4">: </span><span class="s2">TLSSocket</span><span
+    class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;newSession&quot;</span><span class="s4">, </span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;OCSPRequest&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">certificate</span><span class="s4">: </span><span class="s2">Buffer</span><span class="s4">,</span>
+            <span class="s2">issuer</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">resp</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resumeSession&quot;</span><span class="s4">,</span>
+            <span class="s2">sessionId</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">sessionData</span><span class="s4">: </span><span
+    class="s2">Buffer </span><span class="s4">| </span><span class="s5">null</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnection&quot;</span><span class="s4">, </span><span class="s2">tlsSocket</span><span
+    class="s4">: </span><span class="s2">TLSSocket</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span class="s2">line</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">tlsSocket</span><span
+    class="s4">: </span><span class="s2">TLSSocket</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;tlsClientError&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;newSession&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">sessionId</span><span class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span
+    class="s2">sessionData</span><span class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;OCSPRequest&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span>
+                <span class="s2">certificate</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">issuer</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">resp</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+            <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resumeSession&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;secureConnection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;tlsClientError&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;newSession&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;OCSPRequest&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span>
+                <span class="s2">certificate</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">issuer</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">resp</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+            <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resumeSession&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;tlsClientError&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;newSession&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;OCSPRequest&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span>
+                <span class="s2">certificate</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">issuer</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">resp</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+            <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resumeSession&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;tlsClientError&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;newSession&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;OCSPRequest&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span>
+                <span class="s2">certificate</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">issuer</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">,</span>
+                <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">resp</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+            <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resumeSession&quot;</span><span class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">sessionId</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">sessionData</span><span
+    class="s4">: </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;secureConnection&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;keylog&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">line</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">tlsSocket</span><span class="s4">: </span><span
+    class="s2">TLSSocket</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type SecureVersion </span><span class="s4">= </span><span
+    class="s3">&quot;TLSv1.3&quot; </span><span class="s4">| </span><span class="s3">&quot;TLSv1.2&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;TLSv1.1&quot; </span><span class="s4">| </span><span class="s3">&quot;TLSv1&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">SecureContextOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* If set, this will be called when a client opens a connection using the ALPN extension.</span>
+         <span class="s0">* One argument will be passed to the callback: an object containing `servername` and `protocols` fields,</span>
+         <span
+           class="s0">* respectively containing the server name from the SNI extension (if any) and an array of</span>
+         <span class="s0">* ALPN protocol name strings. The callback must return either one of the strings listed in `protocols`,</span>
+         <span class="s0">* which will be returned to the client as the selected ALPN protocol, or `undefined`,</span>
+         <span class="s0">* to reject the connection with a fatal alert. If a string is returned that does not match one of</span>
+         <span class="s0">* the client's ALPN protocols, an error will be thrown.</span>
+         <span class="s0">* This option cannot be used with the `ALPNProtocols` option, and setting both options will throw an error.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ALPNCallback</span><span class="s4">?: ((</span><span class="s2">arg</span><span
+    class="s4">: { </span><span class="s2">servername</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">; </span><span class="s2">protocols</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">[] }) =&gt; </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">) | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Treat intermediate (non-self-signed)</span>
+         <span class="s0">* certificates in the trust CA certificate list as trusted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.9.0, v20.18.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">allowPartialTrustChain</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Optionally override the trusted CA certificates. Default is to trust</span>
+         <span class="s0">* the well-known CAs curated by Mozilla. Mozilla's CAs are completely</span>
+         <span class="s0">* replaced when CAs are explicitly specified using this option.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ca</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s2">Array</span><span
+    class="s4">&lt;</span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">&gt; | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">*  Cert chains in PEM format. One cert chain should be provided per</span>
+         <span class="s0">*  private key. Each cert chain should consist of the PEM formatted</span>
+         <span class="s0">*  certificate for a provided private key, followed by the PEM</span>
+         <span class="s0">*  formatted intermediate certificates (if any), in order, and not</span>
+         <span class="s0">*  including the root CA (the root CA must be pre-known to the peer,</span>
+         <span class="s0">*  see ca). When providing multiple cert chains, they do not have to</span>
+         <span class="s0">*  be in the same order as their private keys in key. If the</span>
+         <span class="s0">*  intermediate certificates are not provided, the peer will not be</span>
+         <span class="s0">*  able to validate the certificate, and the handshake will fail.</span>
+         <span class="s0">*/</span>
+        <span class="s2">cert</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Buffer </span><span class="s4">| </span><span class="s2">Array</span><span class="s4">&lt;</span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">&gt; | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">*  Colon-separated list of supported signature algorithms. The list</span>
+         <span class="s0">*  can contain digest algorithms (SHA256, MD5 etc.), public key</span>
+         <span class="s0">*  algorithms (RSA-PSS, ECDSA etc.), combination of both (e.g</span>
+         <span class="s0">*  'RSA+SHA384') or TLS v1.3 scheme names (e.g. rsa_pss_pss_sha512).</span>
+         <span class="s0">*/</span>
+        <span class="s2">sigalgs</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Cipher suite specification, replacing the default. For more</span>
+         <span class="s0">* information, see modifying the default cipher suite. Permitted</span>
+         <span class="s0">* ciphers can be obtained via tls.getCiphers(). Cipher names must be</span>
+         <span class="s0">* uppercased in order for OpenSSL to accept them.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ciphers</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Name of an OpenSSL engine which can provide the client certificate.</span>
+         <span class="s0">* </span><span class="s1">@deprecated</span>
+         <span class="s0">*/</span>
+        <span class="s2">clientCertEngine</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* PEM formatted CRLs (Certificate Revocation Lists).</span>
+         <span class="s0">*/</span>
+        <span class="s2">crl</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s2">Array</span><span
+    class="s4">&lt;</span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">&gt; | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `'auto'` or custom Diffie-Hellman parameters, required for non-ECDHE perfect forward secrecy.</span>
+         <span class="s0">* If omitted or invalid, the parameters are silently discarded and DHE ciphers will not be available.</span>
+         <span class="s0">* ECDHE-based perfect forward secrecy will still be available.</span>
+         <span class="s0">*/</span>
+        <span class="s2">dhparam</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A string describing a named curve or a colon separated list of curve</span>
+         <span class="s0">* NIDs or names, for example P-521:P-384:P-256, to use for ECDH key</span>
+         <span class="s0">* agreement. Set to auto to select the curve automatically. Use</span>
+         <span class="s0">* crypto.getCurves() to obtain a list of available curve names. On</span>
+         <span class="s0">* recent releases, openssl ecparam -list_curves will also display the</span>
+         <span class="s0">* name and description of each available elliptic curve. Default:</span>
+         <span class="s0">* tls.DEFAULT_ECDH_CURVE.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ecdhCurve</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Attempt to use the server's cipher suite preferences instead of the</span>
+         <span class="s0">* client's. When true, causes SSL_OP_CIPHER_SERVER_PREFERENCE to be</span>
+         <span class="s0">* set in secureOptions</span>
+         <span class="s0">*/</span>
+        <span class="s2">honorCipherOrder</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Private keys in PEM format. PEM allows the option of private keys</span>
+         <span class="s0">* being encrypted. Encrypted keys will be decrypted with</span>
+         <span class="s0">* options.passphrase. Multiple keys using different algorithms can be</span>
+         <span class="s0">* provided either as an array of unencrypted key strings or buffers,</span>
+         <span class="s0">* or an array of objects in the form {pem: &lt;string|buffer&gt;[,</span>
+         <span class="s0">* passphrase: &lt;string&gt;]}. The object form can only occur in an array.</span>
+         <span class="s0">* object.passphrase is optional. Encrypted keys will be decrypted with</span>
+         <span class="s0">* object.passphrase if provided, or options.passphrase if it is not.</span>
+         <span class="s0">*/</span>
+        <span class="s2">key</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s2">Array</span><span
+    class="s4">&lt;</span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">KeyObject</span><span class="s4">&gt; | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Name of an OpenSSL engine to get private key from. Should be used</span>
+         <span class="s0">* together with privateKeyIdentifier.</span>
+         <span class="s0">* </span><span class="s1">@deprecated</span>
+         <span class="s0">*/</span>
+        <span class="s2">privateKeyEngine</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Identifier of a private key managed by an OpenSSL engine. Should be</span>
+         <span class="s0">* used together with privateKeyEngine. Should not be set together with</span>
+         <span class="s0">* key, because both options define a private key in different ways.</span>
+         <span class="s0">* </span><span class="s1">@deprecated</span>
+         <span class="s0">*/</span>
+        <span class="s2">privateKeyIdentifier</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Optionally set the maximum TLS version to allow. One</span>
+         <span
+           class="s0">* of `'TLSv1.3'`, `'TLSv1.2'`, `'TLSv1.1'`, or `'TLSv1'`. Cannot be specified along with the</span>
+         <span class="s0">* `secureProtocol` option, use one or the other.</span>
+         <span class="s0">* **Default:** `'TLSv1.3'`, unless changed using CLI options. Using</span>
+         <span
+           class="s0">* `--tls-max-v1.2` sets the default to `'TLSv1.2'`. Using `--tls-max-v1.3` sets the default to</span>
+         <span class="s0">* `'TLSv1.3'`. If multiple of the options are provided, the highest maximum is used.</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxVersion</span><span class="s4">?: </span><span class="s2">SecureVersion </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Optionally set the minimum TLS version to allow. One</span>
+         <span
+           class="s0">* of `'TLSv1.3'`, `'TLSv1.2'`, `'TLSv1.1'`, or `'TLSv1'`. Cannot be specified along with the</span>
+         <span class="s0">* `secureProtocol` option, use one or the other.  It is not recommended to use</span>
+         <span class="s0">* less than TLSv1.2, but it may be required for interoperability.</span>
+         <span class="s0">* **Default:** `'TLSv1.2'`, unless changed using CLI options. Using</span>
+         <span class="s0">* `--tls-v1.0` sets the default to `'TLSv1'`. Using `--tls-v1.1` sets the default to</span>
+         <span class="s0">* `'TLSv1.1'`. Using `--tls-min-v1.3` sets the default to</span>
+         <span class="s0">* 'TLSv1.3'. If multiple of the options are provided, the lowest minimum is used.</span>
+         <span class="s0">*/</span>
+        <span class="s2">minVersion</span><span class="s4">?: </span><span class="s2">SecureVersion </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Shared passphrase used for a single private key and/or a PFX.</span>
+         <span class="s0">*/</span>
+        <span class="s2">passphrase</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* PFX or PKCS12 encoded private key and certificate chain. pfx is an</span>
+         <span class="s0">* alternative to providing key and cert individually. PFX is usually</span>
+         <span class="s0">* encrypted, if it is, passphrase will be used to decrypt it. Multiple</span>
+         <span class="s0">* PFX can be provided either as an array of unencrypted PFX buffers,</span>
+         <span class="s0">* or an array of objects in the form {buf: &lt;string|buffer&gt;[,</span>
+         <span class="s0">* passphrase: &lt;string&gt;]}. The object form can only occur in an array.</span>
+         <span class="s0">* object.passphrase is optional. Encrypted PFX will be decrypted with</span>
+         <span class="s0">* object.passphrase if provided, or options.passphrase if it is not.</span>
+         <span class="s0">*/</span>
+        <span class="s2">pfx</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer </span><span class="s4">| </span><span class="s2">Array</span><span
+    class="s4">&lt;</span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">PxfObject</span><span class="s4">&gt; | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Optionally affect the OpenSSL protocol behavior, which is not</span>
+         <span class="s0">* usually necessary. This should be used carefully if at all! Value is</span>
+         <span class="s0">* a numeric bitmask of the SSL_OP_* options from OpenSSL Options</span>
+         <span class="s0">*/</span>
+        <span class="s2">secureOptions</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">; </span><span class="s6">// Value is a numeric bitmask of the `SSL_OP_*` options</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Legacy mechanism to select the TLS protocol version to use, it does</span>
+         <span class="s0">* not support independent control of the minimum and maximum version,</span>
+         <span class="s0">* and does not support limiting the protocol to TLSv1.3. Use</span>
+         <span class="s0">* minVersion and maxVersion instead. The possible values are listed as</span>
+         <span class="s0">* SSL_METHODS, use the function names as strings. For example, use</span>
+         <span class="s0">* 'TLSv1_1_method' to force TLS version 1.1, or 'TLS_method' to allow</span>
+         <span class="s0">* any TLS protocol version up to TLSv1.3. It is not recommended to use</span>
+         <span class="s0">* TLS versions less than 1.2, but it may be required for</span>
+         <span class="s0">* interoperability. Default: none, see minVersion.</span>
+         <span class="s0">*/</span>
+        <span class="s2">secureProtocol</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Opaque identifier used by servers to ensure session state is not</span>
+         <span class="s0">* shared between applications. Unused by clients.</span>
+         <span class="s0">*/</span>
+        <span class="s2">sessionIdContext</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* 48-bytes of cryptographically strong pseudo-random data.</span>
+         <span class="s0">* See Session Resumption for more information.</span>
+         <span class="s0">*/</span>
+        <span class="s2">ticketKeys</span><span class="s4">?: </span><span class="s2">Buffer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The number of seconds after which a TLS session created by the</span>
+         <span class="s0">* server will no longer be resumable. See Session Resumption for more</span>
+         <span class="s0">* information. Default: 300.</span>
+         <span class="s0">*/</span>
+        <span class="s2">sessionTimeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SecureContext </span><span class="s4">{</span>
+        <span class="s2">context</span><span class="s4">: </span><span class="s2">any</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Verifies the certificate `cert` is issued to `hostname`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Returns [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) object, populating it with `reason`, `host`, and `cert` on</span>
+     <span class="s0">* failure. On success, returns [undefined](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Undefined_type).</span>
+     <span class="s0">*</span>
+     <span class="s0">* This function is intended to be used in combination with the`checkServerIdentity` option that can be passed to {</span><span
+    class="s1">@link </span><span class="s0">connect} and as</span>
+     <span class="s0">* such operates on a `certificate object`. For other purposes, consider using `x509.checkHost()` instead.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This function can be overwritten by providing an alternative function as the `options.checkServerIdentity` option that is passed to `tls.connect()`. The</span>
+     <span class="s0">* overwriting function can call `tls.checkServerIdentity()` of course, to augment</span>
+     <span class="s0">* the checks done with additional verification.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This function is only called if the certificate passed all other checks, such as</span>
+     <span class="s0">* being issued by trusted CA (`options.ca`).</span>
+     <span class="s0">*</span>
+     <span class="s0">* Earlier versions of Node.js incorrectly accepted certificates for a given`hostname` if a matching `uniformResourceIdentifier` subject alternative name</span>
+     <span class="s0">* was present (see [CVE-2021-44531](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44531)). Applications that wish to accept`uniformResourceIdentifier` subject alternative names can use</span>
+     <span class="s0">* a custom `options.checkServerIdentity` function that implements the desired behavior.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.8.4</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">hostname The host name or IP address to verify the certificate against.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">cert A `certificate object` representing the peer's certificate.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">checkServerIdentity</span><span class="s4">(</span><span
+    class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">cert</span><span class="s4">: </span><span class="s2">PeerCertificate</span><span
+    class="s4">): </span><span class="s2">Error </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates a new {</span><span class="s1">@link </span><span class="s0">Server}. The `secureConnectionListener`, if provided, is</span>
+     <span class="s0">* automatically set as a listener for the `'secureConnection'` event.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `ticketKeys` options is automatically shared between `node:cluster` module</span>
+     <span class="s0">* workers.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following illustrates a simple echo server:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import tls from 'node:tls';</span>
+     <span class="s0">* import fs from 'node:fs';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const options = {</span>
+     <span class="s0">*   key: fs.readFileSync('server-key.pem'),</span>
+     <span class="s0">*   cert: fs.readFileSync('server-cert.pem'),</span>
+     <span class="s0">*</span>
+     <span class="s0">*   // This is necessary only if using client certificate authentication.</span>
+     <span class="s0">*   requestCert: true,</span>
+     <span class="s0">*</span>
+     <span class="s0">*   // This is necessary only if the client uses a self-signed certificate.</span>
+     <span class="s0">*   ca: [ fs.readFileSync('client-cert.pem') ],</span>
+     <span class="s0">* };</span>
+     <span class="s0">*</span>
+     <span class="s0">* const server = tls.createServer(options, (socket) =&gt; {</span>
+     <span class="s0">*   console.log('server connected',</span>
+     <span class="s0">*               socket.authorized ? 'authorized' : 'unauthorized');</span>
+     <span class="s0">*   socket.write('welcome!\n');</span>
+     <span class="s0">*   socket.setEncoding('utf8');</span>
+     <span class="s0">*   socket.pipe(socket);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* server.listen(8000, () =&gt; {</span>
+     <span class="s0">*   console.log('server bound');</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* The server can be tested by connecting to it using the example client from {</span><span
+    class="s1">@link </span><span class="s0">connect}.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.2</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createServer</span><span class="s4">(</span><span class="s2">secureConnectionListener</span><span
+    class="s4">?: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">TLSSocket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">Server</span><span
+    class="s4">;</span>
+    <span class="s5">function </span><span class="s2">createServer</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">TlsOptions</span><span class="s4">, </span><span class="s2">secureConnectionListener</span><span
+    class="s4">?: (</span><span class="s2">socket</span><span class="s4">: </span><span class="s2">TLSSocket</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">Server</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `callback` function, if specified, will be added as a listener for the `'secureConnect'` event.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `tls.connect()` returns a {</span><span class="s1">@link </span><span class="s0">TLSSocket} object.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Unlike the `https` API, `tls.connect()` does not enable the</span>
+     <span class="s0">* SNI (Server Name Indication) extension by default, which may cause some</span>
+     <span class="s0">* servers to return an incorrect certificate or reject the connection</span>
+     <span class="s0">* altogether. To enable SNI, set the `servername` option in addition</span>
+     <span class="s0">* to `host`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following illustrates a client for the echo server example from {</span><span class="s1">@link </span><span
+    class="s0">createServer}:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* // Assumes an echo server that is listening on port 8000.</span>
+     <span class="s0">* import tls from 'node:tls';</span>
+     <span class="s0">* import fs from 'node:fs';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const options = {</span>
+     <span class="s0">*   // Necessary only if the server requires client certificate authentication.</span>
+     <span class="s0">*   key: fs.readFileSync('client-key.pem'),</span>
+     <span class="s0">*   cert: fs.readFileSync('client-cert.pem'),</span>
+     <span class="s0">*</span>
+     <span class="s0">*   // Necessary only if the server uses a self-signed certificate.</span>
+     <span class="s0">*   ca: [ fs.readFileSync('server-cert.pem') ],</span>
+     <span class="s0">*</span>
+     <span class="s0">*   // Necessary only if the server's cert isn't for &quot;localhost&quot;.</span>
+     <span class="s0">*   checkServerIdentity: () =&gt; { return null; },</span>
+     <span class="s0">* };</span>
+     <span class="s0">*</span>
+     <span class="s0">* const socket = tls.connect(8000, options, () =&gt; {</span>
+     <span class="s0">*   console.log('client connected',</span>
+     <span class="s0">*               socket.authorized ? 'authorized' : 'unauthorized');</span>
+     <span class="s0">*   process.stdin.pipe(socket);</span>
+     <span class="s0">*   process.stdin.resume();</span>
+     <span class="s0">* });</span>
+     <span class="s0">* socket.setEncoding('utf8');</span>
+     <span class="s0">* socket.on('data', (data) =&gt; {</span>
+     <span class="s0">*   console.log(data);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* socket.on('end', () =&gt; {</span>
+     <span class="s0">*   console.log('server ends connection');</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.3</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">connect</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ConnectionOptions</span><span
+    class="s4">, </span><span class="s2">secureConnectListener</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s2">TLSSocket</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">connect</span><span class="s4">(</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">,</span>
+        <span class="s2">host</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">?: </span><span class="s2">ConnectionOptions</span><span
+    class="s4">,</span>
+        <span class="s2">secureConnectListener</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">TLSSocket</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">connect</span><span class="s4">(</span><span
+    class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ConnectionOptions</span><span
+    class="s4">, </span><span class="s2">secureConnectListener</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s2">TLSSocket</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* `{@link createServer}` sets the default value of the `honorCipherOrder` option</span>
+     <span class="s0">* to `true`, other APIs that create secure contexts leave it unset.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `{@link createServer}` uses a 128 bit truncated SHA1 hash value generated</span>
+     <span class="s0">* from `process.argv` as the default value of the `sessionIdContext` option, other</span>
+     <span class="s0">* APIs that create secure contexts have no default value.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `tls.createSecureContext()` method creates a `SecureContext` object. It is</span>
+     <span class="s0">* usable as an argument to several `tls` APIs, such as `server.addContext()`,</span>
+     <span class="s0">* but has no public methods. The {</span><span class="s1">@link </span><span class="s0">Server} constructor and the {</span><span
+    class="s1">@link </span><span class="s0">createServer} method do not support the `secureContext` option.</span>
+     <span class="s0">*</span>
+     <span class="s0">* A key is _required_ for ciphers that use certificates. Either `key` or `pfx` can be used to provide it.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the `ca` option is not given, then Node.js will default to using [Mozilla's publicly trusted list of</span>
+     <span class="s0">* CAs](https://hg.mozilla.org/mozilla-central/raw-file/tip/security/nss/lib/ckfw/builtins/certdata.txt).</span>
+     <span class="s0">*</span>
+     <span class="s0">* Custom DHE parameters are discouraged in favor of the new `dhparam: 'auto' `option. When set to `'auto'`, well-known DHE parameters of sufficient strength</span>
+     <span class="s0">* will be selected automatically. Otherwise, if necessary, `openssl dhparam` can</span>
+     <span class="s0">* be used to create custom parameters. The key length must be greater than or</span>
+     <span class="s0">* equal to 1024 bits or else an error will be thrown. Although 1024 bits is</span>
+     <span class="s0">* permissible, use 2048 bits or larger for stronger security.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.13</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createSecureContext</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">SecureContextOptions</span><span
+    class="s4">): </span><span class="s2">SecureContext</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span
+       class="s0">* Returns an array containing the CA certificates from various sources, depending on `type`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * `&quot;default&quot;`: return the CA certificates that will be used by the Node.js TLS clients by default.</span>
+     <span class="s0">*   * When `--use-bundled-ca` is enabled (default), or `--use-openssl-ca` is not enabled,</span>
+     <span class="s0">*     this would include CA certificates from the bundled Mozilla CA store.</span>
+     <span
+       class="s0">*   * When `--use-system-ca` is enabled, this would also include certificates from the system's</span>
+     <span class="s0">*     trusted store.</span>
+     <span class="s0">*   * When `NODE_EXTRA_CA_CERTS` is used, this would also include certificates loaded from the specified</span>
+     <span class="s0">*     file.</span>
+     <span class="s0">* * `&quot;system&quot;`: return the CA certificates that are loaded from the system's trusted store, according</span>
+     <span
+       class="s0">*   to rules set by `--use-system-ca`. This can be used to get the certificates from the system</span>
+     <span class="s0">*   when `--use-system-ca` is not enabled.</span>
+     <span class="s0">* * `&quot;bundled&quot;`: return the CA certificates from the bundled Mozilla CA store. This would be the same</span>
+     <span class="s0">*   as `tls.rootCertificates`.</span>
+     <span class="s0">* * `&quot;extra&quot;`: return the CA certificates loaded from `NODE_EXTRA_CA_CERTS`. It's an empty array if</span>
+     <span class="s0">*   `NODE_EXTRA_CA_CERTS` is not set.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">type The type of CA certificates that will be returned. Valid values</span>
+     <span
+       class="s0">* are `&quot;default&quot;`, `&quot;system&quot;`, `&quot;bundled&quot;` and `&quot;extra&quot;`.</span>
+     <span class="s0">* **Default:** `&quot;default&quot;`.</span>
+     <span class="s0">* </span><span class="s1">@returns </span><span class="s0">An array of PEM-encoded certificates. The array may contain duplicates</span>
+     <span class="s0">* if the same certificate is repeatedly stored in multiple sources.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getCACertificates</span><span class="s4">(</span><span class="s2">type</span><span
+    class="s4">?: </span><span class="s3">&quot;default&quot; </span><span class="s4">| </span><span class="s3">&quot;system&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;bundled&quot; </span><span class="s4">| </span><span class="s3">&quot;extra&quot;</span><span
+    class="s4">): </span><span class="s2">string</span><span class="s4">[];</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns an array with the names of the supported TLS ciphers. The names are</span>
+     <span class="s0">* lower-case for historical reasons, but must be uppercased to be used in</span>
+     <span class="s0">* the `ciphers` option of `{@link createSecureContext}`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Not all supported ciphers are enabled by default. See</span>
+     <span class="s0">* [Modifying the default TLS cipher suite](https://nodejs.org/docs/latest-v24.x/api/tls.html#modifying-the-default-tls-cipher-suite).</span>
+     <span class="s0">*</span>
+     <span class="s0">* Cipher names that start with `'tls_'` are for TLSv1.3, all the others are for</span>
+     <span class="s0">* TLSv1.2 and below.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* console.log(tls.getCiphers()); // ['aes128-gcm-sha256', 'aes128-sha', ...]</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.10.2</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getCiphers</span><span class="s4">(): </span><span class="s2">string</span><span
+    class="s4">[];</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Sets the default CA certificates used by Node.js TLS clients. If the provided</span>
+     <span class="s0">* certificates are parsed successfully, they will become the default CA</span>
+     <span class="s0">* certificate list returned by {</span><span class="s1">@link </span><span class="s0">getCACertificates} and used</span>
+     <span class="s0">* by subsequent TLS connections that don't specify their own CA certificates.</span>
+     <span class="s0">* The certificates will be deduplicated before being set as the default.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This function only affects the current Node.js thread. Previous</span>
+     <span class="s0">* sessions cached by the HTTPS agent won't be affected by this change, so</span>
+     <span class="s0">* this method should be called before any unwanted cachable TLS connections are</span>
+     <span class="s0">* made.</span>
+     <span class="s0">*</span>
+     <span class="s0">* To use system CA certificates as the default:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import tls from 'node:tls';</span>
+     <span class="s0">* tls.setDefaultCACertificates(tls.getCACertificates('system'));</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* This function completely replaces the default CA certificate list. To add additional</span>
+     <span class="s0">* certificates to the existing defaults, get the current certificates and append to them:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import tls from 'node:tls';</span>
+     <span class="s0">* const currentCerts = tls.getCACertificates('default');</span>
+     <span class="s0">* const additionalCerts = ['-----BEGIN CERTIFICATE-----\n...'];</span>
+     <span class="s0">* tls.setDefaultCACertificates([...currentCerts, ...additionalCerts]);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.5.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">certs An array of CA certificates in PEM format.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">setDefaultCACertificates</span><span class="s4">(</span><span
+    class="s2">certs</span><span class="s4">: </span><span class="s2">ReadonlyArray</span><span
+    class="s4">&lt;</span><span class="s2">string </span><span class="s4">| </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ArrayBufferView</span><span class="s4">&gt;): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The default curve name to use for ECDH key agreement in a tls server.</span>
+     <span class="s0">* The default value is `'auto'`. See `{@link createSecureContext()}` for further</span>
+     <span class="s0">* information.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.13</span>
+     <span class="s0">*/</span>
+    <span class="s5">let </span><span class="s2">DEFAULT_ECDH_CURVE</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The default value of the `maxVersion` option of `{@link createSecureContext()}`.</span>
+     <span class="s0">* It can be assigned any of the supported TLS protocol versions,</span>
+     <span class="s0">* `'TLSv1.3'`, `'TLSv1.2'`, `'TLSv1.1'`, or `'TLSv1'`. **Default:** `'TLSv1.3'`, unless</span>
+     <span class="s0">* changed using CLI options. Using `--tls-max-v1.2` sets the default to `'TLSv1.2'`. Using</span>
+     <span class="s0">* `--tls-max-v1.3` sets the default to `'TLSv1.3'`. If multiple of the options</span>
+     <span class="s0">* are provided, the highest maximum is used.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.4.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">let </span><span class="s2">DEFAULT_MAX_VERSION</span><span class="s4">: </span><span class="s2">SecureVersion</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The default value of the `minVersion` option of `{@link createSecureContext()}`.</span>
+     <span class="s0">* It can be assigned any of the supported TLS protocol versions,</span>
+     <span class="s0">* `'TLSv1.3'`, `'TLSv1.2'`, `'TLSv1.1'`, or `'TLSv1'`. **Default:** `'TLSv1.2'`, unless</span>
+     <span class="s0">* changed using CLI options. Using `--tls-min-v1.0` sets the default to</span>
+     <span class="s0">* `'TLSv1'`. Using `--tls-min-v1.1` sets the default to `'TLSv1.1'`. Using</span>
+     <span class="s0">* `--tls-min-v1.3` sets the default to `'TLSv1.3'`. If multiple of the options</span>
+     <span class="s0">* are provided, the lowest minimum is used.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.4.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">let </span><span class="s2">DEFAULT_MIN_VERSION</span><span class="s4">: </span><span class="s2">SecureVersion</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The default value of the `ciphers` option of `{@link createSecureContext()}`.</span>
+     <span class="s0">* It can be assigned any of the supported OpenSSL ciphers.</span>
+     <span class="s0">* Defaults to the content of `crypto.constants.defaultCoreCipherList`, unless</span>
+     <span class="s0">* changed using CLI options using `--tls-default-ciphers`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.8.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">let </span><span class="s2">DEFAULT_CIPHERS</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* An immutable array of strings representing the root certificates (in PEM format)</span>
+     <span class="s0">* from the bundled Mozilla CA store as supplied by the current Node.js version.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The bundled CA store, as supplied by Node.js, is a snapshot of Mozilla CA store</span>
+     <span class="s0">* that is fixed at release time. It is identical on all supported platforms.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.3.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">rootCertificates</span><span class="s4">: </span><span class="s2">readonly string</span><span
+    class="s4">[];</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:tls&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;tls&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

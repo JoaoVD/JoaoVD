@@ -1,0 +1,124 @@
+<html>
+<head>
+  <title>times.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          times.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseTimes </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseTimes'</span><span class="s2">),</span>
+    <span class="s1">castFunction </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_castFunction'</span><span class="s2">),</span>
+    <span class="s1">toInteger </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./toInteger'</span><span class="s2">);</span>
+
+<span class="s4">/** Used as references for various `Number` constants. */</span>
+<span class="s0">var </span><span class="s1">MAX_SAFE_INTEGER </span><span class="s2">= </span><span class="s5">9007199254740991</span><span
+    class="s2">;</span>
+
+<span class="s4">/** Used as references for the maximum length and index of an array. */</span>
+<span class="s0">var </span><span class="s1">MAX_ARRAY_LENGTH </span><span class="s2">= </span><span class="s5">4294967295</span><span
+    class="s2">;</span>
+
+<span class="s6">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMin </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">min</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Invokes the iteratee `n` times, returning an array of the results of</span>
+ <span class="s4">* each invocation. The iteratee is invoked with one argument; (index).</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s7">@static</span>
+ <span class="s4">* </span><span class="s7">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s7">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s7">@category </span><span class="s4">Util</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{number} n The number of times to invoke `iteratee`.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{Function} [iteratee=_.identity] The function invoked per iteration.</span>
+ <span class="s4">* </span><span class="s7">@returns </span><span
+    class="s4">{Array} Returns the array of results.</span>
+ <span class="s4">* </span><span class="s7">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.times(3, String);</span>
+ <span class="s4">* // =&gt; ['0', '1', '2']</span>
+ <span class="s4">*</span>
+ <span class="s4">*  _.times(4, _.constant(0));</span>
+ <span class="s4">* // =&gt; [0, 0, 0, 0]</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">times</span><span class="s2">(</span><span class="s1">n</span><span
+    class="s2">, </span><span class="s1">iteratee</span><span class="s2">) {</span>
+  <span class="s1">n </span><span class="s2">= </span><span class="s1">toInteger</span><span class="s2">(</span><span
+    class="s1">n</span><span class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">n </span><span class="s2">&lt; </span><span
+    class="s5">1 </span><span class="s2">|| </span><span class="s1">n </span><span class="s2">&gt; </span><span
+    class="s1">MAX_SAFE_INTEGER</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s2">[];</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">index </span><span class="s2">= </span><span
+    class="s1">MAX_ARRAY_LENGTH</span><span class="s2">,</span>
+      <span class="s1">length </span><span class="s2">= </span><span class="s1">nativeMin</span><span
+    class="s2">(</span><span class="s1">n</span><span class="s2">, </span><span class="s1">MAX_ARRAY_LENGTH</span><span
+    class="s2">);</span>
+
+  <span class="s1">iteratee </span><span class="s2">= </span><span class="s1">castFunction</span><span
+    class="s2">(</span><span class="s1">iteratee</span><span class="s2">);</span>
+  <span class="s1">n </span><span class="s2">-= </span><span class="s1">MAX_ARRAY_LENGTH</span><span class="s2">;</span>
+
+  <span class="s0">var </span><span class="s1">result </span><span class="s2">= </span><span class="s1">baseTimes</span><span
+    class="s2">(</span><span class="s1">length</span><span class="s2">, </span><span class="s1">iteratee</span><span
+    class="s2">);</span>
+  <span class="s0">while </span><span class="s2">(++</span><span class="s1">index </span><span
+    class="s2">&lt; </span><span class="s1">n</span><span class="s2">) {</span>
+    <span class="s1">iteratee</span><span class="s2">(</span><span class="s1">index</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">times</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<html>
+<head>
+  <title>_unicodeSize.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _unicodeSize.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/** Used to compose unicode character classes. */</span>
+<span class="s2">var </span><span class="s1">rsAstralRange </span><span class="s3">= </span><span
+    class="s4">'</span><span class="s2">\\</span><span class="s4">ud800-</span><span class="s2">\\</span><span
+    class="s4">udfff'</span><span class="s3">,</span>
+    <span class="s1">rsComboMarksRange </span><span class="s3">= </span><span class="s4">'</span><span
+    class="s2">\\</span><span class="s4">u0300-</span><span class="s2">\\</span><span class="s4">u036f'</span><span
+    class="s3">,</span>
+    <span class="s1">reComboHalfMarksRange </span><span class="s3">= </span><span class="s4">'</span><span
+    class="s2">\\</span><span class="s4">ufe20-</span><span class="s2">\\</span><span class="s4">ufe2f'</span><span
+    class="s3">,</span>
+    <span class="s1">rsComboSymbolsRange </span><span class="s3">= </span><span class="s4">'</span><span
+    class="s2">\\</span><span class="s4">u20d0-</span><span class="s2">\\</span><span class="s4">u20ff'</span><span
+    class="s3">,</span>
+    <span class="s1">rsComboRange </span><span class="s3">= </span><span class="s1">rsComboMarksRange </span><span
+    class="s3">+ </span><span class="s1">reComboHalfMarksRange </span><span class="s3">+ </span><span class="s1">rsComboSymbolsRange</span><span
+    class="s3">,</span>
+    <span class="s1">rsVarRange </span><span class="s3">= </span><span class="s4">'</span><span
+    class="s2">\\</span><span class="s4">ufe0e</span><span class="s2">\\</span><span class="s4">ufe0f'</span><span
+    class="s3">;</span>
+
+<span class="s0">/** Used to compose unicode capture groups. */</span>
+<span class="s2">var </span><span class="s1">rsAstral </span><span class="s3">= </span><span class="s4">'[' </span><span
+    class="s3">+ </span><span class="s1">rsAstralRange </span><span class="s3">+ </span><span class="s4">']'</span><span
+    class="s3">,</span>
+    <span class="s1">rsCombo </span><span class="s3">= </span><span class="s4">'[' </span><span
+    class="s3">+ </span><span class="s1">rsComboRange </span><span class="s3">+ </span><span class="s4">']'</span><span
+    class="s3">,</span>
+    <span class="s1">rsFitz </span><span class="s3">= </span><span class="s4">'</span><span class="s2">\\</span><span
+    class="s4">ud83c[</span><span class="s2">\\</span><span class="s4">udffb-</span><span class="s2">\\</span><span
+    class="s4">udfff]'</span><span class="s3">,</span>
+    <span class="s1">rsModifier </span><span class="s3">= </span><span class="s4">'(?:' </span><span
+    class="s3">+ </span><span class="s1">rsCombo </span><span class="s3">+ </span><span class="s4">'|' </span><span
+    class="s3">+ </span><span class="s1">rsFitz </span><span class="s3">+ </span><span class="s4">')'</span><span
+    class="s3">,</span>
+    <span class="s1">rsNonAstral </span><span class="s3">= </span><span class="s4">'[^' </span><span
+    class="s3">+ </span><span class="s1">rsAstralRange </span><span class="s3">+ </span><span class="s4">']'</span><span
+    class="s3">,</span>
+    <span class="s1">rsRegional </span><span class="s3">= </span><span class="s4">'(?:</span><span
+    class="s2">\\</span><span class="s4">ud83c[</span><span class="s2">\\</span><span class="s4">udde6-</span><span
+    class="s2">\\</span><span class="s4">uddff]){2}'</span><span class="s3">,</span>
+    <span class="s1">rsSurrPair </span><span class="s3">= </span><span class="s4">'[</span><span
+    class="s2">\\</span><span class="s4">ud800-</span><span class="s2">\\</span><span class="s4">udbff][</span><span
+    class="s2">\\</span><span class="s4">udc00-</span><span class="s2">\\</span><span class="s4">udfff]'</span><span
+    class="s3">,</span>
+    <span class="s1">rsZWJ </span><span class="s3">= </span><span class="s4">'</span><span class="s2">\\</span><span
+    class="s4">u200d'</span><span class="s3">;</span>
+
+<span class="s0">/** Used to compose unicode regexes. */</span>
+<span class="s2">var </span><span class="s1">reOptMod </span><span class="s3">= </span><span
+    class="s1">rsModifier </span><span class="s3">+ </span><span class="s4">'?'</span><span class="s3">,</span>
+    <span class="s1">rsOptVar </span><span class="s3">= </span><span class="s4">'[' </span><span
+    class="s3">+ </span><span class="s1">rsVarRange </span><span class="s3">+ </span><span class="s4">']?'</span><span
+    class="s3">,</span>
+    <span class="s1">rsOptJoin </span><span class="s3">= </span><span class="s4">'(?:' </span><span class="s3">+ </span><span
+    class="s1">rsZWJ </span><span class="s3">+ </span><span class="s4">'(?:' </span><span class="s3">+ [</span><span
+    class="s1">rsNonAstral</span><span class="s3">, </span><span class="s1">rsRegional</span><span
+    class="s3">, </span><span class="s1">rsSurrPair</span><span class="s3">].</span><span class="s1">join</span><span
+    class="s3">(</span><span class="s4">'|'</span><span class="s3">) + </span><span class="s4">')' </span><span
+    class="s3">+ </span><span class="s1">rsOptVar </span><span class="s3">+ </span><span
+    class="s1">reOptMod </span><span class="s3">+ </span><span class="s4">')*'</span><span class="s3">,</span>
+    <span class="s1">rsSeq </span><span class="s3">= </span><span class="s1">rsOptVar </span><span
+    class="s3">+ </span><span class="s1">reOptMod </span><span class="s3">+ </span><span
+    class="s1">rsOptJoin</span><span class="s3">,</span>
+    <span class="s1">rsSymbol </span><span class="s3">= </span><span class="s4">'(?:' </span><span class="s3">+ [</span><span
+    class="s1">rsNonAstral </span><span class="s3">+ </span><span class="s1">rsCombo </span><span
+    class="s3">+ </span><span class="s4">'?'</span><span class="s3">, </span><span class="s1">rsCombo</span><span
+    class="s3">, </span><span class="s1">rsRegional</span><span class="s3">, </span><span
+    class="s1">rsSurrPair</span><span class="s3">, </span><span class="s1">rsAstral</span><span
+    class="s3">].</span><span class="s1">join</span><span class="s3">(</span><span class="s4">'|'</span><span
+    class="s3">) + </span><span class="s4">')'</span><span class="s3">;</span>
+
+<span class="s0">/** Used to match [string symbols](https://mathiasbynens.be/notes/javascript-unicode). */</span>
+<span class="s2">var </span><span class="s1">reUnicode </span><span class="s3">= </span><span
+    class="s1">RegExp</span><span class="s3">(</span><span class="s1">rsFitz </span><span class="s3">+ </span><span
+    class="s4">'(?=' </span><span class="s3">+ </span><span class="s1">rsFitz </span><span class="s3">+ </span><span
+    class="s4">')|' </span><span class="s3">+ </span><span class="s1">rsSymbol </span><span class="s3">+ </span><span
+    class="s1">rsSeq</span><span class="s3">, </span><span class="s4">'g'</span><span class="s3">);</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Gets the size of a Unicode `string`.</span>
+ <span class="s0">*</span>
+ <span class="s0">* </span><span class="s5">@private</span>
+ <span class="s0">* </span><span class="s5">@param </span><span class="s0">{string} string The string inspect.</span>
+ <span class="s0">* </span><span class="s5">@returns </span><span class="s0">{number} Returns the string size.</span>
+ <span class="s0">*/</span>
+<span class="s2">function </span><span class="s1">unicodeSize</span><span class="s3">(</span><span
+    class="s1">string</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">result </span><span class="s3">= </span><span class="s1">reUnicode</span><span
+    class="s3">.</span><span class="s1">lastIndex </span><span class="s3">= </span><span class="s6">0</span><span
+    class="s3">;</span>
+  <span class="s2">while </span><span class="s3">(</span><span class="s1">reUnicode</span><span class="s3">.</span><span
+    class="s1">test</span><span class="s3">(</span><span class="s1">string</span><span class="s3">)) {</span>
+    <span class="s3">++</span><span class="s1">result</span><span class="s3">;</span>
+  <span class="s3">}</span>
+  <span class="s2">return </span><span class="s1">result</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">unicodeSize</span><span class="s3">;</span>
+</pre>
+</body>
+</html>

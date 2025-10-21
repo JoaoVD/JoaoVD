@@ -1,0 +1,111 @@
+<html>
+<head>
+  <title>_ListCache.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _ListCache.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">listCacheClear </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_listCacheClear'</span><span class="s2">),</span>
+    <span class="s1">listCacheDelete </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_listCacheDelete'</span><span class="s2">),</span>
+    <span class="s1">listCacheGet </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_listCacheGet'</span><span class="s2">),</span>
+    <span class="s1">listCacheHas </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_listCacheHas'</span><span class="s2">),</span>
+    <span class="s1">listCacheSet </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_listCacheSet'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates an list cache object.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@constructor</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array} [entries] The key-value pairs to cache.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">ListCache</span><span class="s2">(</span><span
+    class="s1">entries</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">index </span><span class="s2">= -</span><span class="s6">1</span><span
+    class="s2">,</span>
+      <span class="s1">length </span><span class="s2">= </span><span class="s1">entries </span><span
+    class="s2">== </span><span class="s0">null </span><span class="s2">? </span><span class="s6">0 </span><span
+    class="s2">: </span><span class="s1">entries</span><span class="s2">.</span><span class="s1">length</span><span
+    class="s2">;</span>
+
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">clear</span><span class="s2">();</span>
+  <span class="s0">while </span><span class="s2">(++</span><span class="s1">index </span><span
+    class="s2">&lt; </span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">entry </span><span class="s2">= </span><span
+    class="s1">entries</span><span class="s2">[</span><span class="s1">index</span><span class="s2">];</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">set</span><span class="s2">(</span><span
+    class="s1">entry</span><span class="s2">[</span><span class="s6">0</span><span class="s2">], </span><span
+    class="s1">entry</span><span class="s2">[</span><span class="s6">1</span><span class="s2">]);</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s7">// Add methods to `ListCache`.</span>
+<span class="s1">ListCache</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">clear </span><span class="s2">= </span><span
+    class="s1">listCacheClear</span><span class="s2">;</span>
+<span class="s1">ListCache</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">[</span><span class="s3">'delete'</span><span class="s2">] = </span><span
+    class="s1">listCacheDelete</span><span class="s2">;</span>
+<span class="s1">ListCache</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">get </span><span class="s2">= </span><span class="s1">listCacheGet</span><span
+    class="s2">;</span>
+<span class="s1">ListCache</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">has </span><span class="s2">= </span><span class="s1">listCacheHas</span><span
+    class="s2">;</span>
+<span class="s1">ListCache</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">set </span><span class="s2">= </span><span class="s1">listCacheSet</span><span
+    class="s2">;</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">ListCache</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

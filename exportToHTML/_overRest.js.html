@@ -1,0 +1,116 @@
+<html>
+<head>
+  <title>_overRest.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _overRest.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">apply </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_apply'</span><span class="s2">);</span>
+
+<span class="s4">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMax </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">max</span><span class="s2">;</span>
+
+<span class="s5">/**</span>
+ <span class="s5">* A specialized version of `baseRest` which transforms the rest array.</span>
+ <span class="s5">*</span>
+ <span class="s5">* </span><span class="s6">@private</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{Function} func The function to apply a rest parameter to.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{number} [start=func.length-1] The start position of the rest parameter.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{Function} transform The rest array transform.</span>
+ <span class="s5">* </span><span class="s6">@returns </span><span class="s5">{Function} Returns the new function.</span>
+ <span class="s5">*/</span>
+<span class="s0">function </span><span class="s1">overRest</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">start</span><span class="s2">, </span><span
+    class="s1">transform</span><span class="s2">) {</span>
+  <span class="s1">start </span><span class="s2">= </span><span class="s1">nativeMax</span><span
+    class="s2">(</span><span class="s1">start </span><span class="s2">=== </span><span class="s1">undefined </span><span
+    class="s2">? (</span><span class="s1">func</span><span class="s2">.</span><span class="s1">length </span><span
+    class="s2">- </span><span class="s7">1</span><span class="s2">) : </span><span class="s1">start</span><span
+    class="s2">, </span><span class="s7">0</span><span class="s2">);</span>
+  <span class="s0">return function</span><span class="s2">() {</span>
+    <span class="s0">var </span><span class="s1">args </span><span class="s2">= </span><span class="s1">arguments</span><span
+    class="s2">,</span>
+        <span class="s1">index </span><span class="s2">= -</span><span class="s7">1</span><span class="s2">,</span>
+        <span class="s1">length </span><span class="s2">= </span><span class="s1">nativeMax</span><span
+    class="s2">(</span><span class="s1">args</span><span class="s2">.</span><span class="s1">length </span><span
+    class="s2">- </span><span class="s1">start</span><span class="s2">, </span><span class="s7">0</span><span
+    class="s2">),</span>
+        <span class="s1">array </span><span class="s2">= </span><span class="s1">Array</span><span
+    class="s2">(</span><span class="s1">length</span><span class="s2">);</span>
+
+    <span class="s0">while </span><span class="s2">(++</span><span class="s1">index </span><span class="s2">&lt; </span><span
+    class="s1">length</span><span class="s2">) {</span>
+      <span class="s1">array</span><span class="s2">[</span><span class="s1">index</span><span
+    class="s2">] = </span><span class="s1">args</span><span class="s2">[</span><span class="s1">start </span><span
+    class="s2">+ </span><span class="s1">index</span><span class="s2">];</span>
+    <span class="s2">}</span>
+    <span class="s1">index </span><span class="s2">= -</span><span class="s7">1</span><span class="s2">;</span>
+    <span class="s0">var </span><span class="s1">otherArgs </span><span class="s2">= </span><span
+    class="s1">Array</span><span class="s2">(</span><span class="s1">start </span><span class="s2">+ </span><span
+    class="s7">1</span><span class="s2">);</span>
+    <span class="s0">while </span><span class="s2">(++</span><span class="s1">index </span><span class="s2">&lt; </span><span
+    class="s1">start</span><span class="s2">) {</span>
+      <span class="s1">otherArgs</span><span class="s2">[</span><span class="s1">index</span><span
+    class="s2">] = </span><span class="s1">args</span><span class="s2">[</span><span class="s1">index</span><span
+    class="s2">];</span>
+    <span class="s2">}</span>
+    <span class="s1">otherArgs</span><span class="s2">[</span><span class="s1">start</span><span
+    class="s2">] = </span><span class="s1">transform</span><span class="s2">(</span><span class="s1">array</span><span
+    class="s2">);</span>
+    <span class="s0">return </span><span class="s1">apply</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">otherArgs</span><span class="s2">);</span>
+  <span class="s2">};</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">overRest</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

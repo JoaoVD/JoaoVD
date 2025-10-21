@@ -1,0 +1,1128 @@
+<html>
+<head>
+  <title>v8.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          v8.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:v8` module exposes APIs that are specific to the version of [V8](https://developers.google.com/v8/) built into the Node.js binary. It can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import v8 from 'node:v8';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/v8.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;v8&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Readable </span><span class="s4">} </span><span
+    class="s2">from </span><span class="s3">&quot;node:stream&quot;</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">HeapSpaceInfo </span><span class="s4">{</span>
+        <span class="s2">space_name</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">space_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">space_used_size</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">space_available_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">physical_space_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span
+      class="s6">// ** Signifies if the --zap_code_space option is enabled or not.  1 == enabled, 0 == disabled. */</span>
+    <span class="s2">type DoesZapCodeSpaceFlag </span><span class="s4">= </span><span class="s7">0 </span><span
+    class="s4">| </span><span class="s7">1</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">HeapInfo </span><span class="s4">{</span>
+        <span class="s2">total_heap_size</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">total_heap_size_executable</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">total_physical_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">total_available_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">used_heap_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">heap_size_limit</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">malloced_memory</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">peak_malloced_memory</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">does_zap_garbage</span><span class="s4">: </span><span
+    class="s2">DoesZapCodeSpaceFlag</span><span class="s4">;</span>
+        <span class="s2">number_of_native_contexts</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">number_of_detached_contexts</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">total_global_handles_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">used_global_handles_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">external_memory</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">HeapCodeStatistics </span><span class="s4">{</span>
+        <span class="s2">code_and_metadata_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">bytecode_and_metadata_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">external_script_source_size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">HeapSnapshotOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If true, expose internals in the heap snapshot.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">exposeInternals</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If true, expose numeric values in artificial fields.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">exposeNumericValues</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns an integer representing a version tag derived from the V8 version,</span>
+     <span class="s0">* command-line flags, and detected CPU features. This is useful for determining</span>
+     <span class="s0">* whether a `vm.Script` `cachedData` buffer is compatible with this instance</span>
+     <span class="s0">* of V8.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* console.log(v8.cachedDataVersionTag()); // 3947234607</span>
+     <span class="s0">* // The value returned by v8.cachedDataVersionTag() is derived from the V8</span>
+     <span class="s0">* // version, command-line flags, and detected CPU features. Test that the value</span>
+     <span class="s0">* // does indeed update when flags are toggled.</span>
+     <span class="s0">* v8.setFlagsFromString('--allow_natives_syntax');</span>
+     <span class="s0">* console.log(v8.cachedDataVersionTag()); // 183726201</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">cachedDataVersionTag</span><span class="s4">(): </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns an object with the following properties:</span>
+     <span class="s0">*</span>
+     <span class="s0">* `does_zap_garbage` is a 0/1 boolean, which signifies whether the `--zap_code_space` option is enabled or not. This makes V8 overwrite heap</span>
+     <span class="s0">* garbage with a bit pattern. The RSS footprint (resident set size) gets bigger</span>
+     <span class="s0">* because it continuously touches all heap pages and that makes them less likely</span>
+     <span class="s0">* to get swapped out by the operating system.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `number_of_native_contexts` The value of native\_context is the number of the</span>
+     <span class="s0">* top-level contexts currently active. Increase of this number over time indicates</span>
+     <span class="s0">* a memory leak.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `number_of_detached_contexts` The value of detached\_context is the number</span>
+     <span class="s0">* of contexts that were detached and not yet garbage collected. This number</span>
+     <span class="s0">* being non-zero indicates a potential memory leak.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `total_global_handles_size` The value of total\_global\_handles\_size is the</span>
+     <span class="s0">* total memory size of V8 global handles.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `used_global_handles_size` The value of used\_global\_handles\_size is the</span>
+     <span class="s0">* used memory size of V8 global handles.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `external_memory` The value of external\_memory is the memory size of array</span>
+     <span class="s0">* buffers and external strings.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* {</span>
+     <span class="s0">*   total_heap_size: 7326976,</span>
+     <span class="s0">*   total_heap_size_executable: 4194304,</span>
+     <span class="s0">*   total_physical_size: 7326976,</span>
+     <span class="s0">*   total_available_size: 1152656,</span>
+     <span class="s0">*   used_heap_size: 3476208,</span>
+     <span class="s0">*   heap_size_limit: 1535115264,</span>
+     <span class="s0">*   malloced_memory: 16384,</span>
+     <span class="s0">*   peak_malloced_memory: 1127496,</span>
+     <span class="s0">*   does_zap_garbage: 0,</span>
+     <span class="s0">*   number_of_native_contexts: 1,</span>
+     <span class="s0">*   number_of_detached_contexts: 0,</span>
+     <span class="s0">*   total_global_handles_size: 8192,</span>
+     <span class="s0">*   used_global_handles_size: 3296,</span>
+     <span class="s0">*   external_memory: 318824</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v1.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getHeapStatistics</span><span class="s4">(): </span><span
+    class="s2">HeapInfo</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* It returns an object with a structure similar to the</span>
+     <span class="s0">* [`cppgc::HeapStatistics`](https://v8docs.nodesource.com/node-22.4/d7/d51/heap-statistics_8h_source.html)</span>
+     <span class="s0">* object. See the [V8 documentation](https://v8docs.nodesource.com/node-22.4/df/d2f/structcppgc_1_1_heap_statistics.html)</span>
+     <span class="s0">* for more information about the properties of the object.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* // Detailed</span>
+     <span class="s0">* ({</span>
+     <span class="s0">*   committed_size_bytes: 131072,</span>
+     <span class="s0">*   resident_size_bytes: 131072,</span>
+     <span class="s0">*   used_size_bytes: 152,</span>
+     <span class="s0">*   space_statistics: [</span>
+     <span class="s0">*     {</span>
+     <span class="s0">*       name: 'NormalPageSpace0',</span>
+     <span class="s0">*       committed_size_bytes: 0,</span>
+     <span class="s0">*       resident_size_bytes: 0,</span>
+     <span class="s0">*       used_size_bytes: 0,</span>
+     <span class="s0">*       page_stats: [{}],</span>
+     <span class="s0">*       free_list_stats: {},</span>
+     <span class="s0">*     },</span>
+     <span class="s0">*     {</span>
+     <span class="s0">*       name: 'NormalPageSpace1',</span>
+     <span class="s0">*       committed_size_bytes: 131072,</span>
+     <span class="s0">*       resident_size_bytes: 131072,</span>
+     <span class="s0">*       used_size_bytes: 152,</span>
+     <span class="s0">*       page_stats: [{}],</span>
+     <span class="s0">*       free_list_stats: {},</span>
+     <span class="s0">*     },</span>
+     <span class="s0">*     {</span>
+     <span class="s0">*       name: 'NormalPageSpace2',</span>
+     <span class="s0">*       committed_size_bytes: 0,</span>
+     <span class="s0">*       resident_size_bytes: 0,</span>
+     <span class="s0">*       used_size_bytes: 0,</span>
+     <span class="s0">*       page_stats: [{}],</span>
+     <span class="s0">*       free_list_stats: {},</span>
+     <span class="s0">*     },</span>
+     <span class="s0">*     {</span>
+     <span class="s0">*       name: 'NormalPageSpace3',</span>
+     <span class="s0">*       committed_size_bytes: 0,</span>
+     <span class="s0">*       resident_size_bytes: 0,</span>
+     <span class="s0">*       used_size_bytes: 0,</span>
+     <span class="s0">*       page_stats: [{}],</span>
+     <span class="s0">*       free_list_stats: {},</span>
+     <span class="s0">*     },</span>
+     <span class="s0">*     {</span>
+     <span class="s0">*       name: 'LargePageSpace',</span>
+     <span class="s0">*       committed_size_bytes: 0,</span>
+     <span class="s0">*       resident_size_bytes: 0,</span>
+     <span class="s0">*       used_size_bytes: 0,</span>
+     <span class="s0">*       page_stats: [{}],</span>
+     <span class="s0">*       free_list_stats: {},</span>
+     <span class="s0">*     },</span>
+     <span class="s0">*   ],</span>
+     <span class="s0">*   type_names: [],</span>
+     <span class="s0">*   detail_level: 'detailed',</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* // Brief</span>
+     <span class="s0">* ({</span>
+     <span class="s0">*   committed_size_bytes: 131072,</span>
+     <span class="s0">*   resident_size_bytes: 131072,</span>
+     <span class="s0">*   used_size_bytes: 128864,</span>
+     <span class="s0">*   space_statistics: [],</span>
+     <span class="s0">*   type_names: [],</span>
+     <span class="s0">*   detail_level: 'brief',</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">detailLevel **Default:** `'detailed'`. Specifies the level of detail in the returned statistics.</span>
+     <span class="s0">* Accepted values are:</span>
+     <span class="s0">* * `'brief'`:  Brief statistics contain only the top-level</span>
+     <span class="s0">* allocated and used</span>
+     <span class="s0">* memory statistics for the entire heap.</span>
+     <span class="s0">* * `'detailed'`: Detailed statistics also contain a break</span>
+     <span class="s0">* down per space and page, as well as freelist statistics</span>
+     <span class="s0">* and object type histograms.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getCppHeapStatistics</span><span class="s4">(</span><span
+    class="s2">detailLevel</span><span class="s4">?: </span><span class="s3">&quot;brief&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;detailed&quot;</span><span class="s4">): </span><span
+    class="s2">object</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns statistics about the V8 heap spaces, i.e. the segments which make up</span>
+     <span class="s0">* the V8 heap. Neither the ordering of heap spaces, nor the availability of a</span>
+     <span class="s0">* heap space can be guaranteed as the statistics are provided via the</span>
+     <span class="s0">* V8 [`GetHeapSpaceStatistics`](https://v8docs.nodesource.com/node-13.2/d5/dda/classv8_1_1_isolate.html#ac673576f24fdc7a33378f8f57e1d13a4) function and may change from one V8 version to the</span>
+     <span class="s0">* next.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The value returned is an array of objects containing the following properties:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```json</span>
+     <span class="s0">* [</span>
+     <span class="s0">*   {</span>
+     <span class="s0">*     &quot;space_name&quot;: &quot;new_space&quot;,</span>
+     <span class="s0">*     &quot;space_size&quot;: 2063872,</span>
+     <span class="s0">*     &quot;space_used_size&quot;: 951112,</span>
+     <span class="s0">*     &quot;space_available_size&quot;: 80824,</span>
+     <span class="s0">*     &quot;physical_space_size&quot;: 2063872</span>
+     <span class="s0">*   },</span>
+     <span class="s0">*   {</span>
+     <span class="s0">*     &quot;space_name&quot;: &quot;old_space&quot;,</span>
+     <span class="s0">*     &quot;space_size&quot;: 3090560,</span>
+     <span class="s0">*     &quot;space_used_size&quot;: 2493792,</span>
+     <span class="s0">*     &quot;space_available_size&quot;: 0,</span>
+     <span class="s0">*     &quot;physical_space_size&quot;: 3090560</span>
+     <span class="s0">*   },</span>
+     <span class="s0">*   {</span>
+     <span class="s0">*     &quot;space_name&quot;: &quot;code_space&quot;,</span>
+     <span class="s0">*     &quot;space_size&quot;: 1260160,</span>
+     <span class="s0">*     &quot;space_used_size&quot;: 644256,</span>
+     <span class="s0">*     &quot;space_available_size&quot;: 960,</span>
+     <span class="s0">*     &quot;physical_space_size&quot;: 1260160</span>
+     <span class="s0">*   },</span>
+     <span class="s0">*   {</span>
+     <span class="s0">*     &quot;space_name&quot;: &quot;map_space&quot;,</span>
+     <span class="s0">*     &quot;space_size&quot;: 1094160,</span>
+     <span class="s0">*     &quot;space_used_size&quot;: 201608,</span>
+     <span class="s0">*     &quot;space_available_size&quot;: 0,</span>
+     <span class="s0">*     &quot;physical_space_size&quot;: 1094160</span>
+     <span class="s0">*   },</span>
+     <span class="s0">*   {</span>
+     <span class="s0">*     &quot;space_name&quot;: &quot;large_object_space&quot;,</span>
+     <span class="s0">*     &quot;space_size&quot;: 0,</span>
+     <span class="s0">*     &quot;space_used_size&quot;: 0,</span>
+     <span class="s0">*     &quot;space_available_size&quot;: 1490980608,</span>
+     <span class="s0">*     &quot;physical_space_size&quot;: 0</span>
+     <span class="s0">*   }</span>
+     <span class="s0">* ]</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v6.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getHeapSpaceStatistics</span><span class="s4">(): </span><span
+    class="s2">HeapSpaceInfo</span><span class="s4">[];</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `v8.setFlagsFromString()` method can be used to programmatically set</span>
+     <span class="s0">* V8 command-line flags. This method should be used with care. Changing settings</span>
+     <span class="s0">* after the VM has started may result in unpredictable behavior, including</span>
+     <span class="s0">* crashes and data loss; or it may simply do nothing.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The V8 options available for a version of Node.js may be determined by running `node --v8-options`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Usage:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* // Print GC events to stdout for one minute.</span>
+     <span class="s0">* import v8 from 'node:v8';</span>
+     <span class="s0">* v8.setFlagsFromString('--trace_gc');</span>
+     <span class="s0">* setTimeout(() =&gt; { v8.setFlagsFromString('--notrace_gc'); }, 60e3);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v1.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">setFlagsFromString</span><span class="s4">(</span><span
+    class="s2">flags</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This is similar to the [`queryObjects()` console API](https://developer.chrome.com/docs/devtools/console/utilities#queryObjects-function)</span>
+     <span class="s0">* provided by the Chromium DevTools console. It can be used to search for objects that have the matching constructor on its prototype chain</span>
+     <span class="s0">* in the heap after a full garbage collection, which can be useful for memory leak regression tests. To avoid surprising results, users should</span>
+     <span class="s0">* avoid using this API on constructors whose implementation they don't control, or on constructors that can be invoked by other parties in the</span>
+     <span class="s0">* application.</span>
+     <span class="s0">*</span>
+     <span class="s0">* To avoid accidental leaks, this API does not return raw references to the objects found. By default, it returns the count of the objects</span>
+     <span class="s0">* found. If `options.format` is `'summary'`, it returns an array containing brief string representations for each object. The visibility provided</span>
+     <span class="s0">* in this API is similar to what the heap snapshot provides, while users can save the cost of serialization and parsing and directly filter the</span>
+     <span class="s0">* target objects during the search.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Only objects created in the current execution context are included in the results.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { queryObjects } from 'node:v8';</span>
+     <span class="s0">* class A { foo = 'bar'; }</span>
+     <span class="s0">* console.log(queryObjects(A)); // 0</span>
+     <span class="s0">* const a = new A();</span>
+     <span class="s0">* console.log(queryObjects(A)); // 1</span>
+     <span class="s0">* // [ &quot;A { foo: 'bar' }&quot; ]</span>
+     <span class="s0">* console.log(queryObjects(A, { format: 'summary' }));</span>
+     <span class="s0">*</span>
+     <span class="s0">* class B extends A { bar = 'qux'; }</span>
+     <span class="s0">* const b = new B();</span>
+     <span class="s0">* console.log(queryObjects(B)); // 1</span>
+     <span class="s0">* // [ &quot;B { foo: 'bar', bar: 'qux' }&quot; ]</span>
+     <span class="s0">* console.log(queryObjects(B, { format: 'summary' }));</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Note that, when there are child classes inheriting from a constructor,</span>
+     <span class="s0">* // the constructor also shows up in the prototype chain of the child</span>
+     <span class="s0">* // classes's prototoype, so the child classes's prototoype would also be</span>
+     <span class="s0">* // included in the result.</span>
+     <span class="s0">* console.log(queryObjects(A));  // 3</span>
+     <span class="s0">* // [ &quot;B { foo: 'bar', bar: 'qux' }&quot;, 'A {}', &quot;A { foo: 'bar' }&quot; ]</span>
+     <span class="s0">* console.log(queryObjects(A, { format: 'summary' }));</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">ctor The constructor that can be used to search on the prototype chain in order to filter target objects in the heap.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.13.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">queryObjects</span><span class="s4">(</span><span
+    class="s2">ctor</span><span class="s4">: </span><span class="s2">Function</span><span class="s4">): </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s2">string</span><span class="s4">[];</span>
+    <span class="s5">function </span><span class="s2">queryObjects</span><span class="s4">(</span><span
+    class="s2">ctor</span><span class="s4">: </span><span class="s2">Function</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: { </span><span class="s2">format</span><span class="s4">: </span><span
+    class="s3">&quot;count&quot; </span><span class="s4">}): </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s5">function </span><span class="s2">queryObjects</span><span class="s4">(</span><span
+    class="s2">ctor</span><span class="s4">: </span><span class="s2">Function</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: { </span><span class="s2">format</span><span class="s4">: </span><span
+    class="s3">&quot;summary&quot; </span><span class="s4">}): </span><span class="s2">string</span><span
+    class="s4">[];</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Generates a snapshot of the current V8 heap and returns a Readable</span>
+     <span class="s0">* Stream that may be used to read the JSON serialized representation.</span>
+     <span class="s0">* This JSON stream format is intended to be used with tools such as</span>
+     <span class="s0">* Chrome DevTools. The JSON schema is undocumented and specific to the</span>
+     <span class="s0">* V8 engine. Therefore, the schema may change from one version of V8 to the next.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Creating a heap snapshot requires memory about twice the size of the heap at</span>
+     <span class="s0">* the time the snapshot is created. This results in the risk of OOM killers</span>
+     <span class="s0">* terminating the process.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Generating a snapshot is a synchronous operation which blocks the event loop</span>
+     <span class="s0">* for a duration depending on the heap size.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* // Print heap snapshot to the console</span>
+     <span class="s0">* import v8 from 'node:v8';</span>
+     <span class="s0">* const stream = v8.getHeapSnapshot();</span>
+     <span class="s0">* stream.pipe(process.stdout);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.13.0</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">A Readable containing the V8 heap snapshot.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getHeapSnapshot</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">HeapSnapshotOptions</span><span class="s4">): </span><span
+    class="s2">Readable</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Generates a snapshot of the current V8 heap and writes it to a JSON</span>
+     <span class="s0">* file. This file is intended to be used with tools such as Chrome</span>
+     <span class="s0">* DevTools. The JSON schema is undocumented and specific to the V8</span>
+     <span class="s0">* engine, and may change from one version of V8 to the next.</span>
+     <span class="s0">*</span>
+     <span class="s0">* A heap snapshot is specific to a single V8 isolate. When using `worker threads`, a heap snapshot generated from the main thread will</span>
+     <span class="s0">* not contain any information about the workers, and vice versa.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Creating a heap snapshot requires memory about twice the size of the heap at</span>
+     <span class="s0">* the time the snapshot is created. This results in the risk of OOM killers</span>
+     <span class="s0">* terminating the process.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Generating a snapshot is a synchronous operation which blocks the event loop</span>
+     <span class="s0">* for a duration depending on the heap size.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { writeHeapSnapshot } from 'node:v8';</span>
+     <span class="s0">* import {</span>
+     <span class="s0">*   Worker,</span>
+     <span class="s0">*   isMainThread,</span>
+     <span class="s0">*   parentPort,</span>
+     <span class="s0">* } from 'node:worker_threads';</span>
+     <span class="s0">*</span>
+     <span class="s0">* if (isMainThread) {</span>
+     <span class="s0">*   const worker = new Worker(__filename);</span>
+     <span class="s0">*</span>
+     <span class="s0">*   worker.once('message', (filename) =&gt; {</span>
+     <span class="s0">*     console.log(`worker heapdump: ${filename}`);</span>
+     <span class="s0">*     // Now get a heapdump for the main thread.</span>
+     <span class="s0">*     console.log(`main thread heapdump: ${writeHeapSnapshot()}`);</span>
+     <span class="s0">*   });</span>
+     <span class="s0">*</span>
+     <span class="s0">*   // Tell the worker to create a heapdump.</span>
+     <span class="s0">*   worker.postMessage('heapdump');</span>
+     <span class="s0">* } else {</span>
+     <span class="s0">*   parentPort.once('message', (message) =&gt; {</span>
+     <span class="s0">*     if (message === 'heapdump') {</span>
+     <span class="s0">*       // Generate a heapdump for the worker</span>
+     <span class="s0">*       // and return the filename to the parent.</span>
+     <span class="s0">*       parentPort.postMessage(writeHeapSnapshot());</span>
+     <span class="s0">*     }</span>
+     <span class="s0">*   });</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.13.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">filename The file path where the V8 heap snapshot is to be saved. If not specified, a file name with the pattern `'Heap-${yyyymmdd}-${hhmmss}-${pid}-${thread_id}.heapsnapshot'` will be</span>
+     <span class="s0">* generated, where `{pid}` will be the PID of the Node.js process, `{thread_id}` will be `0` when `writeHeapSnapshot()` is called from the main Node.js thread or the id of a</span>
+     <span class="s0">* worker thread.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The filename where the snapshot was saved.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">writeHeapSnapshot</span><span class="s4">(</span><span class="s2">filename</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">HeapSnapshotOptions</span><span class="s4">): </span><span
+    class="s2">string</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Get statistics about code and its metadata in the heap, see</span>
+     <span class="s0">* V8 [`GetHeapCodeAndMetadataStatistics`](https://v8docs.nodesource.com/node-13.2/d5/dda/classv8_1_1_isolate.html#a6079122af17612ef54ef3348ce170866) API. Returns an object with the</span>
+     <span class="s0">* following properties:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* {</span>
+     <span class="s0">*   code_and_metadata_size: 212208,</span>
+     <span class="s0">*   bytecode_and_metadata_size: 161368,</span>
+     <span class="s0">*   external_script_source_size: 1410794,</span>
+     <span class="s0">*   cpu_profiler_metadata_size: 0,</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.8.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">getHeapCodeStatistics</span><span class="s4">(): </span><span
+    class="s2">HeapCodeStatistics</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span
+       class="s0">* V8 only supports `Latin-1/ISO-8859-1` and `UTF16` as the underlying representation of a string.</span>
+     <span class="s0">* If the `content` uses `Latin-1/ISO-8859-1` as the underlying representation, this function will return true;</span>
+     <span class="s0">* otherwise, it returns false.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If this method returns false, that does not mean that the string contains some characters not in `Latin-1/ISO-8859-1`.</span>
+     <span class="s0">* Sometimes a `Latin-1` string may also be represented as `UTF16`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const { isStringOneByteRepresentation } = require('node:v8');</span>
+     <span class="s0">*</span>
+     <span class="s0">* const Encoding = {</span>
+     <span class="s0">*   latin1: 1,</span>
+     <span class="s0">*   utf16le: 2,</span>
+     <span class="s0">* };</span>
+     <span class="s0">* const buffer = Buffer.alloc(100);</span>
+     <span class="s0">* function writeString(input) {</span>
+     <span class="s0">*   if (isStringOneByteRepresentation(input)) {</span>
+     <span class="s0">*     buffer.writeUint8(Encoding.latin1);</span>
+     <span class="s0">*     buffer.writeUint32LE(input.length, 1);</span>
+     <span class="s0">*     buffer.write(input, 5, 'latin1');</span>
+     <span class="s0">*   } else {</span>
+     <span class="s0">*     buffer.writeUint8(Encoding.utf16le);</span>
+     <span class="s0">*     buffer.writeUint32LE(input.length * 2, 1);</span>
+     <span class="s0">*     buffer.write(input, 5, 'utf16le');</span>
+     <span class="s0">*   }</span>
+     <span class="s0">* }</span>
+     <span class="s0">* writeString('hello');</span>
+     <span class="s0">* writeString('你好');</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v23.10.0, v22.15.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">isStringOneByteRepresentation</span><span class="s4">(</span><span
+    class="s2">content</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Serializer </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Writes out a header, which includes the serialization format version.</span>
+         <span class="s0">*/</span>
+        <span class="s2">writeHeader</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Serializes a JavaScript value and adds the serialized representation to the</span>
+         <span class="s0">* internal buffer.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This throws an error if `value` cannot be serialized.</span>
+         <span class="s0">*/</span>
+        <span class="s2">writeValue</span><span class="s4">(</span><span class="s2">val</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the stored internal buffer. This serializer should not be used once</span>
+         <span class="s0">* the buffer is released. Calling this method results in undefined behavior</span>
+         <span class="s0">* if a previous write has failed.</span>
+         <span class="s0">*/</span>
+        <span class="s2">releaseBuffer</span><span class="s4">(): </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Marks an `ArrayBuffer` as having its contents transferred out of band.</span>
+         <span class="s0">* Pass the corresponding `ArrayBuffer` in the deserializing context to `deserializer.transferArrayBuffer()`.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">id A 32-bit unsigned integer.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">arrayBuffer An `ArrayBuffer` instance.</span>
+         <span class="s0">*/</span>
+        <span class="s2">transferArrayBuffer</span><span class="s4">(</span><span class="s2">id</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">arrayBuffer</span><span
+    class="s4">: </span><span class="s2">ArrayBuffer</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Write a raw 32-bit unsigned integer.</span>
+         <span class="s0">* For use inside of a custom `serializer._writeHostObject()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">writeUint32</span><span class="s4">(</span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Write a raw 64-bit unsigned integer, split into high and low 32-bit parts.</span>
+         <span class="s0">* For use inside of a custom `serializer._writeHostObject()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">writeUint64</span><span class="s4">(</span><span class="s2">hi</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">lo</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Write a JS `number` value.</span>
+         <span class="s0">* For use inside of a custom `serializer._writeHostObject()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">writeDouble</span><span class="s4">(</span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Write raw bytes into the serializer's internal buffer. The deserializer</span>
+         <span class="s0">* will require a way to compute the length of the buffer.</span>
+         <span class="s0">* For use inside of a custom `serializer._writeHostObject()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">writeRawBytes</span><span class="s4">(</span><span class="s2">buffer</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">TypedArray</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* A subclass of `Serializer` that serializes `TypedArray`(in particular `Buffer`) and `DataView` objects as host objects, and only</span>
+     <span class="s0">* stores the part of their underlying `ArrayBuffer`s that they are referring to.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">DefaultSerializer </span><span class="s5">extends </span><span
+    class="s2">Serializer </span><span class="s4">{}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Deserializer </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">data</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">TypedArray</span><span
+    class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Reads and validates a header (including the format version).</span>
+         <span class="s0">* May, for example, reject an invalid or unsupported wire format. In that case,</span>
+         <span class="s0">* an `Error` is thrown.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readHeader</span><span class="s4">(): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Deserializes a JavaScript value from the buffer and returns it.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readValue</span><span class="s4">(): </span><span class="s2">any</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Marks an `ArrayBuffer` as having its contents transferred out of band.</span>
+         <span class="s0">* Pass the corresponding `ArrayBuffer` in the serializing context to `serializer.transferArrayBuffer()` (or return the `id` from `serializer._getSharedArrayBufferId()` in the case of</span>
+         <span class="s0">* `SharedArrayBuffer`s).</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">id A 32-bit unsigned integer.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">arrayBuffer An `ArrayBuffer` instance.</span>
+         <span class="s0">*/</span>
+        <span class="s2">transferArrayBuffer</span><span class="s4">(</span><span class="s2">id</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">arrayBuffer</span><span
+    class="s4">: </span><span class="s2">ArrayBuffer</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Reads the underlying wire format version. Likely mostly to be useful to</span>
+         <span
+           class="s0">* legacy code reading old wire format versions. May not be called before `.readHeader()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getWireFormatVersion</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Read a raw 32-bit unsigned integer and return it.</span>
+         <span class="s0">* For use inside of a custom `deserializer._readHostObject()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readUint32</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Read a raw 64-bit unsigned integer and return it as an array `[hi, lo]` with two 32-bit unsigned integer entries.</span>
+         <span class="s0">* For use inside of a custom `deserializer._readHostObject()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readUint64</span><span class="s4">(): [</span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">number</span><span class="s4">];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Read a JS `number` value.</span>
+         <span class="s0">* For use inside of a custom `deserializer._readHostObject()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readDouble</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Read raw bytes from the deserializer's internal buffer. The `length` parameter</span>
+         <span
+           class="s0">* must correspond to the length of the buffer that was passed to `serializer.writeRawBytes()`.</span>
+         <span class="s0">* For use inside of a custom `deserializer._readHostObject()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readRawBytes</span><span class="s4">(</span><span class="s2">length</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* A subclass of `Deserializer` corresponding to the format written by `DefaultSerializer`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">DefaultDeserializer </span><span class="s5">extends </span><span
+    class="s2">Deserializer </span><span class="s4">{}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses a `DefaultSerializer` to serialize `value` into a buffer.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `ERR_BUFFER_TOO_LARGE` will be thrown when trying to</span>
+     <span class="s0">* serialize a huge object which requires buffer</span>
+     <span class="s0">* larger than `buffer.constants.MAX_LENGTH`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">serialize</span><span class="s4">(</span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">any</span><span class="s4">): </span><span
+    class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses a `DefaultDeserializer` with default options to read a JS value</span>
+     <span class="s0">* from a buffer.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">buffer A buffer returned by {</span><span
+    class="s1">@link </span><span class="s0">serialize}.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">deserialize</span><span class="s4">(</span><span
+    class="s2">buffer</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView</span><span class="s4">): </span><span class="s2">any</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `v8.takeCoverage()` method allows the user to write the coverage started by `NODE_V8_COVERAGE` to disk on demand. This method can be invoked multiple</span>
+     <span class="s0">* times during the lifetime of the process. Each time the execution counter will</span>
+     <span class="s0">* be reset and a new coverage report will be written to the directory specified</span>
+     <span class="s0">* by `NODE_V8_COVERAGE`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* When the process is about to exit, one last coverage will still be written to</span>
+     <span class="s0">* disk unless {</span><span class="s1">@link </span><span class="s0">stopCoverage} is invoked before the process exits.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.18.0, v12.22.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">takeCoverage</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `v8.stopCoverage()` method allows the user to stop the coverage collection</span>
+     <span class="s0">* started by `NODE_V8_COVERAGE`, so that V8 can release the execution count</span>
+     <span class="s0">* records and optimize code. This can be used in conjunction with {</span><span
+    class="s1">@link </span><span class="s0">takeCoverage} if the user wants to collect the coverage on demand.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.18.0, v12.22.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">stopCoverage</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The API is a no-op if `--heapsnapshot-near-heap-limit` is already set from the command line or the API is called more than once.</span>
+     <span class="s0">* `limit` must be a positive integer. See [`--heapsnapshot-near-heap-limit`](https://nodejs.org/docs/latest-v24.x/api/cli.html#--heapsnapshot-near-heap-limitmax_count) for more information.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.10.0, v16.18.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">setHeapSnapshotNearHeapLimit</span><span class="s4">(</span><span
+    class="s2">limit</span><span class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This API collects GC data in current thread.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.6.0, v18.15.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">GCProfiler </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Start collecting GC data.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.6.0, v18.15.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">start</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Stop collecting GC data and return an object. The content of object</span>
+         <span class="s0">* is as follows.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```json</span>
+         <span class="s0">* {</span>
+         <span class="s0">*   &quot;version&quot;: 1,</span>
+         <span class="s0">*   &quot;startTime&quot;: 1674059033862,</span>
+         <span class="s0">*   &quot;statistics&quot;: [</span>
+         <span class="s0">*     {</span>
+         <span class="s0">*       &quot;gcType&quot;: &quot;Scavenge&quot;,</span>
+         <span class="s0">*       &quot;beforeGC&quot;: {</span>
+         <span class="s0">*         &quot;heapStatistics&quot;: {</span>
+         <span class="s0">*           &quot;totalHeapSize&quot;: 5005312,</span>
+         <span class="s0">*           &quot;totalHeapSizeExecutable&quot;: 524288,</span>
+         <span class="s0">*           &quot;totalPhysicalSize&quot;: 5226496,</span>
+         <span class="s0">*           &quot;totalAvailableSize&quot;: 4341325216,</span>
+         <span class="s0">*           &quot;totalGlobalHandlesSize&quot;: 8192,</span>
+         <span class="s0">*           &quot;usedGlobalHandlesSize&quot;: 2112,</span>
+         <span class="s0">*           &quot;usedHeapSize&quot;: 4883840,</span>
+         <span class="s0">*           &quot;heapSizeLimit&quot;: 4345298944,</span>
+         <span class="s0">*           &quot;mallocedMemory&quot;: 254128,</span>
+         <span class="s0">*           &quot;externalMemory&quot;: 225138,</span>
+         <span class="s0">*           &quot;peakMallocedMemory&quot;: 181760</span>
+         <span class="s0">*         },</span>
+         <span class="s0">*         &quot;heapSpaceStatistics&quot;: [</span>
+         <span class="s0">*           {</span>
+         <span class="s0">*             &quot;spaceName&quot;: &quot;read_only_space&quot;,</span>
+         <span class="s0">*             &quot;spaceSize&quot;: 0,</span>
+         <span class="s0">*             &quot;spaceUsedSize&quot;: 0,</span>
+         <span class="s0">*             &quot;spaceAvailableSize&quot;: 0,</span>
+         <span class="s0">*             &quot;physicalSpaceSize&quot;: 0</span>
+         <span class="s0">*           }</span>
+         <span class="s0">*         ]</span>
+         <span class="s0">*       },</span>
+         <span class="s0">*       &quot;cost&quot;: 1574.14,</span>
+         <span class="s0">*       &quot;afterGC&quot;: {</span>
+         <span class="s0">*         &quot;heapStatistics&quot;: {</span>
+         <span class="s0">*           &quot;totalHeapSize&quot;: 6053888,</span>
+         <span class="s0">*           &quot;totalHeapSizeExecutable&quot;: 524288,</span>
+         <span class="s0">*           &quot;totalPhysicalSize&quot;: 5500928,</span>
+         <span class="s0">*           &quot;totalAvailableSize&quot;: 4341101384,</span>
+         <span class="s0">*           &quot;totalGlobalHandlesSize&quot;: 8192,</span>
+         <span class="s0">*           &quot;usedGlobalHandlesSize&quot;: 2112,</span>
+         <span class="s0">*           &quot;usedHeapSize&quot;: 4059096,</span>
+         <span class="s0">*           &quot;heapSizeLimit&quot;: 4345298944,</span>
+         <span class="s0">*           &quot;mallocedMemory&quot;: 254128,</span>
+         <span class="s0">*           &quot;externalMemory&quot;: 225138,</span>
+         <span class="s0">*           &quot;peakMallocedMemory&quot;: 181760</span>
+         <span class="s0">*         },</span>
+         <span class="s0">*         &quot;heapSpaceStatistics&quot;: [</span>
+         <span class="s0">*           {</span>
+         <span class="s0">*             &quot;spaceName&quot;: &quot;read_only_space&quot;,</span>
+         <span class="s0">*             &quot;spaceSize&quot;: 0,</span>
+         <span class="s0">*             &quot;spaceUsedSize&quot;: 0,</span>
+         <span class="s0">*             &quot;spaceAvailableSize&quot;: 0,</span>
+         <span class="s0">*             &quot;physicalSpaceSize&quot;: 0</span>
+         <span class="s0">*           }</span>
+         <span class="s0">*         ]</span>
+         <span class="s0">*       }</span>
+         <span class="s0">*     }</span>
+         <span class="s0">*   ],</span>
+         <span class="s0">*   &quot;endTime&quot;: 1674059036865</span>
+         <span class="s0">* }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Here's an example.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { GCProfiler } from 'node:v8';</span>
+         <span class="s0">* const profiler = new GCProfiler();</span>
+         <span class="s0">* profiler.start();</span>
+         <span class="s0">* setTimeout(() =&gt; {</span>
+         <span class="s0">*   console.log(profiler.stop());</span>
+         <span class="s0">* }, 1000);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.6.0, v18.15.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">stop</span><span class="s4">(): </span><span class="s2">GCProfilerResult</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">GCProfilerResult </span><span class="s4">{</span>
+        <span class="s2">version</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">startTime</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">endTime</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">statistics</span><span class="s4">: </span><span class="s2">Array</span><span
+    class="s4">&lt;{</span>
+            <span class="s2">gcType</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s2">cost</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+            <span class="s2">beforeGC</span><span class="s4">: {</span>
+                <span class="s2">heapStatistics</span><span class="s4">: </span><span
+    class="s2">HeapStatistics</span><span class="s4">;</span>
+                <span class="s2">heapSpaceStatistics</span><span class="s4">: </span><span class="s2">HeapSpaceStatistics</span><span
+    class="s4">[];</span>
+            <span class="s4">};</span>
+            <span class="s2">afterGC</span><span class="s4">: {</span>
+                <span class="s2">heapStatistics</span><span class="s4">: </span><span
+    class="s2">HeapStatistics</span><span class="s4">;</span>
+                <span class="s2">heapSpaceStatistics</span><span class="s4">: </span><span class="s2">HeapSpaceStatistics</span><span
+    class="s4">[];</span>
+            <span class="s4">};</span>
+        <span class="s4">}&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">HeapStatistics </span><span class="s4">{</span>
+        <span class="s2">totalHeapSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">totalHeapSizeExecutable</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">totalPhysicalSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">totalAvailableSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">totalGlobalHandlesSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">usedGlobalHandlesSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">usedHeapSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">heapSizeLimit</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">mallocedMemory</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">externalMemory</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">peakMallocedMemory</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">HeapSpaceStatistics </span><span class="s4">{</span>
+        <span class="s2">spaceName</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">spaceSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">spaceUsedSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">spaceAvailableSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">physicalSpaceSize</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Called when a promise is constructed. This does not mean that corresponding before/after events will occur, only that the possibility exists. This will</span>
+     <span class="s0">* happen if a promise is created without ever getting a continuation.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">promise The promise being created.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">parent The promise continued from, if applicable.</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">Init </span><span class="s4">{</span>
+        <span class="s4">(</span><span class="s2">promise</span><span class="s4">: </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">unknown</span><span
+    class="s4">&gt;, </span><span class="s2">parent</span><span class="s4">: </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Called before a promise continuation executes. This can be in the form of `then()`, `catch()`, or `finally()` handlers or an await resuming.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The before callback will be called 0 to N times. The before callback will typically be called 0 times if no continuation was ever made for the promise.</span>
+     <span class="s0">* The before callback may be called many times in the case where many continuations have been made from the same promise.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">Before </span><span class="s4">{</span>
+        <span class="s4">(</span><span class="s2">promise</span><span class="s4">: </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">unknown</span><span
+    class="s4">&gt;): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Called immediately after a promise continuation executes. This may be after a `then()`, `catch()`, or `finally()` handler or before an await after another await.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">After </span><span class="s4">{</span>
+        <span class="s4">(</span><span class="s2">promise</span><span class="s4">: </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">unknown</span><span
+    class="s4">&gt;): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Called when the promise receives a resolution or rejection value. This may occur synchronously in the case of {</span><span
+    class="s1">@link </span><span class="s0">Promise.resolve()} or</span>
+     <span class="s0">* {</span><span class="s1">@link </span><span class="s0">Promise.reject()}.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">Settled </span><span class="s4">{</span>
+        <span class="s4">(</span><span class="s2">promise</span><span class="s4">: </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">unknown</span><span
+    class="s4">&gt;): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Key events in the lifetime of a promise have been categorized into four areas: creation of a promise, before/after a continuation handler is called or</span>
+     <span class="s0">* around an await, and when the promise resolves or rejects.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Because promises are asynchronous resources whose lifecycle is tracked via the promise hooks mechanism, the `init()`, `before()`, `after()`, and</span>
+     <span class="s0">* `settled()` callbacks must not be async functions as they create more promises which would produce an infinite loop.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">interface </span><span class="s2">HookCallbacks </span><span class="s4">{</span>
+        <span class="s2">init</span><span class="s4">?: </span><span class="s2">Init</span><span class="s4">;</span>
+        <span class="s2">before</span><span class="s4">?: </span><span class="s2">Before</span><span class="s4">;</span>
+        <span class="s2">after</span><span class="s4">?: </span><span class="s2">After</span><span class="s4">;</span>
+        <span class="s2">settled</span><span class="s4">?: </span><span class="s2">Settled</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">PromiseHooks </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `init` hook must be a plain function. Providing an async function will throw as it would produce an infinite microtask loop.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">init The {</span><span class="s1">@link </span><span
+    class="s0">Init | `init` callback} to call when a promise is created.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">Call to stop the hook.</span>
+         <span class="s0">*/</span>
+        <span class="s2">onInit</span><span class="s4">: (</span><span class="s2">init</span><span
+    class="s4">: </span><span class="s2">Init</span><span class="s4">) =&gt; </span><span
+    class="s2">Function</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `settled` hook must be a plain function. Providing an async function will throw as it would produce an infinite microtask loop.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">settled The {</span><span class="s1">@link </span><span
+    class="s0">Settled | `settled` callback} to call when a promise is created.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">Call to stop the hook.</span>
+         <span class="s0">*/</span>
+        <span class="s2">onSettled</span><span class="s4">: (</span><span class="s2">settled</span><span
+    class="s4">: </span><span class="s2">Settled</span><span class="s4">) =&gt; </span><span
+    class="s2">Function</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `before` hook must be a plain function. Providing an async function will throw as it would produce an infinite microtask loop.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">before The {</span><span class="s1">@link </span><span
+    class="s0">Before | `before` callback} to call before a promise continuation executes.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">Call to stop the hook.</span>
+         <span class="s0">*/</span>
+        <span class="s2">onBefore</span><span class="s4">: (</span><span class="s2">before</span><span
+    class="s4">: </span><span class="s2">Before</span><span class="s4">) =&gt; </span><span
+    class="s2">Function</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `after` hook must be a plain function. Providing an async function will throw as it would produce an infinite microtask loop.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">after The {</span><span class="s1">@link </span><span
+    class="s0">After | `after` callback} to call after a promise continuation executes.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">Call to stop the hook.</span>
+         <span class="s0">*/</span>
+        <span class="s2">onAfter</span><span class="s4">: (</span><span class="s2">after</span><span
+    class="s4">: </span><span class="s2">After</span><span class="s4">) =&gt; </span><span
+    class="s2">Function</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Registers functions to be called for different lifetime events of each promise.</span>
+         <span class="s0">* The callbacks `init()`/`before()`/`after()`/`settled()` are called for the respective events during a promise's lifetime.</span>
+         <span class="s0">* All callbacks are optional. For example, if only promise creation needs to be tracked, then only the init callback needs to be passed.</span>
+         <span class="s0">* The hook callbacks must be plain functions. Providing async functions will throw as it would produce an infinite microtask loop.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callbacks The {</span><span
+    class="s1">@link </span><span class="s0">HookCallbacks | Hook Callbacks} to register</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">Used for disabling hooks</span>
+         <span class="s0">*/</span>
+        <span class="s2">createHook</span><span class="s4">: (</span><span class="s2">callbacks</span><span
+    class="s4">: </span><span class="s2">HookCallbacks</span><span class="s4">) =&gt; </span><span
+    class="s2">Function</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `promiseHooks` interface can be used to track promise lifecycle events.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.1.0, v16.14.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">promiseHooks</span><span class="s4">: </span><span class="s2">PromiseHooks</span><span
+    class="s4">;</span>
+    <span class="s2">type StartupSnapshotCallbackFn </span><span class="s4">= (</span><span class="s2">args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">) =&gt; </span><span class="s2">any</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `v8.startupSnapshot` interface can be used to add serialization and deserialization hooks for custom startup snapshots.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```bash</span>
+     <span class="s0">* $ node --snapshot-blob snapshot.blob --build-snapshot entry.js</span>
+     <span class="s0">* # This launches a process with the snapshot</span>
+     <span class="s0">* $ node --snapshot-blob snapshot.blob</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* In the example above, `entry.js` can use methods from the `v8.startupSnapshot` interface to specify how to save information for custom objects</span>
+     <span class="s0">* in the snapshot during serialization and how the information can be used to synchronize these objects during deserialization of the snapshot.</span>
+     <span class="s0">* For example, if the `entry.js` contains the following script:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* 'use strict';</span>
+     <span class="s0">*</span>
+     <span class="s0">* import fs from 'node:fs';</span>
+     <span class="s0">* import zlib from 'node:zlib';</span>
+     <span class="s0">* import path from 'node:path';</span>
+     <span class="s0">* import assert from 'node:assert';</span>
+     <span class="s0">*</span>
+     <span class="s0">* import v8 from 'node:v8';</span>
+     <span class="s0">*</span>
+     <span class="s0">* class BookShelf {</span>
+     <span class="s0">*   storage = new Map();</span>
+     <span class="s0">*</span>
+     <span class="s0">*   // Reading a series of files from directory and store them into storage.</span>
+     <span class="s0">*   constructor(directory, books) {</span>
+     <span class="s0">*     for (const book of books) {</span>
+     <span class="s0">*       this.storage.set(book, fs.readFileSync(path.join(directory, book)));</span>
+     <span class="s0">*     }</span>
+     <span class="s0">*   }</span>
+     <span class="s0">*</span>
+     <span class="s0">*   static compressAll(shelf) {</span>
+     <span class="s0">*     for (const [ book, content ] of shelf.storage) {</span>
+     <span class="s0">*       shelf.storage.set(book, zlib.gzipSync(content));</span>
+     <span class="s0">*     }</span>
+     <span class="s0">*   }</span>
+     <span class="s0">*</span>
+     <span class="s0">*   static decompressAll(shelf) {</span>
+     <span class="s0">*     for (const [ book, content ] of shelf.storage) {</span>
+     <span class="s0">*       shelf.storage.set(book, zlib.gunzipSync(content));</span>
+     <span class="s0">*     }</span>
+     <span class="s0">*   }</span>
+     <span class="s0">* }</span>
+     <span class="s0">*</span>
+     <span class="s0">* // __dirname here is where the snapshot script is placed</span>
+     <span class="s0">* // during snapshot building time.</span>
+     <span class="s0">* const shelf = new BookShelf(__dirname, [</span>
+     <span class="s0">*   'book1.en_US.txt',</span>
+     <span class="s0">*   'book1.es_ES.txt',</span>
+     <span class="s0">*   'book2.zh_CN.txt',</span>
+     <span class="s0">* ]);</span>
+     <span class="s0">*</span>
+     <span class="s0">* assert(v8.startupSnapshot.isBuildingSnapshot());</span>
+     <span class="s0">* // On snapshot serialization, compress the books to reduce size.</span>
+     <span class="s0">* v8.startupSnapshot.addSerializeCallback(BookShelf.compressAll, shelf);</span>
+     <span class="s0">* // On snapshot deserialization, decompress the books.</span>
+     <span class="s0">* v8.startupSnapshot.addDeserializeCallback(BookShelf.decompressAll, shelf);</span>
+     <span class="s0">* v8.startupSnapshot.setDeserializeMainFunction((shelf) =&gt; {</span>
+     <span class="s0">*   // process.env and process.argv are refreshed during snapshot</span>
+     <span class="s0">*   // deserialization.</span>
+     <span class="s0">*   const lang = process.env.BOOK_LANG || 'en_US';</span>
+     <span class="s0">*   const book = process.argv[1];</span>
+     <span class="s0">*   const name = `${book}.${lang}.txt`;</span>
+     <span class="s0">*   console.log(shelf.storage.get(name));</span>
+     <span class="s0">* }, shelf);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* The resulted binary will get print the data deserialized from the snapshot during start up, using the refreshed `process.env` and `process.argv` of the launched process:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```bash</span>
+     <span class="s0">* $ BOOK_LANG=es_ES node --snapshot-blob snapshot.blob book1</span>
+     <span class="s0">* # Prints content of book1.es_ES.txt deserialized from the snapshot.</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Currently the application deserialized from a user-land snapshot cannot be snapshotted again, so these APIs are only available to applications that are not deserialized from a user-land snapshot.</span>
+     <span class="s0">*</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.6.0, v16.17.0</span>
+     <span class="s0">*/</span>
+    <span class="s2">namespace startupSnapshot </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Add a callback that will be called when the Node.js instance is about to get serialized into a snapshot and exit.</span>
+         <span class="s0">* This can be used to release resources that should not or cannot be serialized or to convert user data into a form more suitable for serialization.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.6.0, v16.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">addSerializeCallback</span><span class="s4">(</span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">StartupSnapshotCallbackFn</span><span
+    class="s4">, </span><span class="s2">data</span><span class="s4">?: </span><span class="s2">any</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Add a callback that will be called when the Node.js instance is deserialized from a snapshot.</span>
+         <span class="s0">* The `callback` and the `data` (if provided) will be serialized into the snapshot, they can be used to re-initialize the state of the application or</span>
+         <span class="s0">* to re-acquire resources that the application needs when the application is restarted from the snapshot.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.6.0, v16.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">addDeserializeCallback</span><span class="s4">(</span><span
+    class="s2">callback</span><span class="s4">: </span><span class="s2">StartupSnapshotCallbackFn</span><span
+    class="s4">, </span><span class="s2">data</span><span class="s4">?: </span><span class="s2">any</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This sets the entry point of the Node.js application when it is deserialized from a snapshot. This can be called only once in the snapshot building script.</span>
+         <span class="s0">* If called, the deserialized application no longer needs an additional entry point script to start up and will simply invoke the callback along with the deserialized</span>
+         <span class="s0">* data (if provided), otherwise an entry point script still needs to be provided to the deserialized application.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.6.0, v16.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">setDeserializeMainFunction</span><span
+    class="s4">(</span><span class="s2">callback</span><span class="s4">: </span><span class="s2">StartupSnapshotCallbackFn</span><span
+    class="s4">, </span><span class="s2">data</span><span class="s4">?: </span><span class="s2">any</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns true if the Node.js instance is run to build a snapshot.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.6.0, v16.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">isBuildingSnapshot</span><span class="s4">(): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:v8&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;v8&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

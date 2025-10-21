@@ -1,0 +1,135 @@
+<html>
+<head>
+  <title>throttle.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          throttle.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">debounce </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./debounce'</span><span class="s2">),</span>
+    <span class="s1">isObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isObject'</span><span class="s2">);</span>
+
+<span class="s4">/** Error message constants. */</span>
+<span class="s0">var </span><span class="s1">FUNC_ERROR_TEXT </span><span class="s2">= </span><span class="s3">'Expected a function'</span><span
+    class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a throttled function that only invokes `func` at most once per</span>
+ <span class="s4">* every `wait` milliseconds. The throttled function comes with a `cancel`</span>
+ <span class="s4">* method to cancel delayed `func` invocations and a `flush` method to</span>
+ <span class="s4">* immediately invoke them. Provide `options` to indicate whether `func`</span>
+ <span class="s4">* should be invoked on the leading and/or trailing edge of the `wait`</span>
+ <span class="s4">* timeout. The `func` is invoked with the last arguments provided to the</span>
+ <span class="s4">* throttled function. Subsequent calls to the throttled function return the</span>
+ <span class="s4">* result of the last `func` invocation.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** If `leading` and `trailing` options are `true`, `func` is</span>
+ <span class="s4">* invoked on the trailing edge of the timeout only if the throttled function</span>
+ <span class="s4">* is invoked more than once during the `wait` timeout.</span>
+ <span class="s4">*</span>
+ <span class="s4">* If `wait` is `0` and `leading` is `false`, `func` invocation is deferred</span>
+ <span class="s4">* until to the next tick, similar to `setTimeout` with a timeout of `0`.</span>
+ <span class="s4">*</span>
+ <span
+   class="s4">* See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)</span>
+ <span class="s4">* for details over the differences between `_.throttle` and `_.debounce`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Function</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Function} func The function to throttle.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{number} [wait=0] The number of milliseconds to throttle invocations to.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Object} [options={}] The options object.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{boolean} [options.leading=true]</span>
+ <span class="s4">*  Specify invoking on the leading edge of the timeout.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{boolean} [options.trailing=true]</span>
+ <span class="s4">*  Specify invoking on the trailing edge of the timeout.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Function} Returns the new throttled function.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Avoid excessively updating the position while scrolling.</span>
+ <span class="s4">* jQuery(window).on('scroll', _.throttle(updatePosition, 100));</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Invoke `renewToken` when the click event is fired, but not more than once every 5 minutes.</span>
+ <span class="s4">* var throttled = _.throttle(renewToken, 300000, { 'trailing': false });</span>
+ <span class="s4">* jQuery(element).on('click', throttled);</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Cancel the trailing throttled invocation.</span>
+ <span class="s4">* jQuery(window).on('popstate', throttled.cancel);</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">throttle</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">wait</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">leading </span><span class="s2">= </span><span
+    class="s0">true</span><span class="s2">,</span>
+      <span class="s1">trailing </span><span class="s2">= </span><span class="s0">true</span><span class="s2">;</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">func </span><span
+    class="s2">!= </span><span class="s3">'function'</span><span class="s2">) {</span>
+    <span class="s0">throw new </span><span class="s1">TypeError</span><span class="s2">(</span><span class="s1">FUNC_ERROR_TEXT</span><span
+    class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isObject</span><span class="s2">(</span><span
+    class="s1">options</span><span class="s2">)) {</span>
+    <span class="s1">leading </span><span class="s2">= </span><span class="s3">'leading' </span><span
+    class="s0">in </span><span class="s1">options </span><span class="s2">? !!</span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">leading </span><span class="s2">: </span><span
+    class="s1">leading</span><span class="s2">;</span>
+    <span class="s1">trailing </span><span class="s2">= </span><span class="s3">'trailing' </span><span
+    class="s0">in </span><span class="s1">options </span><span class="s2">? !!</span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">trailing </span><span class="s2">: </span><span
+    class="s1">trailing</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">debounce</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">wait</span><span class="s2">, {</span>
+    <span class="s3">'leading'</span><span class="s2">: </span><span class="s1">leading</span><span class="s2">,</span>
+    <span class="s3">'maxWait'</span><span class="s2">: </span><span class="s1">wait</span><span class="s2">,</span>
+    <span class="s3">'trailing'</span><span class="s2">: </span><span class="s1">trailing</span>
+  <span class="s2">});</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">throttle</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

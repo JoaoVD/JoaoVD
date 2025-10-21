@@ -1,0 +1,62 @@
+{
+  "name": "sistema-pastelaria-nw",
+  "version": "1.0.0",
+  "description": "Sistema de PDV para Pastelaria",
+  "private": true,
+  "main": "dist/index.html",
+  "author": "Seu Nome",
+  "scripts": {
+    "start": "npm run build && nw .",
+    "build": "webpack --config webpack.common.js",
+    "dev": "webpack serve --open --config webpack.common.js",
+    "make": "npm run build && build --tasks win-x64 --mirror https://dl.nwjs.io/ ./"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "html-webpack-plugin": "^5.6.0",
+    "nw": "^0.83.0",
+    "nw-builder": "^4.6.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4",
+    "webpack-merge": "^5.10.0"
+  },
+  "window": {
+    "title": "Sistema Pastelaria",
+    "width": 1280,
+    "height": 720,
+    "position": "center",
+    "icon": "icon.png"
+  },
+  "build": {
+    "nwVersion": "0.83.0",
+    "targets": [
+      "zip",
+      "nsis7z"
+    ],
+    "files": [
+      "dist/**",
+      "server.js",
+      "pastelaria.db",
+      "node_modules/**"
+    ],
+    "excludes": [
+      "node_modules/nw/**",
+      "node_modules/nw-builder/**",
+      "node_modules/webpack*/**"
+    ],
+    "win": {
+      "icon": "icon.png",
+      "companyName": "Sua Empresa",
+      "productName": "Sistema Pastelaria"
+    }
+  }
+}

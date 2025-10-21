@@ -1,0 +1,127 @@
+<html>
+<head>
+  <title>boolSchema.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          boolSchema.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">KeywordErrorDefinition</span><span
+  class="s2">, </span><span class="s1">KeywordErrorCxt</span><span class="s2">} </span><span
+  class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">SchemaCxt</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;..&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">reportError</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../errors&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">Name</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;../codegen&quot;</span>
+<span class="s0">import </span><span class="s1">N from </span><span class="s3">&quot;../names&quot;</span>
+
+<span class="s0">const </span><span class="s1">boolError</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: </span><span
+    class="s3">&quot;boolean schema is false&quot;</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">topBoolOrEmptySchema</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaCxt</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">validateName</span><span
+    class="s2">} = </span><span class="s1">it</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">schema </span><span class="s2">=== </span><span
+    class="s0">false</span><span class="s2">) {</span>
+    <span class="s1">falseSchemaError</span><span class="s2">(</span><span class="s1">it</span><span
+    class="s2">, </span><span class="s0">false</span><span class="s2">)</span>
+  <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span
+    class="s0">typeof </span><span class="s1">schema </span><span class="s2">== </span><span class="s3">&quot;object&quot; </span><span
+    class="s2">&amp;&amp; </span><span class="s1">schema</span><span class="s2">.</span><span
+    class="s1">$async </span><span class="s2">=== </span><span class="s0">true</span><span class="s2">) {</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">return</span><span class="s2">(</span><span
+    class="s1">N</span><span class="s2">.</span><span class="s1">data</span><span class="s2">)</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">validateName</span><span
+    class="s2">}</span><span class="s3">.errors`</span><span class="s2">, </span><span class="s0">null</span><span
+    class="s2">)</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">return</span><span class="s2">(</span><span
+    class="s0">true</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">boolOrEmptySchema</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaCxt</span><span class="s2">, </span><span
+    class="s1">valid</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">} = </span><span class="s1">it</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">schema </span><span class="s2">=== </span><span
+    class="s0">false</span><span class="s2">) {</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">var</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s0">false</span><span class="s2">) </span><span
+    class="s4">// TODO var</span>
+    <span class="s1">falseSchemaError</span><span class="s2">(</span><span class="s1">it</span><span class="s2">)</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">var</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s0">true</span><span class="s2">) </span><span
+    class="s4">// TODO var</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">falseSchemaError</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaCxt</span><span class="s2">, </span><span
+    class="s1">overrideAllErrors</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">} = </span><span class="s1">it</span>
+  <span class="s4">// TODO maybe some other interface should be used for non-keyword validation errors...</span>
+  <span class="s0">const </span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordErrorCxt </span><span class="s2">= {</span>
+    <span class="s1">gen</span><span class="s2">,</span>
+    <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;false schema&quot;</span><span
+    class="s2">,</span>
+    <span class="s1">data</span><span class="s2">,</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s0">false</span><span class="s2">,</span>
+    <span class="s1">schemaCode</span><span class="s2">: </span><span class="s0">false</span><span class="s2">,</span>
+    <span class="s1">schemaValue</span><span class="s2">: </span><span class="s0">false</span><span class="s2">,</span>
+    <span class="s1">params</span><span class="s2">: {},</span>
+    <span class="s1">it</span><span class="s2">,</span>
+  <span class="s2">}</span>
+  <span class="s1">reportError</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">, </span><span
+    class="s1">boolError</span><span class="s2">, </span><span class="s1">undefined</span><span
+    class="s2">, </span><span class="s1">overrideAllErrors</span><span class="s2">)</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

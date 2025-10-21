@@ -1,0 +1,100 @@
+<html>
+<head>
+  <title>unionWith.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          unionWith.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseFlatten </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseFlatten'</span><span class="s2">),</span>
+    <span class="s1">baseRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">),</span>
+    <span class="s1">baseUniq </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseUniq'</span><span class="s2">),</span>
+    <span class="s1">isArrayLikeObject </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./isArrayLikeObject'</span><span class="s2">),</span>
+    <span class="s1">last </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./last'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* This method is like `_.union` except that it accepts `comparator` which</span>
+ <span class="s4">* is invoked to compare elements of `arrays`. Result values are chosen from</span>
+ <span class="s4">* the first array in which the value occurs. The comparator is invoked</span>
+ <span class="s4">* with two arguments: (arrVal, othVal).</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">4.0.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Array</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{...Array} [arrays] The arrays to inspect.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [comparator] The comparator invoked per element.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Array} Returns the new array of combined values.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var objects = [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }];</span>
+ <span class="s4">* var others = [{ 'x': 1, 'y': 1 }, { 'x': 1, 'y': 2 }];</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.unionWith(objects, others, _.isEqual);</span>
+ <span class="s4">* // =&gt; [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }, { 'x': 1, 'y': 1 }]</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">unionWith </span><span class="s2">= </span><span class="s1">baseRest</span><span
+    class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span class="s1">arrays</span><span
+    class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">comparator </span><span class="s2">= </span><span
+    class="s1">last</span><span class="s2">(</span><span class="s1">arrays</span><span class="s2">);</span>
+  <span class="s1">comparator </span><span class="s2">= </span><span class="s0">typeof </span><span class="s1">comparator </span><span
+    class="s2">== </span><span class="s3">'function' </span><span class="s2">? </span><span
+    class="s1">comparator </span><span class="s2">: </span><span class="s1">undefined</span><span class="s2">;</span>
+  <span class="s0">return </span><span class="s1">baseUniq</span><span class="s2">(</span><span
+    class="s1">baseFlatten</span><span class="s2">(</span><span class="s1">arrays</span><span class="s2">, </span><span
+    class="s6">1</span><span class="s2">, </span><span class="s1">isArrayLikeObject</span><span
+    class="s2">, </span><span class="s0">true</span><span class="s2">), </span><span class="s1">undefined</span><span
+    class="s2">, </span><span class="s1">comparator</span><span class="s2">);</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">unionWith</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

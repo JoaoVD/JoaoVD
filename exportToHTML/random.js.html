@@ -1,0 +1,170 @@
+<html>
+<head>
+  <title>random.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          random.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseRandom </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseRandom'</span><span class="s2">),</span>
+    <span class="s1">isIterateeCall </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_isIterateeCall'</span><span class="s2">),</span>
+    <span class="s1">toFinite </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./toFinite'</span><span class="s2">);</span>
+
+<span class="s4">/** Built-in method references without a dependency on `root`. */</span>
+<span class="s0">var </span><span class="s1">freeParseFloat </span><span class="s2">= </span><span
+    class="s1">parseFloat</span><span class="s2">;</span>
+
+<span class="s5">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMin </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">min</span><span class="s2">,</span>
+    <span class="s1">nativeRandom </span><span class="s2">= </span><span class="s1">Math</span><span class="s2">.</span><span
+    class="s1">random</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Produces a random number between the inclusive `lower` and `upper` bounds.</span>
+ <span class="s4">* If only one argument is provided a number between `0` and the given number</span>
+ <span class="s4">* is returned. If `floating` is `true`, or either `lower` or `upper` are</span>
+ <span class="s4">* floats, a floating-point number is returned instead of an integer.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** JavaScript follows the IEEE-754 standard for resolving</span>
+ <span class="s4">* floating-point values which can produce unexpected results.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">0.7.0</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">Number</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{number} [lower=0] The lower bound.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{number} [upper=1] The upper bound.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{boolean} [floating] Specify returning a floating-point number.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{number} Returns the random number.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.random(0, 5);</span>
+ <span class="s4">* // =&gt; an integer between 0 and 5</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.random(5);</span>
+ <span class="s4">* // =&gt; also an integer between 0 and 5</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.random(5, true);</span>
+ <span class="s4">* // =&gt; a floating-point number between 0 and 5</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.random(1.2, 5.2);</span>
+ <span class="s4">* // =&gt; a floating-point number between 1.2 and 5.2</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">random</span><span class="s2">(</span><span
+    class="s1">lower</span><span class="s2">, </span><span class="s1">upper</span><span class="s2">, </span><span
+    class="s1">floating</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">floating </span><span
+    class="s2">&amp;&amp; </span><span class="s0">typeof </span><span class="s1">floating </span><span
+    class="s2">!= </span><span class="s3">'boolean' </span><span class="s2">&amp;&amp; </span><span class="s1">isIterateeCall</span><span
+    class="s2">(</span><span class="s1">lower</span><span class="s2">, </span><span class="s1">upper</span><span
+    class="s2">, </span><span class="s1">floating</span><span class="s2">)) {</span>
+    <span class="s1">upper </span><span class="s2">= </span><span class="s1">floating </span><span
+    class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">floating </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">upper </span><span class="s2">== </span><span class="s3">'boolean'</span><span class="s2">) {</span>
+      <span class="s1">floating </span><span class="s2">= </span><span class="s1">upper</span><span class="s2">;</span>
+      <span class="s1">upper </span><span class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s2">}</span>
+    <span class="s0">else if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">lower </span><span class="s2">== </span><span class="s3">'boolean'</span><span class="s2">) {</span>
+      <span class="s1">floating </span><span class="s2">= </span><span class="s1">lower</span><span class="s2">;</span>
+      <span class="s1">lower </span><span class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">lower </span><span class="s2">=== </span><span
+    class="s1">undefined </span><span class="s2">&amp;&amp; </span><span class="s1">upper </span><span
+    class="s2">=== </span><span class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s1">lower </span><span class="s2">= </span><span class="s7">0</span><span class="s2">;</span>
+    <span class="s1">upper </span><span class="s2">= </span><span class="s7">1</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">lower </span><span class="s2">= </span><span class="s1">toFinite</span><span
+    class="s2">(</span><span class="s1">lower</span><span class="s2">);</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">upper </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+      <span class="s1">upper </span><span class="s2">= </span><span class="s1">lower</span><span class="s2">;</span>
+      <span class="s1">lower </span><span class="s2">= </span><span class="s7">0</span><span class="s2">;</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">upper </span><span class="s2">= </span><span class="s1">toFinite</span><span
+    class="s2">(</span><span class="s1">upper</span><span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">lower </span><span class="s2">&gt; </span><span
+    class="s1">upper</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">temp </span><span class="s2">= </span><span
+    class="s1">lower</span><span class="s2">;</span>
+    <span class="s1">lower </span><span class="s2">= </span><span class="s1">upper</span><span class="s2">;</span>
+    <span class="s1">upper </span><span class="s2">= </span><span class="s1">temp</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">floating </span><span class="s2">|| </span><span
+    class="s1">lower </span><span class="s2">% </span><span class="s7">1 </span><span class="s2">|| </span><span
+    class="s1">upper </span><span class="s2">% </span><span class="s7">1</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">rand </span><span class="s2">= </span><span
+    class="s1">nativeRandom</span><span class="s2">();</span>
+    <span class="s0">return </span><span class="s1">nativeMin</span><span class="s2">(</span><span
+    class="s1">lower </span><span class="s2">+ (</span><span class="s1">rand </span><span class="s2">* (</span><span
+    class="s1">upper </span><span class="s2">- </span><span class="s1">lower </span><span class="s2">+ </span><span
+    class="s1">freeParseFloat</span><span class="s2">(</span><span class="s3">'1e-' </span><span
+    class="s2">+ ((</span><span class="s1">rand </span><span class="s2">+ </span><span class="s3">''</span><span
+    class="s2">).</span><span class="s1">length </span><span class="s2">- </span><span class="s7">1</span><span
+    class="s2">)))), </span><span class="s1">upper</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">baseRandom</span><span class="s2">(</span><span
+    class="s1">lower</span><span class="s2">, </span><span class="s1">upper</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">random</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<html>
+<head>
+  <title>_getTag.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _getTag.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">DataView </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_DataView'</span><span class="s2">),</span>
+    <span class="s1">Map </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_Map'</span><span class="s2">),</span>
+    <span class="s1">Promise </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_Promise'</span><span class="s2">),</span>
+    <span class="s1">Set </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_Set'</span><span class="s2">),</span>
+    <span class="s1">WeakMap </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_WeakMap'</span><span class="s2">),</span>
+    <span class="s1">baseGetTag </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseGetTag'</span><span class="s2">),</span>
+    <span class="s1">toSource </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_toSource'</span><span class="s2">);</span>
+
+<span class="s4">/** `Object#toString` result references. */</span>
+<span class="s0">var </span><span class="s1">mapTag </span><span class="s2">= </span><span
+    class="s3">'[object Map]'</span><span class="s2">,</span>
+    <span class="s1">objectTag </span><span class="s2">= </span><span class="s3">'[object Object]'</span><span
+    class="s2">,</span>
+    <span class="s1">promiseTag </span><span class="s2">= </span><span class="s3">'[object Promise]'</span><span
+    class="s2">,</span>
+    <span class="s1">setTag </span><span class="s2">= </span><span class="s3">'[object Set]'</span><span
+    class="s2">,</span>
+    <span class="s1">weakMapTag </span><span class="s2">= </span><span class="s3">'[object WeakMap]'</span><span
+    class="s2">;</span>
+
+<span class="s0">var </span><span class="s1">dataViewTag </span><span class="s2">= </span><span class="s3">'[object DataView]'</span><span
+    class="s2">;</span>
+
+<span class="s4">/** Used to detect maps, sets, and weakmaps. */</span>
+<span class="s0">var </span><span class="s1">dataViewCtorString </span><span class="s2">= </span><span class="s1">toSource</span><span
+    class="s2">(</span><span class="s1">DataView</span><span class="s2">),</span>
+    <span class="s1">mapCtorString </span><span class="s2">= </span><span class="s1">toSource</span><span
+    class="s2">(</span><span class="s1">Map</span><span class="s2">),</span>
+    <span class="s1">promiseCtorString </span><span class="s2">= </span><span class="s1">toSource</span><span
+    class="s2">(</span><span class="s1">Promise</span><span class="s2">),</span>
+    <span class="s1">setCtorString </span><span class="s2">= </span><span class="s1">toSource</span><span
+    class="s2">(</span><span class="s1">Set</span><span class="s2">),</span>
+    <span class="s1">weakMapCtorString </span><span class="s2">= </span><span class="s1">toSource</span><span
+    class="s2">(</span><span class="s1">WeakMap</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Gets the `toStringTag` of `value`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{*} value The value to query.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{string} Returns the `toStringTag`.</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">getTag </span><span class="s2">= </span><span
+    class="s1">baseGetTag</span><span class="s2">;</span>
+
+<span class="s6">// Fallback for data views, maps, sets, and weak maps in IE 11 and promises in Node.js &lt; 6.</span>
+<span class="s0">if </span><span class="s2">((</span><span class="s1">DataView </span><span
+    class="s2">&amp;&amp; </span><span class="s1">getTag</span><span class="s2">(</span><span
+    class="s0">new </span><span class="s1">DataView</span><span class="s2">(</span><span class="s0">new </span><span
+    class="s1">ArrayBuffer</span><span class="s2">(</span><span class="s7">1</span><span class="s2">))) != </span><span
+    class="s1">dataViewTag</span><span class="s2">) ||</span>
+    <span class="s2">(</span><span class="s1">Map </span><span class="s2">&amp;&amp; </span><span
+    class="s1">getTag</span><span class="s2">(</span><span class="s0">new </span><span class="s1">Map</span><span
+    class="s2">) != </span><span class="s1">mapTag</span><span class="s2">) ||</span>
+    <span class="s2">(</span><span class="s1">Promise </span><span class="s2">&amp;&amp; </span><span
+    class="s1">getTag</span><span class="s2">(</span><span class="s1">Promise</span><span class="s2">.</span><span
+    class="s1">resolve</span><span class="s2">()) != </span><span class="s1">promiseTag</span><span
+    class="s2">) ||</span>
+    <span class="s2">(</span><span class="s1">Set </span><span class="s2">&amp;&amp; </span><span
+    class="s1">getTag</span><span class="s2">(</span><span class="s0">new </span><span class="s1">Set</span><span
+    class="s2">) != </span><span class="s1">setTag</span><span class="s2">) ||</span>
+    <span class="s2">(</span><span class="s1">WeakMap </span><span class="s2">&amp;&amp; </span><span
+    class="s1">getTag</span><span class="s2">(</span><span class="s0">new </span><span class="s1">WeakMap</span><span
+    class="s2">) != </span><span class="s1">weakMapTag</span><span class="s2">)) {</span>
+  <span class="s1">getTag </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">result </span><span class="s2">= </span><span
+    class="s1">baseGetTag</span><span class="s2">(</span><span class="s1">value</span><span class="s2">),</span>
+        <span class="s1">Ctor </span><span class="s2">= </span><span class="s1">result </span><span
+    class="s2">== </span><span class="s1">objectTag </span><span class="s2">? </span><span class="s1">value</span><span
+    class="s2">.</span><span class="s1">constructor </span><span class="s2">: </span><span
+    class="s1">undefined</span><span class="s2">,</span>
+        <span class="s1">ctorString </span><span class="s2">= </span><span class="s1">Ctor </span><span
+    class="s2">? </span><span class="s1">toSource</span><span class="s2">(</span><span class="s1">Ctor</span><span
+    class="s2">) : </span><span class="s3">''</span><span class="s2">;</span>
+
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">ctorString</span><span class="s2">) {</span>
+      <span class="s0">switch </span><span class="s2">(</span><span class="s1">ctorString</span><span
+    class="s2">) {</span>
+        <span class="s0">case </span><span class="s1">dataViewCtorString</span><span class="s2">: </span><span
+    class="s0">return </span><span class="s1">dataViewTag</span><span class="s2">;</span>
+        <span class="s0">case </span><span class="s1">mapCtorString</span><span class="s2">: </span><span class="s0">return </span><span
+    class="s1">mapTag</span><span class="s2">;</span>
+        <span class="s0">case </span><span class="s1">promiseCtorString</span><span class="s2">: </span><span
+    class="s0">return </span><span class="s1">promiseTag</span><span class="s2">;</span>
+        <span class="s0">case </span><span class="s1">setCtorString</span><span class="s2">: </span><span class="s0">return </span><span
+    class="s1">setTag</span><span class="s2">;</span>
+        <span class="s0">case </span><span class="s1">weakMapCtorString</span><span class="s2">: </span><span
+    class="s0">return </span><span class="s1">weakMapTag</span><span class="s2">;</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">};</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">getTag</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

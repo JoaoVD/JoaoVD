@@ -1,0 +1,87 @@
+<html>
+<head>
+  <title>isBufferList.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          isBufferList.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">const </span><span class="s1">tape </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'tape'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">BufferList</span><span
+    class="s3">, </span><span class="s1">BufferListStream </span><span class="s3">} = </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'../'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">Buffer </span><span class="s3">} = </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'buffer'</span><span class="s3">)</span>
+
+<span class="s1">tape</span><span class="s3">(</span><span class="s0">'isBufferList positives'</span><span class="s3">, (</span><span
+    class="s1">t</span><span class="s3">) =&gt; {</span>
+  <span class="s1">t</span><span class="s3">.</span><span class="s1">ok</span><span class="s3">(</span><span class="s1">BufferList</span><span
+    class="s3">.</span><span class="s1">isBufferList</span><span class="s3">(</span><span class="s2">new </span><span
+    class="s1">BufferList</span><span class="s3">()))</span>
+  <span class="s1">t</span><span class="s3">.</span><span class="s1">ok</span><span class="s3">(</span><span class="s1">BufferList</span><span
+    class="s3">.</span><span class="s1">isBufferList</span><span class="s3">(</span><span class="s2">new </span><span
+    class="s1">BufferListStream</span><span class="s3">()))</span>
+
+  <span class="s1">t</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+<span class="s3">})</span>
+
+<span class="s1">tape</span><span class="s3">(</span><span class="s0">'isBufferList negatives'</span><span class="s3">, (</span><span
+    class="s1">t</span><span class="s3">) =&gt; {</span>
+  <span class="s2">const </span><span class="s1">types </span><span class="s3">= [</span>
+    <span class="s2">null</span><span class="s3">,</span>
+    <span class="s1">undefined</span><span class="s3">,</span>
+    <span class="s1">NaN</span><span class="s3">,</span>
+    <span class="s2">true</span><span class="s3">,</span>
+    <span class="s2">false</span><span class="s3">,</span>
+    <span class="s3">{},</span>
+    <span class="s3">[],</span>
+    <span class="s1">Buffer</span><span class="s3">.</span><span class="s1">alloc</span><span class="s3">(</span><span
+    class="s4">0</span><span class="s3">),</span>
+    <span class="s3">[</span><span class="s1">Buffer</span><span class="s3">.</span><span class="s1">alloc</span><span
+    class="s3">(</span><span class="s4">0</span><span class="s3">)]</span>
+  <span class="s3">]</span>
+
+  <span class="s2">for </span><span class="s3">(</span><span class="s2">const </span><span
+    class="s1">obj of types</span><span class="s3">) {</span>
+    <span class="s1">t</span><span class="s3">.</span><span class="s1">notOk</span><span class="s3">(</span><span
+    class="s1">BufferList</span><span class="s3">.</span><span class="s1">isBufferList</span><span
+    class="s3">(</span><span class="s1">obj</span><span class="s3">))</span>
+  <span class="s3">}</span>
+
+  <span class="s1">t</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+<span class="s3">})</span>
+</pre>
+</body>
+</html>

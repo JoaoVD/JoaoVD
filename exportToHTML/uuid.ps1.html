@@ -1,0 +1,84 @@
+<html>
+<head>
+  <title>uuid.ps1</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #7a7e85;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          uuid.ps1</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">#</span><span class="s1">!/usr/bin/env pwsh
+</span><span class="s0">$basedir=Split-Path $</span><span class="s2">MyInvocation</span><span class="s0">.MyCommand.Definition -</span><span
+  class="s2">Parent
+</span>
+<span class="s0">$exe=&quot;&quot;</span>
+<span class="s3">if </span><span class="s0">($</span><span class="s2">PSVersionTable</span><span class="s0">.PSVersion -lt &quot;</span><span
+    class="s4">6.0</span><span class="s0">&quot; -or $IsWindows) {</span>
+  <span class="s0"># </span><span class="s1">Fix case when both the Windows and Linux builds of Node
+  </span><span class="s0"># </span><span class="s1">are installed in the same directory
+  </span><span class="s0">$exe=&quot;</span><span class="s4">.exe</span><span class="s0">&quot;</span>
+<span class="s0">}</span>
+<span class="s0">$ret=</span><span class="s5">0</span>
+<span class="s3">if </span><span class="s0">(Test-Path &quot;$basedir</span><span class="s4">/node</span><span
+    class="s0">$exe&quot;) {</span>
+  <span class="s0"># </span><span class="s1">Support pipeline input
+  </span><span class="s3">if </span><span class="s0">($</span><span class="s2">MyInvocation</span><span class="s0">.ExpectingInput) {</span>
+    <span class="s0">$</span><span class="s2">input </span><span class="s0">| &amp; &quot;$basedir</span><span
+    class="s4">/node</span><span class="s0">$exe&quot;  &quot;$basedir</span><span
+    class="s4">/../uuid/dist/bin/uuid</span><span class="s0">&quot; $</span><span class="s2">args</span>
+  <span class="s0">} </span><span class="s3">else </span><span class="s0">{</span>
+    <span class="s0">&amp; &quot;$basedir</span><span class="s4">/node</span><span
+    class="s0">$exe&quot;  &quot;$basedir</span><span class="s4">/../uuid/dist/bin/uuid</span><span
+    class="s0">&quot; $</span><span class="s2">args</span>
+  <span class="s0">}</span>
+  <span class="s0">$ret=$</span><span class="s2">LASTEXITCODE</span>
+<span class="s0">} </span><span class="s3">else </span><span class="s0">{</span>
+  <span class="s0"># </span><span class="s1">Support pipeline input
+  </span><span class="s3">if </span><span class="s0">($</span><span class="s2">MyInvocation</span><span class="s0">.ExpectingInput) {</span>
+    <span class="s0">$</span><span class="s2">input </span><span class="s0">| &amp; &quot;</span><span
+    class="s4">node</span><span class="s0">$exe&quot;  &quot;$basedir</span><span
+    class="s4">/../uuid/dist/bin/uuid</span><span class="s0">&quot; $</span><span class="s2">args</span>
+  <span class="s0">} </span><span class="s3">else </span><span class="s0">{</span>
+    <span class="s0">&amp; &quot;</span><span class="s4">node</span><span
+    class="s0">$exe&quot;  &quot;$basedir</span><span class="s4">/../uuid/dist/bin/uuid</span><span
+    class="s0">&quot; $</span><span class="s2">args</span>
+  <span class="s0">}</span>
+  <span class="s0">$ret=$</span><span class="s2">LASTEXITCODE</span>
+<span class="s0">}</span>
+<span class="s3">exit </span><span class="s0">$ret</span>
+</pre>
+</body>
+</html>

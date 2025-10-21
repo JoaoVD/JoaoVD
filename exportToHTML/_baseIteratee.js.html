@@ -1,0 +1,100 @@
+<html>
+<head>
+  <title>_baseIteratee.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _baseIteratee.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseMatches </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseMatches'</span><span class="s2">),</span>
+    <span class="s1">baseMatchesProperty </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseMatchesProperty'</span><span class="s2">),</span>
+    <span class="s1">identity </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./identity'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">),</span>
+    <span class="s1">property </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./property'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* The base implementation of `_.iteratee`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{*} [value=_.identity] The value to convert to an iteratee.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Function} Returns the iteratee.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">baseIteratee</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">) {</span>
+  <span class="s6">// Don't store the `typeof` result in a variable to avoid a JIT bug in Safari 9.</span>
+  <span class="s6">// See https://bugs.webkit.org/show_bug.cgi?id=156034 for more details.</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">value </span><span
+    class="s2">== </span><span class="s3">'function'</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">value</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">value </span><span class="s2">== </span><span
+    class="s0">null</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">identity</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">value </span><span
+    class="s2">== </span><span class="s3">'object'</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">isArray</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">)</span>
+      <span class="s2">? </span><span class="s1">baseMatchesProperty</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">[</span><span class="s7">0</span><span class="s2">], </span><span class="s1">value</span><span
+    class="s2">[</span><span class="s7">1</span><span class="s2">])</span>
+      <span class="s2">: </span><span class="s1">baseMatches</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">property</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">baseIteratee</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

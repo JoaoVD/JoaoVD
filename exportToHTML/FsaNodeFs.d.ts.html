@@ -1,0 +1,381 @@
+<html>
+<head>
+  <title>FsaNodeFs.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsaNodeFs.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">FsaNodeDirent </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'./FsaNodeDirent'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">FsaNodeStats </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'./FsaNodeStats'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">FsSynchronousApi </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types/FsSynchronousApi'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">FsaNodeWriteStream </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./FsaNodeWriteStream'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">FsaNodeReadStream </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./FsaNodeReadStream'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">FsaNodeCore </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./FsaNodeCore'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">FsCallbackApi</span><span class="s2">, </span><span class="s1">FsPromisesApi </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">* as </span><span
+    class="s1">misc from </span><span class="s3">'../node/types/misc'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">* as </span><span
+    class="s1">opts from </span><span class="s3">'../node/types/options'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">FsCommonObjects </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types/FsCommonObjects'</span><span
+    class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* Constructs a Node.js `fs` API from a File System Access API</span>
+ <span class="s4">* [`FileSystemDirectoryHandle` object](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle).</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">FsaNodeFs </span><span class="s0">extends </span><span class="s1">FsaNodeCore </span><span class="s0">implements </span><span
+    class="s1">FsCallbackApi</span><span class="s2">, </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">, </span><span class="s1">FsCommonObjects </span><span class="s2">{</span>
+    <span class="s1">readonly promises</span><span class="s2">: </span><span class="s1">FsPromisesApi</span><span
+    class="s2">;</span>
+    <span class="s1">readonly open</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'open'</span><span class="s2">];</span>
+    <span class="s1">readonly close</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'close'</span><span class="s2">];</span>
+    <span class="s1">readonly read</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'read'</span><span class="s2">];</span>
+    <span class="s1">readonly readFile</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'readFile'</span><span class="s2">];</span>
+    <span class="s1">readonly write</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'write'</span><span class="s2">];</span>
+    <span class="s1">readonly writev</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'writev'</span><span class="s2">];</span>
+    <span class="s1">readonly writeFile</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'writeFile'</span><span class="s2">];</span>
+    <span class="s1">readonly copyFile</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'copyFile'</span><span class="s2">];</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@todo </span><span class="s4">There is a proposal for native &quot;self remove&quot; operation.</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://github.com/whatwg/fs/blob/main/proposals/Remove.md</span>
+     <span class="s4">*/</span>
+    <span class="s1">readonly unlink</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'unlink'</span><span class="s2">];</span>
+    <span class="s1">readonly realpath</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'realpath'</span><span class="s2">];</span>
+    <span class="s1">readonly stat</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'stat'</span><span class="s2">];</span>
+    <span class="s1">readonly lstat</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'lstat'</span><span class="s2">];</span>
+    <span class="s1">readonly fstat</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'fstat'</span><span class="s2">];</span>
+    <span class="s0">private </span><span class="s1">getHandleStats</span><span class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@todo </span><span class="s4">There is a proposal for native move support.</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://github.com/whatwg/fs/blob/main/proposals/MovingNonOpfsFiles.md</span>
+     <span class="s4">*/</span>
+    <span class="s1">readonly rename</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'rename'</span><span class="s2">];</span>
+    <span class="s1">readonly exists</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'exists'</span><span class="s2">];</span>
+    <span class="s1">readonly access</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'access'</span><span class="s2">];</span>
+    <span class="s1">readonly appendFile</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'appendFile'</span><span class="s2">];</span>
+    <span class="s1">readonly readdir</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'readdir'</span><span class="s2">];</span>
+    <span class="s1">readonly readlink</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'readlink'</span><span class="s2">];</span>
+    <span class="s4">/** </span><span class="s5">@todo </span><span class="s4">Could this use `FileSystemSyncAccessHandle.flush` through a Worker thread? */</span>
+    <span class="s1">readonly fsync</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'fsync'</span><span class="s2">];</span>
+    <span class="s1">readonly fdatasync</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'fdatasync'</span><span class="s2">];</span>
+    <span class="s1">readonly ftruncate</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'ftruncate'</span><span class="s2">];</span>
+    <span class="s1">readonly truncate</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'truncate'</span><span class="s2">];</span>
+    <span class="s1">readonly futimes</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'futimes'</span><span class="s2">];</span>
+    <span class="s1">readonly utimes</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'utimes'</span><span class="s2">];</span>
+    <span class="s1">readonly mkdir</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'mkdir'</span><span class="s2">];</span>
+    <span class="s1">readonly mkdtemp</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'mkdtemp'</span><span class="s2">];</span>
+    <span class="s0">private </span><span class="s1">rmAll</span><span class="s2">;</span>
+    <span class="s1">readonly rmdir</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'rmdir'</span><span class="s2">];</span>
+    <span class="s1">readonly rm</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'rm'</span><span class="s2">];</span>
+    <span class="s1">readonly fchmod</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'fchmod'</span><span class="s2">];</span>
+    <span class="s1">readonly chmod</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'chmod'</span><span class="s2">];</span>
+    <span class="s1">readonly lchmod</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'lchmod'</span><span class="s2">];</span>
+    <span class="s1">readonly fchown</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'fchown'</span><span class="s2">];</span>
+    <span class="s1">readonly chown</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'chown'</span><span class="s2">];</span>
+    <span class="s1">readonly lchown</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'lchown'</span><span class="s2">];</span>
+    <span class="s1">readonly createWriteStream</span><span class="s2">: </span><span
+    class="s1">FsCallbackApi</span><span class="s2">[</span><span class="s3">'createWriteStream'</span><span class="s2">];</span>
+    <span class="s1">readonly createReadStream</span><span class="s2">: </span><span
+    class="s1">FsCallbackApi</span><span class="s2">[</span><span class="s3">'createReadStream'</span><span class="s2">];</span>
+    <span class="s1">openAsBlob</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">PathLike</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">IOpenAsBlobOptions</span><span class="s2">) =&gt; </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">Blob</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly cp</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'cp'</span><span class="s2">];</span>
+    <span class="s1">readonly lutimes</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'lutimes'</span><span class="s2">];</span>
+    <span class="s1">readonly opendir</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'opendir'</span><span class="s2">];</span>
+    <span class="s1">readonly readv</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'readv'</span><span class="s2">];</span>
+    <span class="s1">readonly statfs</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'statfs'</span><span class="s2">];</span>
+    <span class="s1">readonly glob</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'glob'</span><span class="s2">];</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@todo </span><span class="s4">Implement using `FileSystemObserver` class.</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemObserver</span>
+     <span class="s4">*/</span>
+    <span class="s1">readonly watchFile</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'watchFile'</span><span class="s2">];</span>
+    <span class="s1">readonly unwatchFile</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'unwatchFile'</span><span class="s2">];</span>
+    <span class="s1">readonly watch</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'watch'</span><span class="s2">];</span>
+    <span class="s1">readonly symlink</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'symlink'</span><span class="s2">];</span>
+    <span class="s1">readonly link</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">[</span><span class="s3">'link'</span><span class="s2">];</span>
+    <span class="s1">readonly statSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'statSync'</span><span class="s2">];</span>
+    <span class="s1">readonly lstatSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'lstatSync'</span><span class="s2">];</span>
+    <span class="s1">readonly fstatSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'fstatSync'</span><span class="s2">];</span>
+    <span class="s1">readonly accessSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'accessSync'</span><span class="s2">];</span>
+    <span class="s1">readonly readFileSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'readFileSync'</span><span class="s2">];</span>
+    <span class="s1">readonly writeFileSync</span><span class="s2">: </span><span
+    class="s1">FsSynchronousApi</span><span class="s2">[</span><span class="s3">'writeFileSync'</span><span class="s2">];</span>
+    <span class="s1">readonly appendFileSync</span><span class="s2">: </span><span
+    class="s1">FsSynchronousApi</span><span class="s2">[</span><span class="s3">'appendFileSync'</span><span class="s2">];</span>
+    <span class="s1">readonly closeSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'closeSync'</span><span class="s2">];</span>
+    <span class="s1">readonly existsSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'existsSync'</span><span class="s2">];</span>
+    <span class="s1">readonly copyFileSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'copyFileSync'</span><span class="s2">];</span>
+    <span class="s1">readonly renameSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'renameSync'</span><span class="s2">];</span>
+    <span class="s1">readonly rmdirSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'rmdirSync'</span><span class="s2">];</span>
+    <span class="s1">readonly rmSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'rmSync'</span><span class="s2">];</span>
+    <span class="s1">readonly mkdirSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'mkdirSync'</span><span class="s2">];</span>
+    <span class="s1">readonly mkdtempSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'mkdtempSync'</span><span class="s2">];</span>
+    <span class="s1">readonly readlinkSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'readlinkSync'</span><span class="s2">];</span>
+    <span class="s1">readonly truncateSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'truncateSync'</span><span class="s2">];</span>
+    <span class="s1">readonly ftruncateSync</span><span class="s2">: </span><span
+    class="s1">FsSynchronousApi</span><span class="s2">[</span><span class="s3">'ftruncateSync'</span><span class="s2">];</span>
+    <span class="s1">readonly unlinkSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'unlinkSync'</span><span class="s2">];</span>
+    <span class="s1">readonly readdirSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'readdirSync'</span><span class="s2">];</span>
+    <span class="s1">readonly realpathSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'realpathSync'</span><span class="s2">];</span>
+    <span class="s1">readonly readSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'readSync'</span><span class="s2">];</span>
+    <span class="s1">readonly writeSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'writeSync'</span><span class="s2">];</span>
+    <span class="s1">readonly openSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'openSync'</span><span class="s2">];</span>
+    <span class="s1">readonly writevSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'writevSync'</span><span class="s2">];</span>
+    <span class="s1">readonly fdatasyncSync</span><span class="s2">: </span><span
+    class="s1">FsSynchronousApi</span><span class="s2">[</span><span class="s3">'fdatasyncSync'</span><span class="s2">];</span>
+    <span class="s1">readonly fsyncSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'fsyncSync'</span><span class="s2">];</span>
+    <span class="s1">readonly chmodSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'chmodSync'</span><span class="s2">];</span>
+    <span class="s1">readonly chownSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'chownSync'</span><span class="s2">];</span>
+    <span class="s1">readonly fchmodSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'fchmodSync'</span><span class="s2">];</span>
+    <span class="s1">readonly fchownSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'fchownSync'</span><span class="s2">];</span>
+    <span class="s1">readonly futimesSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'futimesSync'</span><span class="s2">];</span>
+    <span class="s1">readonly lchmodSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'lchmodSync'</span><span class="s2">];</span>
+    <span class="s1">readonly lchownSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'lchownSync'</span><span class="s2">];</span>
+    <span class="s1">readonly utimesSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'utimesSync'</span><span class="s2">];</span>
+    <span class="s1">readonly lutimesSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'lutimesSync'</span><span class="s2">];</span>
+    <span class="s1">readonly cpSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'cpSync'</span><span class="s2">];</span>
+    <span class="s1">readonly opendirSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'opendirSync'</span><span class="s2">];</span>
+    <span class="s1">readonly statfsSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'statfsSync'</span><span class="s2">];</span>
+    <span class="s1">readonly readvSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'readvSync'</span><span class="s2">];</span>
+    <span class="s1">readonly globSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'globSync'</span><span class="s2">];</span>
+    <span class="s1">readonly symlinkSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'symlinkSync'</span><span class="s2">];</span>
+    <span class="s1">readonly linkSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'linkSync'</span><span class="s2">];</span>
+    <span class="s1">readonly F_OK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">readonly R_OK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">readonly W_OK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">readonly X_OK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">readonly constants</span><span class="s2">: {</span>
+        <span class="s1">O_RDONLY</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_WRONLY</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_RDWR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFMT</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFREG</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFDIR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFCHR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFBLK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFIFO</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFLNK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFSOCK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_CREAT</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">O_EXCL</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">O_NOCTTY</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_TRUNC</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">O_APPEND</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_DIRECTORY</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_NOATIME</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_NOFOLLOW</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_SYNC</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">O_SYMLINK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_DIRECT</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_NONBLOCK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">S_IRWXU</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IRUSR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IWUSR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IXUSR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IRWXG</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IRGRP</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IWGRP</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IXGRP</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IRWXO</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IROTH</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IWOTH</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IXOTH</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">F_OK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">R_OK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">W_OK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">X_OK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">UV_FS_SYMLINK_DIR</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">UV_FS_SYMLINK_JUNCTION</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">UV_FS_COPYFILE_EXCL</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">UV_FS_COPYFILE_FICLONE</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">UV_FS_COPYFILE_FICLONE_FORCE</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">;</span>
+        <span class="s1">COPYFILE_EXCL</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">COPYFILE_FICLONE</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">COPYFILE_FICLONE_FORCE</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">readonly Dirent</span><span class="s2">: </span><span class="s0">typeof </span><span class="s1">FsaNodeDirent</span><span
+    class="s2">;</span>
+    <span class="s1">readonly Stats</span><span class="s2">: {</span>
+        <span class="s0">new </span><span class="s2">(</span><span class="s1">isBigInt</span><span
+    class="s2">: </span><span class="s1">boolean</span><span class="s2">, </span><span class="s1">size</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">, </span><span class="s1">kind</span><span
+    class="s2">: </span><span class="s3">&quot;file&quot; </span><span class="s2">| </span><span class="s3">&quot;directory&quot;</span><span
+    class="s2">): </span><span class="s1">FsaNodeStats</span><span class="s2">&lt;</span><span
+    class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s2">};</span>
+    <span class="s1">readonly WriteStream</span><span class="s2">: </span><span class="s0">typeof </span><span
+    class="s1">FsaNodeWriteStream</span><span class="s2">;</span>
+    <span class="s1">readonly ReadStream</span><span class="s2">: </span><span class="s0">typeof </span><span
+    class="s1">FsaNodeReadStream</span><span class="s2">;</span>
+    <span class="s1">readonly StatFs</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">;</span>
+    <span class="s1">readonly Dir</span><span class="s2">: </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s1">readonly StatsWatcher</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">;</span>
+    <span class="s1">readonly FSWatcher</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<html>
+<head>
+  <title>node-which</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          node-which</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">#!/usr/bin/env node</span>
+<span class="s2">var </span><span class="s1">which </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">&quot;../&quot;</span><span class="s3">)</span>
+<span class="s2">if </span><span class="s3">(</span><span class="s1">process</span><span class="s3">.</span><span
+    class="s1">argv</span><span class="s3">.</span><span class="s1">length </span><span class="s3">&lt; </span><span
+    class="s5">3</span><span class="s3">)</span>
+  <span class="s1">usage</span><span class="s3">()</span>
+
+<span class="s2">function </span><span class="s1">usage </span><span class="s3">() {</span>
+  <span class="s1">console</span><span class="s3">.</span><span class="s1">error</span><span class="s3">(</span><span
+    class="s4">'usage: which [-as] program ...'</span><span class="s3">)</span>
+  <span class="s1">process</span><span class="s3">.</span><span class="s1">exit</span><span class="s3">(</span><span
+    class="s5">1</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">var </span><span class="s1">all </span><span class="s3">= </span><span class="s2">false</span>
+<span class="s2">var </span><span class="s1">silent </span><span class="s3">= </span><span class="s2">false</span>
+<span class="s2">var </span><span class="s1">dashdash </span><span class="s3">= </span><span class="s2">false</span>
+<span class="s2">var </span><span class="s1">args </span><span class="s3">= </span><span class="s1">process</span><span
+    class="s3">.</span><span class="s1">argv</span><span class="s3">.</span><span class="s1">slice</span><span
+    class="s3">(</span><span class="s5">2</span><span class="s3">).</span><span class="s1">filter</span><span
+    class="s3">(</span><span class="s2">function </span><span class="s3">(</span><span class="s1">arg</span><span
+    class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">dashdash </span><span class="s3">|| !</span><span
+    class="s6">/^-/</span><span class="s3">.</span><span class="s1">test</span><span class="s3">(</span><span
+    class="s1">arg</span><span class="s3">))</span>
+    <span class="s2">return true</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">arg </span><span class="s3">=== </span><span
+    class="s4">'--'</span><span class="s3">) {</span>
+    <span class="s1">dashdash </span><span class="s3">= </span><span class="s2">true</span>
+    <span class="s2">return false</span>
+  <span class="s3">}</span>
+
+  <span class="s2">var </span><span class="s1">flags </span><span class="s3">= </span><span class="s1">arg</span><span
+    class="s3">.</span><span class="s1">substr</span><span class="s3">(</span><span class="s5">1</span><span class="s3">).</span><span
+    class="s1">split</span><span class="s3">(</span><span class="s4">''</span><span class="s3">)</span>
+  <span class="s2">for </span><span class="s3">(</span><span class="s2">var </span><span class="s1">f </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">f </span><span class="s3">&lt; </span><span
+    class="s1">flags</span><span class="s3">.</span><span class="s1">length</span><span class="s3">; </span><span
+    class="s1">f</span><span class="s3">++) {</span>
+    <span class="s2">var </span><span class="s1">flag </span><span class="s3">= </span><span
+    class="s1">flags</span><span class="s3">[</span><span class="s1">f</span><span class="s3">]</span>
+    <span class="s2">switch </span><span class="s3">(</span><span class="s1">flag</span><span class="s3">) {</span>
+      <span class="s2">case </span><span class="s4">'s'</span><span class="s3">:</span>
+        <span class="s1">silent </span><span class="s3">= </span><span class="s2">true</span>
+        <span class="s2">break</span>
+      <span class="s2">case </span><span class="s4">'a'</span><span class="s3">:</span>
+        <span class="s1">all </span><span class="s3">= </span><span class="s2">true</span>
+        <span class="s2">break</span>
+      <span class="s2">default</span><span class="s3">:</span>
+        <span class="s1">console</span><span class="s3">.</span><span class="s1">error</span><span
+    class="s3">(</span><span class="s4">'which: illegal option -- ' </span><span class="s3">+ </span><span class="s1">flag</span><span
+    class="s3">)</span>
+        <span class="s1">usage</span><span class="s3">()</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+  <span class="s2">return false</span>
+<span class="s3">})</span>
+
+<span class="s1">process</span><span class="s3">.</span><span class="s1">exit</span><span class="s3">(</span><span
+    class="s1">args</span><span class="s3">.</span><span class="s1">reduce</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">pv</span><span class="s3">, </span><span
+    class="s1">current</span><span class="s3">) {</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s2">var </span><span class="s1">f </span><span class="s3">= </span><span class="s1">which</span><span
+    class="s3">.</span><span class="s1">sync</span><span class="s3">(</span><span class="s1">current</span><span
+    class="s3">, { </span><span class="s1">all</span><span class="s3">: </span><span class="s1">all </span><span
+    class="s3">})</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">all</span><span class="s3">)</span>
+      <span class="s1">f </span><span class="s3">= </span><span class="s1">f</span><span class="s3">.</span><span
+    class="s1">join</span><span class="s3">(</span><span class="s4">'</span><span class="s2">\n</span><span
+    class="s4">'</span><span class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">silent</span><span class="s3">)</span>
+      <span class="s1">console</span><span class="s3">.</span><span class="s1">log</span><span class="s3">(</span><span
+    class="s1">f</span><span class="s3">)</span>
+    <span class="s2">return </span><span class="s1">pv</span><span class="s3">;</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">e</span><span
+    class="s3">) {</span>
+    <span class="s2">return </span><span class="s5">1</span><span class="s3">;</span>
+  <span class="s3">}</span>
+<span class="s3">}, </span><span class="s5">0</span><span class="s3">))</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<html>
+<head>
+  <title>handle.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          handle.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">var </span><span class="s1">assert </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'assert'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">thing </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'handle-thing'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">httpDeceiver </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'http-deceiver'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">util </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'util'</span><span class="s3">)</span>
+
+<span class="s2">function </span><span class="s1">Handle </span><span class="s3">(</span><span class="s1">options</span><span
+    class="s3">, </span><span class="s1">stream</span><span class="s3">, </span><span class="s1">socket</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= {}</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">_spdyState </span><span
+    class="s3">= </span><span class="s1">state</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">options </span><span class="s3">= </span><span
+    class="s1">options </span><span class="s3">|| {}</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">stream</span>
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">socket </span><span class="s3">= </span><span
+    class="s2">null</span>
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">rawSocket </span><span
+    class="s3">= </span><span class="s1">socket </span><span class="s3">|| </span><span class="s1">stream</span><span
+    class="s3">.</span><span class="s1">connection</span><span class="s3">.</span><span class="s1">socket</span>
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">deceiver </span><span class="s3">= </span><span
+    class="s2">null</span>
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">ending </span><span class="s3">= </span><span
+    class="s2">false</span>
+
+  <span class="s2">var </span><span class="s1">self </span><span class="s3">= </span><span class="s2">this</span>
+  <span class="s1">thing</span><span class="s3">.</span><span class="s1">call</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">, </span><span class="s1">stream</span><span class="s3">, {</span>
+    <span class="s1">getPeerName</span><span class="s3">: </span><span class="s2">function </span><span
+    class="s3">() {</span>
+      <span class="s2">return </span><span class="s1">self</span><span class="s3">.</span><span
+    class="s1">_getPeerName</span><span class="s3">()</span>
+    <span class="s3">},</span>
+    <span class="s1">close</span><span class="s3">: </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">callback</span><span class="s3">) {</span>
+      <span class="s2">return </span><span class="s1">self</span><span class="s3">.</span><span class="s1">_closeCallback</span><span
+    class="s3">(</span><span class="s1">callback</span><span class="s3">)</span>
+    <span class="s3">}</span>
+  <span class="s3">})</span>
+
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">stream</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'stream'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">stream</span><span class="s3">) {</span>
+      <span class="s1">state</span><span class="s3">.</span><span class="s1">stream </span><span
+    class="s3">= </span><span class="s1">stream</span>
+    <span class="s3">})</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+<span class="s1">util</span><span class="s3">.</span><span class="s1">inherits</span><span class="s3">(</span><span
+    class="s1">Handle</span><span class="s3">, </span><span class="s1">thing</span><span class="s3">)</span>
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">Handle</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">create </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">create </span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">stream</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">) {</span>
+  <span class="s2">return new </span><span class="s1">Handle</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">stream</span><span class="s3">, </span><span
+    class="s1">socket</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">_getPeerName </span><span class="s3">= </span><span class="s2">function </span><span class="s1">_getPeerName </span><span
+    class="s3">() {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">rawSocket</span><span class="s3">.</span><span class="s1">_getpeername</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">rawSocket</span><span class="s3">.</span><span class="s1">_getpeername</span><span class="s3">()</span>
+  <span class="s3">}</span>
+
+  <span class="s2">return null</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">_closeCallback </span><span class="s3">= </span><span class="s2">function </span><span class="s1">_closeCallback </span><span
+    class="s3">(</span><span class="s1">callback</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+  <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">state</span><span class="s3">.</span><span class="s1">stream</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">ending</span><span class="s3">) {</span>
+    <span class="s4">// The .end() method of the stream may be called by us or by the</span>
+    <span class="s4">// .shutdown() method in our super-class. If the latter has already been</span>
+    <span class="s4">// called, then calling the .end() method below will have no effect, with</span>
+    <span class="s4">// the result that the callback will never get executed, leading to an ever</span>
+    <span class="s4">// so subtle memory leak.</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">stream</span><span class="s3">.</span><span
+    class="s1">_writableState</span><span class="s3">.</span><span class="s1">finished</span><span class="s3">) {</span>
+      <span class="s4">// NOTE: it is important to call `setImmediate` instead of `nextTick`,</span>
+      <span class="s4">// since this is how regular `handle.close()` works in node.js core.</span>
+      <span class="s4">//</span>
+      <span class="s4">// Using `nextTick` will lead to `net.Socket` emitting `close` before</span>
+      <span class="s4">// `end` on UV_EOF. This results in aborted request without `end` event.</span>
+      <span class="s1">setImmediate</span><span class="s3">(</span><span class="s1">callback</span><span
+    class="s3">)</span>
+    <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span
+    class="s1">stream</span><span class="s3">.</span><span class="s1">_writableState</span><span
+    class="s3">.</span><span class="s1">ending</span><span class="s3">) {</span>
+      <span class="s1">stream</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s0">'finish'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+        <span class="s1">callback</span><span class="s3">(</span><span class="s2">null</span><span class="s3">)</span>
+      <span class="s3">})</span>
+    <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+      <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s1">callback</span><span class="s3">)</span>
+    <span class="s3">}</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+    <span class="s1">stream</span><span class="s3">.</span><span class="s1">abort</span><span class="s3">(</span><span
+    class="s1">callback</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// Only a single end is allowed</span>
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">ending </span><span class="s3">= </span><span
+    class="s2">false</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">getStream </span><span class="s3">= </span><span class="s2">function </span><span
+    class="s1">getStream </span><span class="s3">(</span><span class="s1">callback</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">callback</span><span class="s3">) {</span>
+    <span class="s1">assert</span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">stream</span><span class="s3">)</span>
+    <span class="s2">return </span><span class="s1">state</span><span class="s3">.</span><span class="s1">stream</span>
+  <span class="s3">}</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">stream</span><span class="s3">) {</span>
+    <span class="s1">process</span><span class="s3">.</span><span class="s1">nextTick</span><span
+    class="s3">(</span><span class="s2">function </span><span class="s3">() {</span>
+      <span class="s1">callback</span><span class="s3">(</span><span class="s1">state</span><span
+    class="s3">.</span><span class="s1">stream</span><span class="s3">)</span>
+    <span class="s3">})</span>
+    <span class="s2">return</span>
+  <span class="s3">}</span>
+
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'stream'</span><span class="s3">, </span><span class="s1">callback</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">assignSocket </span><span class="s3">= </span><span class="s2">function </span><span class="s1">assignSocket </span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">, </span><span class="s1">options</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">socket </span><span class="s3">= </span><span
+    class="s1">socket</span>
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">deceiver </span><span class="s3">= </span><span
+    class="s1">httpDeceiver</span><span class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s1">options</span><span class="s3">)</span>
+
+  <span class="s2">function </span><span class="s1">onStreamError </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+    <span class="s1">state</span><span class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span
+    class="s1">emit</span><span class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span
+    class="s1">err</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">getStream</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">stream</span><span class="s3">) {</span>
+    <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s1">onStreamError</span><span class="s3">)</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">assignClientRequest </span><span class="s3">= </span><span class="s2">function </span><span class="s1">assignClientRequest </span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+  <span class="s2">var </span><span class="s1">oldEnd </span><span class="s3">= </span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">end</span>
+  <span class="s2">var </span><span class="s1">oldSend </span><span class="s3">= </span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">_send</span>
+
+  <span class="s4">// Catch the headers before request will be sent</span>
+  <span class="s2">var </span><span class="s1">self </span><span class="s3">= </span><span class="s2">this</span>
+
+  <span class="s4">// For old nodes</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">thing</span><span class="s3">.</span><span
+    class="s1">mode </span><span class="s3">!== </span><span class="s0">'modern'</span><span class="s3">) {</span>
+    <span class="s1">req</span><span class="s3">.</span><span class="s1">end </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">end </span><span class="s3">() {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">end </span><span class="s3">= </span><span
+    class="s1">oldEnd</span>
+
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">_send</span><span class="s3">(</span><span
+    class="s0">''</span><span class="s3">)</span>
+
+      <span class="s2">return this</span><span class="s3">.</span><span class="s1">end</span><span
+    class="s3">.</span><span class="s1">apply</span><span class="s3">(</span><span class="s2">this</span><span
+    class="s3">, </span><span class="s1">arguments</span><span class="s3">)</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s1">req</span><span class="s3">.</span><span class="s1">_send </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">send </span><span class="s3">(</span><span class="s1">data</span><span
+    class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">_headerSent </span><span
+    class="s3">= </span><span class="s2">true</span>
+
+    <span class="s4">// for v0.10 and below, otherwise it will set `hot = false` and include</span>
+    <span class="s4">// headers in first write</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">_header </span><span class="s3">= </span><span
+    class="s0">'ignore me'</span>
+
+    <span class="s4">// To prevent exception</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">connection </span><span
+    class="s3">= </span><span class="s1">state</span><span class="s3">.</span><span class="s1">socket</span>
+
+    <span class="s4">// It is very important to leave this here, otherwise it will be executed</span>
+    <span class="s4">// on a next tick, after `_send` will perform write</span>
+    <span class="s1">self</span><span class="s3">.</span><span class="s1">getStream</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">stream</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s1">stream</span><span class="s3">.</span><span
+    class="s1">connection</span><span class="s3">.</span><span class="s1">_isGoaway</span><span class="s3">(</span><span
+    class="s1">stream</span><span class="s3">.</span><span class="s1">id</span><span class="s3">)) {</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">send</span><span class="s3">()</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+
+    <span class="s4">// We are ready to create stream</span>
+    <span class="s1">self</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'needStream'</span><span class="s3">)</span>
+
+    <span class="s4">// Ensure that the connection is still ok to use</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">stream </span><span class="s3">&amp;&amp; </span><span class="s1">state</span><span
+    class="s3">.</span><span class="s1">stream</span><span class="s3">.</span><span class="s1">connection</span><span
+    class="s3">.</span><span class="s1">_isGoaway</span><span class="s3">(</span><span class="s1">state</span><span
+    class="s3">.</span><span class="s1">stream</span><span class="s3">.</span><span class="s1">id</span><span
+    class="s3">)) {</span>
+      <span class="s2">return</span>
+    <span class="s3">}</span>
+
+    <span class="s1">req</span><span class="s3">.</span><span class="s1">_send </span><span class="s3">= </span><span
+    class="s1">oldSend</span>
+
+    <span class="s4">// Ignore empty writes</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">method </span><span class="s3">=== </span><span class="s0">'GET' </span><span
+    class="s3">&amp;&amp; </span><span class="s1">data</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">0</span><span class="s3">) {</span>
+      <span class="s2">return</span>
+    <span class="s3">}</span>
+
+    <span class="s2">return </span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">_send</span><span class="s3">.</span><span class="s1">apply</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">, </span><span class="s1">arguments</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// No chunked encoding</span>
+  <span class="s1">req</span><span class="s3">.</span><span class="s1">useChunkedEncodingByDefault </span><span
+    class="s3">= </span><span class="s2">false</span>
+
+  <span class="s1">req</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'finish'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+    <span class="s1">req</span><span class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span
+    class="s1">end</span><span class="s3">()</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">assignRequest </span><span class="s3">= </span><span class="s2">function </span><span class="s1">assignRequest </span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">) {</span>
+  <span class="s4">// Emit trailing headers</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">getStream</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">stream</span><span class="s3">) {</span>
+    <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'headers'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">headers</span><span class="s3">) {</span>
+      <span class="s1">req</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'trailers'</span><span class="s3">, </span><span class="s1">headers</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">assignResponse </span><span class="s3">= </span><span class="s2">function </span><span class="s1">assignResponse </span><span
+    class="s3">(</span><span class="s1">res</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">self </span><span class="s3">= </span><span class="s2">this</span>
+
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">addTrailers </span><span
+    class="s3">= </span><span class="s2">function </span><span class="s1">addTrailers </span><span
+    class="s3">(</span><span class="s1">headers</span><span class="s3">) {</span>
+    <span class="s1">self</span><span class="s3">.</span><span class="s1">getStream</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">stream</span><span class="s3">) {</span>
+      <span class="s1">stream</span><span class="s3">.</span><span class="s1">sendHeaders</span><span
+    class="s3">(</span><span class="s1">headers</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">_transformHeaders </span><span class="s3">= </span><span class="s2">function </span><span class="s1">_transformHeaders </span><span
+    class="s3">(</span><span class="s1">kind</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s2">var </span><span class="s1">res </span><span class="s3">= {}</span>
+  <span class="s2">var </span><span class="s1">keys </span><span class="s3">= </span><span class="s1">Object</span><span
+    class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span class="s1">headers</span><span
+    class="s3">)</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">kind </span><span class="s3">=== </span><span
+    class="s0">'request' </span><span class="s3">&amp;&amp; </span><span class="s1">state</span><span
+    class="s3">.</span><span class="s1">options</span><span class="s3">[</span><span class="s0">'x-forwarded-for'</span><span
+    class="s3">]) {</span>
+    <span class="s2">var </span><span class="s1">xforwarded </span><span class="s3">= </span><span
+    class="s1">state</span><span class="s3">.</span><span class="s1">stream</span><span class="s3">.</span><span
+    class="s1">connection</span><span class="s3">.</span><span class="s1">getXForwardedFor</span><span
+    class="s3">()</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">xforwarded </span><span
+    class="s3">!== </span><span class="s2">null</span><span class="s3">) {</span>
+      <span class="s1">res</span><span class="s3">[</span><span class="s0">'x-forwarded-for'</span><span
+    class="s3">] = </span><span class="s1">xforwarded</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s2">for </span><span class="s3">(</span><span class="s2">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">keys</span><span class="s3">.</span><span class="s1">length</span><span class="s3">; </span><span
+    class="s1">i</span><span class="s3">++) {</span>
+    <span class="s2">var </span><span class="s1">key </span><span class="s3">= </span><span class="s1">keys</span><span
+    class="s3">[</span><span class="s1">i</span><span class="s3">]</span>
+    <span class="s2">var </span><span class="s1">value </span><span class="s3">= </span><span
+    class="s1">headers</span><span class="s3">[</span><span class="s1">key</span><span class="s3">]</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">key </span><span class="s3">=== </span><span
+    class="s0">':authority'</span><span class="s3">) {</span>
+      <span class="s1">res</span><span class="s3">.</span><span class="s1">host </span><span class="s3">= </span><span
+    class="s1">value</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s6">/^:/</span><span class="s3">.</span><span
+    class="s1">test</span><span class="s3">(</span><span class="s1">key</span><span class="s3">)) {</span>
+      <span class="s2">continue</span>
+    <span class="s3">}</span>
+
+    <span class="s1">res</span><span class="s3">[</span><span class="s1">key</span><span class="s3">] = </span><span
+    class="s1">value</span>
+  <span class="s3">}</span>
+  <span class="s2">return </span><span class="s1">res</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">emitRequest </span><span class="s3">= </span><span class="s2">function </span><span class="s1">emitRequest </span><span
+    class="s3">() {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+  <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">state</span><span class="s3">.</span><span class="s1">stream</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">deceiver</span><span class="s3">.</span><span
+    class="s1">emitRequest</span><span class="s3">({</span>
+    <span class="s1">method</span><span class="s3">: </span><span class="s1">stream</span><span class="s3">.</span><span
+    class="s1">method</span><span class="s3">,</span>
+    <span class="s1">path</span><span class="s3">: </span><span class="s1">stream</span><span class="s3">.</span><span
+    class="s1">path</span><span class="s3">,</span>
+    <span class="s1">headers</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">_transformHeaders</span><span class="s3">(</span><span class="s0">'request'</span><span
+    class="s3">, </span><span class="s1">stream</span><span class="s3">.</span><span class="s1">headers</span><span
+    class="s3">)</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s1">Handle</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">emitResponse </span><span class="s3">= </span><span class="s2">function </span><span class="s1">emitResponse </span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">deceiver</span><span class="s3">.</span><span
+    class="s1">emitResponse</span><span class="s3">({</span>
+    <span class="s1">status</span><span class="s3">: </span><span class="s1">status</span><span class="s3">,</span>
+    <span class="s1">headers</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">_transformHeaders</span><span class="s3">(</span><span class="s0">'response'</span><span
+    class="s3">, </span><span class="s1">headers</span><span class="s3">)</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

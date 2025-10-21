@@ -1,0 +1,144 @@
+<html>
+<head>
+  <title>bindKey.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          bindKey.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseRest </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">),</span>
+    <span class="s1">createWrap </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createWrap'</span><span class="s2">),</span>
+    <span class="s1">getHolder </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_getHolder'</span><span class="s2">),</span>
+    <span class="s1">replaceHolders </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_replaceHolders'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to compose bitmasks for function metadata. */</span>
+<span class="s0">var </span><span class="s1">WRAP_BIND_FLAG </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">,</span>
+    <span class="s1">WRAP_BIND_KEY_FLAG </span><span class="s2">= </span><span class="s5">2</span><span
+    class="s2">,</span>
+    <span class="s1">WRAP_PARTIAL_FLAG </span><span class="s2">= </span><span class="s5">32</span><span
+    class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a function that invokes the method at `object[key]` with `partials`</span>
+ <span class="s4">* prepended to the arguments it receives.</span>
+ <span class="s4">*</span>
+ <span class="s4">* This method differs from `_.bind` by allowing bound functions to reference</span>
+ <span class="s4">* methods that may be redefined or don't yet exist. See</span>
+ <span class="s4">* [Peter Michaux's article](http://peter.michaux.ca/articles/lazy-function-definition-pattern)</span>
+ <span class="s4">* for more details.</span>
+ <span class="s4">*</span>
+ <span class="s4">* The `_.bindKey.placeholder` value, which defaults to `_` in monolithic</span>
+ <span class="s4">* builds, may be used as a placeholder for partially applied arguments.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">0.10.0</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">Function</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Object} object The object to invoke the method on.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{string} key The key of the method.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{...*} [partials] The arguments to be partially applied.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span
+    class="s4">{Function} Returns the new bound function.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var object = {</span>
+ <span class="s4">*   'user': 'fred',</span>
+ <span class="s4">*   'greet': function(greeting, punctuation) {</span>
+ <span class="s4">*     return greeting + ' ' + this.user + punctuation;</span>
+ <span class="s4">*   }</span>
+ <span class="s4">* };</span>
+ <span class="s4">*</span>
+ <span class="s4">* var bound = _.bindKey(object, 'greet', 'hi');</span>
+ <span class="s4">* bound('!');</span>
+ <span class="s4">* // =&gt; 'hi fred!'</span>
+ <span class="s4">*</span>
+ <span class="s4">* object.greet = function(greeting, punctuation) {</span>
+ <span class="s4">*   return greeting + 'ya ' + this.user + punctuation;</span>
+ <span class="s4">* };</span>
+ <span class="s4">*</span>
+ <span class="s4">* bound('!');</span>
+ <span class="s4">* // =&gt; 'hiya fred!'</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Bound with placeholders.</span>
+ <span class="s4">* var bound = _.bindKey(object, 'greet', _, '!');</span>
+ <span class="s4">* bound('hi');</span>
+ <span class="s4">* // =&gt; 'hiya fred!'</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">bindKey </span><span class="s2">= </span><span
+    class="s1">baseRest</span><span class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span
+    class="s1">partials</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">bitmask </span><span class="s2">= </span><span
+    class="s1">WRAP_BIND_FLAG </span><span class="s2">| </span><span class="s1">WRAP_BIND_KEY_FLAG</span><span
+    class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">partials</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">holders </span><span class="s2">= </span><span class="s1">replaceHolders</span><span
+    class="s2">(</span><span class="s1">partials</span><span class="s2">, </span><span class="s1">getHolder</span><span
+    class="s2">(</span><span class="s1">bindKey</span><span class="s2">));</span>
+    <span class="s1">bitmask </span><span class="s2">|= </span><span class="s1">WRAP_PARTIAL_FLAG</span><span
+    class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">createWrap</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">bitmask</span><span class="s2">, </span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">partials</span><span class="s2">, </span><span
+    class="s1">holders</span><span class="s2">);</span>
+<span class="s2">});</span>
+
+<span class="s7">// Assign default placeholders.</span>
+<span class="s1">bindKey</span><span class="s2">.</span><span class="s1">placeholder </span><span
+    class="s2">= {};</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">bindKey</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

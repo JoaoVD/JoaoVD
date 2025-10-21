@@ -1,0 +1,119 @@
+<html>
+<head>
+  <title>partial.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          partial.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseRest </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">),</span>
+    <span class="s1">createWrap </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createWrap'</span><span class="s2">),</span>
+    <span class="s1">getHolder </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_getHolder'</span><span class="s2">),</span>
+    <span class="s1">replaceHolders </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_replaceHolders'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to compose bitmasks for function metadata. */</span>
+<span class="s0">var </span><span class="s1">WRAP_PARTIAL_FLAG </span><span class="s2">= </span><span
+    class="s5">32</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a function that invokes `func` with `partials` prepended to the</span>
+ <span class="s4">* arguments it receives. This method is like `_.bind` except it does **not**</span>
+ <span class="s4">* alter the `this` binding.</span>
+ <span class="s4">*</span>
+ <span class="s4">* The `_.partial.placeholder` value, which defaults to `_` in monolithic</span>
+ <span class="s4">* builds, may be used as a placeholder for partially applied arguments.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This method doesn't set the &quot;length&quot; property of partially</span>
+ <span class="s4">* applied functions.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">0.2.0</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">Function</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Function} func The function to partially apply arguments to.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{...*} [partials] The arguments to be partially applied.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{Function} Returns the new partially applied function.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* function greet(greeting, name) {</span>
+ <span class="s4">*   return greeting + ' ' + name;</span>
+ <span class="s4">* }</span>
+ <span class="s4">*</span>
+ <span class="s4">* var sayHelloTo = _.partial(greet, 'hello');</span>
+ <span class="s4">* sayHelloTo('fred');</span>
+ <span class="s4">* // =&gt; 'hello fred'</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Partially applied with placeholders.</span>
+ <span class="s4">* var greetFred = _.partial(greet, _, 'fred');</span>
+ <span class="s4">* greetFred('hi');</span>
+ <span class="s4">* // =&gt; 'hi fred'</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">partial </span><span class="s2">= </span><span
+    class="s1">baseRest</span><span class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">partials</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">holders </span><span class="s2">= </span><span
+    class="s1">replaceHolders</span><span class="s2">(</span><span class="s1">partials</span><span
+    class="s2">, </span><span class="s1">getHolder</span><span class="s2">(</span><span class="s1">partial</span><span
+    class="s2">));</span>
+  <span class="s0">return </span><span class="s1">createWrap</span><span class="s2">(</span><span class="s1">func</span><span
+    class="s2">, </span><span class="s1">WRAP_PARTIAL_FLAG</span><span class="s2">, </span><span
+    class="s1">undefined</span><span class="s2">, </span><span class="s1">partials</span><span class="s2">, </span><span
+    class="s1">holders</span><span class="s2">);</span>
+<span class="s2">});</span>
+
+<span class="s7">// Assign default placeholders.</span>
+<span class="s1">partial</span><span class="s2">.</span><span class="s1">placeholder </span><span
+    class="s2">= {};</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">partial</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

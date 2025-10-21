@@ -1,0 +1,76 @@
+<html>
+<head>
+  <title>iterators.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          iterators.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// Backwards-compatible iterator interfaces, augmented with iterator helper methods by lib.esnext.iterator in TypeScript 5.6.</span>
+<span class="s0">// The IterableIterator interface does not contain these methods, which creates assignability issues in places where IteratorObjects</span>
+<span class="s0">// are expected (eg. DOM-compatible APIs) if lib.esnext.iterator is loaded.</span>
+<span class="s0">// Also ensures that iterators returned by the Node API, which inherit from Iterator.prototype, correctly expose the iterator helper methods</span>
+<span class="s0">// if lib.esnext.iterator is loaded.</span>
+<span class="s0">// TODO: remove once this package no longer supports TS 5.5, and replace NodeJS.BuiltinIteratorReturn with BuiltinIteratorReturn.</span>
+
+<span class="s0">// Placeholders for TS &lt;5.6</span>
+<span class="s2">interface </span><span class="s1">IteratorObject</span><span class="s3">&lt;</span><span
+    class="s1">T</span><span class="s3">, </span><span class="s1">TReturn</span><span class="s3">, </span><span
+    class="s1">TNext</span><span class="s3">&gt; {}</span>
+<span class="s2">interface </span><span class="s1">AsyncIteratorObject</span><span class="s3">&lt;</span><span
+    class="s1">T</span><span class="s3">, </span><span class="s1">TReturn</span><span class="s3">, </span><span
+    class="s1">TNext</span><span class="s3">&gt; {}</span>
+
+<span class="s1">declare namespace NodeJS </span><span class="s3">{</span>
+    <span class="s0">// Populate iterator methods for TS &lt;5.6</span>
+    <span class="s2">interface </span><span class="s1">Iterator</span><span class="s3">&lt;</span><span
+    class="s1">T</span><span class="s3">, </span><span class="s1">TReturn</span><span class="s3">, </span><span
+    class="s1">TNext</span><span class="s3">&gt; </span><span class="s2">extends </span><span
+    class="s1">globalThis</span><span class="s3">.</span><span class="s1">Iterator</span><span
+    class="s3">&lt;</span><span class="s1">T</span><span class="s3">, </span><span class="s1">TReturn</span><span
+    class="s3">, </span><span class="s1">TNext</span><span class="s3">&gt; {}</span>
+    <span class="s2">interface </span><span class="s1">AsyncIterator</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">, </span><span class="s1">TReturn</span><span class="s3">, </span><span class="s1">TNext</span><span
+    class="s3">&gt; </span><span class="s2">extends </span><span class="s1">globalThis</span><span
+    class="s3">.</span><span class="s1">AsyncIterator</span><span class="s3">&lt;</span><span class="s1">T</span><span
+    class="s3">, </span><span class="s1">TReturn</span><span class="s3">, </span><span class="s1">TNext</span><span
+    class="s3">&gt; {}</span>
+
+    <span class="s0">// Polyfill for TS 5.6's instrinsic BuiltinIteratorReturn type, required for DOM-compatible iterators</span>
+    <span class="s1">type BuiltinIteratorReturn </span><span class="s3">= </span><span class="s1">ReturnType</span><span
+    class="s3">&lt;</span><span class="s1">any</span><span class="s3">[][</span><span class="s2">typeof </span><span
+    class="s1">Symbol</span><span class="s3">.</span><span class="s1">iterator</span><span class="s3">]&gt; </span><span
+    class="s2">extends</span>
+        <span class="s1">globalThis</span><span class="s3">.</span><span class="s1">Iterator</span><span
+    class="s3">&lt;</span><span class="s1">any</span><span class="s3">, </span><span
+    class="s1">infer TReturn</span><span class="s3">&gt; ? </span><span class="s1">TReturn</span>
+        <span class="s3">: </span><span class="s1">any</span><span class="s3">;</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

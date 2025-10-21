@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema Pastelaria - Login</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="login-container" class="login-container">
+  <form id="login-form" class="login-form">
+    <h2>Sistema da Pastelaria</h2>
+    <p>Por favor, faça o login para continuar</p>
+    <div class="form-group">
+      <label for="username">Usuário</label>
+      <input type="text" id="username" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <input type="password" id="password" required>
+    </div>
+    <button type="submit" class="btn-login">Entrar</button>
+    <p id="login-error" class="login-error hidden"></p>
+  </form>
+</div>
+
+<div id="app-container" class="hidden">
+  <nav class="main-nav">
+    <button id="nav-caixa" class="nav-btn">Caixa</button>
+    <button id="nav-admin" class="nav-btn">Admin</button>
+    <button id="nav-relatorios" class="nav-btn">Relatórios</button>
+    <div class="user-info">
+      <span id="display-username"></span>
+      <button id="btn-logout" class="btn-reset">Sair</button>
+    </div>
+  </nav>
+
+  <main id="view-caixa" class="view"></main>
+  <main id="view-admin" class="view hidden"></main>
+  <main id="view-relatorios" class="view hidden"></main>
+</div>
+
+<div id="modal-pagamento" class="modal-overlay hidden">
+  <div class="modal-conteudo">
+    <button id="btn-fechar-modal" class="btn-fechar-modal">X</button>
+    <h2>Finalizar Venda</h2>
+    <div class="total-modal">
+      <span>TOTAL A PAGAR:</span>
+      <span id="total-modal-valor">R$ 0,00</span>
+    </div>
+    <div id="dinheiro-secao" class="hidden">
+      <label for="valor-pago">Valor Pago pelo Cliente:</label>
+      <input type="number" id="valor-pago" placeholder="Ex: 50.00">
+      <div class="troco-display">
+        <span>TROCO:</span>
+        <span id="troco-valor">R$ 0,00</span>
+      </div>
+    </div>
+    <p>Selecione a forma de pagamento:</p>
+    <div class="metodos-pagamento">
+      <button class="btn-metodo" data-metodo="Dinheiro">Dinheiro</button>
+      <button class="btn-metodo" data-metodo="Débito">Cartão de Débito</button>
+      <button class="btn-metodo" data-metodo="Crédito">Cartão de Crédito</button>
+      <button class="btn-metodo" data-metodo="Pix">Pix</button>
+      <button id="btn-confirmar-dinheiro" class="btn-metodo btn-confirmar hidden" data-metodo="Dinheiro">Confirmar
+        Pagamento
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-reset" class="modal-overlay hidden">
+  <div class="modal-conteudo">
+    <button id="btn-fechar-modal-reset" class="btn-fechar-modal">X</button>
+    <h2>⚠️ AÇÃO IRREVERSÍVEL ⚠️</h2>
+    <p>Você está prestes a apagar <b>TODOS OS PRODUTOS</b> e <b>TODAS AS VENDAS</b> permanentemente.</p>
+    <p>Para confirmar, digite a frase <strong>ZERAR SISTEMA</strong> no campo abaixo:</p>
+    <div class="form-group">
+      <input type="text" id="input-confirmar-reset" autocomplete="off">
+    </div>
+    <button id="btn-confirmar-reset-final" class="btn-reset" disabled>Confirmar Exclusão Permanente</button>
+  </div>
+</div>
+
+<div id="recibo-container" class="hidden">
+  <div id="recibo-content">
+    <div class="recibo-header text-center">
+      <h3>NFCE - DANFE NFC-e</h3>
+      <p><strong>NOME DA SUA PASTELARIA</strong></p>
+      <p>CNPJ: 00.000.000/0001-00</p>
+      <p>----------------------------------------</p>
+      <p><strong>NAO E DOCUMENTO FISCAL</strong></p>
+      <p>----------------------------------------</p>
+    </div>
+
+    <table class="recibo-table">
+      <thead>
+      <tr>
+        <th>DESC.</th>
+        <th class="text-center">QTD</th>
+        <th class="text-right">VL.UN</th>
+        <th class="text-right">TOTAL</th>
+      </tr>
+      </thead>
+      <tbody id="recibo-itens">
+      </tbody>
+    </table>
+
+    <div class="recibo-totais">
+      <p>----------------------------------------</p>
+      <div class="total-linha"><span>QTD. TOTAL DE ITENS</span><span id="recibo-qtd-total"></span></div>
+      <div class="total-linha"><span>VALOR TOTAL R$</span><span id="recibo-valor-total"></span></div>
+      <p>----------------------------------------</p>
+      <div class="total-linha"><strong>FORMA PAGAMENTO</strong><strong><span id="recibo-pagamento"></span></strong>
+      </div>
+      <div id="linha-troco" class="total-linha hidden"><span>TROCO R$</span><span id="recibo-troco"></span></div>
+    </div>
+
+    <div class="recibo-footer text-center">
+      <p>Venda N.: <span id="recibo-id-venda"></span> - <span id="recibo-data"></span></p>
+      <p>Obrigado pela preferência!</p>
+    </div>
+  </div>
+</div>
+
+<script src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,931 @@
+<html>
+<head>
+  <title>events.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #6aab73;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #cf8e6d;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          events.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// Copyright Joyent, Inc. and other Node contributors.</span>
+<span class="s0">//</span>
+<span class="s0">// Permission is hereby granted, free of charge, to any person obtaining a</span>
+<span class="s0">// copy of this software and associated documentation files (the</span>
+<span class="s0">// &quot;Software&quot;), to deal in the Software without restriction, including</span>
+<span class="s0">// without limitation the rights to use, copy, modify, merge, publish,</span>
+<span class="s0">// distribute, sublicense, and/or sell copies of the Software, and to permit</span>
+<span class="s0">// persons to whom the Software is furnished to do so, subject to the</span>
+<span class="s0">// following conditions:</span>
+<span class="s0">//</span>
+<span class="s0">// The above copyright notice and this permission notice shall be included</span>
+<span class="s0">// in all copies or substantial portions of the Software.</span>
+<span class="s0">//</span>
+<span class="s0">// THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS</span>
+<span class="s0">// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF</span>
+<span class="s0">// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN</span>
+<span class="s0">// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,</span>
+<span class="s0">// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR</span>
+<span class="s0">// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE</span>
+<span class="s0">// USE OR OTHER DEALINGS IN THE SOFTWARE.</span>
+
+<span class="s2">'use strict'</span><span class="s3">;</span>
+
+<span class="s4">var </span><span class="s1">R </span><span class="s3">= </span><span class="s4">typeof </span><span
+    class="s1">Reflect </span><span class="s3">=== </span><span class="s2">'object' </span><span
+    class="s3">? </span><span class="s1">Reflect </span><span class="s3">: </span><span class="s4">null</span>
+<span class="s4">var </span><span class="s1">ReflectApply </span><span class="s3">= </span><span
+    class="s1">R </span><span class="s3">&amp;&amp; </span><span class="s4">typeof </span><span class="s1">R</span><span
+    class="s3">.</span><span class="s1">apply </span><span class="s3">=== </span><span class="s2">'function'</span>
+  <span class="s3">? </span><span class="s1">R</span><span class="s3">.</span><span class="s1">apply</span>
+  <span class="s3">: </span><span class="s4">function </span><span class="s1">ReflectApply</span><span
+    class="s3">(</span><span class="s1">target</span><span class="s3">, </span><span class="s1">receiver</span><span
+    class="s3">, </span><span class="s1">args</span><span class="s3">) {</span>
+    <span class="s4">return </span><span class="s1">Function</span><span class="s3">.</span><span
+    class="s1">prototype</span><span class="s3">.</span><span class="s1">apply</span><span class="s3">.</span><span
+    class="s1">call</span><span class="s3">(</span><span class="s1">target</span><span class="s3">, </span><span
+    class="s1">receiver</span><span class="s3">, </span><span class="s1">args</span><span class="s3">);</span>
+  <span class="s3">}</span>
+
+<span class="s4">var </span><span class="s1">ReflectOwnKeys</span>
+<span class="s4">if </span><span class="s3">(</span><span class="s1">R </span><span class="s3">&amp;&amp; </span><span
+    class="s4">typeof </span><span class="s1">R</span><span class="s3">.</span><span class="s1">ownKeys </span><span
+    class="s3">=== </span><span class="s2">'function'</span><span class="s3">) {</span>
+  <span class="s1">ReflectOwnKeys </span><span class="s3">= </span><span class="s1">R</span><span
+    class="s3">.</span><span class="s1">ownKeys</span>
+<span class="s3">} </span><span class="s4">else if </span><span class="s3">(</span><span class="s1">Object</span><span
+    class="s3">.</span><span class="s1">getOwnPropertySymbols</span><span class="s3">) {</span>
+  <span class="s1">ReflectOwnKeys </span><span class="s3">= </span><span class="s4">function </span><span class="s1">ReflectOwnKeys</span><span
+    class="s3">(</span><span class="s1">target</span><span class="s3">) {</span>
+    <span class="s4">return </span><span class="s1">Object</span><span class="s3">.</span><span class="s1">getOwnPropertyNames</span><span
+    class="s3">(</span><span class="s1">target</span><span class="s3">)</span>
+      <span class="s3">.</span><span class="s1">concat</span><span class="s3">(</span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">getOwnPropertySymbols</span><span
+    class="s3">(</span><span class="s1">target</span><span class="s3">));</span>
+  <span class="s3">};</span>
+<span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+  <span class="s1">ReflectOwnKeys </span><span class="s3">= </span><span class="s4">function </span><span class="s1">ReflectOwnKeys</span><span
+    class="s3">(</span><span class="s1">target</span><span class="s3">) {</span>
+    <span class="s4">return </span><span class="s1">Object</span><span class="s3">.</span><span class="s1">getOwnPropertyNames</span><span
+    class="s3">(</span><span class="s1">target</span><span class="s3">);</span>
+  <span class="s3">};</span>
+<span class="s3">}</span>
+
+<span class="s4">function </span><span class="s1">ProcessEmitWarning</span><span class="s3">(</span><span class="s1">warning</span><span
+    class="s3">) {</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">console </span><span
+    class="s3">&amp;&amp; </span><span class="s1">console</span><span class="s3">.</span><span
+    class="s1">warn</span><span class="s3">) </span><span class="s1">console</span><span class="s3">.</span><span
+    class="s1">warn</span><span class="s3">(</span><span class="s1">warning</span><span class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s4">var </span><span class="s1">NumberIsNaN </span><span class="s3">= </span><span class="s1">Number</span><span
+    class="s3">.</span><span class="s1">isNaN </span><span class="s3">|| </span><span class="s4">function </span><span
+    class="s1">NumberIsNaN</span><span class="s3">(</span><span class="s1">value</span><span class="s3">) {</span>
+  <span class="s4">return </span><span class="s1">value </span><span class="s3">!== </span><span class="s1">value</span><span
+    class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s4">function </span><span class="s1">EventEmitter</span><span class="s3">() {</span>
+  <span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">init</span><span
+    class="s3">.</span><span class="s1">call</span><span class="s3">(</span><span class="s4">this</span><span
+    class="s3">);</span>
+<span class="s3">}</span>
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">EventEmitter</span><span class="s3">;</span>
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports</span><span class="s3">.</span><span
+    class="s1">once </span><span class="s3">= </span><span class="s1">once</span><span class="s3">;</span>
+
+<span class="s0">// Backwards-compat with node 0.10.x</span>
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">EventEmitter </span><span
+    class="s3">= </span><span class="s1">EventEmitter</span><span class="s3">;</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">_events </span><span class="s3">= </span><span class="s1">undefined</span><span
+    class="s3">;</span>
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">_eventsCount </span><span class="s3">= </span><span class="s5">0</span><span
+    class="s3">;</span>
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">_maxListeners </span><span class="s3">= </span><span class="s1">undefined</span><span
+    class="s3">;</span>
+
+<span class="s0">// By default EventEmitters will print a warning if more than 10 listeners are</span>
+<span class="s0">// added to it. This is a useful default which helps finding memory leaks.</span>
+<span class="s4">var </span><span class="s1">defaultMaxListeners </span><span class="s3">= </span><span
+    class="s5">10</span><span class="s3">;</span>
+
+<span class="s4">function </span><span class="s1">checkListener</span><span class="s3">(</span><span
+    class="s1">listener</span><span class="s3">) {</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span
+    class="s1">listener </span><span class="s3">!== </span><span class="s2">'function'</span><span class="s3">) {</span>
+    <span class="s4">throw new </span><span class="s1">TypeError</span><span class="s3">(</span><span class="s2">'The &quot;listener&quot; argument must be of type Function. Received type ' </span><span
+    class="s3">+ </span><span class="s4">typeof </span><span class="s1">listener</span><span class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s1">Object</span><span class="s3">.</span><span class="s1">defineProperty</span><span
+    class="s3">(</span><span class="s1">EventEmitter</span><span class="s3">, </span><span class="s2">'defaultMaxListeners'</span><span
+    class="s3">, {</span>
+  <span class="s1">enumerable</span><span class="s3">: </span><span class="s4">true</span><span class="s3">,</span>
+  <span class="s1">get</span><span class="s3">: </span><span class="s4">function</span><span class="s3">() {</span>
+    <span class="s4">return </span><span class="s1">defaultMaxListeners</span><span class="s3">;</span>
+  <span class="s3">},</span>
+  <span class="s1">set</span><span class="s3">: </span><span class="s4">function</span><span class="s3">(</span><span
+    class="s1">arg</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span class="s1">arg </span><span
+    class="s3">!== </span><span class="s2">'number' </span><span class="s3">|| </span><span class="s1">arg </span><span
+    class="s3">&lt; </span><span class="s5">0 </span><span class="s3">|| </span><span class="s1">NumberIsNaN</span><span
+    class="s3">(</span><span class="s1">arg</span><span class="s3">)) {</span>
+      <span class="s4">throw new </span><span class="s1">RangeError</span><span class="s3">(</span><span class="s2">'The value of &quot;defaultMaxListeners&quot; is out of range. It must be a non-negative number. Received ' </span><span
+    class="s3">+ </span><span class="s1">arg </span><span class="s3">+ </span><span class="s2">'.'</span><span
+    class="s3">);</span>
+    <span class="s3">}</span>
+    <span class="s1">defaultMaxListeners </span><span class="s3">= </span><span class="s1">arg</span><span
+    class="s3">;</span>
+  <span class="s3">}</span>
+<span class="s3">});</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">init </span><span
+    class="s3">= </span><span class="s4">function</span><span class="s3">() {</span>
+
+  <span class="s4">if </span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_events </span><span class="s3">=== </span><span class="s1">undefined </span><span class="s3">||</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">_events </span><span
+    class="s3">=== </span><span class="s1">Object</span><span class="s3">.</span><span
+    class="s1">getPrototypeOf</span><span class="s3">(</span><span class="s4">this</span><span class="s3">).</span><span
+    class="s1">_events</span><span class="s3">) {</span>
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">_events </span><span class="s3">= </span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s4">null</span><span class="s3">);</span>
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">_eventsCount </span><span class="s3">= </span><span
+    class="s5">0</span><span class="s3">;</span>
+  <span class="s3">}</span>
+
+  <span class="s4">this</span><span class="s3">.</span><span class="s1">_maxListeners </span><span
+    class="s3">= </span><span class="s4">this</span><span class="s3">.</span><span class="s1">_maxListeners </span><span
+    class="s3">|| </span><span class="s1">undefined</span><span class="s3">;</span>
+<span class="s3">};</span>
+
+<span class="s0">// Obviously not all Emitters should be limited to 10. This function allows</span>
+<span class="s0">// that to be increased. Set to zero for unlimited.</span>
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">setMaxListeners </span><span class="s3">= </span><span
+    class="s4">function </span><span class="s1">setMaxListeners</span><span class="s3">(</span><span class="s1">n</span><span
+    class="s3">) {</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span class="s1">n </span><span
+    class="s3">!== </span><span class="s2">'number' </span><span class="s3">|| </span><span class="s1">n </span><span
+    class="s3">&lt; </span><span class="s5">0 </span><span class="s3">|| </span><span class="s1">NumberIsNaN</span><span
+    class="s3">(</span><span class="s1">n</span><span class="s3">)) {</span>
+    <span class="s4">throw new </span><span class="s1">RangeError</span><span class="s3">(</span><span class="s2">'The value of &quot;n&quot; is out of range. It must be a non-negative number. Received ' </span><span
+    class="s3">+ </span><span class="s1">n </span><span class="s3">+ </span><span class="s2">'.'</span><span class="s3">);</span>
+  <span class="s3">}</span>
+  <span class="s4">this</span><span class="s3">.</span><span class="s1">_maxListeners </span><span
+    class="s3">= </span><span class="s1">n</span><span class="s3">;</span>
+  <span class="s4">return this</span><span class="s3">;</span>
+<span class="s3">};</span>
+
+<span class="s4">function </span><span class="s1">_getMaxListeners</span><span class="s3">(</span><span
+    class="s1">that</span><span class="s3">) {</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">that</span><span class="s3">.</span><span
+    class="s1">_maxListeners </span><span class="s3">=== </span><span class="s1">undefined</span><span
+    class="s3">)</span>
+    <span class="s4">return </span><span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">defaultMaxListeners</span><span
+    class="s3">;</span>
+  <span class="s4">return </span><span class="s1">that</span><span class="s3">.</span><span
+    class="s1">_maxListeners</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">getMaxListeners </span><span class="s3">= </span><span
+    class="s4">function </span><span class="s1">getMaxListeners</span><span class="s3">() {</span>
+  <span class="s4">return </span><span class="s1">_getMaxListeners</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">);</span>
+<span class="s3">};</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">emit </span><span class="s3">= </span><span class="s4">function </span><span
+    class="s1">emit</span><span class="s3">(</span><span class="s1">type</span><span class="s3">) {</span>
+  <span class="s4">var </span><span class="s1">args </span><span class="s3">= [];</span>
+  <span class="s4">for </span><span class="s3">(</span><span class="s4">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">1</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">arguments</span><span class="s3">.</span><span class="s1">length</span><span class="s3">; </span><span
+    class="s1">i</span><span class="s3">++) </span><span class="s1">args</span><span class="s3">.</span><span
+    class="s1">push</span><span class="s3">(</span><span class="s1">arguments</span><span class="s3">[</span><span
+    class="s1">i</span><span class="s3">]);</span>
+  <span class="s4">var </span><span class="s1">doError </span><span class="s3">= (</span><span
+    class="s1">type </span><span class="s3">=== </span><span class="s2">'error'</span><span class="s3">);</span>
+
+  <span class="s4">var </span><span class="s1">events </span><span class="s3">= </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">_events</span><span class="s3">;</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">events </span><span class="s3">!== </span><span
+    class="s1">undefined</span><span class="s3">)</span>
+    <span class="s1">doError </span><span class="s3">= (</span><span class="s1">doError </span><span class="s3">&amp;&amp; </span><span
+    class="s1">events</span><span class="s3">.</span><span class="s1">error </span><span class="s3">=== </span><span
+    class="s1">undefined</span><span class="s3">);</span>
+  <span class="s4">else if </span><span class="s3">(!</span><span class="s1">doError</span><span class="s3">)</span>
+    <span class="s4">return false</span><span class="s3">;</span>
+
+  <span class="s0">// If there is no 'error' event listener then throw.</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">doError</span><span class="s3">) {</span>
+    <span class="s4">var </span><span class="s1">er</span><span class="s3">;</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">args</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">&gt; </span><span class="s5">0</span><span class="s3">)</span>
+      <span class="s1">er </span><span class="s3">= </span><span class="s1">args</span><span class="s3">[</span><span
+    class="s5">0</span><span class="s3">];</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">er </span><span
+    class="s4">instanceof </span><span class="s1">Error</span><span class="s3">) {</span>
+      <span class="s0">// Note: The comments on the `throw` lines are intentional, they show</span>
+      <span class="s0">// up in Node's output if this results in an unhandled exception.</span>
+      <span class="s4">throw </span><span class="s1">er</span><span class="s3">; </span><span class="s0">// Unhandled 'error' event</span>
+    <span class="s3">}</span>
+    <span class="s0">// At least give some kind of context to the user</span>
+    <span class="s4">var </span><span class="s1">err </span><span class="s3">= </span><span class="s4">new </span><span
+    class="s1">Error</span><span class="s3">(</span><span class="s2">'Unhandled error.' </span><span
+    class="s3">+ (</span><span class="s1">er </span><span class="s3">? </span><span class="s2">' (' </span><span
+    class="s3">+ </span><span class="s1">er</span><span class="s3">.</span><span class="s1">message </span><span
+    class="s3">+ </span><span class="s2">')' </span><span class="s3">: </span><span class="s2">''</span><span
+    class="s3">));</span>
+    <span class="s1">err</span><span class="s3">.</span><span class="s1">context </span><span class="s3">= </span><span
+    class="s1">er</span><span class="s3">;</span>
+    <span class="s4">throw </span><span class="s1">err</span><span class="s3">; </span><span class="s0">// Unhandled 'error' event</span>
+  <span class="s3">}</span>
+
+  <span class="s4">var </span><span class="s1">handler </span><span class="s3">= </span><span
+    class="s1">events</span><span class="s3">[</span><span class="s1">type</span><span class="s3">];</span>
+
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">handler </span><span class="s3">=== </span><span
+    class="s1">undefined</span><span class="s3">)</span>
+    <span class="s4">return false</span><span class="s3">;</span>
+
+  <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span
+    class="s1">handler </span><span class="s3">=== </span><span class="s2">'function'</span><span class="s3">) {</span>
+    <span class="s1">ReflectApply</span><span class="s3">(</span><span class="s1">handler</span><span
+    class="s3">, </span><span class="s4">this</span><span class="s3">, </span><span class="s1">args</span><span
+    class="s3">);</span>
+  <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+    <span class="s4">var </span><span class="s1">len </span><span class="s3">= </span><span
+    class="s1">handler</span><span class="s3">.</span><span class="s1">length</span><span class="s3">;</span>
+    <span class="s4">var </span><span class="s1">listeners </span><span class="s3">= </span><span
+    class="s1">arrayClone</span><span class="s3">(</span><span class="s1">handler</span><span class="s3">, </span><span
+    class="s1">len</span><span class="s3">);</span>
+    <span class="s4">for </span><span class="s3">(</span><span class="s4">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">len</span><span class="s3">; ++</span><span class="s1">i</span><span class="s3">)</span>
+      <span class="s1">ReflectApply</span><span class="s3">(</span><span class="s1">listeners</span><span
+    class="s3">[</span><span class="s1">i</span><span class="s3">], </span><span class="s4">this</span><span class="s3">, </span><span
+    class="s1">args</span><span class="s3">);</span>
+  <span class="s3">}</span>
+
+  <span class="s4">return true</span><span class="s3">;</span>
+<span class="s3">};</span>
+
+<span class="s4">function </span><span class="s1">_addListener</span><span class="s3">(</span><span
+    class="s1">target</span><span class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">, </span><span class="s1">prepend</span><span class="s3">) {</span>
+  <span class="s4">var </span><span class="s1">m</span><span class="s3">;</span>
+  <span class="s4">var </span><span class="s1">events</span><span class="s3">;</span>
+  <span class="s4">var </span><span class="s1">existing</span><span class="s3">;</span>
+
+  <span class="s1">checkListener</span><span class="s3">(</span><span class="s1">listener</span><span
+    class="s3">);</span>
+
+  <span class="s1">events </span><span class="s3">= </span><span class="s1">target</span><span class="s3">.</span><span
+    class="s1">_events</span><span class="s3">;</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">events </span><span class="s3">=== </span><span
+    class="s1">undefined</span><span class="s3">) {</span>
+    <span class="s1">events </span><span class="s3">= </span><span class="s1">target</span><span
+    class="s3">.</span><span class="s1">_events </span><span class="s3">= </span><span class="s1">Object</span><span
+    class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span class="s4">null</span><span
+    class="s3">);</span>
+    <span class="s1">target</span><span class="s3">.</span><span class="s1">_eventsCount </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">;</span>
+  <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+    <span class="s0">// To avoid recursion in the case that type === &quot;newListener&quot;! Before</span>
+    <span class="s0">// adding it to the listeners, first emit &quot;newListener&quot;.</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">events</span><span class="s3">.</span><span
+    class="s1">newListener </span><span class="s3">!== </span><span class="s1">undefined</span><span
+    class="s3">) {</span>
+      <span class="s1">target</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s2">'newListener'</span><span class="s3">, </span><span class="s1">type</span><span class="s3">,</span>
+                  <span class="s1">listener</span><span class="s3">.</span><span class="s1">listener </span><span
+    class="s3">? </span><span class="s1">listener</span><span class="s3">.</span><span class="s1">listener </span><span
+    class="s3">: </span><span class="s1">listener</span><span class="s3">);</span>
+
+      <span class="s0">// Re-assign `events` because a newListener handler could have caused the</span>
+      <span class="s0">// this._events to be assigned to a new object</span>
+      <span class="s1">events </span><span class="s3">= </span><span class="s1">target</span><span
+    class="s3">.</span><span class="s1">_events</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s1">existing </span><span class="s3">= </span><span class="s1">events</span><span
+    class="s3">[</span><span class="s1">type</span><span class="s3">];</span>
+  <span class="s3">}</span>
+
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">existing </span><span class="s3">=== </span><span
+    class="s1">undefined</span><span class="s3">) {</span>
+    <span class="s0">// Optimize the case of one listener. Don't need the extra array object.</span>
+    <span class="s1">existing </span><span class="s3">= </span><span class="s1">events</span><span
+    class="s3">[</span><span class="s1">type</span><span class="s3">] = </span><span class="s1">listener</span><span
+    class="s3">;</span>
+    <span class="s3">++</span><span class="s1">target</span><span class="s3">.</span><span
+    class="s1">_eventsCount</span><span class="s3">;</span>
+  <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span class="s1">existing </span><span
+    class="s3">=== </span><span class="s2">'function'</span><span class="s3">) {</span>
+      <span class="s0">// Adding the second element, need to change to array.</span>
+      <span class="s1">existing </span><span class="s3">= </span><span class="s1">events</span><span class="s3">[</span><span
+    class="s1">type</span><span class="s3">] =</span>
+        <span class="s1">prepend </span><span class="s3">? [</span><span class="s1">listener</span><span
+    class="s3">, </span><span class="s1">existing</span><span class="s3">] : [</span><span
+    class="s1">existing</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">];</span>
+      <span class="s0">// If we've already got an array, just append.</span>
+    <span class="s3">} </span><span class="s4">else if </span><span class="s3">(</span><span
+    class="s1">prepend</span><span class="s3">) {</span>
+      <span class="s1">existing</span><span class="s3">.</span><span class="s1">unshift</span><span
+    class="s3">(</span><span class="s1">listener</span><span class="s3">);</span>
+    <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+      <span class="s1">existing</span><span class="s3">.</span><span class="s1">push</span><span
+    class="s3">(</span><span class="s1">listener</span><span class="s3">);</span>
+    <span class="s3">}</span>
+
+    <span class="s0">// Check for listener leak</span>
+    <span class="s1">m </span><span class="s3">= </span><span class="s1">_getMaxListeners</span><span
+    class="s3">(</span><span class="s1">target</span><span class="s3">);</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">m </span><span class="s3">&gt; </span><span
+    class="s5">0 </span><span class="s3">&amp;&amp; </span><span class="s1">existing</span><span
+    class="s3">.</span><span class="s1">length </span><span class="s3">&gt; </span><span class="s1">m </span><span
+    class="s3">&amp;&amp; !</span><span class="s1">existing</span><span class="s3">.</span><span
+    class="s1">warned</span><span class="s3">) {</span>
+      <span class="s1">existing</span><span class="s3">.</span><span class="s1">warned </span><span class="s3">= </span><span
+    class="s4">true</span><span class="s3">;</span>
+      <span class="s0">// No error code for this since it is a Warning</span>
+      <span class="s0">// eslint-disable-next-line no-restricted-syntax</span>
+      <span class="s4">var </span><span class="s1">w </span><span class="s3">= </span><span class="s4">new </span><span
+    class="s1">Error</span><span class="s3">(</span><span
+    class="s2">'Possible EventEmitter memory leak detected. ' </span><span class="s3">+</span>
+                          <span class="s1">existing</span><span class="s3">.</span><span class="s1">length </span><span
+    class="s3">+ </span><span class="s2">' ' </span><span class="s3">+ </span><span class="s1">String</span><span
+    class="s3">(</span><span class="s1">type</span><span class="s3">) + </span><span
+    class="s2">' listeners ' </span><span class="s3">+</span>
+                          <span class="s2">'added. Use emitter.setMaxListeners() to ' </span><span class="s3">+</span>
+                          <span class="s2">'increase limit'</span><span class="s3">);</span>
+      <span class="s1">w</span><span class="s3">.</span><span class="s1">name </span><span class="s3">= </span><span
+    class="s2">'MaxListenersExceededWarning'</span><span class="s3">;</span>
+      <span class="s1">w</span><span class="s3">.</span><span class="s1">emitter </span><span class="s3">= </span><span
+    class="s1">target</span><span class="s3">;</span>
+      <span class="s1">w</span><span class="s3">.</span><span class="s1">type </span><span class="s3">= </span><span
+    class="s1">type</span><span class="s3">;</span>
+      <span class="s1">w</span><span class="s3">.</span><span class="s1">count </span><span class="s3">= </span><span
+    class="s1">existing</span><span class="s3">.</span><span class="s1">length</span><span class="s3">;</span>
+      <span class="s1">ProcessEmitWarning</span><span class="s3">(</span><span class="s1">w</span><span
+    class="s3">);</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s4">return </span><span class="s1">target</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">addListener </span><span class="s3">= </span><span
+    class="s4">function </span><span class="s1">addListener</span><span class="s3">(</span><span
+    class="s1">type</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">) {</span>
+  <span class="s4">return </span><span class="s1">_addListener</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">, </span><span class="s4">false</span><span class="s3">);</span>
+<span class="s3">};</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">on </span><span class="s3">= </span><span class="s1">EventEmitter</span><span
+    class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">addListener</span><span class="s3">;</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">prependListener </span><span class="s3">=</span>
+    <span class="s4">function </span><span class="s1">prependListener</span><span class="s3">(</span><span class="s1">type</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">) {</span>
+      <span class="s4">return </span><span class="s1">_addListener</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">, </span><span class="s4">true</span><span class="s3">);</span>
+    <span class="s3">};</span>
+
+<span class="s4">function </span><span class="s1">onceWrapper</span><span class="s3">() {</span>
+  <span class="s4">if </span><span class="s3">(!</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">fired</span><span class="s3">) {</span>
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">target</span><span class="s3">.</span><span
+    class="s1">removeListener</span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">, </span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">wrapFn</span><span class="s3">);</span>
+    <span class="s4">this</span><span class="s3">.</span><span class="s1">fired </span><span class="s3">= </span><span
+    class="s4">true</span><span class="s3">;</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">arguments</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">0</span><span class="s3">)</span>
+      <span class="s4">return this</span><span class="s3">.</span><span class="s1">listener</span><span
+    class="s3">.</span><span class="s1">call</span><span class="s3">(</span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">target</span><span class="s3">);</span>
+    <span class="s4">return this</span><span class="s3">.</span><span class="s1">listener</span><span
+    class="s3">.</span><span class="s1">apply</span><span class="s3">(</span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">target</span><span class="s3">, </span><span class="s1">arguments</span><span
+    class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">function </span><span class="s1">_onceWrap</span><span class="s3">(</span><span
+    class="s1">target</span><span class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">) {</span>
+  <span class="s4">var </span><span class="s1">state </span><span class="s3">= { </span><span
+    class="s1">fired</span><span class="s3">: </span><span class="s4">false</span><span class="s3">, </span><span
+    class="s1">wrapFn</span><span class="s3">: </span><span class="s1">undefined</span><span class="s3">, </span><span
+    class="s1">target</span><span class="s3">: </span><span class="s1">target</span><span class="s3">, </span><span
+    class="s1">type</span><span class="s3">: </span><span class="s1">type</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">: </span><span class="s1">listener </span><span class="s3">};</span>
+  <span class="s4">var </span><span class="s1">wrapped </span><span class="s3">= </span><span
+    class="s1">onceWrapper</span><span class="s3">.</span><span class="s1">bind</span><span class="s3">(</span><span
+    class="s1">state</span><span class="s3">);</span>
+  <span class="s1">wrapped</span><span class="s3">.</span><span class="s1">listener </span><span
+    class="s3">= </span><span class="s1">listener</span><span class="s3">;</span>
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">wrapFn </span><span class="s3">= </span><span
+    class="s1">wrapped</span><span class="s3">;</span>
+  <span class="s4">return </span><span class="s1">wrapped</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">once </span><span class="s3">= </span><span class="s4">function </span><span
+    class="s1">once</span><span class="s3">(</span><span class="s1">type</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">) {</span>
+  <span class="s1">checkListener</span><span class="s3">(</span><span class="s1">listener</span><span
+    class="s3">);</span>
+  <span class="s4">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s1">type</span><span class="s3">, </span><span class="s1">_onceWrap</span><span class="s3">(</span><span
+    class="s4">this</span><span class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">));</span>
+  <span class="s4">return this</span><span class="s3">;</span>
+<span class="s3">};</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">prependOnceListener </span><span class="s3">=</span>
+    <span class="s4">function </span><span class="s1">prependOnceListener</span><span class="s3">(</span><span
+    class="s1">type</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">) {</span>
+      <span class="s1">checkListener</span><span class="s3">(</span><span class="s1">listener</span><span
+    class="s3">);</span>
+      <span class="s4">this</span><span class="s3">.</span><span class="s1">prependListener</span><span
+    class="s3">(</span><span class="s1">type</span><span class="s3">, </span><span class="s1">_onceWrap</span><span
+    class="s3">(</span><span class="s4">this</span><span class="s3">, </span><span class="s1">type</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">));</span>
+      <span class="s4">return this</span><span class="s3">;</span>
+    <span class="s3">};</span>
+
+<span class="s0">// Emits a 'removeListener' event if and only if the listener was removed.</span>
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">removeListener </span><span class="s3">=</span>
+    <span class="s4">function </span><span class="s1">removeListener</span><span class="s3">(</span><span class="s1">type</span><span
+    class="s3">, </span><span class="s1">listener</span><span class="s3">) {</span>
+      <span class="s4">var </span><span class="s1">list</span><span class="s3">, </span><span
+    class="s1">events</span><span class="s3">, </span><span class="s1">position</span><span class="s3">, </span><span
+    class="s1">i</span><span class="s3">, </span><span class="s1">originalListener</span><span class="s3">;</span>
+
+      <span class="s1">checkListener</span><span class="s3">(</span><span class="s1">listener</span><span
+    class="s3">);</span>
+
+      <span class="s1">events </span><span class="s3">= </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">_events</span><span class="s3">;</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">events </span><span
+    class="s3">=== </span><span class="s1">undefined</span><span class="s3">)</span>
+        <span class="s4">return this</span><span class="s3">;</span>
+
+      <span class="s1">list </span><span class="s3">= </span><span class="s1">events</span><span
+    class="s3">[</span><span class="s1">type</span><span class="s3">];</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">list </span><span class="s3">=== </span><span
+    class="s1">undefined</span><span class="s3">)</span>
+        <span class="s4">return this</span><span class="s3">;</span>
+
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">list </span><span class="s3">=== </span><span
+    class="s1">listener </span><span class="s3">|| </span><span class="s1">list</span><span class="s3">.</span><span
+    class="s1">listener </span><span class="s3">=== </span><span class="s1">listener</span><span class="s3">) {</span>
+        <span class="s4">if </span><span class="s3">(--</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_eventsCount </span><span class="s3">=== </span><span class="s5">0</span><span class="s3">)</span>
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">_events </span><span
+    class="s3">= </span><span class="s1">Object</span><span class="s3">.</span><span class="s1">create</span><span
+    class="s3">(</span><span class="s4">null</span><span class="s3">);</span>
+        <span class="s4">else </span><span class="s3">{</span>
+          <span class="s4">delete </span><span class="s1">events</span><span class="s3">[</span><span
+    class="s1">type</span><span class="s3">];</span>
+          <span class="s4">if </span><span class="s3">(</span><span class="s1">events</span><span
+    class="s3">.</span><span class="s1">removeListener</span><span class="s3">)</span>
+            <span class="s4">this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s2">'removeListener'</span><span class="s3">, </span><span
+    class="s1">type</span><span class="s3">, </span><span class="s1">list</span><span class="s3">.</span><span
+    class="s1">listener </span><span class="s3">|| </span><span class="s1">listener</span><span class="s3">);</span>
+        <span class="s3">}</span>
+      <span class="s3">} </span><span class="s4">else if </span><span class="s3">(</span><span class="s4">typeof </span><span
+    class="s1">list </span><span class="s3">!== </span><span class="s2">'function'</span><span class="s3">) {</span>
+        <span class="s1">position </span><span class="s3">= -</span><span class="s5">1</span><span class="s3">;</span>
+
+        <span class="s4">for </span><span class="s3">(</span><span class="s1">i </span><span class="s3">= </span><span
+    class="s1">list</span><span class="s3">.</span><span class="s1">length </span><span class="s3">- </span><span
+    class="s5">1</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&gt;= </span><span
+    class="s5">0</span><span class="s3">; </span><span class="s1">i</span><span class="s3">--) {</span>
+          <span class="s4">if </span><span class="s3">(</span><span class="s1">list</span><span class="s3">[</span><span
+    class="s1">i</span><span class="s3">] === </span><span class="s1">listener </span><span class="s3">|| </span><span
+    class="s1">list</span><span class="s3">[</span><span class="s1">i</span><span class="s3">].</span><span class="s1">listener </span><span
+    class="s3">=== </span><span class="s1">listener</span><span class="s3">) {</span>
+            <span class="s1">originalListener </span><span class="s3">= </span><span class="s1">list</span><span
+    class="s3">[</span><span class="s1">i</span><span class="s3">].</span><span class="s1">listener</span><span
+    class="s3">;</span>
+            <span class="s1">position </span><span class="s3">= </span><span class="s1">i</span><span
+    class="s3">;</span>
+            <span class="s4">break</span><span class="s3">;</span>
+          <span class="s3">}</span>
+        <span class="s3">}</span>
+
+        <span class="s4">if </span><span class="s3">(</span><span class="s1">position </span><span
+    class="s3">&lt; </span><span class="s5">0</span><span class="s3">)</span>
+          <span class="s4">return this</span><span class="s3">;</span>
+
+        <span class="s4">if </span><span class="s3">(</span><span class="s1">position </span><span
+    class="s3">=== </span><span class="s5">0</span><span class="s3">)</span>
+          <span class="s1">list</span><span class="s3">.</span><span class="s1">shift</span><span class="s3">();</span>
+        <span class="s4">else </span><span class="s3">{</span>
+          <span class="s1">spliceOne</span><span class="s3">(</span><span class="s1">list</span><span
+    class="s3">, </span><span class="s1">position</span><span class="s3">);</span>
+        <span class="s3">}</span>
+
+        <span class="s4">if </span><span class="s3">(</span><span class="s1">list</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">1</span><span class="s3">)</span>
+          <span class="s1">events</span><span class="s3">[</span><span class="s1">type</span><span
+    class="s3">] = </span><span class="s1">list</span><span class="s3">[</span><span class="s5">0</span><span
+    class="s3">];</span>
+
+        <span class="s4">if </span><span class="s3">(</span><span class="s1">events</span><span class="s3">.</span><span
+    class="s1">removeListener </span><span class="s3">!== </span><span class="s1">undefined</span><span
+    class="s3">)</span>
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s2">'removeListener'</span><span class="s3">, </span><span
+    class="s1">type</span><span class="s3">, </span><span class="s1">originalListener </span><span class="s3">|| </span><span
+    class="s1">listener</span><span class="s3">);</span>
+      <span class="s3">}</span>
+
+      <span class="s4">return this</span><span class="s3">;</span>
+    <span class="s3">};</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">off </span><span class="s3">= </span><span class="s1">EventEmitter</span><span
+    class="s3">.</span><span class="s1">prototype</span><span class="s3">.</span><span
+    class="s1">removeListener</span><span class="s3">;</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">removeAllListeners </span><span class="s3">=</span>
+    <span class="s4">function </span><span class="s1">removeAllListeners</span><span class="s3">(</span><span
+    class="s1">type</span><span class="s3">) {</span>
+      <span class="s4">var </span><span class="s1">listeners</span><span class="s3">, </span><span
+    class="s1">events</span><span class="s3">, </span><span class="s1">i</span><span class="s3">;</span>
+
+      <span class="s1">events </span><span class="s3">= </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">_events</span><span class="s3">;</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">events </span><span
+    class="s3">=== </span><span class="s1">undefined</span><span class="s3">)</span>
+        <span class="s4">return this</span><span class="s3">;</span>
+
+      <span class="s0">// not listening for removeListener, no need to emit</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">events</span><span class="s3">.</span><span
+    class="s1">removeListener </span><span class="s3">=== </span><span class="s1">undefined</span><span
+    class="s3">) {</span>
+        <span class="s4">if </span><span class="s3">(</span><span class="s1">arguments</span><span
+    class="s3">.</span><span class="s1">length </span><span class="s3">=== </span><span class="s5">0</span><span
+    class="s3">) {</span>
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">_events </span><span
+    class="s3">= </span><span class="s1">Object</span><span class="s3">.</span><span class="s1">create</span><span
+    class="s3">(</span><span class="s4">null</span><span class="s3">);</span>
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">_eventsCount </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">;</span>
+        <span class="s3">} </span><span class="s4">else if </span><span class="s3">(</span><span
+    class="s1">events</span><span class="s3">[</span><span class="s1">type</span><span class="s3">] !== </span><span
+    class="s1">undefined</span><span class="s3">) {</span>
+          <span class="s4">if </span><span class="s3">(--</span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">_eventsCount </span><span class="s3">=== </span><span class="s5">0</span><span
+    class="s3">)</span>
+            <span class="s4">this</span><span class="s3">.</span><span class="s1">_events </span><span
+    class="s3">= </span><span class="s1">Object</span><span class="s3">.</span><span class="s1">create</span><span
+    class="s3">(</span><span class="s4">null</span><span class="s3">);</span>
+          <span class="s4">else</span>
+            <span class="s4">delete </span><span class="s1">events</span><span class="s3">[</span><span
+    class="s1">type</span><span class="s3">];</span>
+        <span class="s3">}</span>
+        <span class="s4">return this</span><span class="s3">;</span>
+      <span class="s3">}</span>
+
+      <span class="s0">// emit removeListener for all listeners on all events</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">arguments</span><span
+    class="s3">.</span><span class="s1">length </span><span class="s3">=== </span><span class="s5">0</span><span
+    class="s3">) {</span>
+        <span class="s4">var </span><span class="s1">keys </span><span class="s3">= </span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span
+    class="s1">events</span><span class="s3">);</span>
+        <span class="s4">var </span><span class="s1">key</span><span class="s3">;</span>
+        <span class="s4">for </span><span class="s3">(</span><span class="s1">i </span><span class="s3">= </span><span
+    class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">keys</span><span class="s3">.</span><span class="s1">length</span><span class="s3">; ++</span><span
+    class="s1">i</span><span class="s3">) {</span>
+          <span class="s1">key </span><span class="s3">= </span><span class="s1">keys</span><span
+    class="s3">[</span><span class="s1">i</span><span class="s3">];</span>
+          <span class="s4">if </span><span class="s3">(</span><span class="s1">key </span><span
+    class="s3">=== </span><span class="s2">'removeListener'</span><span class="s3">) </span><span
+    class="s4">continue</span><span class="s3">;</span>
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">removeAllListeners</span><span
+    class="s3">(</span><span class="s1">key</span><span class="s3">);</span>
+        <span class="s3">}</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">removeAllListeners</span><span class="s3">(</span><span
+    class="s2">'removeListener'</span><span class="s3">);</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">_events </span><span
+    class="s3">= </span><span class="s1">Object</span><span class="s3">.</span><span class="s1">create</span><span
+    class="s3">(</span><span class="s4">null</span><span class="s3">);</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">_eventsCount </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">;</span>
+        <span class="s4">return this</span><span class="s3">;</span>
+      <span class="s3">}</span>
+
+      <span class="s1">listeners </span><span class="s3">= </span><span class="s1">events</span><span
+    class="s3">[</span><span class="s1">type</span><span class="s3">];</span>
+
+      <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span
+    class="s1">listeners </span><span class="s3">=== </span><span class="s2">'function'</span><span
+    class="s3">) {</span>
+        <span class="s4">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">type</span><span class="s3">, </span><span class="s1">listeners</span><span
+    class="s3">);</span>
+      <span class="s3">} </span><span class="s4">else if </span><span class="s3">(</span><span
+    class="s1">listeners </span><span class="s3">!== </span><span class="s1">undefined</span><span class="s3">) {</span>
+        <span class="s0">// LIFO order</span>
+        <span class="s4">for </span><span class="s3">(</span><span class="s1">i </span><span class="s3">= </span><span
+    class="s1">listeners</span><span class="s3">.</span><span class="s1">length </span><span class="s3">- </span><span
+    class="s5">1</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&gt;= </span><span
+    class="s5">0</span><span class="s3">; </span><span class="s1">i</span><span class="s3">--) {</span>
+          <span class="s4">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">type</span><span class="s3">, </span><span class="s1">listeners</span><span
+    class="s3">[</span><span class="s1">i</span><span class="s3">]);</span>
+        <span class="s3">}</span>
+      <span class="s3">}</span>
+
+      <span class="s4">return this</span><span class="s3">;</span>
+    <span class="s3">};</span>
+
+<span class="s4">function </span><span class="s1">_listeners</span><span class="s3">(</span><span
+    class="s1">target</span><span class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span
+    class="s1">unwrap</span><span class="s3">) {</span>
+  <span class="s4">var </span><span class="s1">events </span><span class="s3">= </span><span
+    class="s1">target</span><span class="s3">.</span><span class="s1">_events</span><span class="s3">;</span>
+
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">events </span><span class="s3">=== </span><span
+    class="s1">undefined</span><span class="s3">)</span>
+    <span class="s4">return </span><span class="s3">[];</span>
+
+  <span class="s4">var </span><span class="s1">evlistener </span><span class="s3">= </span><span
+    class="s1">events</span><span class="s3">[</span><span class="s1">type</span><span class="s3">];</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">evlistener </span><span
+    class="s3">=== </span><span class="s1">undefined</span><span class="s3">)</span>
+    <span class="s4">return </span><span class="s3">[];</span>
+
+  <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span class="s1">evlistener </span><span
+    class="s3">=== </span><span class="s2">'function'</span><span class="s3">)</span>
+    <span class="s4">return </span><span class="s1">unwrap </span><span class="s3">? [</span><span
+    class="s1">evlistener</span><span class="s3">.</span><span class="s1">listener </span><span
+    class="s3">|| </span><span class="s1">evlistener</span><span class="s3">] : [</span><span
+    class="s1">evlistener</span><span class="s3">];</span>
+
+  <span class="s4">return </span><span class="s1">unwrap </span><span class="s3">?</span>
+    <span class="s1">unwrapListeners</span><span class="s3">(</span><span class="s1">evlistener</span><span class="s3">) : </span><span
+    class="s1">arrayClone</span><span class="s3">(</span><span class="s1">evlistener</span><span
+    class="s3">, </span><span class="s1">evlistener</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">listeners </span><span class="s3">= </span><span
+    class="s4">function </span><span class="s1">listeners</span><span class="s3">(</span><span
+    class="s1">type</span><span class="s3">) {</span>
+  <span class="s4">return </span><span class="s1">_listeners</span><span class="s3">(</span><span class="s4">this</span><span
+    class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span class="s4">true</span><span
+    class="s3">);</span>
+<span class="s3">};</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">rawListeners </span><span class="s3">= </span><span
+    class="s4">function </span><span class="s1">rawListeners</span><span class="s3">(</span><span class="s1">type</span><span
+    class="s3">) {</span>
+  <span class="s4">return </span><span class="s1">_listeners</span><span class="s3">(</span><span class="s4">this</span><span
+    class="s3">, </span><span class="s1">type</span><span class="s3">, </span><span class="s4">false</span><span
+    class="s3">);</span>
+<span class="s3">};</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">listenerCount </span><span
+    class="s3">= </span><span class="s4">function</span><span class="s3">(</span><span class="s1">emitter</span><span
+    class="s3">, </span><span class="s1">type</span><span class="s3">) {</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span
+    class="s1">emitter</span><span class="s3">.</span><span class="s1">listenerCount </span><span class="s3">=== </span><span
+    class="s2">'function'</span><span class="s3">) {</span>
+    <span class="s4">return </span><span class="s1">emitter</span><span class="s3">.</span><span class="s1">listenerCount</span><span
+    class="s3">(</span><span class="s1">type</span><span class="s3">);</span>
+  <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+    <span class="s4">return </span><span class="s1">listenerCount</span><span class="s3">.</span><span
+    class="s1">call</span><span class="s3">(</span><span class="s1">emitter</span><span class="s3">, </span><span
+    class="s1">type</span><span class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">};</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">listenerCount </span><span class="s3">= </span><span
+    class="s1">listenerCount</span><span class="s3">;</span>
+<span class="s4">function </span><span class="s1">listenerCount</span><span class="s3">(</span><span
+    class="s1">type</span><span class="s3">) {</span>
+  <span class="s4">var </span><span class="s1">events </span><span class="s3">= </span><span class="s4">this</span><span
+    class="s3">.</span><span class="s1">_events</span><span class="s3">;</span>
+
+  <span class="s4">if </span><span class="s3">(</span><span class="s1">events </span><span class="s3">!== </span><span
+    class="s1">undefined</span><span class="s3">) {</span>
+    <span class="s4">var </span><span class="s1">evlistener </span><span class="s3">= </span><span
+    class="s1">events</span><span class="s3">[</span><span class="s1">type</span><span class="s3">];</span>
+
+    <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span
+    class="s1">evlistener </span><span class="s3">=== </span><span class="s2">'function'</span><span
+    class="s3">) {</span>
+      <span class="s4">return </span><span class="s5">1</span><span class="s3">;</span>
+    <span class="s3">} </span><span class="s4">else if </span><span class="s3">(</span><span
+    class="s1">evlistener </span><span class="s3">!== </span><span class="s1">undefined</span><span
+    class="s3">) {</span>
+      <span class="s4">return </span><span class="s1">evlistener</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">;</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s4">return </span><span class="s5">0</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">eventNames </span><span class="s3">= </span><span
+    class="s4">function </span><span class="s1">eventNames</span><span class="s3">() {</span>
+  <span class="s4">return this</span><span class="s3">.</span><span class="s1">_eventsCount </span><span
+    class="s3">&gt; </span><span class="s5">0 </span><span class="s3">? </span><span
+    class="s1">ReflectOwnKeys</span><span class="s3">(</span><span class="s4">this</span><span class="s3">.</span><span
+    class="s1">_events</span><span class="s3">) : [];</span>
+<span class="s3">};</span>
+
+<span class="s4">function </span><span class="s1">arrayClone</span><span class="s3">(</span><span
+    class="s1">arr</span><span class="s3">, </span><span class="s1">n</span><span class="s3">) {</span>
+  <span class="s4">var </span><span class="s1">copy </span><span class="s3">= </span><span class="s4">new </span><span
+    class="s1">Array</span><span class="s3">(</span><span class="s1">n</span><span class="s3">);</span>
+  <span class="s4">for </span><span class="s3">(</span><span class="s4">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">n</span><span class="s3">; ++</span><span class="s1">i</span><span class="s3">)</span>
+    <span class="s1">copy</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] = </span><span
+    class="s1">arr</span><span class="s3">[</span><span class="s1">i</span><span class="s3">];</span>
+  <span class="s4">return </span><span class="s1">copy</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s4">function </span><span class="s1">spliceOne</span><span class="s3">(</span><span
+    class="s1">list</span><span class="s3">, </span><span class="s1">index</span><span class="s3">) {</span>
+  <span class="s4">for </span><span class="s3">(; </span><span class="s1">index </span><span class="s3">+ </span><span
+    class="s5">1 </span><span class="s3">&lt; </span><span class="s1">list</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">; </span><span class="s1">index</span><span class="s3">++)</span>
+    <span class="s1">list</span><span class="s3">[</span><span class="s1">index</span><span class="s3">] = </span><span
+    class="s1">list</span><span class="s3">[</span><span class="s1">index </span><span class="s3">+ </span><span
+    class="s5">1</span><span class="s3">];</span>
+  <span class="s1">list</span><span class="s3">.</span><span class="s1">pop</span><span class="s3">();</span>
+<span class="s3">}</span>
+
+<span class="s4">function </span><span class="s1">unwrapListeners</span><span class="s3">(</span><span
+    class="s1">arr</span><span class="s3">) {</span>
+  <span class="s4">var </span><span class="s1">ret </span><span class="s3">= </span><span class="s4">new </span><span
+    class="s1">Array</span><span class="s3">(</span><span class="s1">arr</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">);</span>
+  <span class="s4">for </span><span class="s3">(</span><span class="s4">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">ret</span><span class="s3">.</span><span class="s1">length</span><span class="s3">; ++</span><span
+    class="s1">i</span><span class="s3">) {</span>
+    <span class="s1">ret</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] = </span><span
+    class="s1">arr</span><span class="s3">[</span><span class="s1">i</span><span class="s3">].</span><span class="s1">listener </span><span
+    class="s3">|| </span><span class="s1">arr</span><span class="s3">[</span><span class="s1">i</span><span class="s3">];</span>
+  <span class="s3">}</span>
+  <span class="s4">return </span><span class="s1">ret</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s4">function </span><span class="s1">once</span><span class="s3">(</span><span
+    class="s1">emitter</span><span class="s3">, </span><span class="s1">name</span><span class="s3">) {</span>
+  <span class="s4">return new </span><span class="s1">Promise</span><span class="s3">(</span><span
+    class="s4">function </span><span class="s3">(</span><span class="s1">resolve</span><span class="s3">, </span><span
+    class="s1">reject</span><span class="s3">) {</span>
+    <span class="s4">function </span><span class="s1">errorListener</span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+      <span class="s1">emitter</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">name</span><span class="s3">, </span><span class="s1">resolver</span><span
+    class="s3">);</span>
+      <span class="s1">reject</span><span class="s3">(</span><span class="s1">err</span><span class="s3">);</span>
+    <span class="s3">}</span>
+
+    <span class="s4">function </span><span class="s1">resolver</span><span class="s3">() {</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span class="s1">emitter</span><span
+    class="s3">.</span><span class="s1">removeListener </span><span class="s3">=== </span><span
+    class="s2">'function'</span><span class="s3">) {</span>
+        <span class="s1">emitter</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s2">'error'</span><span class="s3">, </span><span
+    class="s1">errorListener</span><span class="s3">);</span>
+      <span class="s3">}</span>
+      <span class="s1">resolve</span><span class="s3">([].</span><span class="s1">slice</span><span
+    class="s3">.</span><span class="s1">call</span><span class="s3">(</span><span class="s1">arguments</span><span
+    class="s3">));</span>
+    <span class="s3">};</span>
+
+    <span class="s1">eventTargetAgnosticAddListener</span><span class="s3">(</span><span class="s1">emitter</span><span
+    class="s3">, </span><span class="s1">name</span><span class="s3">, </span><span class="s1">resolver</span><span
+    class="s3">, { </span><span class="s1">once</span><span class="s3">: </span><span class="s4">true </span><span
+    class="s3">});</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">name </span><span class="s3">!== </span><span
+    class="s2">'error'</span><span class="s3">) {</span>
+      <span class="s1">addErrorHandlerIfEventEmitter</span><span class="s3">(</span><span class="s1">emitter</span><span
+    class="s3">, </span><span class="s1">errorListener</span><span class="s3">, { </span><span
+    class="s1">once</span><span class="s3">: </span><span class="s4">true </span><span class="s3">});</span>
+    <span class="s3">}</span>
+  <span class="s3">});</span>
+<span class="s3">}</span>
+
+<span class="s4">function </span><span class="s1">addErrorHandlerIfEventEmitter</span><span class="s3">(</span><span
+    class="s1">emitter</span><span class="s3">, </span><span class="s1">handler</span><span class="s3">, </span><span
+    class="s1">flags</span><span class="s3">) {</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span
+    class="s1">emitter</span><span class="s3">.</span><span class="s1">on </span><span class="s3">=== </span><span
+    class="s2">'function'</span><span class="s3">) {</span>
+    <span class="s1">eventTargetAgnosticAddListener</span><span class="s3">(</span><span class="s1">emitter</span><span
+    class="s3">, </span><span class="s2">'error'</span><span class="s3">, </span><span class="s1">handler</span><span
+    class="s3">, </span><span class="s1">flags</span><span class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">function </span><span class="s1">eventTargetAgnosticAddListener</span><span class="s3">(</span><span
+    class="s1">emitter</span><span class="s3">, </span><span class="s1">name</span><span class="s3">, </span><span
+    class="s1">listener</span><span class="s3">, </span><span class="s1">flags</span><span class="s3">) {</span>
+  <span class="s4">if </span><span class="s3">(</span><span class="s4">typeof </span><span
+    class="s1">emitter</span><span class="s3">.</span><span class="s1">on </span><span class="s3">=== </span><span
+    class="s2">'function'</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">flags</span><span class="s3">.</span><span
+    class="s1">once</span><span class="s3">) {</span>
+      <span class="s1">emitter</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s1">name</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">);</span>
+    <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+      <span class="s1">emitter</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s1">name</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">);</span>
+    <span class="s3">}</span>
+  <span class="s3">} </span><span class="s4">else if </span><span class="s3">(</span><span
+    class="s4">typeof </span><span class="s1">emitter</span><span class="s3">.</span><span
+    class="s1">addEventListener </span><span class="s3">=== </span><span class="s2">'function'</span><span class="s3">) {</span>
+    <span class="s0">// EventTarget does not have `error` event semantics like Node</span>
+    <span class="s0">// EventEmitters, we do not listen for `error` events here.</span>
+    <span class="s1">emitter</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s1">name</span><span class="s3">, </span><span class="s4">function </span><span
+    class="s1">wrapListener</span><span class="s3">(</span><span class="s1">arg</span><span class="s3">) {</span>
+      <span class="s0">// IE does not have builtin `{ once: true }` support so we</span>
+      <span class="s0">// have to do it manually.</span>
+      <span class="s4">if </span><span class="s3">(</span><span class="s1">flags</span><span class="s3">.</span><span
+    class="s1">once</span><span class="s3">) {</span>
+        <span class="s1">emitter</span><span class="s3">.</span><span class="s1">removeEventListener</span><span
+    class="s3">(</span><span class="s1">name</span><span class="s3">, </span><span class="s1">wrapListener</span><span
+    class="s3">);</span>
+      <span class="s3">}</span>
+      <span class="s1">listener</span><span class="s3">(</span><span class="s1">arg</span><span class="s3">);</span>
+    <span class="s3">});</span>
+  <span class="s3">} </span><span class="s4">else </span><span class="s3">{</span>
+    <span class="s4">throw new </span><span class="s1">TypeError</span><span class="s3">(</span><span class="s2">'The &quot;emitter&quot; argument must be of type EventEmitter. Received type ' </span><span
+    class="s3">+ </span><span class="s4">typeof </span><span class="s1">emitter</span><span class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

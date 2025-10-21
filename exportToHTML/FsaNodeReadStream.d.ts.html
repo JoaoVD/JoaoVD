@@ -1,0 +1,92 @@
+<html>
+<head>
+  <title>FsaNodeReadStream.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsaNodeReadStream.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">Readable </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'../vendor/node/stream'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">Defer </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'thingies/lib/Defer'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">FsaNodeFsOpenFile </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'./FsaNodeFsOpenFile'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">IReadStream </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types/misc'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">IReadStreamOptions </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types/options'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">FsaNodeFs </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./FsaNodeFs'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">FsaNodeReadStream </span><span
+    class="s0">extends </span><span class="s1">Readable </span><span class="s0">implements </span><span class="s1">IReadStream </span><span
+    class="s2">{</span>
+    <span class="s0">protected </span><span class="s1">readonly fs</span><span class="s2">: </span><span class="s1">FsaNodeFs</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly handle</span><span class="s2">: </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">FsaNodeFsOpenFile</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly path</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly options</span><span class="s2">: </span><span
+    class="s1">IReadStreamOptions</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">__pending__</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">__closed__</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">__bytes__</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly __mutex__</span><span class="s2">: &lt;</span><span
+    class="s1">T </span><span class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span
+    class="s1">code</span><span class="s2">: </span><span class="s0">import</span><span class="s2">(</span><span
+    class="s3">&quot;thingies&quot;</span><span class="s2">).</span><span class="s1">Code</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;;</span>
+    <span class="s0">protected </span><span class="s1">readonly __file__</span><span class="s2">: </span><span
+    class="s1">Defer</span><span class="s2">&lt;</span><span class="s1">FsaNodeFsOpenFile</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">fs</span><span
+    class="s2">: </span><span class="s1">FsaNodeFs</span><span class="s2">, </span><span class="s1">handle</span><span
+    class="s2">: </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">FsaNodeFsOpenFile</span><span class="s2">&gt;, </span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">: </span><span class="s1">IReadStreamOptions</span><span class="s2">);</span>
+    <span class="s0">private </span><span class="s1">__read__</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">__close__</span><span class="s2">;</span>
+    <span class="s1">get bytesRead</span><span class="s2">(): </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">get pending</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">_read</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

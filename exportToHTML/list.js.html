@@ -1,0 +1,293 @@
+<html>
+<head>
+  <title>list.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #7a7e85;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          list.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">// XXX: This shares a lot in common with extract.js</span>
+<span class="s2">// maybe some DRY opportunity here?</span>
+
+<span class="s2">// tar -t</span>
+<span class="s3">const </span><span class="s1">hlo </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'./high-level-opt.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">Parser </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./parse.js'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">fs </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'fs'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">fsm </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'fs-minipass'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'path'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">stripSlash </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'./strip-trailing-slashes.js'</span><span
+    class="s4">)</span>
+
+<span class="s1">module</span><span class="s4">.</span><span class="s1">exports </span><span class="s4">= (</span><span
+    class="s1">opt_</span><span class="s4">, </span><span class="s1">files</span><span class="s4">, </span><span
+    class="s1">cb</span><span class="s4">) =&gt; {</span>
+  <span class="s3">if </span><span class="s4">(</span><span class="s3">typeof </span><span class="s1">opt_ </span><span
+    class="s4">=== </span><span class="s0">'function'</span><span class="s4">) {</span>
+    <span class="s1">cb </span><span class="s4">= </span><span class="s1">opt_</span><span class="s4">, </span><span
+    class="s1">files </span><span class="s4">= </span><span class="s3">null</span><span class="s4">, </span><span
+    class="s1">opt_ </span><span class="s4">= {}</span>
+  <span class="s4">} </span><span class="s3">else if </span><span class="s4">(</span><span class="s1">Array</span><span
+    class="s4">.</span><span class="s1">isArray</span><span class="s4">(</span><span class="s1">opt_</span><span
+    class="s4">)) {</span>
+    <span class="s1">files </span><span class="s4">= </span><span class="s1">opt_</span><span class="s4">, </span><span
+    class="s1">opt_ </span><span class="s4">= {}</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s3">typeof </span><span class="s1">files </span><span
+    class="s4">=== </span><span class="s0">'function'</span><span class="s4">) {</span>
+    <span class="s1">cb </span><span class="s4">= </span><span class="s1">files</span><span class="s4">, </span><span
+    class="s1">files </span><span class="s4">= </span><span class="s3">null</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(!</span><span class="s1">files</span><span class="s4">) {</span>
+    <span class="s1">files </span><span class="s4">= []</span>
+  <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+    <span class="s1">files </span><span class="s4">= </span><span class="s1">Array</span><span class="s4">.</span><span
+    class="s1">from</span><span class="s4">(</span><span class="s1">files</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">const </span><span class="s1">opt </span><span class="s4">= </span><span class="s1">hlo</span><span
+    class="s4">(</span><span class="s1">opt_</span><span class="s4">)</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">sync </span><span class="s4">&amp;&amp; </span><span class="s3">typeof </span><span class="s1">cb </span><span
+    class="s4">=== </span><span class="s0">'function'</span><span class="s4">) {</span>
+    <span class="s3">throw new </span><span class="s1">TypeError</span><span class="s4">(</span><span class="s0">'callback not supported for sync tar functions'</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(!</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">file </span><span class="s4">&amp;&amp; </span><span class="s3">typeof </span><span class="s1">cb </span><span
+    class="s4">=== </span><span class="s0">'function'</span><span class="s4">) {</span>
+    <span class="s3">throw new </span><span class="s1">TypeError</span><span class="s4">(</span><span class="s0">'callback only supported with file option'</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">files</span><span class="s4">.</span><span
+    class="s1">length</span><span class="s4">) {</span>
+    <span class="s1">filesFilter</span><span class="s4">(</span><span class="s1">opt</span><span
+    class="s4">, </span><span class="s1">files</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(!</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">noResume</span><span class="s4">) {</span>
+    <span class="s1">onentryFunction</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">return </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">file </span><span
+    class="s4">&amp;&amp; </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">sync </span><span
+    class="s4">? </span><span class="s1">listFileSync</span><span class="s4">(</span><span class="s1">opt</span><span
+    class="s4">)</span>
+    <span class="s4">: </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">file </span><span
+    class="s4">? </span><span class="s1">listFile</span><span class="s4">(</span><span class="s1">opt</span><span
+    class="s4">, </span><span class="s1">cb</span><span class="s4">)</span>
+    <span class="s4">: </span><span class="s1">list</span><span class="s4">(</span><span class="s1">opt</span><span
+    class="s4">)</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">onentryFunction </span><span class="s4">= </span><span
+    class="s1">opt </span><span class="s4">=&gt; {</span>
+  <span class="s3">const </span><span class="s1">onentry </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">onentry</span>
+  <span class="s1">opt</span><span class="s4">.</span><span class="s1">onentry </span><span class="s4">= </span><span
+    class="s1">onentry </span><span class="s4">? </span><span class="s1">e </span><span class="s4">=&gt; {</span>
+    <span class="s1">onentry</span><span class="s4">(</span><span class="s1">e</span><span class="s4">)</span>
+    <span class="s1">e</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+  <span class="s4">} : </span><span class="s1">e </span><span class="s4">=&gt; </span><span class="s1">e</span><span
+    class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+<span class="s4">}</span>
+
+<span class="s2">// construct a filter that limits the file entries listed</span>
+<span class="s2">// include child entries if a dir is included</span>
+<span class="s3">const </span><span class="s1">filesFilter </span><span class="s4">= (</span><span class="s1">opt</span><span
+    class="s4">, </span><span class="s1">files</span><span class="s4">) =&gt; {</span>
+  <span class="s3">const </span><span class="s1">map </span><span class="s4">= </span><span class="s3">new </span><span
+    class="s1">Map</span><span class="s4">(</span><span class="s1">files</span><span class="s4">.</span><span
+    class="s1">map</span><span class="s4">(</span><span class="s1">f </span><span class="s4">=&gt; [</span><span
+    class="s1">stripSlash</span><span class="s4">(</span><span class="s1">f</span><span class="s4">), </span><span
+    class="s3">true</span><span class="s4">]))</span>
+  <span class="s3">const </span><span class="s1">filter </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">filter</span>
+
+  <span class="s3">const </span><span class="s1">mapHas </span><span class="s4">= (</span><span
+    class="s1">file</span><span class="s4">, </span><span class="s1">r</span><span class="s4">) =&gt; {</span>
+    <span class="s3">const </span><span class="s1">root </span><span class="s4">= </span><span class="s1">r </span><span
+    class="s4">|| </span><span class="s1">path</span><span class="s4">.</span><span class="s1">parse</span><span
+    class="s4">(</span><span class="s1">file</span><span class="s4">).</span><span class="s1">root </span><span
+    class="s4">|| </span><span class="s0">'.'</span>
+    <span class="s3">const </span><span class="s1">ret </span><span class="s4">= </span><span
+    class="s1">file </span><span class="s4">=== </span><span class="s1">root </span><span class="s4">? </span><span
+    class="s3">false</span>
+      <span class="s4">: </span><span class="s1">map</span><span class="s4">.</span><span class="s1">has</span><span
+    class="s4">(</span><span class="s1">file</span><span class="s4">) ? </span><span class="s1">map</span><span
+    class="s4">.</span><span class="s1">get</span><span class="s4">(</span><span class="s1">file</span><span class="s4">)</span>
+      <span class="s4">: </span><span class="s1">mapHas</span><span class="s4">(</span><span class="s1">path</span><span
+    class="s4">.</span><span class="s1">dirname</span><span class="s4">(</span><span class="s1">file</span><span
+    class="s4">), </span><span class="s1">root</span><span class="s4">)</span>
+
+    <span class="s1">map</span><span class="s4">.</span><span class="s1">set</span><span class="s4">(</span><span
+    class="s1">file</span><span class="s4">, </span><span class="s1">ret</span><span class="s4">)</span>
+    <span class="s3">return </span><span class="s1">ret</span>
+  <span class="s4">}</span>
+
+  <span class="s1">opt</span><span class="s4">.</span><span class="s1">filter </span><span class="s4">= </span><span
+    class="s1">filter</span>
+    <span class="s4">? (</span><span class="s1">file</span><span class="s4">, </span><span class="s1">entry</span><span
+    class="s4">) =&gt; </span><span class="s1">filter</span><span class="s4">(</span><span class="s1">file</span><span
+    class="s4">, </span><span class="s1">entry</span><span class="s4">) &amp;&amp; </span><span class="s1">mapHas</span><span
+    class="s4">(</span><span class="s1">stripSlash</span><span class="s4">(</span><span class="s1">file</span><span
+    class="s4">))</span>
+    <span class="s4">: </span><span class="s1">file </span><span class="s4">=&gt; </span><span
+    class="s1">mapHas</span><span class="s4">(</span><span class="s1">stripSlash</span><span class="s4">(</span><span
+    class="s1">file</span><span class="s4">))</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">listFileSync </span><span class="s4">= </span><span
+    class="s1">opt </span><span class="s4">=&gt; {</span>
+  <span class="s3">const </span><span class="s1">p </span><span class="s4">= </span><span class="s1">list</span><span
+    class="s4">(</span><span class="s1">opt</span><span class="s4">)</span>
+  <span class="s3">const </span><span class="s1">file </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">file</span>
+  <span class="s3">let </span><span class="s1">threw </span><span class="s4">= </span><span class="s3">true</span>
+  <span class="s3">let </span><span class="s1">fd</span>
+  <span class="s3">try </span><span class="s4">{</span>
+    <span class="s3">const </span><span class="s1">stat </span><span class="s4">= </span><span class="s1">fs</span><span
+    class="s4">.</span><span class="s1">statSync</span><span class="s4">(</span><span class="s1">file</span><span
+    class="s4">)</span>
+    <span class="s3">const </span><span class="s1">readSize </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">maxReadSize </span><span class="s4">|| </span><span class="s5">16 </span><span
+    class="s4">* </span><span class="s5">1024 </span><span class="s4">* </span><span class="s5">1024</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">stat</span><span class="s4">.</span><span
+    class="s1">size </span><span class="s4">&lt; </span><span class="s1">readSize</span><span class="s4">) {</span>
+      <span class="s1">p</span><span class="s4">.</span><span class="s1">end</span><span class="s4">(</span><span
+    class="s1">fs</span><span class="s4">.</span><span class="s1">readFileSync</span><span class="s4">(</span><span
+    class="s1">file</span><span class="s4">))</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s3">let </span><span class="s1">pos </span><span class="s4">= </span><span class="s5">0</span>
+      <span class="s3">const </span><span class="s1">buf </span><span class="s4">= </span><span class="s1">Buffer</span><span
+    class="s4">.</span><span class="s1">allocUnsafe</span><span class="s4">(</span><span class="s1">readSize</span><span
+    class="s4">)</span>
+      <span class="s1">fd </span><span class="s4">= </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">openSync</span><span class="s4">(</span><span class="s1">file</span><span class="s4">, </span><span
+    class="s0">'r'</span><span class="s4">)</span>
+      <span class="s3">while </span><span class="s4">(</span><span class="s1">pos </span><span
+    class="s4">&lt; </span><span class="s1">stat</span><span class="s4">.</span><span class="s1">size</span><span
+    class="s4">) {</span>
+        <span class="s3">const </span><span class="s1">bytesRead </span><span class="s4">= </span><span
+    class="s1">fs</span><span class="s4">.</span><span class="s1">readSync</span><span class="s4">(</span><span
+    class="s1">fd</span><span class="s4">, </span><span class="s1">buf</span><span class="s4">, </span><span class="s5">0</span><span
+    class="s4">, </span><span class="s1">readSize</span><span class="s4">, </span><span class="s1">pos</span><span
+    class="s4">)</span>
+        <span class="s1">pos </span><span class="s4">+= </span><span class="s1">bytesRead</span>
+        <span class="s1">p</span><span class="s4">.</span><span class="s1">write</span><span class="s4">(</span><span
+    class="s1">buf</span><span class="s4">.</span><span class="s1">slice</span><span class="s4">(</span><span
+    class="s5">0</span><span class="s4">, </span><span class="s1">bytesRead</span><span class="s4">))</span>
+      <span class="s4">}</span>
+      <span class="s1">p</span><span class="s4">.</span><span class="s1">end</span><span class="s4">()</span>
+    <span class="s4">}</span>
+    <span class="s1">threw </span><span class="s4">= </span><span class="s3">false</span>
+  <span class="s4">} </span><span class="s3">finally </span><span class="s4">{</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">threw </span><span
+    class="s4">&amp;&amp; </span><span class="s1">fd</span><span class="s4">) {</span>
+      <span class="s3">try </span><span class="s4">{</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">closeSync</span><span
+    class="s4">(</span><span class="s1">fd</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {}</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">listFile </span><span class="s4">= (</span><span
+    class="s1">opt</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) =&gt; {</span>
+  <span class="s3">const </span><span class="s1">parse </span><span class="s4">= </span><span
+    class="s3">new </span><span class="s1">Parser</span><span class="s4">(</span><span class="s1">opt</span><span
+    class="s4">)</span>
+  <span class="s3">const </span><span class="s1">readSize </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">maxReadSize </span><span class="s4">|| </span><span
+    class="s5">16 </span><span class="s4">* </span><span class="s5">1024 </span><span class="s4">* </span><span
+    class="s5">1024</span>
+
+  <span class="s3">const </span><span class="s1">file </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">file</span>
+  <span class="s3">const </span><span class="s1">p </span><span class="s4">= </span><span class="s3">new </span><span
+    class="s1">Promise</span><span class="s4">((</span><span class="s1">resolve</span><span class="s4">, </span><span
+    class="s1">reject</span><span class="s4">) =&gt; {</span>
+    <span class="s1">parse</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'error'</span><span class="s4">, </span><span class="s1">reject</span><span class="s4">)</span>
+    <span class="s1">parse</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'end'</span><span class="s4">, </span><span class="s1">resolve</span><span class="s4">)</span>
+
+    <span class="s1">fs</span><span class="s4">.</span><span class="s1">stat</span><span class="s4">(</span><span
+    class="s1">file</span><span class="s4">, (</span><span class="s1">er</span><span class="s4">, </span><span
+    class="s1">stat</span><span class="s4">) =&gt; {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+        <span class="s1">reject</span><span class="s4">(</span><span class="s1">er</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+        <span class="s3">const </span><span class="s1">stream </span><span class="s4">= </span><span
+    class="s3">new </span><span class="s1">fsm</span><span class="s4">.</span><span class="s1">ReadStream</span><span
+    class="s4">(</span><span class="s1">file</span><span class="s4">, {</span>
+          <span class="s1">readSize</span><span class="s4">: </span><span class="s1">readSize</span><span
+    class="s4">,</span>
+          <span class="s1">size</span><span class="s4">: </span><span class="s1">stat</span><span
+    class="s4">.</span><span class="s1">size</span><span class="s4">,</span>
+        <span class="s4">})</span>
+        <span class="s1">stream</span><span class="s4">.</span><span class="s1">on</span><span class="s4">(</span><span
+    class="s0">'error'</span><span class="s4">, </span><span class="s1">reject</span><span class="s4">)</span>
+        <span class="s1">stream</span><span class="s4">.</span><span class="s1">pipe</span><span
+    class="s4">(</span><span class="s1">parse</span><span class="s4">)</span>
+      <span class="s4">}</span>
+    <span class="s4">})</span>
+  <span class="s4">})</span>
+  <span class="s3">return </span><span class="s1">cb </span><span class="s4">? </span><span class="s1">p</span><span
+    class="s4">.</span><span class="s1">then</span><span class="s4">(</span><span class="s1">cb</span><span
+    class="s4">, </span><span class="s1">cb</span><span class="s4">) : </span><span class="s1">p</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">list </span><span class="s4">= </span><span class="s1">opt </span><span
+    class="s4">=&gt; </span><span class="s3">new </span><span class="s1">Parser</span><span class="s4">(</span><span
+    class="s1">opt</span><span class="s4">)</span>
+</pre>
+</body>
+</html>

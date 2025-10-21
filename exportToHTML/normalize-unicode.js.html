@@ -1,0 +1,61 @@
+<html>
+<head>
+  <title>normalize-unicode.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          normalize-unicode.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// warning: extremely hot code path.</span>
+<span class="s0">// This has been meticulously optimized for use</span>
+<span class="s0">// within npm install on large package trees.</span>
+<span class="s0">// Do not edit without careful benchmarking.</span>
+<span class="s2">const </span><span class="s1">normalizeCache </span><span class="s3">= </span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s2">null</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">hasOwnProperty </span><span
+    class="s3">} = </span><span class="s1">Object</span><span class="s3">.</span><span class="s1">prototype</span>
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">s </span><span class="s3">=&gt; {</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">hasOwnProperty</span><span
+    class="s3">.</span><span class="s1">call</span><span class="s3">(</span><span class="s1">normalizeCache</span><span
+    class="s3">, </span><span class="s1">s</span><span class="s3">)) {</span>
+    <span class="s1">normalizeCache</span><span class="s3">[</span><span class="s1">s</span><span class="s3">] = </span><span
+    class="s1">s</span><span class="s3">.</span><span class="s1">normalize</span><span class="s3">(</span><span
+    class="s4">'NFD'</span><span class="s3">)</span>
+  <span class="s3">}</span>
+  <span class="s2">return </span><span class="s1">normalizeCache</span><span class="s3">[</span><span
+    class="s1">s</span><span class="s3">]</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

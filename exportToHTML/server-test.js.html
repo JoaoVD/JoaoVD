@@ -1,0 +1,863 @@
+<html>
+<head>
+  <title>server-test.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          server-test.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/* eslint-env mocha */</span>
+
+<span class="s2">var </span><span class="s1">assert </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'assert'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">tls </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">'tls'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">net </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">'net'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">https </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">'https'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">transport </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'spdy-transport'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">util </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">'util'</span><span class="s3">)</span>
+
+<span class="s2">var </span><span class="s1">fixtures </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'./fixtures'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">spdy </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">'../'</span><span class="s3">)</span>
+
+<span class="s1">describe</span><span class="s3">(</span><span class="s4">'SPDY Server'</span><span class="s3">, </span><span
+    class="s2">function </span><span class="s3">() {</span>
+  <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">everyConfig</span><span
+    class="s3">(</span><span class="s2">function </span><span class="s3">(</span><span class="s1">protocol</span><span
+    class="s3">, </span><span class="s1">alpn</span><span class="s3">, </span><span class="s1">version</span><span
+    class="s3">, </span><span class="s1">plain</span><span class="s3">) {</span>
+    <span class="s2">var </span><span class="s1">server</span>
+    <span class="s2">var </span><span class="s1">client</span>
+
+    <span class="s1">beforeEach</span><span class="s3">(</span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">done</span><span class="s3">) {</span>
+      <span class="s1">server </span><span class="s3">= </span><span class="s1">spdy</span><span
+    class="s3">.</span><span class="s1">createServer</span><span class="s3">(</span><span class="s1">Object</span><span
+    class="s3">.</span><span class="s1">assign</span><span class="s3">({</span>
+        <span class="s1">spdy</span><span class="s3">: {</span>
+          <span class="s4">'x-forwarded-for'</span><span class="s3">: </span><span class="s2">true</span><span
+    class="s3">,</span>
+          <span class="s1">plain</span><span class="s3">: </span><span class="s1">plain</span>
+        <span class="s3">}</span>
+      <span class="s3">}, </span><span class="s1">fixtures</span><span class="s3">.</span><span
+    class="s1">keys</span><span class="s3">))</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">listen</span><span
+    class="s3">(</span><span class="s1">fixtures</span><span class="s3">.</span><span class="s1">port</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+        <span class="s2">var </span><span class="s1">socket </span><span class="s3">= (</span><span
+    class="s1">plain </span><span class="s3">? </span><span class="s1">net </span><span class="s3">: </span><span
+    class="s1">tls</span><span class="s3">).</span><span class="s1">connect</span><span class="s3">({</span>
+          <span class="s1">rejectUnauthorized</span><span class="s3">: </span><span class="s2">false</span><span
+    class="s3">,</span>
+          <span class="s1">port</span><span class="s3">: </span><span class="s1">fixtures</span><span
+    class="s3">.</span><span class="s1">port</span><span class="s3">,</span>
+          <span class="s1">ALPNProtocols</span><span class="s3">: [</span><span class="s1">alpn</span><span
+    class="s3">]</span>
+        <span class="s3">}, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">client </span><span class="s3">= </span><span class="s1">transport</span><span
+    class="s3">.</span><span class="s1">connection</span><span class="s3">.</span><span class="s1">create</span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">, {</span>
+            <span class="s1">protocol</span><span class="s3">: </span><span class="s1">protocol</span><span
+    class="s3">,</span>
+            <span class="s1">isServer</span><span class="s3">: </span><span class="s2">false</span>
+          <span class="s3">})</span>
+          <span class="s1">client</span><span class="s3">.</span><span class="s1">start</span><span
+    class="s3">(</span><span class="s1">version</span><span class="s3">)</span>
+          <span class="s1">done</span><span class="s3">()</span>
+        <span class="s3">})</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">afterEach</span><span class="s3">(</span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">done</span><span class="s3">) {</span>
+      <span class="s1">client</span><span class="s3">.</span><span class="s1">socket</span><span
+    class="s3">.</span><span class="s1">destroy</span><span class="s3">()</span>
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">close</span><span class="s3">(</span><span
+    class="s1">done</span><span class="s3">)</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span class="s4">'should process GET request'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'GET'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/get'</span><span class="s3">,</span>
+        <span class="s1">headers</span><span class="s3">: {</span>
+          <span class="s1">a</span><span class="s3">: </span><span class="s4">'b'</span>
+        <span class="s3">}</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'error'</span><span class="s3">, (</span><span class="s1">err</span><span class="s3">) =&gt; {</span>
+          <span class="s1">done</span><span class="s3">(</span><span class="s1">err</span><span class="s3">)</span>
+        <span class="s3">})</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s5">200</span><span
+    class="s3">)</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">headers</span><span class="s3">.</span><span class="s1">ok</span><span
+    class="s3">, </span><span class="s4">'yes'</span><span class="s3">)</span>
+
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">, </span><span class="s4">'response'</span><span
+    class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s3">})</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">isSpdy</span><span
+    class="s3">, </span><span class="s1">res</span><span class="s3">.</span><span class="s1">isSpdy</span><span
+    class="s3">)</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">, </span><span class="s1">res</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">)</span>
+        <span class="s1">assert</span><span class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">isSpdy</span><span class="s3">)</span>
+        <span class="s2">if </span><span class="s3">(!</span><span class="s1">plain</span><span class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">(</span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span class="s1">encrypted</span><span
+    class="s3">)</span>
+          <span class="s1">assert</span><span class="s3">(</span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span class="s1">getPeerCertificate</span><span
+    class="s3">())</span>
+        <span class="s3">}</span>
+
+        <span class="s0">// Auto-detection</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">version </span><span class="s3">=== </span><span
+    class="s5">3.1</span><span class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">(</span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">spdyVersion </span><span class="s3">&gt;= </span><span class="s5">3 </span><span
+    class="s3">&amp;&amp; </span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">spdyVersion </span><span class="s3">&lt;= </span><span class="s5">3.1</span><span class="s3">)</span>
+        <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">, </span><span class="s1">version</span><span class="s3">)</span>
+        <span class="s3">}</span>
+        <span class="s1">assert</span><span class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">spdyStream</span><span class="s3">)</span>
+        <span class="s1">assert</span><span class="s3">(</span><span class="s1">res</span><span class="s3">.</span><span
+    class="s1">spdyStream</span><span class="s3">)</span>
+
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">method</span><span
+    class="s3">, </span><span class="s4">'GET'</span><span class="s3">)</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">url</span><span
+    class="s3">, </span><span class="s4">'/get'</span><span class="s3">)</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">deepStrictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">headers</span><span
+    class="s3">, { </span><span class="s1">a</span><span class="s3">: </span><span class="s4">'b'</span><span
+    class="s3">, </span><span class="s1">host</span><span class="s3">: </span><span class="s4">'localhost' </span><span
+    class="s3">})</span>
+
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'end'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span class="s3">(</span><span
+    class="s5">200</span><span class="s3">, {</span>
+            <span class="s1">ok</span><span class="s3">: </span><span class="s4">'yes'</span>
+          <span class="s3">})</span>
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">)</span>
+          <span class="s1">assert</span><span class="s3">(</span><span class="s1">res</span><span
+    class="s3">.</span><span class="s1">finished</span><span class="s3">, </span><span class="s4">'res.finished should be set'</span><span
+    class="s3">)</span>
+        <span class="s3">})</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span class="s4">'should process POST request'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'POST'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/post'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s5">200</span><span
+    class="s3">)</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">headers</span><span class="s3">.</span><span class="s1">ok</span><span
+    class="s3">, </span><span class="s4">'yes'</span><span class="s3">)</span>
+
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">, </span><span class="s4">'response'</span><span
+    class="s3">, </span><span class="s1">next</span><span class="s3">)</span>
+        <span class="s3">})</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">)</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">method</span><span
+    class="s3">, </span><span class="s4">'POST'</span><span class="s3">)</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">url</span><span
+    class="s3">, </span><span class="s4">'/post'</span><span class="s3">)</span>
+
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span
+    class="s3">(</span><span class="s5">200</span><span class="s3">, {</span>
+          <span class="s1">ok</span><span class="s3">: </span><span class="s4">'yes'</span>
+        <span class="s3">})</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">)</span>
+
+        <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">, </span><span class="s4">'request'</span><span
+    class="s3">, </span><span class="s1">next</span><span class="s3">)</span>
+      <span class="s3">})</span>
+
+      <span class="s2">var </span><span class="s1">waiting </span><span class="s3">= </span><span class="s5">2</span>
+      <span class="s2">function </span><span class="s1">next </span><span class="s3">() {</span>
+        <span class="s2">if </span><span class="s3">(--</span><span class="s1">waiting </span><span
+    class="s3">=== </span><span class="s5">0</span><span class="s3">) {</span>
+          <span class="s2">return </span><span class="s1">done</span><span class="s3">()</span>
+        <span class="s3">}</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span
+    class="s4">'should process expect-continue request'</span><span class="s3">, </span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'GET'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/get'</span><span class="s3">,</span>
+        <span class="s1">headers</span><span class="s3">: {</span>
+          <span class="s1">Expect</span><span class="s3">: </span><span class="s4">'100-continue'</span>
+        <span class="s3">}</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s5">100</span><span
+    class="s3">)</span>
+
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">, </span><span class="s4">'response'</span><span
+    class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s3">})</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'end'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">)</span>
+        <span class="s3">})</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span
+    class="s4">'should emit `checkContinue` request'</span><span class="s3">, </span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'GET'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/get'</span><span class="s3">,</span>
+        <span class="s1">headers</span><span class="s3">: {</span>
+          <span class="s1">Expect</span><span class="s3">: </span><span class="s4">'100-continue'</span>
+        <span class="s3">}</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s5">100</span><span
+    class="s3">)</span>
+
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">, </span><span class="s4">'response'</span><span
+    class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s3">})</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'checkContinue'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'end'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">writeContinue</span><span
+    class="s3">()</span>
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">)</span>
+        <span class="s3">})</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span class="s4">'should send PUSH_PROMISE'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'POST'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/page'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'pushPromise'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">push</span><span class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">push</span><span class="s3">.</span><span class="s1">path</span><span
+    class="s3">, </span><span class="s4">'/push'</span><span class="s3">)</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">push</span><span class="s3">.</span><span class="s1">headers</span><span
+    class="s3">.</span><span class="s1">yes</span><span class="s3">, </span><span class="s4">'push'</span><span
+    class="s3">)</span>
+
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">push</span><span class="s3">, </span><span class="s4">'push'</span><span
+    class="s3">, </span><span class="s1">next</span><span class="s3">)</span>
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">, </span><span class="s4">'response'</span><span
+    class="s3">, </span><span class="s1">next</span><span class="s3">)</span>
+        <span class="s3">})</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">)</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">method</span><span
+    class="s3">, </span><span class="s4">'POST'</span><span class="s3">)</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">url</span><span
+    class="s3">, </span><span class="s4">'/page'</span><span class="s3">)</span>
+
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span
+    class="s3">(</span><span class="s5">200</span><span class="s3">, {</span>
+          <span class="s1">ok</span><span class="s3">: </span><span class="s4">'yes'</span>
+        <span class="s3">})</span>
+
+        <span class="s2">var </span><span class="s1">push </span><span class="s3">= </span><span
+    class="s1">res</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span class="s4">'/push'</span><span
+    class="s3">, {</span>
+          <span class="s1">request</span><span class="s3">: {</span>
+            <span class="s1">yes</span><span class="s3">: </span><span class="s4">'push'</span>
+          <span class="s3">}</span>
+        <span class="s3">})</span>
+        <span class="s1">push</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'push'</span><span class="s3">)</span>
+
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">)</span>
+
+        <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">, </span><span class="s4">'request'</span><span
+    class="s3">, </span><span class="s1">next</span><span class="s3">)</span>
+      <span class="s3">})</span>
+
+      <span class="s2">var </span><span class="s1">waiting </span><span class="s3">= </span><span class="s5">3</span>
+      <span class="s2">function </span><span class="s1">next </span><span class="s3">() {</span>
+        <span class="s2">if </span><span class="s3">(--</span><span class="s1">waiting </span><span
+    class="s3">=== </span><span class="s5">0</span><span class="s3">) {</span>
+          <span class="s2">return </span><span class="s1">done</span><span class="s3">()</span>
+        <span class="s3">}</span>
+      <span class="s3">}</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span class="s4">'should receive trailing headers'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'POST'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/post'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">sendHeaders</span><span
+    class="s3">({ </span><span class="s1">trai</span><span class="s3">: </span><span class="s4">'ler' </span><span
+    class="s3">})</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s5">200</span><span
+    class="s3">)</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">headers</span><span class="s3">.</span><span class="s1">ok</span><span
+    class="s3">, </span><span class="s4">'yes'</span><span class="s3">)</span>
+
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">, </span><span class="s4">'response'</span><span
+    class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s3">})</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s2">var </span><span class="s1">gotHeaders </span><span class="s3">= </span><span
+    class="s2">false</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'trailers'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">headers</span><span class="s3">) {</span>
+          <span class="s1">gotHeaders </span><span class="s3">= </span><span class="s2">true</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">headers</span><span class="s3">.</span><span class="s1">trai</span><span
+    class="s3">, </span><span class="s4">'ler'</span><span class="s3">)</span>
+        <span class="s3">})</span>
+
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'end'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">assert</span><span class="s3">(</span><span class="s1">gotHeaders</span><span
+    class="s3">)</span>
+
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span class="s3">(</span><span
+    class="s5">200</span><span class="s3">, {</span>
+            <span class="s1">ok</span><span class="s3">: </span><span class="s4">'yes'</span>
+          <span class="s3">})</span>
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">)</span>
+        <span class="s3">})</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span
+    class="s4">'should call .writeHead() automatically'</span><span class="s3">, </span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'POST'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/post'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s5">300</span><span
+    class="s3">)</span>
+
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">, </span><span class="s4">'response'</span><span
+    class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s3">})</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'end'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">statusCode </span><span
+    class="s3">= </span><span class="s5">300</span>
+          <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">)</span>
+        <span class="s3">})</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span class="s4">'should not crash on .writeHead() after socket close'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'POST'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/post'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">setTimeout</span><span class="s3">(</span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">client</span><span class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span
+    class="s1">destroy</span><span class="s3">()</span>
+        <span class="s3">}, </span><span class="s5">50</span><span class="s3">)</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'error'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {})</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">connection</span><span
+    class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span class="s4">'close'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">doesNotThrow</span><span
+    class="s3">(</span><span class="s2">function </span><span class="s3">() {</span>
+            <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span
+    class="s3">(</span><span class="s5">200</span><span class="s3">)</span>
+            <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span
+    class="s3">(</span><span class="s4">'response'</span><span class="s3">)</span>
+          <span class="s3">})</span>
+          <span class="s1">done</span><span class="s3">()</span>
+        <span class="s3">})</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span
+    class="s4">'should not crash on .push() after socket close'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">done</span><span class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'POST'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/post'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">setTimeout</span><span class="s3">(</span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">client</span><span class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span
+    class="s1">destroy</span><span class="s3">()</span>
+        <span class="s3">}, </span><span class="s5">50</span><span class="s3">)</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'error'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {})</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">connection</span><span
+    class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span class="s4">'close'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">doesNotThrow</span><span
+    class="s3">(</span><span class="s2">function </span><span class="s3">() {</span>
+            <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">res</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s4">'/push'</span><span class="s3">, {}), </span><span class="s1">undefined</span><span class="s3">)</span>
+            <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span
+    class="s3">(</span><span class="s4">'response'</span><span class="s3">)</span>
+          <span class="s3">})</span>
+          <span class="s1">done</span><span class="s3">()</span>
+        <span class="s3">})</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span class="s4">'should end response after writing everything down'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'GET'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/post'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'response'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s1">headers</span><span
+    class="s3">) {</span>
+          <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">status</span><span class="s3">, </span><span class="s5">200</span><span
+    class="s3">)</span>
+
+          <span class="s1">fixtures</span><span class="s3">.</span><span class="s1">expectData</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">, </span><span
+    class="s4">'hello world, what</span><span class="s2">\'</span><span class="s4">s up?'</span><span
+    class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s3">})</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span
+    class="s3">(</span><span class="s5">200</span><span class="s3">)</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s4">'hello '</span><span class="s3">)</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s4">'world'</span><span class="s3">)</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s4">', what</span><span class="s2">\'</span><span class="s4">s'</span><span class="s3">)</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s4">' up?'</span><span class="s3">)</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span class="s4">'should handle x-forwarded-for'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+      <span class="s1">client</span><span class="s3">.</span><span class="s1">sendXForwardedFor</span><span
+    class="s3">(</span><span class="s4">'1.2.3.4'</span><span class="s3">)</span>
+
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'GET'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/post'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'end'</span><span class="s3">, </span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">headers</span><span
+    class="s3">[</span><span class="s4">'x-forwarded-for'</span><span class="s3">], </span><span
+    class="s4">'1.2.3.4'</span><span class="s3">)</span>
+        <span class="s1">req</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+
+    <span class="s1">it</span><span class="s3">(</span><span class="s4">'should destroy request after end'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+      <span class="s2">var </span><span class="s1">stream </span><span class="s3">= </span><span
+    class="s1">client</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'POST'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/post'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">(!</span><span class="s1">err</span><span class="s3">)</span>
+      <span class="s3">})</span>
+      <span class="s1">stream</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+      <span class="s1">stream</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'error'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {})</span>
+
+      <span class="s1">server</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'request'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">destroy</span><span class="s3">()</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">socket</span><span class="s3">.</span><span
+    class="s1">on</span><span class="s3">(</span><span class="s4">'close'</span><span class="s3">, </span><span
+    class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">done</span><span class="s3">()</span>
+        <span class="s3">})</span>
+      <span class="s3">})</span>
+    <span class="s3">})</span>
+  <span class="s3">})</span>
+
+  <span class="s1">it</span><span class="s3">(</span><span class="s4">'should respond to http/1.1'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+    <span class="s2">var </span><span class="s1">server </span><span class="s3">= </span><span
+    class="s1">spdy</span><span class="s3">.</span><span class="s1">createServer</span><span class="s3">(</span><span
+    class="s1">fixtures</span><span class="s3">.</span><span class="s1">keys</span><span class="s3">, </span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">req</span><span class="s3">, </span><span
+    class="s1">res</span><span class="s3">) {</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">isSpdy</span><span
+    class="s3">, </span><span class="s1">res</span><span class="s3">.</span><span class="s1">isSpdy</span><span
+    class="s3">)</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">, </span><span class="s1">res</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">)</span>
+      <span class="s1">assert</span><span class="s3">(!</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">isSpdy</span><span class="s3">)</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">, </span><span class="s5">1</span><span class="s3">)</span>
+
+      <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span
+    class="s3">(</span><span class="s5">200</span><span class="s3">)</span>
+      <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+    <span class="s3">})</span>
+
+    <span class="s1">server</span><span class="s3">.</span><span class="s1">listen</span><span class="s3">(</span><span
+    class="s1">fixtures</span><span class="s3">.</span><span class="s1">port</span><span class="s3">, </span><span
+    class="s2">function </span><span class="s3">() {</span>
+      <span class="s2">var </span><span class="s1">req </span><span class="s3">= </span><span
+    class="s1">https</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">agent</span><span class="s3">: </span><span class="s2">false</span><span class="s3">,</span>
+        <span class="s1">rejectUnauthorized</span><span class="s3">: </span><span class="s2">false</span><span
+    class="s3">,</span>
+        <span class="s1">NPNProtocols</span><span class="s3">: [</span><span class="s4">'http/1.1'</span><span
+    class="s3">],</span>
+        <span class="s1">port</span><span class="s3">: </span><span class="s1">fixtures</span><span
+    class="s3">.</span><span class="s1">port</span><span class="s3">,</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'GET'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">res</span><span class="s3">.</span><span class="s1">statusCode</span><span
+    class="s3">, </span><span class="s5">200</span><span class="s3">)</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'end'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">server</span><span class="s3">.</span><span class="s1">close</span><span
+    class="s3">(</span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s3">})</span>
+      <span class="s3">})</span>
+
+      <span class="s1">req</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+    <span class="s3">})</span>
+  <span class="s3">})</span>
+
+  <span class="s1">it</span><span class="s3">(</span><span class="s4">'should support custom base'</span><span
+    class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span class="s1">done</span><span
+    class="s3">) {</span>
+    <span class="s2">function </span><span class="s1">Pseuver </span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">) {</span>
+      <span class="s1">https</span><span class="s3">.</span><span class="s1">Server</span><span class="s3">.</span><span
+    class="s1">call</span><span class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">listener</span><span class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s1">util</span><span class="s3">.</span><span class="s1">inherits</span><span class="s3">(</span><span
+    class="s1">Pseuver</span><span class="s3">, </span><span class="s1">https</span><span class="s3">.</span><span
+    class="s1">Server</span><span class="s3">)</span>
+
+    <span class="s2">var </span><span class="s1">server </span><span class="s3">= </span><span
+    class="s1">spdy</span><span class="s3">.</span><span class="s1">createServer</span><span class="s3">(</span><span
+    class="s1">Pseuver</span><span class="s3">, </span><span class="s1">fixtures</span><span class="s3">.</span><span
+    class="s1">keys</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">isSpdy</span><span
+    class="s3">, </span><span class="s1">res</span><span class="s3">.</span><span class="s1">isSpdy</span><span
+    class="s3">)</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">, </span><span class="s1">res</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">)</span>
+      <span class="s1">assert</span><span class="s3">(!</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">isSpdy</span><span class="s3">)</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion</span><span
+    class="s3">, </span><span class="s5">1</span><span class="s3">)</span>
+
+      <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead</span><span
+    class="s3">(</span><span class="s5">200</span><span class="s3">)</span>
+      <span class="s1">res</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+    <span class="s3">})</span>
+
+    <span class="s1">server</span><span class="s3">.</span><span class="s1">listen</span><span class="s3">(</span><span
+    class="s1">fixtures</span><span class="s3">.</span><span class="s1">port</span><span class="s3">, </span><span
+    class="s2">function </span><span class="s3">() {</span>
+      <span class="s2">var </span><span class="s1">req </span><span class="s3">= </span><span
+    class="s1">https</span><span class="s3">.</span><span class="s1">request</span><span class="s3">({</span>
+        <span class="s1">agent</span><span class="s3">: </span><span class="s2">false</span><span class="s3">,</span>
+        <span class="s1">rejectUnauthorized</span><span class="s3">: </span><span class="s2">false</span><span
+    class="s3">,</span>
+        <span class="s1">NPNProtocols</span><span class="s3">: [</span><span class="s4">'http/1.1'</span><span
+    class="s3">],</span>
+        <span class="s1">port</span><span class="s3">: </span><span class="s1">fixtures</span><span
+    class="s3">.</span><span class="s1">port</span><span class="s3">,</span>
+        <span class="s1">method</span><span class="s3">: </span><span class="s4">'GET'</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s4">'/'</span>
+      <span class="s3">}, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">res</span><span class="s3">) {</span>
+        <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">res</span><span class="s3">.</span><span class="s1">statusCode</span><span
+    class="s3">, </span><span class="s5">200</span><span class="s3">)</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">resume</span><span class="s3">()</span>
+        <span class="s1">res</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'end'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+          <span class="s1">server</span><span class="s3">.</span><span class="s1">close</span><span
+    class="s3">(</span><span class="s1">done</span><span class="s3">)</span>
+        <span class="s3">})</span>
+      <span class="s3">})</span>
+
+      <span class="s1">req</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+    <span class="s3">})</span>
+  <span class="s3">})</span>
+<span class="s3">})</span>
+</pre>
+</body>
+</html>

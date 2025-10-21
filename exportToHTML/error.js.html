@@ -1,0 +1,84 @@
+<html>
+<head>
+  <title>error.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          error.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">var </span><span class="s1">util </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'util'</span><span class="s3">)</span>
+
+<span class="s2">var </span><span class="s1">User </span><span class="s3">= </span><span class="s1">exports</span><span
+    class="s3">.</span><span class="s1">User </span><span class="s3">= </span><span class="s2">function </span><span
+    class="s1">User </span><span class="s3">(</span><span class="s1">msg</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">err </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">Error</span><span class="s3">(</span><span class="s1">msg</span><span class="s3">)</span>
+  <span class="s1">Error</span><span class="s3">.</span><span class="s1">captureStackTrace</span><span
+    class="s3">(</span><span class="s1">err</span><span class="s3">, </span><span class="s1">User</span><span
+    class="s3">)</span>
+  <span class="s1">err</span><span class="s3">.</span><span class="s1">code </span><span class="s3">= </span><span
+    class="s0">'EGAUGE'</span>
+  <span class="s2">return </span><span class="s1">err</span>
+<span class="s3">}</span>
+
+<span class="s1">exports</span><span class="s3">.</span><span class="s1">MissingTemplateValue </span><span
+    class="s3">= </span><span class="s2">function </span><span class="s1">MissingTemplateValue </span><span
+    class="s3">(</span><span class="s1">item</span><span class="s3">, </span><span class="s1">values</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">err </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">User</span><span class="s3">(</span><span class="s1">util</span><span class="s3">.</span><span
+    class="s1">format</span><span class="s3">(</span><span
+    class="s0">'Missing template value &quot;%s&quot;'</span><span class="s3">, </span><span class="s1">item</span><span
+    class="s3">.</span><span class="s1">type</span><span class="s3">))</span>
+  <span class="s1">Error</span><span class="s3">.</span><span class="s1">captureStackTrace</span><span
+    class="s3">(</span><span class="s1">err</span><span class="s3">, </span><span class="s1">MissingTemplateValue</span><span
+    class="s3">)</span>
+  <span class="s1">err</span><span class="s3">.</span><span class="s1">template </span><span class="s3">= </span><span
+    class="s1">item</span>
+  <span class="s1">err</span><span class="s3">.</span><span class="s1">values </span><span class="s3">= </span><span
+    class="s1">values</span>
+  <span class="s2">return </span><span class="s1">err</span>
+<span class="s3">}</span>
+
+<span class="s1">exports</span><span class="s3">.</span><span class="s1">Internal </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">Internal </span><span class="s3">(</span><span
+    class="s1">msg</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">err </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">Error</span><span class="s3">(</span><span class="s1">msg</span><span class="s3">)</span>
+  <span class="s1">Error</span><span class="s3">.</span><span class="s1">captureStackTrace</span><span
+    class="s3">(</span><span class="s1">err</span><span class="s3">, </span><span class="s1">Internal</span><span
+    class="s3">)</span>
+  <span class="s1">err</span><span class="s3">.</span><span class="s1">code </span><span class="s3">= </span><span
+    class="s0">'EGAUGEINTERNAL'</span>
+  <span class="s2">return </span><span class="s1">err</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

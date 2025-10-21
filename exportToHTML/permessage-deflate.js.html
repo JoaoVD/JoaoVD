@@ -1,0 +1,855 @@
+<html>
+<head>
+  <title>permessage-deflate.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          permessage-deflate.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span><span class="s1">;</span>
+
+<span class="s3">const </span><span class="s2">zlib </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'zlib'</span><span class="s1">);</span>
+
+<span class="s3">const </span><span class="s2">bufferUtil </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'./buffer-util'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">Limiter </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'./limiter'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s1">{ </span><span class="s2">kStatusCode </span><span class="s1">} = </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'./constants'</span><span class="s1">);</span>
+
+<span class="s3">const </span><span class="s2">FastBuffer </span><span class="s1">= </span><span
+    class="s2">Buffer</span><span class="s1">[</span><span class="s2">Symbol</span><span class="s1">.</span><span
+    class="s2">species</span><span class="s1">];</span>
+<span class="s3">const </span><span class="s2">TRAILER </span><span class="s1">= </span><span
+    class="s2">Buffer</span><span class="s1">.</span><span class="s2">from</span><span class="s1">([</span><span
+    class="s4">0x00</span><span class="s1">, </span><span class="s4">0x00</span><span class="s1">, </span><span
+    class="s4">0xff</span><span class="s1">, </span><span class="s4">0xff</span><span class="s1">]);</span>
+<span class="s3">const </span><span class="s2">kPerMessageDeflate </span><span class="s1">= </span><span class="s2">Symbol</span><span
+    class="s1">(</span><span class="s0">'permessage-deflate'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kTotalLength </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'total-length'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kCallback </span><span class="s1">= </span><span class="s2">Symbol</span><span
+    class="s1">(</span><span class="s0">'callback'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kBuffers </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'buffers'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kError </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'error'</span><span class="s1">);</span>
+
+<span class="s5">//</span>
+<span class="s5">// We limit zlib concurrency, which prevents severe memory fragmentation</span>
+<span class="s5">// as documented in https://github.com/nodejs/node/issues/8871#issuecomment-250915913</span>
+<span class="s5">// and https://github.com/websockets/ws/issues/1202</span>
+<span class="s5">//</span>
+<span class="s5">// Intentionally global; it's the global thread pool that's an issue.</span>
+<span class="s5">//</span>
+<span class="s3">let </span><span class="s2">zlibLimiter</span><span class="s1">;</span>
+
+<span class="s6">/**</span>
+ <span class="s6">* permessage-deflate implementation.</span>
+ <span class="s6">*/</span>
+<span class="s3">class </span><span class="s2">PerMessageDeflate </span><span class="s1">{</span>
+  <span class="s6">/**</span>
+   <span class="s6">* Creates a PerMessageDeflate instance.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span
+    class="s6">{Object} [options] Configuration options</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{(Boolean|Number)} [options.clientMaxWindowBits] Advertise support</span>
+   <span class="s6">*     for, or request, a custom client window size</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Boolean} [options.clientNoContextTakeover=false] Advertise/</span>
+   <span class="s6">*     acknowledge disabling of client context takeover</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Number} [options.concurrencyLimit=10] The number of concurrent</span>
+   <span class="s6">*     calls to zlib</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{(Boolean|Number)} [options.serverMaxWindowBits] Request/confirm the</span>
+   <span class="s6">*     use of a custom server window size</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Boolean} [options.serverNoContextTakeover=false] Request/accept</span>
+   <span class="s6">*     disabling of server context takeover</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Number} [options.threshold=1024] Size (in bytes) below which</span>
+   <span class="s6">*     messages should not be compressed if context takeover is disabled</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Object} [options.zlibDeflateOptions] Options to pass to zlib on</span>
+   <span class="s6">*     deflate</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Object} [options.zlibInflateOptions] Options to pass to zlib on</span>
+   <span class="s6">*     inflate</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Boolean} [isServer=false] Create the instance in either server or</span>
+   <span class="s6">*     client mode</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Number} [maxPayload=0] The maximum allowed message length</span>
+   <span class="s6">*/</span>
+  <span class="s2">constructor</span><span class="s1">(</span><span class="s2">options</span><span
+    class="s1">, </span><span class="s2">isServer</span><span class="s1">, </span><span
+    class="s2">maxPayload</span><span class="s1">) {</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_maxPayload </span><span
+    class="s1">= </span><span class="s2">maxPayload </span><span class="s1">| </span><span class="s4">0</span><span
+    class="s1">;</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_options </span><span
+    class="s1">= </span><span class="s2">options </span><span class="s1">|| {};</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_threshold </span><span class="s1">=</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">threshold </span><span class="s1">!== </span><span
+    class="s2">undefined </span><span class="s1">? </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_options</span><span class="s1">.</span><span class="s2">threshold </span><span class="s1">: </span><span
+    class="s4">1024</span><span class="s1">;</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_isServer </span><span
+    class="s1">= !!</span><span class="s2">isServer</span><span class="s1">;</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate </span><span
+    class="s1">= </span><span class="s3">null</span><span class="s1">;</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate </span><span
+    class="s1">= </span><span class="s3">null</span><span class="s1">;</span>
+
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">params </span><span class="s1">= </span><span
+    class="s3">null</span><span class="s1">;</span>
+
+    <span class="s3">if </span><span class="s1">(!</span><span class="s2">zlibLimiter</span><span class="s1">) {</span>
+      <span class="s3">const </span><span class="s2">concurrency </span><span class="s1">=</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">concurrencyLimit </span><span class="s1">!== </span><span
+    class="s2">undefined</span>
+          <span class="s1">? </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_options</span><span class="s1">.</span><span class="s2">concurrencyLimit</span>
+          <span class="s1">: </span><span class="s4">10</span><span class="s1">;</span>
+      <span class="s2">zlibLimiter </span><span class="s1">= </span><span class="s3">new </span><span
+    class="s2">Limiter</span><span class="s1">(</span><span class="s2">concurrency</span><span class="s1">);</span>
+    <span class="s1">}</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* </span><span class="s7">@type </span><span class="s6">{String}</span>
+   <span class="s6">*/</span>
+  <span class="s3">static </span><span class="s2">get extensionName</span><span class="s1">() {</span>
+    <span class="s3">return </span><span class="s0">'permessage-deflate'</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Create an extension negotiation offer.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@return </span><span class="s6">{Object} Extension parameters</span>
+   <span class="s6">* </span><span class="s7">@public</span>
+   <span class="s6">*/</span>
+  <span class="s2">offer</span><span class="s1">() {</span>
+    <span class="s3">const </span><span class="s2">params </span><span class="s1">= {};</span>
+
+    <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_options</span><span class="s1">.</span><span class="s2">serverNoContextTakeover</span><span class="s1">) {</span>
+      <span class="s2">params</span><span class="s1">.</span><span class="s2">server_no_context_takeover </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_options</span><span class="s1">.</span><span class="s2">clientNoContextTakeover</span><span class="s1">) {</span>
+      <span class="s2">params</span><span class="s1">.</span><span class="s2">client_no_context_takeover </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_options</span><span class="s1">.</span><span class="s2">serverMaxWindowBits</span><span
+    class="s1">) {</span>
+      <span class="s2">params</span><span class="s1">.</span><span class="s2">server_max_window_bits </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">serverMaxWindowBits</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_options</span><span class="s1">.</span><span class="s2">clientMaxWindowBits</span><span
+    class="s1">) {</span>
+      <span class="s2">params</span><span class="s1">.</span><span class="s2">client_max_window_bits </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">clientMaxWindowBits</span><span class="s1">;</span>
+    <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">_options</span><span class="s1">.</span><span
+    class="s2">clientMaxWindowBits </span><span class="s1">== </span><span class="s3">null</span><span
+    class="s1">) {</span>
+      <span class="s2">params</span><span class="s1">.</span><span class="s2">client_max_window_bits </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s3">return </span><span class="s2">params</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Accept an extension negotiation offer/response.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Array} configurations The extension negotiation offers/reponse</span>
+   <span class="s6">* </span><span class="s7">@return </span><span class="s6">{Object} Accepted configuration</span>
+   <span class="s6">* </span><span class="s7">@public</span>
+   <span class="s6">*/</span>
+  <span class="s2">accept</span><span class="s1">(</span><span class="s2">configurations</span><span
+    class="s1">) {</span>
+    <span class="s2">configurations </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">normalizeParams</span><span class="s1">(</span><span
+    class="s2">configurations</span><span class="s1">);</span>
+
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">params </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_isServer</span>
+      <span class="s1">? </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">acceptAsServer</span><span class="s1">(</span><span class="s2">configurations</span><span
+    class="s1">)</span>
+      <span class="s1">: </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">acceptAsClient</span><span class="s1">(</span><span class="s2">configurations</span><span
+    class="s1">);</span>
+
+    <span class="s3">return this</span><span class="s1">.</span><span class="s2">params</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Releases all resources used by the extension.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@public</span>
+   <span class="s6">*/</span>
+  <span class="s2">cleanup</span><span class="s1">() {</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_inflate</span><span class="s1">) {</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">.</span><span class="s2">close</span><span class="s1">();</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate </span><span
+    class="s1">= </span><span class="s3">null</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_deflate</span><span class="s1">) {</span>
+      <span class="s3">const </span><span class="s2">callback </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span class="s1">[</span><span
+    class="s2">kCallback</span><span class="s1">];</span>
+
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">.</span><span class="s2">close</span><span class="s1">();</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate </span><span
+    class="s1">= </span><span class="s3">null</span><span class="s1">;</span>
+
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">callback</span><span class="s1">) {</span>
+        <span class="s2">callback</span><span class="s1">(</span>
+          <span class="s3">new </span><span class="s2">Error</span><span class="s1">(</span>
+            <span class="s0">'The deflate stream was closed while data was being processed'</span>
+          <span class="s1">)</span>
+        <span class="s1">);</span>
+      <span class="s1">}</span>
+    <span class="s1">}</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">*  Accept an extension negotiation offer.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Array} offers The extension negotiation offers</span>
+   <span class="s6">* </span><span class="s7">@return </span><span class="s6">{Object} Accepted configuration</span>
+   <span class="s6">* </span><span class="s7">@private</span>
+   <span class="s6">*/</span>
+  <span class="s2">acceptAsServer</span><span class="s1">(</span><span class="s2">offers</span><span
+    class="s1">) {</span>
+    <span class="s3">const </span><span class="s2">opts </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span class="s1">;</span>
+    <span class="s3">const </span><span class="s2">accepted </span><span class="s1">= </span><span
+    class="s2">offers</span><span class="s1">.</span><span class="s2">find</span><span class="s1">((</span><span
+    class="s2">params</span><span class="s1">) =&gt; {</span>
+      <span class="s3">if </span><span class="s1">(</span>
+        <span class="s1">(</span><span class="s2">opts</span><span class="s1">.</span><span class="s2">serverNoContextTakeover </span><span
+    class="s1">=== </span><span class="s3">false </span><span class="s1">&amp;&amp;</span>
+          <span class="s2">params</span><span class="s1">.</span><span class="s2">server_no_context_takeover</span><span
+    class="s1">) ||</span>
+        <span class="s1">(</span><span class="s2">params</span><span class="s1">.</span><span class="s2">server_max_window_bits </span><span
+    class="s1">&amp;&amp;</span>
+          <span class="s1">(</span><span class="s2">opts</span><span class="s1">.</span><span class="s2">serverMaxWindowBits </span><span
+    class="s1">=== </span><span class="s3">false </span><span class="s1">||</span>
+            <span class="s1">(</span><span class="s3">typeof </span><span class="s2">opts</span><span
+    class="s1">.</span><span class="s2">serverMaxWindowBits </span><span class="s1">=== </span><span
+    class="s0">'number' </span><span class="s1">&amp;&amp;</span>
+              <span class="s2">opts</span><span class="s1">.</span><span class="s2">serverMaxWindowBits </span><span
+    class="s1">&gt; </span><span class="s2">params</span><span class="s1">.</span><span class="s2">server_max_window_bits</span><span
+    class="s1">))) ||</span>
+        <span class="s1">(</span><span class="s3">typeof </span><span class="s2">opts</span><span
+    class="s1">.</span><span class="s2">clientMaxWindowBits </span><span class="s1">=== </span><span
+    class="s0">'number' </span><span class="s1">&amp;&amp;</span>
+          <span class="s1">!</span><span class="s2">params</span><span class="s1">.</span><span class="s2">client_max_window_bits</span><span
+    class="s1">)</span>
+      <span class="s1">) {</span>
+        <span class="s3">return false</span><span class="s1">;</span>
+      <span class="s1">}</span>
+
+      <span class="s3">return true</span><span class="s1">;</span>
+    <span class="s1">});</span>
+
+    <span class="s3">if </span><span class="s1">(!</span><span class="s2">accepted</span><span class="s1">) {</span>
+      <span class="s3">throw new </span><span class="s2">Error</span><span class="s1">(</span><span class="s0">'None of the extension offers can be accepted'</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+
+    <span class="s3">if </span><span class="s1">(</span><span class="s2">opts</span><span class="s1">.</span><span
+    class="s2">serverNoContextTakeover</span><span class="s1">) {</span>
+      <span class="s2">accepted</span><span class="s1">.</span><span class="s2">server_no_context_takeover </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s2">opts</span><span class="s1">.</span><span
+    class="s2">clientNoContextTakeover</span><span class="s1">) {</span>
+      <span class="s2">accepted</span><span class="s1">.</span><span class="s2">client_no_context_takeover </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">opts</span><span
+    class="s1">.</span><span class="s2">serverMaxWindowBits </span><span class="s1">=== </span><span
+    class="s0">'number'</span><span class="s1">) {</span>
+      <span class="s2">accepted</span><span class="s1">.</span><span class="s2">server_max_window_bits </span><span
+    class="s1">= </span><span class="s2">opts</span><span class="s1">.</span><span class="s2">serverMaxWindowBits</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">opts</span><span
+    class="s1">.</span><span class="s2">clientMaxWindowBits </span><span class="s1">=== </span><span
+    class="s0">'number'</span><span class="s1">) {</span>
+      <span class="s2">accepted</span><span class="s1">.</span><span class="s2">client_max_window_bits </span><span
+    class="s1">= </span><span class="s2">opts</span><span class="s1">.</span><span class="s2">clientMaxWindowBits</span><span
+    class="s1">;</span>
+    <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span>
+      <span class="s2">accepted</span><span class="s1">.</span><span class="s2">client_max_window_bits </span><span
+    class="s1">=== </span><span class="s3">true </span><span class="s1">||</span>
+      <span class="s2">opts</span><span class="s1">.</span><span class="s2">clientMaxWindowBits </span><span class="s1">=== </span><span
+    class="s3">false</span>
+    <span class="s1">) {</span>
+      <span class="s3">delete </span><span class="s2">accepted</span><span class="s1">.</span><span class="s2">client_max_window_bits</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s3">return </span><span class="s2">accepted</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Accept the extension negotiation response.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Array} response The extension negotiation response</span>
+   <span class="s6">* </span><span class="s7">@return </span><span class="s6">{Object} Accepted configuration</span>
+   <span class="s6">* </span><span class="s7">@private</span>
+   <span class="s6">*/</span>
+  <span class="s2">acceptAsClient</span><span class="s1">(</span><span class="s2">response</span><span
+    class="s1">) {</span>
+    <span class="s3">const </span><span class="s2">params </span><span class="s1">= </span><span
+    class="s2">response</span><span class="s1">[</span><span class="s4">0</span><span class="s1">];</span>
+
+    <span class="s3">if </span><span class="s1">(</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">clientNoContextTakeover </span><span class="s1">=== </span><span class="s3">false </span><span
+    class="s1">&amp;&amp;</span>
+      <span class="s2">params</span><span class="s1">.</span><span class="s2">client_no_context_takeover</span>
+    <span class="s1">) {</span>
+      <span class="s3">throw new </span><span class="s2">Error</span><span class="s1">(</span><span class="s0">'Unexpected parameter &quot;client_no_context_takeover&quot;'</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+
+    <span class="s3">if </span><span class="s1">(!</span><span class="s2">params</span><span class="s1">.</span><span
+    class="s2">client_max_window_bits</span><span class="s1">) {</span>
+      <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof this</span><span
+    class="s1">.</span><span class="s2">_options</span><span class="s1">.</span><span
+    class="s2">clientMaxWindowBits </span><span class="s1">=== </span><span class="s0">'number'</span><span class="s1">) {</span>
+        <span class="s2">params</span><span class="s1">.</span><span class="s2">client_max_window_bits </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">clientMaxWindowBits</span><span class="s1">;</span>
+      <span class="s1">}</span>
+    <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">clientMaxWindowBits </span><span class="s1">=== </span><span
+    class="s3">false </span><span class="s1">||</span>
+      <span class="s1">(</span><span class="s3">typeof this</span><span class="s1">.</span><span
+    class="s2">_options</span><span class="s1">.</span><span class="s2">clientMaxWindowBits </span><span
+    class="s1">=== </span><span class="s0">'number' </span><span class="s1">&amp;&amp;</span>
+        <span class="s2">params</span><span class="s1">.</span><span class="s2">client_max_window_bits </span><span
+    class="s1">&gt; </span><span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">clientMaxWindowBits</span><span class="s1">)</span>
+    <span class="s1">) {</span>
+      <span class="s3">throw new </span><span class="s2">Error</span><span class="s1">(</span>
+        <span class="s0">'Unexpected or invalid parameter &quot;client_max_window_bits&quot;'</span>
+      <span class="s1">);</span>
+    <span class="s1">}</span>
+
+    <span class="s3">return </span><span class="s2">params</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Normalize parameters.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Array} configurations The extension negotiation offers/reponse</span>
+   <span class="s6">* </span><span class="s7">@return </span><span class="s6">{Array} The offers/response with normalized parameters</span>
+   <span class="s6">* </span><span class="s7">@private</span>
+   <span class="s6">*/</span>
+  <span class="s2">normalizeParams</span><span class="s1">(</span><span class="s2">configurations</span><span
+    class="s1">) {</span>
+    <span class="s2">configurations</span><span class="s1">.</span><span class="s2">forEach</span><span
+    class="s1">((</span><span class="s2">params</span><span class="s1">) =&gt; {</span>
+      <span class="s2">Object</span><span class="s1">.</span><span class="s2">keys</span><span class="s1">(</span><span
+    class="s2">params</span><span class="s1">).</span><span class="s2">forEach</span><span class="s1">((</span><span
+    class="s2">key</span><span class="s1">) =&gt; {</span>
+        <span class="s3">let </span><span class="s2">value </span><span class="s1">= </span><span
+    class="s2">params</span><span class="s1">[</span><span class="s2">key</span><span class="s1">];</span>
+
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">value</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&gt; </span><span class="s4">1</span><span class="s1">) {</span>
+          <span class="s3">throw new </span><span class="s2">Error</span><span class="s1">(</span><span class="s0">`Parameter &quot;</span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">key</span><span class="s1">}</span><span class="s0">&quot; must have only a single value`</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+
+        <span class="s2">value </span><span class="s1">= </span><span class="s2">value</span><span
+    class="s1">[</span><span class="s4">0</span><span class="s1">];</span>
+
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">key </span><span
+    class="s1">=== </span><span class="s0">'client_max_window_bits'</span><span class="s1">) {</span>
+          <span class="s3">if </span><span class="s1">(</span><span class="s2">value </span><span class="s1">!== </span><span
+    class="s3">true</span><span class="s1">) {</span>
+            <span class="s3">const </span><span class="s2">num </span><span class="s1">= +</span><span
+    class="s2">value</span><span class="s1">;</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">Number</span><span class="s1">.</span><span
+    class="s2">isInteger</span><span class="s1">(</span><span class="s2">num</span><span class="s1">) || </span><span
+    class="s2">num </span><span class="s1">&lt; </span><span class="s4">8 </span><span class="s1">|| </span><span
+    class="s2">num </span><span class="s1">&gt; </span><span class="s4">15</span><span class="s1">) {</span>
+              <span class="s3">throw new </span><span class="s2">TypeError</span><span class="s1">(</span>
+                <span class="s0">`Invalid value for parameter &quot;</span><span class="s2">$</span><span
+    class="s1">{</span><span class="s2">key</span><span class="s1">}</span><span class="s0">&quot;: </span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">value</span><span class="s1">}</span><span
+    class="s0">`</span>
+              <span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s2">value </span><span class="s1">= </span><span class="s2">num</span><span class="s1">;</span>
+          <span class="s1">} </span><span class="s3">else if </span><span class="s1">(!</span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_isServer</span><span class="s1">) {</span>
+            <span class="s3">throw new </span><span class="s2">TypeError</span><span class="s1">(</span>
+              <span class="s0">`Invalid value for parameter &quot;</span><span class="s2">$</span><span
+    class="s1">{</span><span class="s2">key</span><span class="s1">}</span><span class="s0">&quot;: </span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">value</span><span class="s1">}</span><span
+    class="s0">`</span>
+            <span class="s1">);</span>
+          <span class="s1">}</span>
+        <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span><span
+    class="s2">key </span><span class="s1">=== </span><span class="s0">'server_max_window_bits'</span><span class="s1">) {</span>
+          <span class="s3">const </span><span class="s2">num </span><span class="s1">= +</span><span
+    class="s2">value</span><span class="s1">;</span>
+          <span class="s3">if </span><span class="s1">(!</span><span class="s2">Number</span><span
+    class="s1">.</span><span class="s2">isInteger</span><span class="s1">(</span><span class="s2">num</span><span
+    class="s1">) || </span><span class="s2">num </span><span class="s1">&lt; </span><span class="s4">8 </span><span
+    class="s1">|| </span><span class="s2">num </span><span class="s1">&gt; </span><span class="s4">15</span><span
+    class="s1">) {</span>
+            <span class="s3">throw new </span><span class="s2">TypeError</span><span class="s1">(</span>
+              <span class="s0">`Invalid value for parameter &quot;</span><span class="s2">$</span><span
+    class="s1">{</span><span class="s2">key</span><span class="s1">}</span><span class="s0">&quot;: </span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">value</span><span class="s1">}</span><span
+    class="s0">`</span>
+            <span class="s1">);</span>
+          <span class="s1">}</span>
+          <span class="s2">value </span><span class="s1">= </span><span class="s2">num</span><span class="s1">;</span>
+        <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span>
+          <span class="s2">key </span><span class="s1">=== </span><span
+    class="s0">'client_no_context_takeover' </span><span class="s1">||</span>
+          <span class="s2">key </span><span class="s1">=== </span><span class="s0">'server_no_context_takeover'</span>
+        <span class="s1">) {</span>
+          <span class="s3">if </span><span class="s1">(</span><span class="s2">value </span><span class="s1">!== </span><span
+    class="s3">true</span><span class="s1">) {</span>
+            <span class="s3">throw new </span><span class="s2">TypeError</span><span class="s1">(</span>
+              <span class="s0">`Invalid value for parameter &quot;</span><span class="s2">$</span><span
+    class="s1">{</span><span class="s2">key</span><span class="s1">}</span><span class="s0">&quot;: </span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">value</span><span class="s1">}</span><span
+    class="s0">`</span>
+            <span class="s1">);</span>
+          <span class="s1">}</span>
+        <span class="s1">} </span><span class="s3">else </span><span class="s1">{</span>
+          <span class="s3">throw new </span><span class="s2">Error</span><span class="s1">(</span><span class="s0">`Unknown parameter &quot;</span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">key</span><span class="s1">}</span><span class="s0">&quot;`</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+
+        <span class="s2">params</span><span class="s1">[</span><span class="s2">key</span><span
+    class="s1">] = </span><span class="s2">value</span><span class="s1">;</span>
+      <span class="s1">});</span>
+    <span class="s1">});</span>
+
+    <span class="s3">return </span><span class="s2">configurations</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Decompress data. Concurrency limited.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Buffer} data Compressed data</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Boolean} fin Specifies whether or not this is the last fragment</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Function} callback Callback</span>
+   <span class="s6">* </span><span class="s7">@public</span>
+   <span class="s6">*/</span>
+  <span class="s2">decompress</span><span class="s1">(</span><span class="s2">data</span><span class="s1">, </span><span
+    class="s2">fin</span><span class="s1">, </span><span class="s2">callback</span><span class="s1">) {</span>
+    <span class="s2">zlibLimiter</span><span class="s1">.</span><span class="s2">add</span><span
+    class="s1">((</span><span class="s2">done</span><span class="s1">) =&gt; {</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_decompress</span><span
+    class="s1">(</span><span class="s2">data</span><span class="s1">, </span><span class="s2">fin</span><span
+    class="s1">, (</span><span class="s2">err</span><span class="s1">, </span><span class="s2">result</span><span
+    class="s1">) =&gt; {</span>
+        <span class="s2">done</span><span class="s1">();</span>
+        <span class="s2">callback</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">, </span><span class="s2">result</span><span class="s1">);</span>
+      <span class="s1">});</span>
+    <span class="s1">});</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Compress data. Concurrency limited.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span
+    class="s6">{(Buffer|String)} data Data to compress</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Boolean} fin Specifies whether or not this is the last fragment</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Function} callback Callback</span>
+   <span class="s6">* </span><span class="s7">@public</span>
+   <span class="s6">*/</span>
+  <span class="s2">compress</span><span class="s1">(</span><span class="s2">data</span><span class="s1">, </span><span
+    class="s2">fin</span><span class="s1">, </span><span class="s2">callback</span><span class="s1">) {</span>
+    <span class="s2">zlibLimiter</span><span class="s1">.</span><span class="s2">add</span><span
+    class="s1">((</span><span class="s2">done</span><span class="s1">) =&gt; {</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_compress</span><span
+    class="s1">(</span><span class="s2">data</span><span class="s1">, </span><span class="s2">fin</span><span
+    class="s1">, (</span><span class="s2">err</span><span class="s1">, </span><span class="s2">result</span><span
+    class="s1">) =&gt; {</span>
+        <span class="s2">done</span><span class="s1">();</span>
+        <span class="s2">callback</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">, </span><span class="s2">result</span><span class="s1">);</span>
+      <span class="s1">});</span>
+    <span class="s1">});</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Decompress data.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Buffer} data Compressed data</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Boolean} fin Specifies whether or not this is the last fragment</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Function} callback Callback</span>
+   <span class="s6">* </span><span class="s7">@private</span>
+   <span class="s6">*/</span>
+  <span class="s2">_decompress</span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">, </span><span class="s2">fin</span><span class="s1">, </span><span class="s2">callback</span><span
+    class="s1">) {</span>
+    <span class="s3">const </span><span class="s2">endpoint </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_isServer </span><span class="s1">? </span><span
+    class="s0">'client' </span><span class="s1">: </span><span class="s0">'server'</span><span class="s1">;</span>
+
+    <span class="s3">if </span><span class="s1">(!</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_inflate</span><span class="s1">) {</span>
+      <span class="s3">const </span><span class="s2">key </span><span class="s1">= </span><span class="s0">`</span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">endpoint</span><span class="s1">}</span><span
+    class="s0">_max_window_bits`</span><span class="s1">;</span>
+      <span class="s3">const </span><span class="s2">windowBits </span><span class="s1">=</span>
+        <span class="s3">typeof this</span><span class="s1">.</span><span class="s2">params</span><span
+    class="s1">[</span><span class="s2">key</span><span class="s1">] !== </span><span class="s0">'number'</span>
+          <span class="s1">? </span><span class="s2">zlib</span><span class="s1">.</span><span class="s2">Z_DEFAULT_WINDOWBITS</span>
+          <span class="s1">: </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">params</span><span class="s1">[</span><span class="s2">key</span><span class="s1">];</span>
+
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate </span><span
+    class="s1">= </span><span class="s2">zlib</span><span class="s1">.</span><span
+    class="s2">createInflateRaw</span><span class="s1">({</span>
+        <span class="s2">...</span><span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">zlibInflateOptions</span><span class="s1">,</span>
+        <span class="s2">windowBits</span>
+      <span class="s1">});</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">[</span><span class="s2">kPerMessageDeflate</span><span class="s1">] = </span><span
+    class="s3">this</span><span class="s1">;</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">[</span><span class="s2">kTotalLength</span><span class="s1">] = </span><span class="s4">0</span><span
+    class="s1">;</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">[</span><span class="s2">kBuffers</span><span class="s1">] = [];</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s0">'error'</span><span
+    class="s1">, </span><span class="s2">inflateOnError</span><span class="s1">);</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s0">'data'</span><span
+    class="s1">, </span><span class="s2">inflateOnData</span><span class="s1">);</span>
+    <span class="s1">}</span>
+
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span class="s1">[</span><span
+    class="s2">kCallback</span><span class="s1">] = </span><span class="s2">callback</span><span class="s1">;</span>
+
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span class="s1">.</span><span
+    class="s2">write</span><span class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+    <span class="s3">if </span><span class="s1">(</span><span class="s2">fin</span><span class="s1">) </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span class="s1">.</span><span
+    class="s2">write</span><span class="s1">(</span><span class="s2">TRAILER</span><span class="s1">);</span>
+
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span class="s1">.</span><span
+    class="s2">flush</span><span class="s1">(() =&gt; {</span>
+      <span class="s3">const </span><span class="s2">err </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span class="s1">[</span><span
+    class="s2">kError</span><span class="s1">];</span>
+
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">.</span><span class="s2">close</span><span class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate </span><span class="s1">= </span><span
+    class="s3">null</span><span class="s1">;</span>
+        <span class="s2">callback</span><span class="s1">(</span><span class="s2">err</span><span class="s1">);</span>
+        <span class="s3">return</span><span class="s1">;</span>
+      <span class="s1">}</span>
+
+      <span class="s3">const </span><span class="s2">data </span><span class="s1">= </span><span
+    class="s2">bufferUtil</span><span class="s1">.</span><span class="s2">concat</span><span class="s1">(</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">[</span><span class="s2">kBuffers</span><span class="s1">],</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">[</span><span class="s2">kTotalLength</span><span class="s1">]</span>
+      <span class="s1">);</span>
+
+      <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_inflate</span><span class="s1">.</span><span class="s2">_readableState</span><span
+    class="s1">.</span><span class="s2">endEmitted</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">.</span><span class="s2">close</span><span class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate </span><span class="s1">= </span><span
+    class="s3">null</span><span class="s1">;</span>
+      <span class="s1">} </span><span class="s3">else </span><span class="s1">{</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">[</span><span class="s2">kTotalLength</span><span class="s1">] = </span><span class="s4">0</span><span
+    class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span
+    class="s1">[</span><span class="s2">kBuffers</span><span class="s1">] = [];</span>
+
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">fin </span><span
+    class="s1">&amp;&amp; </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">params</span><span class="s1">[</span><span class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span
+    class="s2">endpoint</span><span class="s1">}</span><span class="s0">_no_context_takeover`</span><span class="s1">]) {</span>
+          <span class="s3">this</span><span class="s1">.</span><span class="s2">_inflate</span><span class="s1">.</span><span
+    class="s2">reset</span><span class="s1">();</span>
+        <span class="s1">}</span>
+      <span class="s1">}</span>
+
+      <span class="s2">callback</span><span class="s1">(</span><span class="s3">null</span><span
+    class="s1">, </span><span class="s2">data</span><span class="s1">);</span>
+    <span class="s1">});</span>
+  <span class="s1">}</span>
+
+  <span class="s6">/**</span>
+   <span class="s6">* Compress data.</span>
+   <span class="s6">*</span>
+   <span class="s6">* </span><span class="s7">@param </span><span
+    class="s6">{(Buffer|String)} data Data to compress</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Boolean} fin Specifies whether or not this is the last fragment</span>
+   <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Function} callback Callback</span>
+   <span class="s6">* </span><span class="s7">@private</span>
+   <span class="s6">*/</span>
+  <span class="s2">_compress</span><span class="s1">(</span><span class="s2">data</span><span class="s1">, </span><span
+    class="s2">fin</span><span class="s1">, </span><span class="s2">callback</span><span class="s1">) {</span>
+    <span class="s3">const </span><span class="s2">endpoint </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_isServer </span><span class="s1">? </span><span
+    class="s0">'server' </span><span class="s1">: </span><span class="s0">'client'</span><span class="s1">;</span>
+
+    <span class="s3">if </span><span class="s1">(!</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_deflate</span><span class="s1">) {</span>
+      <span class="s3">const </span><span class="s2">key </span><span class="s1">= </span><span class="s0">`</span><span
+    class="s2">$</span><span class="s1">{</span><span class="s2">endpoint</span><span class="s1">}</span><span
+    class="s0">_max_window_bits`</span><span class="s1">;</span>
+      <span class="s3">const </span><span class="s2">windowBits </span><span class="s1">=</span>
+        <span class="s3">typeof this</span><span class="s1">.</span><span class="s2">params</span><span
+    class="s1">[</span><span class="s2">key</span><span class="s1">] !== </span><span class="s0">'number'</span>
+          <span class="s1">? </span><span class="s2">zlib</span><span class="s1">.</span><span class="s2">Z_DEFAULT_WINDOWBITS</span>
+          <span class="s1">: </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">params</span><span class="s1">[</span><span class="s2">key</span><span class="s1">];</span>
+
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate </span><span
+    class="s1">= </span><span class="s2">zlib</span><span class="s1">.</span><span
+    class="s2">createDeflateRaw</span><span class="s1">({</span>
+        <span class="s2">...</span><span class="s3">this</span><span class="s1">.</span><span class="s2">_options</span><span
+    class="s1">.</span><span class="s2">zlibDeflateOptions</span><span class="s1">,</span>
+        <span class="s2">windowBits</span>
+      <span class="s1">});</span>
+
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">[</span><span class="s2">kTotalLength</span><span class="s1">] = </span><span class="s4">0</span><span
+    class="s1">;</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">[</span><span class="s2">kBuffers</span><span class="s1">] = [];</span>
+
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s0">'data'</span><span
+    class="s1">, </span><span class="s2">deflateOnData</span><span class="s1">);</span>
+    <span class="s1">}</span>
+
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span class="s1">[</span><span
+    class="s2">kCallback</span><span class="s1">] = </span><span class="s2">callback</span><span class="s1">;</span>
+
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span class="s1">.</span><span
+    class="s2">write</span><span class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span class="s1">.</span><span
+    class="s2">flush</span><span class="s1">(</span><span class="s2">zlib</span><span class="s1">.</span><span
+    class="s2">Z_SYNC_FLUSH</span><span class="s1">, () =&gt; {</span>
+      <span class="s3">if </span><span class="s1">(!</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_deflate</span><span class="s1">) {</span>
+        <span class="s5">//</span>
+        <span class="s5">// The deflate stream was closed while data was being processed.</span>
+        <span class="s5">//</span>
+        <span class="s3">return</span><span class="s1">;</span>
+      <span class="s1">}</span>
+
+      <span class="s3">let </span><span class="s2">data </span><span class="s1">= </span><span
+    class="s2">bufferUtil</span><span class="s1">.</span><span class="s2">concat</span><span class="s1">(</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">[</span><span class="s2">kBuffers</span><span class="s1">],</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">[</span><span class="s2">kTotalLength</span><span class="s1">]</span>
+      <span class="s1">);</span>
+
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">fin</span><span class="s1">) {</span>
+        <span class="s2">data </span><span class="s1">= </span><span class="s3">new </span><span
+    class="s2">FastBuffer</span><span class="s1">(</span><span class="s2">data</span><span class="s1">.</span><span
+    class="s2">buffer</span><span class="s1">, </span><span class="s2">data</span><span class="s1">.</span><span
+    class="s2">byteOffset</span><span class="s1">, </span><span class="s2">data</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">- </span><span class="s4">4</span><span class="s1">);</span>
+      <span class="s1">}</span>
+
+      <span class="s5">//</span>
+      <span class="s5">// Ensure that the callback will not be called again in</span>
+      <span class="s5">// `PerMessageDeflate#cleanup()`.</span>
+      <span class="s5">//</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">[</span><span class="s2">kCallback</span><span class="s1">] = </span><span class="s3">null</span><span
+    class="s1">;</span>
+
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">[</span><span class="s2">kTotalLength</span><span class="s1">] = </span><span class="s4">0</span><span
+    class="s1">;</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">[</span><span class="s2">kBuffers</span><span class="s1">] = [];</span>
+
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">fin </span><span
+    class="s1">&amp;&amp; </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">params</span><span class="s1">[</span><span class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span
+    class="s2">endpoint</span><span class="s1">}</span><span class="s0">_no_context_takeover`</span><span class="s1">]) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_deflate</span><span
+    class="s1">.</span><span class="s2">reset</span><span class="s1">();</span>
+      <span class="s1">}</span>
+
+      <span class="s2">callback</span><span class="s1">(</span><span class="s3">null</span><span
+    class="s1">, </span><span class="s2">data</span><span class="s1">);</span>
+    <span class="s1">});</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s2">module</span><span class="s1">.</span><span class="s2">exports </span><span class="s1">= </span><span
+    class="s2">PerMessageDeflate</span><span class="s1">;</span>
+
+<span class="s6">/**</span>
+ <span class="s6">* The listener of the `zlib.DeflateRaw` stream `'data'` event.</span>
+ <span class="s6">*</span>
+ <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Buffer} chunk A chunk of data</span>
+ <span class="s6">* </span><span class="s7">@private</span>
+ <span class="s6">*/</span>
+<span class="s3">function </span><span class="s2">deflateOnData</span><span class="s1">(</span><span
+    class="s2">chunk</span><span class="s1">) {</span>
+  <span class="s3">this</span><span class="s1">[</span><span class="s2">kBuffers</span><span class="s1">].</span><span
+    class="s2">push</span><span class="s1">(</span><span class="s2">chunk</span><span class="s1">);</span>
+  <span class="s3">this</span><span class="s1">[</span><span class="s2">kTotalLength</span><span class="s1">] += </span><span
+    class="s2">chunk</span><span class="s1">.</span><span class="s2">length</span><span class="s1">;</span>
+<span class="s1">}</span>
+
+<span class="s6">/**</span>
+ <span class="s6">* The listener of the `zlib.InflateRaw` stream `'data'` event.</span>
+ <span class="s6">*</span>
+ <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Buffer} chunk A chunk of data</span>
+ <span class="s6">* </span><span class="s7">@private</span>
+ <span class="s6">*/</span>
+<span class="s3">function </span><span class="s2">inflateOnData</span><span class="s1">(</span><span
+    class="s2">chunk</span><span class="s1">) {</span>
+  <span class="s3">this</span><span class="s1">[</span><span class="s2">kTotalLength</span><span class="s1">] += </span><span
+    class="s2">chunk</span><span class="s1">.</span><span class="s2">length</span><span class="s1">;</span>
+
+  <span class="s3">if </span><span class="s1">(</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kPerMessageDeflate</span><span
+    class="s1">].</span><span class="s2">_maxPayload </span><span class="s1">&lt; </span><span class="s4">1 </span><span
+    class="s1">||</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kTotalLength</span><span
+    class="s1">] &lt;= </span><span class="s3">this</span><span class="s1">[</span><span
+    class="s2">kPerMessageDeflate</span><span class="s1">].</span><span class="s2">_maxPayload</span>
+  <span class="s1">) {</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kBuffers</span><span class="s1">].</span><span
+    class="s2">push</span><span class="s1">(</span><span class="s2">chunk</span><span class="s1">);</span>
+    <span class="s3">return</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s3">this</span><span class="s1">[</span><span class="s2">kError</span><span class="s1">] = </span><span
+    class="s3">new </span><span class="s2">RangeError</span><span class="s1">(</span><span class="s0">'Max payload size exceeded'</span><span
+    class="s1">);</span>
+  <span class="s3">this</span><span class="s1">[</span><span class="s2">kError</span><span class="s1">].</span><span
+    class="s2">code </span><span class="s1">= </span><span class="s0">'WS_ERR_UNSUPPORTED_MESSAGE_LENGTH'</span><span
+    class="s1">;</span>
+  <span class="s3">this</span><span class="s1">[</span><span class="s2">kError</span><span class="s1">][</span><span
+    class="s2">kStatusCode</span><span class="s1">] = </span><span class="s4">1009</span><span class="s1">;</span>
+  <span class="s3">this</span><span class="s1">.</span><span class="s2">removeListener</span><span
+    class="s1">(</span><span class="s0">'data'</span><span class="s1">, </span><span
+    class="s2">inflateOnData</span><span class="s1">);</span>
+
+  <span class="s5">//</span>
+  <span class="s5">// The choice to employ `zlib.reset()` over `zlib.close()` is dictated by the</span>
+  <span class="s5">// fact that in Node.js versions prior to 13.10.0, the callback for</span>
+  <span class="s5">// `zlib.flush()` is not called if `zlib.close()` is used. Utilizing</span>
+  <span class="s5">// `zlib.reset()` ensures that either the callback is invoked or an error is</span>
+  <span class="s5">// emitted.</span>
+  <span class="s5">//</span>
+  <span class="s3">this</span><span class="s1">.</span><span class="s2">reset</span><span class="s1">();</span>
+<span class="s1">}</span>
+
+<span class="s6">/**</span>
+ <span class="s6">* The listener of the `zlib.InflateRaw` stream `'error'` event.</span>
+ <span class="s6">*</span>
+ <span class="s6">* </span><span class="s7">@param </span><span class="s6">{Error} err The emitted error</span>
+ <span class="s6">* </span><span class="s7">@private</span>
+ <span class="s6">*/</span>
+<span class="s3">function </span><span class="s2">inflateOnError</span><span class="s1">(</span><span
+    class="s2">err</span><span class="s1">) {</span>
+  <span class="s5">//</span>
+  <span class="s5">// There is no need to call `Zlib#close()` as the handle is automatically</span>
+  <span class="s5">// closed when an error is emitted.</span>
+  <span class="s5">//</span>
+  <span class="s3">this</span><span class="s1">[</span><span class="s2">kPerMessageDeflate</span><span
+    class="s1">].</span><span class="s2">_inflate </span><span class="s1">= </span><span class="s3">null</span><span
+    class="s1">;</span>
+
+  <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">[</span><span
+    class="s2">kError</span><span class="s1">]) {</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kCallback</span><span
+    class="s1">](</span><span class="s3">this</span><span class="s1">[</span><span class="s2">kError</span><span
+    class="s1">]);</span>
+    <span class="s3">return</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s2">err</span><span class="s1">[</span><span class="s2">kStatusCode</span><span
+    class="s1">] = </span><span class="s4">1007</span><span class="s1">;</span>
+  <span class="s3">this</span><span class="s1">[</span><span class="s2">kCallback</span><span class="s1">](</span><span
+    class="s2">err</span><span class="s1">);</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

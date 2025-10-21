@@ -1,0 +1,368 @@
+<html>
+<head>
+  <title>chownr.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          chownr.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">const </span><span class="s1">fs </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'fs'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">path </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'path'</span><span class="s3">)</span>
+
+<span class="s4">/* istanbul ignore next */</span>
+<span class="s2">const </span><span class="s1">LCHOWN </span><span class="s3">= </span><span class="s1">fs</span><span
+    class="s3">.</span><span class="s1">lchown </span><span class="s3">? </span><span class="s0">'lchown' </span><span
+    class="s3">: </span><span class="s0">'chown'</span>
+<span class="s4">/* istanbul ignore next */</span>
+<span class="s2">const </span><span class="s1">LCHOWNSYNC </span><span class="s3">= </span><span
+    class="s1">fs</span><span class="s3">.</span><span class="s1">lchownSync </span><span class="s3">? </span><span
+    class="s0">'lchownSync' </span><span class="s3">: </span><span class="s0">'chownSync'</span>
+
+<span class="s4">/* istanbul ignore next */</span>
+<span class="s2">const </span><span class="s1">needEISDIRHandled </span><span class="s3">= </span><span
+    class="s1">fs</span><span class="s3">.</span><span class="s1">lchown </span><span class="s3">&amp;&amp;</span>
+  <span class="s3">!</span><span class="s1">process</span><span class="s3">.</span><span class="s1">version</span><span
+    class="s3">.</span><span class="s1">match</span><span class="s3">(</span><span class="s5">/v1[1-9]+\./</span><span
+    class="s3">) &amp;&amp;</span>
+  <span class="s3">!</span><span class="s1">process</span><span class="s3">.</span><span class="s1">version</span><span
+    class="s3">.</span><span class="s1">match</span><span class="s3">(</span><span class="s5">/v10\.[6-9]/</span><span
+    class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">lchownSync </span><span class="s3">= (</span><span class="s1">path</span><span
+    class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">) =&gt; {</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s2">return </span><span class="s1">fs</span><span class="s3">[</span><span class="s1">LCHOWNSYNC</span><span
+    class="s3">](</span><span class="s1">path</span><span class="s3">, </span><span class="s1">uid</span><span
+    class="s3">, </span><span class="s1">gid</span><span class="s3">)</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">er</span><span
+    class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">.</span><span
+    class="s1">code </span><span class="s3">!== </span><span class="s0">'ENOENT'</span><span class="s3">)</span>
+      <span class="s2">throw </span><span class="s1">er</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">/* istanbul ignore next */</span>
+<span class="s2">const </span><span class="s1">chownSync </span><span class="s3">= (</span><span
+    class="s1">path</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span
+    class="s1">gid</span><span class="s3">) =&gt; {</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s2">return </span><span class="s1">fs</span><span class="s3">.</span><span
+    class="s1">chownSync</span><span class="s3">(</span><span class="s1">path</span><span class="s3">, </span><span
+    class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span class="s3">)</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">er</span><span
+    class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">.</span><span
+    class="s1">code </span><span class="s3">!== </span><span class="s0">'ENOENT'</span><span class="s3">)</span>
+      <span class="s2">throw </span><span class="s1">er</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">/* istanbul ignore next */</span>
+<span class="s2">const </span><span class="s1">handleEISDIR </span><span class="s3">=</span>
+  <span class="s1">needEISDIRHandled </span><span class="s3">? (</span><span class="s1">path</span><span
+    class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">) =&gt; </span><span class="s1">er </span><span
+    class="s3">=&gt; {</span>
+    <span class="s4">// Node prior to v10 had a very questionable implementation of</span>
+    <span class="s4">// fs.lchown, which would always try to call fs.open on a directory</span>
+    <span class="s4">// Fall back to fs.chown in those cases.</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">er </span><span class="s3">|| </span><span
+    class="s1">er</span><span class="s3">.</span><span class="s1">code </span><span class="s3">!== </span><span
+    class="s0">'EISDIR'</span><span class="s3">)</span>
+      <span class="s1">cb</span><span class="s3">(</span><span class="s1">er</span><span class="s3">)</span>
+    <span class="s2">else</span>
+      <span class="s1">fs</span><span class="s3">.</span><span class="s1">chown</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span
+    class="s1">gid</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">)</span>
+  <span class="s3">}</span>
+  <span class="s3">: (</span><span class="s1">_</span><span class="s3">, </span><span class="s1">__</span><span
+    class="s3">, </span><span class="s1">___</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">) =&gt; </span><span
+    class="s1">cb</span>
+
+<span class="s4">/* istanbul ignore next */</span>
+<span class="s2">const </span><span class="s1">handleEISDirSync </span><span class="s3">=</span>
+  <span class="s1">needEISDIRHandled </span><span class="s3">? (</span><span class="s1">path</span><span
+    class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">) =&gt; {</span>
+    <span class="s2">try </span><span class="s3">{</span>
+      <span class="s2">return </span><span class="s1">lchownSync</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span
+    class="s1">gid</span><span class="s3">)</span>
+    <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">er</span><span
+    class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">.</span><span
+    class="s1">code </span><span class="s3">!== </span><span class="s0">'EISDIR'</span><span class="s3">)</span>
+        <span class="s2">throw </span><span class="s1">er</span>
+      <span class="s1">chownSync</span><span class="s3">(</span><span class="s1">path</span><span
+    class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">)</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+  <span class="s3">: (</span><span class="s1">path</span><span class="s3">, </span><span class="s1">uid</span><span
+    class="s3">, </span><span class="s1">gid</span><span class="s3">) =&gt; </span><span
+    class="s1">lchownSync</span><span class="s3">(</span><span class="s1">path</span><span class="s3">, </span><span
+    class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span class="s3">)</span>
+
+<span class="s4">// fs.readdir could only accept an options object as of node v6</span>
+<span class="s2">const </span><span class="s1">nodeVersion </span><span class="s3">= </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">version</span>
+<span class="s2">let </span><span class="s1">readdir </span><span class="s3">= (</span><span class="s1">path</span><span
+    class="s3">, </span><span class="s1">options</span><span class="s3">, </span><span class="s1">cb</span><span
+    class="s3">) =&gt; </span><span class="s1">fs</span><span class="s3">.</span><span class="s1">readdir</span><span
+    class="s3">(</span><span class="s1">path</span><span class="s3">, </span><span class="s1">options</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">)</span>
+<span class="s2">let </span><span class="s1">readdirSync </span><span class="s3">= (</span><span
+    class="s1">path</span><span class="s3">, </span><span class="s1">options</span><span class="s3">) =&gt; </span><span
+    class="s1">fs</span><span class="s3">.</span><span class="s1">readdirSync</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">, </span><span class="s1">options</span><span class="s3">)</span>
+<span class="s4">/* istanbul ignore next */</span>
+<span class="s2">if </span><span class="s3">(</span><span class="s5">/^v4\./</span><span class="s3">.</span><span
+    class="s1">test</span><span class="s3">(</span><span class="s1">nodeVersion</span><span class="s3">))</span>
+  <span class="s1">readdir </span><span class="s3">= (</span><span class="s1">path</span><span class="s3">, </span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">) =&gt; </span><span
+    class="s1">fs</span><span class="s3">.</span><span class="s1">readdir</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">chown </span><span class="s3">= (</span><span
+    class="s1">cpath</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span
+    class="s1">gid</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">) =&gt; {</span>
+  <span class="s1">fs</span><span class="s3">[</span><span class="s1">LCHOWN</span><span class="s3">](</span><span
+    class="s1">cpath</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span
+    class="s1">gid</span><span class="s3">, </span><span class="s1">handleEISDIR</span><span class="s3">(</span><span
+    class="s1">cpath</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span
+    class="s1">gid</span><span class="s3">, </span><span class="s1">er </span><span class="s3">=&gt; {</span>
+    <span class="s4">// Skip ENOENT error</span>
+    <span class="s1">cb</span><span class="s3">(</span><span class="s1">er </span><span
+    class="s3">&amp;&amp; </span><span class="s1">er</span><span class="s3">.</span><span class="s1">code </span><span
+    class="s3">!== </span><span class="s0">'ENOENT' </span><span class="s3">? </span><span class="s1">er </span><span
+    class="s3">: </span><span class="s2">null</span><span class="s3">)</span>
+  <span class="s3">}))</span>
+<span class="s3">}</span>
+
+<span class="s2">const </span><span class="s1">chownrKid </span><span class="s3">= (</span><span
+    class="s1">p</span><span class="s3">, </span><span class="s1">child</span><span class="s3">, </span><span
+    class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">) =&gt; {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">child </span><span
+    class="s3">=== </span><span class="s0">'string'</span><span class="s3">)</span>
+    <span class="s2">return </span><span class="s1">fs</span><span class="s3">.</span><span class="s1">lstat</span><span
+    class="s3">(</span><span class="s1">path</span><span class="s3">.</span><span class="s1">resolve</span><span
+    class="s3">(</span><span class="s1">p</span><span class="s3">, </span><span class="s1">child</span><span class="s3">), (</span><span
+    class="s1">er</span><span class="s3">, </span><span class="s1">stats</span><span class="s3">) =&gt; {</span>
+      <span class="s4">// Skip ENOENT error</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">)</span>
+        <span class="s2">return </span><span class="s1">cb</span><span class="s3">(</span><span
+    class="s1">er</span><span class="s3">.</span><span class="s1">code </span><span class="s3">!== </span><span
+    class="s0">'ENOENT' </span><span class="s3">? </span><span class="s1">er </span><span class="s3">: </span><span
+    class="s2">null</span><span class="s3">)</span>
+      <span class="s1">stats</span><span class="s3">.</span><span class="s1">name </span><span class="s3">= </span><span
+    class="s1">child</span>
+      <span class="s1">chownrKid</span><span class="s3">(</span><span class="s1">p</span><span class="s3">, </span><span
+    class="s1">stats</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span
+    class="s1">gid</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">)</span>
+    <span class="s3">})</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">child</span><span class="s3">.</span><span
+    class="s1">isDirectory</span><span class="s3">()) {</span>
+    <span class="s1">chownr</span><span class="s3">(</span><span class="s1">path</span><span class="s3">.</span><span
+    class="s1">resolve</span><span class="s3">(</span><span class="s1">p</span><span class="s3">, </span><span
+    class="s1">child</span><span class="s3">.</span><span class="s1">name</span><span class="s3">), </span><span
+    class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span class="s3">, </span><span
+    class="s1">er </span><span class="s3">=&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">)</span>
+        <span class="s2">return </span><span class="s1">cb</span><span class="s3">(</span><span
+    class="s1">er</span><span class="s3">)</span>
+      <span class="s2">const </span><span class="s1">cpath </span><span class="s3">= </span><span class="s1">path</span><span
+    class="s3">.</span><span class="s1">resolve</span><span class="s3">(</span><span class="s1">p</span><span
+    class="s3">, </span><span class="s1">child</span><span class="s3">.</span><span class="s1">name</span><span
+    class="s3">)</span>
+      <span class="s1">chown</span><span class="s3">(</span><span class="s1">cpath</span><span class="s3">, </span><span
+    class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+    <span class="s2">const </span><span class="s1">cpath </span><span class="s3">= </span><span
+    class="s1">path</span><span class="s3">.</span><span class="s1">resolve</span><span class="s3">(</span><span
+    class="s1">p</span><span class="s3">, </span><span class="s1">child</span><span class="s3">.</span><span class="s1">name</span><span
+    class="s3">)</span>
+    <span class="s1">chown</span><span class="s3">(</span><span class="s1">cpath</span><span class="s3">, </span><span
+    class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span class="s3">, </span><span
+    class="s1">cb</span><span class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+
+<span class="s2">const </span><span class="s1">chownr </span><span class="s3">= (</span><span class="s1">p</span><span
+    class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">) =&gt; {</span>
+  <span class="s1">readdir</span><span class="s3">(</span><span class="s1">p</span><span class="s3">, { </span><span
+    class="s1">withFileTypes</span><span class="s3">: </span><span class="s2">true </span><span
+    class="s3">}, (</span><span class="s1">er</span><span class="s3">, </span><span class="s1">children</span><span
+    class="s3">) =&gt; {</span>
+    <span class="s4">// any error other than ENOTDIR or ENOTSUP means it's not readable,</span>
+    <span class="s4">// or doesn't exist.  give up.</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">.</span><span
+    class="s1">code </span><span class="s3">=== </span><span class="s0">'ENOENT'</span><span class="s3">)</span>
+        <span class="s2">return </span><span class="s1">cb</span><span class="s3">()</span>
+      <span class="s2">else if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">.</span><span
+    class="s1">code </span><span class="s3">!== </span><span class="s0">'ENOTDIR' </span><span
+    class="s3">&amp;&amp; </span><span class="s1">er</span><span class="s3">.</span><span class="s1">code </span><span
+    class="s3">!== </span><span class="s0">'ENOTSUP'</span><span class="s3">)</span>
+        <span class="s2">return </span><span class="s1">cb</span><span class="s3">(</span><span
+    class="s1">er</span><span class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">er </span><span class="s3">|| !</span><span
+    class="s1">children</span><span class="s3">.</span><span class="s1">length</span><span class="s3">)</span>
+      <span class="s2">return </span><span class="s1">chown</span><span class="s3">(</span><span
+    class="s1">p</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">)</span>
+
+    <span class="s2">let </span><span class="s1">len </span><span class="s3">= </span><span
+    class="s1">children</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">let </span><span class="s1">errState </span><span class="s3">= </span><span class="s2">null</span>
+    <span class="s2">const </span><span class="s1">then </span><span class="s3">= </span><span
+    class="s1">er </span><span class="s3">=&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">errState</span><span class="s3">)</span>
+        <span class="s2">return</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">)</span>
+        <span class="s2">return </span><span class="s1">cb</span><span class="s3">(</span><span
+    class="s1">errState </span><span class="s3">= </span><span class="s1">er</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(-- </span><span class="s1">len </span><span
+    class="s3">=== </span><span class="s6">0</span><span class="s3">)</span>
+        <span class="s2">return </span><span class="s1">chown</span><span class="s3">(</span><span
+    class="s1">p</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">, </span><span class="s1">cb</span><span class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s1">children</span><span class="s3">.</span><span class="s1">forEach</span><span
+    class="s3">(</span><span class="s1">child </span><span class="s3">=&gt; </span><span
+    class="s1">chownrKid</span><span class="s3">(</span><span class="s1">p</span><span class="s3">, </span><span
+    class="s1">child</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span
+    class="s1">gid</span><span class="s3">, </span><span class="s1">then</span><span class="s3">))</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s2">const </span><span class="s1">chownrKidSync </span><span class="s3">= (</span><span class="s1">p</span><span
+    class="s3">, </span><span class="s1">child</span><span class="s3">, </span><span class="s1">uid</span><span
+    class="s3">, </span><span class="s1">gid</span><span class="s3">) =&gt; {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">child </span><span
+    class="s3">=== </span><span class="s0">'string'</span><span class="s3">) {</span>
+    <span class="s2">try </span><span class="s3">{</span>
+      <span class="s2">const </span><span class="s1">stats </span><span class="s3">= </span><span
+    class="s1">fs</span><span class="s3">.</span><span class="s1">lstatSync</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">.</span><span class="s1">resolve</span><span class="s3">(</span><span
+    class="s1">p</span><span class="s3">, </span><span class="s1">child</span><span class="s3">))</span>
+      <span class="s1">stats</span><span class="s3">.</span><span class="s1">name </span><span class="s3">= </span><span
+    class="s1">child</span>
+      <span class="s1">child </span><span class="s3">= </span><span class="s1">stats</span>
+    <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">er</span><span
+    class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">.</span><span
+    class="s1">code </span><span class="s3">=== </span><span class="s0">'ENOENT'</span><span class="s3">)</span>
+        <span class="s2">return</span>
+      <span class="s2">else</span>
+        <span class="s2">throw </span><span class="s1">er</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">child</span><span class="s3">.</span><span
+    class="s1">isDirectory</span><span class="s3">())</span>
+    <span class="s1">chownrSync</span><span class="s3">(</span><span class="s1">path</span><span
+    class="s3">.</span><span class="s1">resolve</span><span class="s3">(</span><span class="s1">p</span><span
+    class="s3">, </span><span class="s1">child</span><span class="s3">.</span><span class="s1">name</span><span
+    class="s3">), </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">)</span>
+
+  <span class="s1">handleEISDirSync</span><span class="s3">(</span><span class="s1">path</span><span class="s3">.</span><span
+    class="s1">resolve</span><span class="s3">(</span><span class="s1">p</span><span class="s3">, </span><span
+    class="s1">child</span><span class="s3">.</span><span class="s1">name</span><span class="s3">), </span><span
+    class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s2">const </span><span class="s1">chownrSync </span><span class="s3">= (</span><span
+    class="s1">p</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">) =&gt; {</span>
+  <span class="s2">let </span><span class="s1">children</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s1">children </span><span class="s3">= </span><span class="s1">readdirSync</span><span
+    class="s3">(</span><span class="s1">p</span><span class="s3">, { </span><span class="s1">withFileTypes</span><span
+    class="s3">: </span><span class="s2">true </span><span class="s3">})</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">er</span><span
+    class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">.</span><span
+    class="s1">code </span><span class="s3">=== </span><span class="s0">'ENOENT'</span><span class="s3">)</span>
+      <span class="s2">return</span>
+    <span class="s2">else if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">.</span><span
+    class="s1">code </span><span class="s3">=== </span><span class="s0">'ENOTDIR' </span><span
+    class="s3">|| </span><span class="s1">er</span><span class="s3">.</span><span class="s1">code </span><span
+    class="s3">=== </span><span class="s0">'ENOTSUP'</span><span class="s3">)</span>
+      <span class="s2">return </span><span class="s1">handleEISDirSync</span><span class="s3">(</span><span
+    class="s1">p</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">)</span>
+    <span class="s2">else</span>
+      <span class="s2">throw </span><span class="s1">er</span>
+  <span class="s3">}</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">children </span><span
+    class="s3">&amp;&amp; </span><span class="s1">children</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">)</span>
+    <span class="s1">children</span><span class="s3">.</span><span class="s1">forEach</span><span
+    class="s3">(</span><span class="s1">child </span><span class="s3">=&gt; </span><span class="s1">chownrKidSync</span><span
+    class="s3">(</span><span class="s1">p</span><span class="s3">, </span><span class="s1">child</span><span class="s3">, </span><span
+    class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span class="s3">))</span>
+
+  <span class="s2">return </span><span class="s1">handleEISDirSync</span><span class="s3">(</span><span
+    class="s1">p</span><span class="s3">, </span><span class="s1">uid</span><span class="s3">, </span><span class="s1">gid</span><span
+    class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">chownr</span>
+<span class="s1">chownr</span><span class="s3">.</span><span class="s1">sync </span><span class="s3">= </span><span
+    class="s1">chownrSync</span>
+</pre>
+</body>
+</html>

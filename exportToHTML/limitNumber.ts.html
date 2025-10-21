@@ -1,0 +1,137 @@
+<html>
+<head>
+  <title>limitNumber.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          limitNumber.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">ErrorObject</span><span class="s2">, </span><span class="s1">KeywordErrorDefinition</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">, </span><span class="s1">operators</span><span class="s2">, </span><span
+    class="s1">Code</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+
+<span class="s0">const </span><span class="s1">ops </span><span class="s2">= </span><span class="s1">operators</span>
+
+<span class="s1">type Kwd </span><span class="s2">= </span><span class="s3">&quot;maximum&quot; </span><span class="s2">| </span><span
+    class="s3">&quot;minimum&quot; </span><span class="s2">| </span><span
+    class="s3">&quot;exclusiveMaximum&quot; </span><span class="s2">| </span><span class="s3">&quot;exclusiveMinimum&quot;</span>
+
+<span class="s1">type Comparison </span><span class="s2">= </span><span class="s3">&quot;&lt;=&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;&gt;=&quot; </span><span class="s2">| </span><span class="s3">&quot;&lt;&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;&gt;&quot;</span>
+
+<span class="s0">const </span><span class="s1">KWDs</span><span class="s2">: {[</span><span class="s1">K </span><span
+    class="s0">in </span><span class="s1">Kwd</span><span class="s2">]: {</span><span class="s1">okStr</span><span
+    class="s2">: </span><span class="s1">Comparison</span><span class="s2">; </span><span class="s1">ok</span><span
+    class="s2">: </span><span class="s1">Code</span><span class="s2">; </span><span class="s1">fail</span><span
+    class="s2">: </span><span class="s1">Code</span><span class="s2">}} = {</span>
+  <span class="s1">maximum</span><span class="s2">: {</span><span class="s1">okStr</span><span class="s2">: </span><span
+    class="s3">&quot;&lt;=&quot;</span><span class="s2">, </span><span class="s1">ok</span><span
+    class="s2">: </span><span class="s1">ops</span><span class="s2">.</span><span class="s1">LTE</span><span class="s2">, </span><span
+    class="s1">fail</span><span class="s2">: </span><span class="s1">ops</span><span class="s2">.</span><span
+    class="s1">GT</span><span class="s2">},</span>
+  <span class="s1">minimum</span><span class="s2">: {</span><span class="s1">okStr</span><span class="s2">: </span><span
+    class="s3">&quot;&gt;=&quot;</span><span class="s2">, </span><span class="s1">ok</span><span
+    class="s2">: </span><span class="s1">ops</span><span class="s2">.</span><span class="s1">GTE</span><span class="s2">, </span><span
+    class="s1">fail</span><span class="s2">: </span><span class="s1">ops</span><span class="s2">.</span><span
+    class="s1">LT</span><span class="s2">},</span>
+  <span class="s1">exclusiveMaximum</span><span class="s2">: {</span><span class="s1">okStr</span><span
+    class="s2">: </span><span class="s3">&quot;&lt;&quot;</span><span class="s2">, </span><span
+    class="s1">ok</span><span class="s2">: </span><span class="s1">ops</span><span class="s2">.</span><span class="s1">LT</span><span
+    class="s2">, </span><span class="s1">fail</span><span class="s2">: </span><span class="s1">ops</span><span
+    class="s2">.</span><span class="s1">GTE</span><span class="s2">},</span>
+  <span class="s1">exclusiveMinimum</span><span class="s2">: {</span><span class="s1">okStr</span><span
+    class="s2">: </span><span class="s3">&quot;&gt;&quot;</span><span class="s2">, </span><span
+    class="s1">ok</span><span class="s2">: </span><span class="s1">ops</span><span class="s2">.</span><span class="s1">GT</span><span
+    class="s2">, </span><span class="s1">fail</span><span class="s2">: </span><span class="s1">ops</span><span
+    class="s2">.</span><span class="s1">LTE</span><span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type LimitNumberError </span><span class="s2">= </span><span class="s1">ErrorObject</span><span
+    class="s2">&lt;</span>
+  <span class="s1">Kwd</span><span class="s2">,</span>
+  <span class="s2">{</span><span class="s1">limit</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">; </span><span class="s1">comparison</span><span class="s2">: </span><span
+    class="s1">Comparison</span><span class="s2">},</span>
+  <span class="s1">number </span><span class="s2">| {</span><span class="s1">$data</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">}</span>
+<span class="s2">&gt;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: ({</span><span class="s1">keyword</span><span
+    class="s2">, </span><span class="s1">schemaCode</span><span class="s2">}) =&gt; </span><span
+    class="s1">str</span><span class="s3">`must be </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">KWDs</span><span class="s2">[</span><span class="s1">keyword </span><span class="s2">as </span><span
+    class="s1">Kwd</span><span class="s2">].</span><span class="s1">okStr</span><span class="s2">} </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span
+    class="s3">`</span><span class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">keyword</span><span
+    class="s2">, </span><span class="s1">schemaCode</span><span class="s2">}) =&gt;</span>
+    <span class="s1">_</span><span class="s3">`{comparison: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">KWDs</span><span class="s2">[</span><span class="s1">keyword </span><span
+    class="s2">as </span><span class="s1">Kwd</span><span class="s2">].</span><span class="s1">okStr</span><span
+    class="s2">}</span><span class="s3">, limit: </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">schemaCode</span><span class="s2">}</span><span class="s3">}`</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s1">Object</span><span class="s2">.</span><span
+    class="s1">keys</span><span class="s2">(</span><span class="s1">KWDs</span><span class="s2">),</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;number&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;number&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">$data</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">keyword</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s1">schemaCode</span><span
+    class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">fail$data</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">} </span><span class="s1">$</span><span class="s2">{</span><span class="s1">KWDs</span><span
+    class="s2">[</span><span class="s1">keyword </span><span class="s2">as </span><span class="s1">Kwd</span><span
+    class="s2">].</span><span class="s1">fail</span><span class="s2">} </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">schemaCode</span><span class="s2">} </span><span class="s3">|| isNaN(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">)`</span><span class="s2">)</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

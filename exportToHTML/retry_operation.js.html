@@ -1,0 +1,325 @@
+<html>
+<head>
+  <title>retry_operation.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #7a7e85;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          retry_operation.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">function </span><span class="s1">RetryOperation</span><span class="s2">(</span><span class="s1">timeouts</span><span
+  class="s2">, </span><span class="s1">options</span><span class="s2">) {</span>
+  <span class="s3">// Compatibility for the old (timeouts, retryForever) signature</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">options </span><span class="s2">=== </span><span class="s4">'boolean'</span><span class="s2">) {</span>
+    <span class="s1">options </span><span class="s2">= { </span><span class="s1">forever</span><span
+    class="s2">: </span><span class="s1">options </span><span class="s2">};</span>
+  <span class="s2">}</span>
+
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_originalTimeouts </span><span
+    class="s2">= </span><span class="s1">JSON</span><span class="s2">.</span><span class="s1">parse</span><span
+    class="s2">(</span><span class="s1">JSON</span><span class="s2">.</span><span class="s1">stringify</span><span
+    class="s2">(</span><span class="s1">timeouts</span><span class="s2">));</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_timeouts </span><span class="s2">= </span><span
+    class="s1">timeouts</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_options </span><span class="s2">= </span><span
+    class="s1">options </span><span class="s2">|| {};</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_maxRetryTime </span><span
+    class="s2">= </span><span class="s1">options </span><span class="s2">&amp;&amp; </span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">maxRetryTime </span><span
+    class="s2">|| </span><span class="s1">Infinity</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_fn </span><span class="s2">= </span><span
+    class="s0">null</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_errors </span><span class="s2">= [];</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_attempts </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_operationTimeout </span><span
+    class="s2">= </span><span class="s0">null</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_operationTimeoutCb </span><span
+    class="s2">= </span><span class="s0">null</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_timeout </span><span class="s2">= </span><span
+    class="s0">null</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_operationStart </span><span
+    class="s2">= </span><span class="s0">null</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_timer </span><span class="s2">= </span><span
+    class="s0">null</span><span class="s2">;</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_options</span><span class="s2">.</span><span class="s1">forever</span><span class="s2">) {</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_cachedTimeouts </span><span
+    class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span class="s1">_timeouts</span><span
+    class="s2">.</span><span class="s1">slice</span><span class="s2">(</span><span class="s5">0</span><span class="s2">);</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">RetryOperation</span><span class="s2">;</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">reset </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">() {</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_attempts </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_timeouts </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_originalTimeouts</span><span
+    class="s2">.</span><span class="s1">slice</span><span class="s2">(</span><span class="s5">0</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">stop </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">() {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_timeout</span><span class="s2">) {</span>
+    <span class="s1">clearTimeout</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_timeout</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_timer</span><span class="s2">) {</span>
+    <span class="s1">clearTimeout</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_timer</span><span class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_timeouts       </span><span
+    class="s2">= [];</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_cachedTimeouts </span><span
+    class="s2">= </span><span class="s0">null</span><span class="s2">;</span>
+<span class="s2">};</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">retry </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">err</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_timeout</span><span class="s2">) {</span>
+    <span class="s1">clearTimeout</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_timeout</span><span class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">err</span><span class="s2">) {</span>
+    <span class="s0">return false</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">currentTime </span><span class="s2">= </span><span class="s0">new </span><span
+    class="s1">Date</span><span class="s2">().</span><span class="s1">getTime</span><span class="s2">();</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">err </span><span
+    class="s2">&amp;&amp; </span><span class="s1">currentTime </span><span class="s2">- </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_operationStart </span><span
+    class="s2">&gt;= </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_maxRetryTime</span><span class="s2">) {</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_errors</span><span class="s2">.</span><span
+    class="s1">push</span><span class="s2">(</span><span class="s1">err</span><span class="s2">);</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_errors</span><span class="s2">.</span><span
+    class="s1">unshift</span><span class="s2">(</span><span class="s0">new </span><span class="s1">Error</span><span
+    class="s2">(</span><span class="s4">'RetryOperation timeout occurred'</span><span class="s2">));</span>
+    <span class="s0">return false</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_errors</span><span class="s2">.</span><span
+    class="s1">push</span><span class="s2">(</span><span class="s1">err</span><span class="s2">);</span>
+
+  <span class="s0">var </span><span class="s1">timeout </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_timeouts</span><span class="s2">.</span><span
+    class="s1">shift</span><span class="s2">();</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">timeout </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_cachedTimeouts</span><span class="s2">) {</span>
+      <span class="s3">// retry forever, only keep last error</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">_errors</span><span class="s2">.</span><span
+    class="s1">splice</span><span class="s2">(</span><span class="s5">0</span><span class="s2">, </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_errors</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">- </span><span class="s5">1</span><span class="s2">);</span>
+      <span class="s1">timeout </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_cachedTimeouts</span><span class="s2">.</span><span
+    class="s1">slice</span><span class="s2">(-</span><span class="s5">1</span><span class="s2">);</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s0">return false</span><span class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">var </span><span class="s1">self </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">;</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_timer </span><span class="s2">= </span><span
+    class="s1">setTimeout</span><span class="s2">(</span><span class="s0">function</span><span class="s2">() {</span>
+    <span class="s1">self</span><span class="s2">.</span><span class="s1">_attempts</span><span class="s2">++;</span>
+
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">self</span><span class="s2">.</span><span
+    class="s1">_operationTimeoutCb</span><span class="s2">) {</span>
+      <span class="s1">self</span><span class="s2">.</span><span class="s1">_timeout </span><span
+    class="s2">= </span><span class="s1">setTimeout</span><span class="s2">(</span><span class="s0">function</span><span
+    class="s2">() {</span>
+        <span class="s1">self</span><span class="s2">.</span><span class="s1">_operationTimeoutCb</span><span
+    class="s2">(</span><span class="s1">self</span><span class="s2">.</span><span class="s1">_attempts</span><span
+    class="s2">);</span>
+      <span class="s2">}, </span><span class="s1">self</span><span class="s2">.</span><span
+    class="s1">_operationTimeout</span><span class="s2">);</span>
+
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">self</span><span class="s2">.</span><span
+    class="s1">_options</span><span class="s2">.</span><span class="s1">unref</span><span class="s2">) {</span>
+          <span class="s1">self</span><span class="s2">.</span><span class="s1">_timeout</span><span class="s2">.</span><span
+    class="s1">unref</span><span class="s2">();</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s1">self</span><span class="s2">.</span><span class="s1">_fn</span><span class="s2">(</span><span
+    class="s1">self</span><span class="s2">.</span><span class="s1">_attempts</span><span class="s2">);</span>
+  <span class="s2">}, </span><span class="s1">timeout</span><span class="s2">);</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_options</span><span class="s2">.</span><span class="s1">unref</span><span class="s2">) {</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">_timer</span><span class="s2">.</span><span
+    class="s1">unref</span><span class="s2">();</span>
+  <span class="s2">}</span>
+
+  <span class="s0">return true</span><span class="s2">;</span>
+<span class="s2">};</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">attempt </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">fn</span><span class="s2">, </span><span class="s1">timeoutOps</span><span
+    class="s2">) {</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_fn </span><span class="s2">= </span><span
+    class="s1">fn</span><span class="s2">;</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">timeoutOps</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">timeoutOps</span><span class="s2">.</span><span
+    class="s1">timeout</span><span class="s2">) {</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">_operationTimeout </span><span
+    class="s2">= </span><span class="s1">timeoutOps</span><span class="s2">.</span><span class="s1">timeout</span><span
+    class="s2">;</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">timeoutOps</span><span class="s2">.</span><span
+    class="s1">cb</span><span class="s2">) {</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">_operationTimeoutCb </span><span class="s2">= </span><span
+    class="s1">timeoutOps</span><span class="s2">.</span><span class="s1">cb</span><span class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">var </span><span class="s1">self </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_operationTimeoutCb</span><span class="s2">) {</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_timeout </span><span
+    class="s2">= </span><span class="s1">setTimeout</span><span class="s2">(</span><span class="s0">function</span><span
+    class="s2">() {</span>
+      <span class="s1">self</span><span class="s2">.</span><span class="s1">_operationTimeoutCb</span><span class="s2">();</span>
+    <span class="s2">}, </span><span class="s1">self</span><span class="s2">.</span><span
+    class="s1">_operationTimeout</span><span class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_operationStart </span><span
+    class="s2">= </span><span class="s0">new </span><span class="s1">Date</span><span class="s2">().</span><span
+    class="s1">getTime</span><span class="s2">();</span>
+
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">_fn</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_attempts</span><span class="s2">);</span>
+<span class="s2">};</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">try </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">fn</span><span class="s2">) {</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s4">'Using RetryOperation.try() is deprecated'</span><span class="s2">);</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">attempt</span><span class="s2">(</span><span
+    class="s1">fn</span><span class="s2">);</span>
+<span class="s2">};</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">start </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">fn</span><span class="s2">) {</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s4">'Using RetryOperation.start() is deprecated'</span><span class="s2">);</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">attempt</span><span class="s2">(</span><span
+    class="s1">fn</span><span class="s2">);</span>
+<span class="s2">};</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">start </span><span class="s2">= </span><span
+    class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">try</span><span class="s2">;</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">errors </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">() {</span>
+  <span class="s0">return this</span><span class="s2">.</span><span class="s1">_errors</span><span class="s2">;</span>
+<span class="s2">};</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">attempts </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">() {</span>
+  <span class="s0">return this</span><span class="s2">.</span><span class="s1">_attempts</span><span class="s2">;</span>
+<span class="s2">};</span>
+
+<span class="s1">RetryOperation</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">mainError </span><span class="s2">= </span><span class="s0">function</span><span
+    class="s2">() {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_errors</span><span class="s2">.</span><span class="s1">length </span><span class="s2">=== </span><span
+    class="s5">0</span><span class="s2">) {</span>
+    <span class="s0">return null</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">var </span><span class="s1">counts </span><span class="s2">= {};</span>
+  <span class="s0">var </span><span class="s1">mainError </span><span class="s2">= </span><span
+    class="s0">null</span><span class="s2">;</span>
+  <span class="s0">var </span><span class="s1">mainErrorCount </span><span class="s2">= </span><span class="s5">0</span><span
+    class="s2">;</span>
+
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">var </span><span class="s1">i </span><span
+    class="s2">= </span><span class="s5">0</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&lt; </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_errors</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">; </span><span class="s1">i</span><span class="s2">++) {</span>
+    <span class="s0">var </span><span class="s1">error </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_errors</span><span class="s2">[</span><span
+    class="s1">i</span><span class="s2">];</span>
+    <span class="s0">var </span><span class="s1">message </span><span class="s2">= </span><span
+    class="s1">error</span><span class="s2">.</span><span class="s1">message</span><span class="s2">;</span>
+    <span class="s0">var </span><span class="s1">count </span><span class="s2">= (</span><span
+    class="s1">counts</span><span class="s2">[</span><span class="s1">message</span><span class="s2">] || </span><span
+    class="s5">0</span><span class="s2">) + </span><span class="s5">1</span><span class="s2">;</span>
+
+    <span class="s1">counts</span><span class="s2">[</span><span class="s1">message</span><span
+    class="s2">] = </span><span class="s1">count</span><span class="s2">;</span>
+
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">count </span><span
+    class="s2">&gt;= </span><span class="s1">mainErrorCount</span><span class="s2">) {</span>
+      <span class="s1">mainError </span><span class="s2">= </span><span class="s1">error</span><span class="s2">;</span>
+      <span class="s1">mainErrorCount </span><span class="s2">= </span><span class="s1">count</span><span
+    class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">return </span><span class="s1">mainError</span><span class="s2">;</span>
+<span class="s2">};</span>
+</pre>
+</body>
+</html>

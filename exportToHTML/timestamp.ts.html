@@ -1,0 +1,158 @@
+<html>
+<head>
+  <title>timestamp.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #42c3d4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          timestamp.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">const </span><span class="s1">DT_SEPARATOR </span><span class="s2">= </span><span class="s3">/t|\s/i</span>
+<span class="s0">const </span><span class="s1">DATE </span><span class="s2">= </span><span class="s3">/^(\d\d\d\d)-(\d\d)-(\d\d)$/</span>
+<span class="s0">const </span><span class="s1">TIME </span><span class="s2">= </span><span class="s3">/^(\d\d):(\d\d):(\d\d)(?:\.\d+)?(?:z|([+-]\d\d)(?::?(\d\d))?)$/i</span>
+<span class="s0">const </span><span class="s1">DAYS </span><span class="s2">= [</span><span class="s4">0</span><span
+    class="s2">, </span><span class="s4">31</span><span class="s2">, </span><span class="s4">28</span><span
+    class="s2">, </span><span class="s4">31</span><span class="s2">, </span><span class="s4">30</span><span
+    class="s2">, </span><span class="s4">31</span><span class="s2">, </span><span class="s4">30</span><span
+    class="s2">, </span><span class="s4">31</span><span class="s2">, </span><span class="s4">31</span><span
+    class="s2">, </span><span class="s4">30</span><span class="s2">, </span><span class="s4">31</span><span
+    class="s2">, </span><span class="s4">30</span><span class="s2">, </span><span class="s4">31</span><span
+    class="s2">]</span>
+
+<span class="s0">export default function </span><span class="s1">validTimestamp</span><span class="s2">(</span><span
+    class="s1">str</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">allowDate</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">): </span><span
+    class="s1">boolean </span><span class="s2">{</span>
+  <span class="s5">// http://tools.ietf.org/html/rfc3339#section-5.6</span>
+  <span class="s0">const </span><span class="s1">dt</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">[] = </span><span class="s1">str</span><span class="s2">.</span><span class="s1">split</span><span
+    class="s2">(</span><span class="s1">DT_SEPARATOR</span><span class="s2">)</span>
+  <span class="s0">return </span><span class="s2">(</span>
+    <span class="s2">(</span><span class="s1">dt</span><span class="s2">.</span><span class="s1">length </span><span
+    class="s2">=== </span><span class="s4">2 </span><span class="s2">&amp;&amp; </span><span class="s1">validDate</span><span
+    class="s2">(</span><span class="s1">dt</span><span class="s2">[</span><span class="s4">0</span><span class="s2">]) &amp;&amp; </span><span
+    class="s1">validTime</span><span class="s2">(</span><span class="s1">dt</span><span class="s2">[</span><span
+    class="s4">1</span><span class="s2">])) ||</span>
+    <span class="s2">(</span><span class="s1">allowDate </span><span class="s2">&amp;&amp; </span><span
+    class="s1">dt</span><span class="s2">.</span><span class="s1">length </span><span class="s2">=== </span><span
+    class="s4">1 </span><span class="s2">&amp;&amp; </span><span class="s1">validDate</span><span
+    class="s2">(</span><span class="s1">dt</span><span class="s2">[</span><span class="s4">0</span><span
+    class="s2">]))</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">validDate</span><span class="s2">(</span><span
+    class="s1">str</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">boolean </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">matches</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">[] | </span><span class="s0">null </span><span class="s2">= </span><span
+    class="s1">DATE</span><span class="s2">.</span><span class="s1">exec</span><span class="s2">(</span><span
+    class="s1">str</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">matches</span><span class="s2">) </span><span
+    class="s0">return false</span>
+  <span class="s0">const </span><span class="s1">y</span><span class="s2">: </span><span class="s1">number </span><span
+    class="s2">= +</span><span class="s1">matches</span><span class="s2">[</span><span class="s4">1</span><span
+    class="s2">]</span>
+  <span class="s0">const </span><span class="s1">m</span><span class="s2">: </span><span class="s1">number </span><span
+    class="s2">= +</span><span class="s1">matches</span><span class="s2">[</span><span class="s4">2</span><span
+    class="s2">]</span>
+  <span class="s0">const </span><span class="s1">d</span><span class="s2">: </span><span class="s1">number </span><span
+    class="s2">= +</span><span class="s1">matches</span><span class="s2">[</span><span class="s4">3</span><span
+    class="s2">]</span>
+  <span class="s0">return </span><span class="s2">(</span>
+    <span class="s1">m </span><span class="s2">&gt;= </span><span class="s4">1 </span><span class="s2">&amp;&amp;</span>
+    <span class="s1">m </span><span class="s2">&lt;= </span><span class="s4">12 </span><span
+    class="s2">&amp;&amp;</span>
+    <span class="s1">d </span><span class="s2">&gt;= </span><span class="s4">1 </span><span class="s2">&amp;&amp;</span>
+    <span class="s2">(</span><span class="s1">d </span><span class="s2">&lt;= </span><span class="s1">DAYS</span><span
+    class="s2">[</span><span class="s1">m</span><span class="s2">] ||</span>
+      <span class="s5">// leap year: https://tools.ietf.org/html/rfc3339#appendix-C</span>
+      <span class="s2">(</span><span class="s1">m </span><span class="s2">=== </span><span class="s4">2 </span><span
+    class="s2">&amp;&amp; </span><span class="s1">d </span><span class="s2">=== </span><span class="s4">29 </span><span
+    class="s2">&amp;&amp; (</span><span class="s1">y </span><span class="s2">% </span><span class="s4">100 </span><span
+    class="s2">=== </span><span class="s4">0 </span><span class="s2">? </span><span class="s1">y </span><span
+    class="s2">% </span><span class="s4">400 </span><span class="s2">=== </span><span class="s4">0 </span><span
+    class="s2">: </span><span class="s1">y </span><span class="s2">% </span><span class="s4">4 </span><span class="s2">=== </span><span
+    class="s4">0</span><span class="s2">)))</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">validTime</span><span class="s2">(</span><span
+    class="s1">str</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">boolean </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">matches</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">[] | </span><span class="s0">null </span><span class="s2">= </span><span
+    class="s1">TIME</span><span class="s2">.</span><span class="s1">exec</span><span class="s2">(</span><span
+    class="s1">str</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">matches</span><span class="s2">) </span><span
+    class="s0">return false</span>
+  <span class="s0">const </span><span class="s1">hr</span><span class="s2">: </span><span class="s1">number </span><span
+    class="s2">= +</span><span class="s1">matches</span><span class="s2">[</span><span class="s4">1</span><span
+    class="s2">]</span>
+  <span class="s0">const </span><span class="s1">min</span><span class="s2">: </span><span
+    class="s1">number </span><span class="s2">= +</span><span class="s1">matches</span><span class="s2">[</span><span
+    class="s4">2</span><span class="s2">]</span>
+  <span class="s0">const </span><span class="s1">sec</span><span class="s2">: </span><span
+    class="s1">number </span><span class="s2">= +</span><span class="s1">matches</span><span class="s2">[</span><span
+    class="s4">3</span><span class="s2">]</span>
+  <span class="s0">const </span><span class="s1">tzH</span><span class="s2">: </span><span
+    class="s1">number </span><span class="s2">= +(</span><span class="s1">matches</span><span class="s2">[</span><span
+    class="s4">4</span><span class="s2">] || </span><span class="s4">0</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">tzM</span><span class="s2">: </span><span
+    class="s1">number </span><span class="s2">= +(</span><span class="s1">matches</span><span class="s2">[</span><span
+    class="s4">5</span><span class="s2">] || </span><span class="s4">0</span><span class="s2">)</span>
+  <span class="s0">return </span><span class="s2">(</span>
+    <span class="s2">(</span><span class="s1">hr </span><span class="s2">&lt;= </span><span class="s4">23 </span><span
+    class="s2">&amp;&amp; </span><span class="s1">min </span><span class="s2">&lt;= </span><span
+    class="s4">59 </span><span class="s2">&amp;&amp; </span><span class="s1">sec </span><span
+    class="s2">&lt;= </span><span class="s4">59</span><span class="s2">) ||</span>
+    <span class="s5">// leap second</span>
+    <span class="s2">(</span><span class="s1">hr </span><span class="s2">- </span><span class="s1">tzH </span><span
+    class="s2">=== </span><span class="s4">23 </span><span class="s2">&amp;&amp; </span><span
+    class="s1">min </span><span class="s2">- </span><span class="s1">tzM </span><span class="s2">=== </span><span
+    class="s4">59 </span><span class="s2">&amp;&amp; </span><span class="s1">sec </span><span
+    class="s2">=== </span><span class="s4">60</span><span class="s2">)</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s1">validTimestamp</span><span class="s2">.</span><span class="s1">code </span><span
+    class="s2">= </span><span class="s6">'require(&quot;ajv/dist/runtime/timestamp&quot;).default'</span>
+</pre>
+</body>
+</html>

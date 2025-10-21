@@ -1,0 +1,482 @@
+<html>
+<head>
+  <title>jtd-schema.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #cf8e6d;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          jtd-schema.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/** numeric strings */</span>
+<span class="s1">type NumberType </span><span class="s2">= </span><span class="s3">&quot;float32&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;float64&quot; </span><span class="s2">| </span><span class="s3">&quot;int8&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;uint8&quot; </span><span class="s2">| </span><span class="s3">&quot;int16&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;uint16&quot; </span><span class="s2">| </span><span class="s3">&quot;int32&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;uint32&quot;</span><span class="s2">;</span>
+<span class="s0">/** string strings */</span>
+<span class="s1">type StringType </span><span class="s2">= </span><span class="s3">&quot;string&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;timestamp&quot;</span><span class="s2">;</span>
+<span class="s0">/** Generic JTD Schema without inference of the represented type */</span>
+<span class="s4">export </span><span class="s1">type SomeJTDSchemaType </span><span class="s2">= (</span><span
+    class="s5">// ref</span>
+<span class="s2">{</span>
+    <span class="s1">ref</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+<span class="s2">} | {</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s1">NumberType </span><span
+    class="s2">| </span><span class="s1">StringType </span><span class="s2">| </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">;</span>
+<span class="s2">} | {</span>
+    <span class="s4">enum</span><span class="s2">: </span><span class="s1">string</span><span class="s2">[];</span>
+<span class="s2">} | {</span>
+    <span class="s1">elements</span><span class="s2">: </span><span class="s1">SomeJTDSchemaType</span><span class="s2">;</span>
+<span class="s2">} | {</span>
+    <span class="s1">values</span><span class="s2">: </span><span class="s1">SomeJTDSchemaType</span><span
+    class="s2">;</span>
+<span class="s2">} | {</span>
+    <span class="s1">properties</span><span class="s2">: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">SomeJTDSchemaType</span><span class="s2">&gt;;</span>
+    <span class="s1">optionalProperties</span><span class="s2">?: </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">SomeJTDSchemaType</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">additionalProperties</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+<span class="s2">} | {</span>
+    <span class="s1">properties</span><span class="s2">?: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">SomeJTDSchemaType</span><span class="s2">&gt;;</span>
+    <span class="s1">optionalProperties</span><span class="s2">: </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">SomeJTDSchemaType</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">additionalProperties</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+<span class="s2">} | {</span>
+    <span class="s1">discriminator</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s1">mapping</span><span class="s2">: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">SomeJTDSchemaType</span><span class="s2">&gt;;</span>
+<span class="s2">} | {}) &amp; {</span>
+    <span class="s1">nullable</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">metadata</span><span class="s2">?: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">definitions</span><span class="s2">?: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">SomeJTDSchemaType</span><span class="s2">&gt;;</span>
+<span class="s2">};</span>
+<span class="s0">/** required keys of an object, not undefined */</span>
+<span class="s1">type RequiredKeys</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; = {</span>
+    <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span class="s1">keyof T</span><span
+    class="s2">]-?: </span><span class="s1">undefined </span><span class="s4">extends </span><span
+    class="s1">T</span><span class="s2">[</span><span class="s1">K</span><span class="s2">] ? </span><span class="s1">never </span><span
+    class="s2">: </span><span class="s1">K</span><span class="s2">;</span>
+<span class="s2">}[</span><span class="s1">keyof T</span><span class="s2">];</span>
+<span class="s0">/** optional or undifined-able keys of an object */</span>
+<span class="s1">type OptionalKeys</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; = {</span>
+    <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span class="s1">keyof T</span><span
+    class="s2">]-?: </span><span class="s1">undefined </span><span class="s4">extends </span><span
+    class="s1">T</span><span class="s2">[</span><span class="s1">K</span><span class="s2">] ? </span><span
+    class="s1">K </span><span class="s2">: </span><span class="s1">never</span><span class="s2">;</span>
+<span class="s2">}[</span><span class="s1">keyof T</span><span class="s2">];</span>
+<span class="s0">/** type is true if T is a union type */</span>
+<span class="s1">type IsUnion_</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s1">U </span><span class="s4">extends </span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">T</span><span class="s2">&gt; = </span><span
+    class="s4">false extends </span><span class="s2">(</span><span class="s1">T </span><span
+    class="s4">extends </span><span class="s1">unknown </span><span class="s2">? ([</span><span class="s1">U</span><span
+    class="s2">] </span><span class="s4">extends </span><span class="s2">[</span><span class="s1">T</span><span
+    class="s2">] ? </span><span class="s4">false </span><span class="s2">: </span><span class="s4">true</span><span
+    class="s2">) : </span><span class="s1">never</span><span class="s2">) ? </span><span class="s4">false </span><span
+    class="s2">: </span><span class="s4">true</span><span class="s2">;</span>
+<span class="s1">type IsUnion</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; = </span><span
+    class="s1">IsUnion_</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;;</span>
+<span class="s0">/** type is true if T is identically E */</span>
+<span class="s1">type TypeEquality</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span
+    class="s1">E</span><span class="s2">&gt; = [</span><span class="s1">T</span><span class="s2">] </span><span
+    class="s4">extends </span><span class="s2">[</span><span class="s1">E</span><span class="s2">] ? ([</span><span
+    class="s1">E</span><span class="s2">] </span><span class="s4">extends </span><span class="s2">[</span><span
+    class="s1">T</span><span class="s2">] ? </span><span class="s4">true </span><span class="s2">: </span><span
+    class="s4">false</span><span class="s2">) : </span><span class="s4">false</span><span class="s2">;</span>
+<span class="s0">/** type is true if T or null is identically E or null*/</span>
+<span class="s1">type NullTypeEquality</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s1">E</span><span class="s2">&gt; = </span><span
+    class="s1">TypeEquality</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">| </span><span
+    class="s4">null</span><span class="s2">, </span><span class="s1">E </span><span class="s2">| </span><span
+    class="s4">null</span><span class="s2">&gt;;</span>
+<span class="s0">/** gets only the string literals of a type or null if a type isn't a string literal */</span>
+<span class="s1">type EnumString</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; = [</span><span class="s1">T</span><span class="s2">] </span><span class="s4">extends </span><span
+    class="s2">[</span><span class="s1">never</span><span class="s2">] ? </span><span class="s4">null </span><span
+    class="s2">: </span><span class="s1">T </span><span class="s4">extends </span><span class="s1">string </span><span
+    class="s2">? </span><span class="s1">string </span><span class="s4">extends </span><span class="s1">T </span><span
+    class="s2">? </span><span class="s4">null </span><span class="s2">: </span><span class="s1">T </span><span
+    class="s2">: </span><span class="s4">null</span><span class="s2">;</span>
+<span class="s0">/** true if type is a union of string literals */</span>
+<span class="s1">type IsEnum</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; = </span><span class="s4">null extends </span><span class="s1">EnumString</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt; ? </span><span class="s4">false </span><span class="s2">: </span><span
+    class="s4">true</span><span class="s2">;</span>
+<span class="s0">/** true only if all types are array types (not tuples) */</span>
+<span class="s1">type IsElements</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; = </span><span class="s4">false extends </span><span class="s1">IsUnion</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; ? [</span><span class="s1">T</span><span
+    class="s2">] </span><span class="s4">extends </span><span class="s2">[</span><span
+    class="s1">readonly unknown</span><span class="s2">[]] ? </span><span class="s1">undefined </span><span class="s4">extends </span><span
+    class="s1">T</span><span class="s2">[</span><span class="s6">0.5</span><span class="s2">] ? </span><span class="s4">false </span><span
+    class="s2">: </span><span class="s4">true </span><span class="s2">: </span><span class="s4">false </span><span
+    class="s2">: </span><span class="s4">false</span><span class="s2">;</span>
+<span class="s0">/** true if the the type is a values type */</span>
+<span class="s1">type IsValues</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; = </span><span class="s4">false extends </span><span class="s1">IsUnion</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; ? </span><span
+    class="s1">TypeEquality</span><span class="s2">&lt;</span><span class="s1">keyof T</span><span
+    class="s2">, </span><span class="s1">string</span><span class="s2">&gt; : </span><span class="s4">false</span><span
+    class="s2">;</span>
+<span class="s0">/** true if type is a properties type and Union is false, or type is a discriminator type and Union is true */</span>
+<span class="s1">type IsRecord</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s1">Union </span><span class="s4">extends </span><span
+    class="s1">boolean</span><span class="s2">&gt; = </span><span class="s1">Union </span><span
+    class="s4">extends </span><span class="s1">IsUnion</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; ? </span><span class="s4">null extends </span><span class="s1">EnumString</span><span class="s2">&lt;</span><span
+    class="s1">keyof T</span><span class="s2">&gt; ? </span><span class="s4">false </span><span
+    class="s2">: </span><span class="s4">true </span><span class="s2">: </span><span class="s4">false</span><span
+    class="s2">;</span>
+<span class="s0">/** true if type represents an empty record */</span>
+<span class="s1">type IsEmptyRecord</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; = [</span><span class="s1">T</span><span class="s2">] </span><span class="s4">extends </span><span
+    class="s2">[</span><span class="s1">Record</span><span class="s2">&lt;</span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">never</span><span class="s2">&gt;] ? [</span><span class="s1">T</span><span
+    class="s2">] </span><span class="s4">extends </span><span class="s2">[</span><span class="s1">never</span><span
+    class="s2">] ? </span><span class="s4">false </span><span class="s2">: </span><span class="s4">true </span><span
+    class="s2">: </span><span class="s4">false</span><span class="s2">;</span>
+<span class="s0">/** actual schema */</span>
+<span class="s4">export </span><span class="s1">type JTDSchemaType</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">, </span><span class="s1">D </span><span class="s4">extends </span><span
+    class="s1">Record</span><span class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">unknown</span><span class="s2">&gt; = </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">never</span><span
+    class="s2">&gt;&gt; = (</span><span class="s5">// refs - where null wasn't specified, must match exactly</span>
+<span class="s2">(</span><span class="s4">null extends </span><span class="s1">EnumString</span><span
+    class="s2">&lt;</span><span class="s1">keyof D</span><span class="s2">&gt; ? </span><span
+    class="s1">never </span><span class="s2">: ({</span>
+    <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span class="s1">keyof D</span><span
+    class="s2">]: [</span><span class="s1">T</span><span class="s2">] </span><span class="s4">extends </span><span
+    class="s2">[</span><span class="s1">D</span><span class="s2">[</span><span class="s1">K</span><span class="s2">]] ? {</span>
+        <span class="s1">ref</span><span class="s2">: </span><span class="s1">K</span><span class="s2">;</span>
+    <span class="s2">} : </span><span class="s1">never</span><span class="s2">;</span>
+<span class="s2">}[</span><span class="s1">keyof D</span><span class="s2">] &amp; {</span>
+    <span class="s1">nullable</span><span class="s2">?: </span><span class="s4">false</span><span class="s2">;</span>
+<span class="s2">}) | (</span><span class="s4">null extends </span><span class="s1">T </span><span class="s2">? {</span>
+    <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span class="s1">keyof D</span><span
+    class="s2">]: [</span><span class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s4">null</span><span class="s2">&gt;] </span><span class="s4">extends </span><span
+    class="s2">[</span><span class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">D</span><span
+    class="s2">[</span><span class="s1">K</span><span class="s2">], </span><span class="s4">null</span><span class="s2">&gt;] ? {</span>
+        <span class="s1">ref</span><span class="s2">: </span><span class="s1">K</span><span class="s2">;</span>
+    <span class="s2">} : </span><span class="s1">never</span><span class="s2">;</span>
+<span class="s2">}[</span><span class="s1">keyof D</span><span class="s2">] &amp; {</span>
+    <span class="s1">nullable</span><span class="s2">: </span><span class="s4">true</span><span class="s2">;</span>
+<span class="s2">} : </span><span class="s1">never</span><span class="s2">)) | (</span><span
+    class="s1">unknown </span><span class="s4">extends </span><span class="s1">T </span><span class="s2">? {</span>
+    <span class="s1">nullable</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+<span class="s2">} : </span><span class="s1">never</span><span class="s2">) | ((</span><span
+    class="s4">true extends </span><span class="s1">NullTypeEquality</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s1">number</span><span class="s2">&gt; ? {</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s1">NumberType</span><span class="s2">;</span>
+<span class="s2">} : </span><span class="s4">true extends </span><span class="s1">NullTypeEquality</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span class="s1">boolean</span><span
+    class="s2">&gt; ? {</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">;</span>
+<span class="s2">} : </span><span class="s4">true extends </span><span class="s1">NullTypeEquality</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span class="s1">string</span><span
+    class="s2">&gt; ? {</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s1">StringType</span><span class="s2">;</span>
+<span class="s2">} : </span><span class="s4">true extends </span><span class="s1">NullTypeEquality</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span class="s1">Date</span><span
+    class="s2">&gt; ? {</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;timestamp&quot;</span><span class="s2">;</span>
+<span class="s2">} : </span><span class="s4">true extends </span><span class="s1">IsEnum</span><span
+    class="s2">&lt;</span><span class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s4">null</span><span class="s2">&gt;&gt; ? {</span>
+    <span class="s4">enum</span><span class="s2">: </span><span class="s1">EnumString</span><span class="s2">&lt;</span><span
+    class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span
+    class="s4">null</span><span class="s2">&gt;&gt;[];</span>
+<span class="s2">} : </span><span class="s4">true extends </span><span class="s1">IsElements</span><span
+    class="s2">&lt;</span><span class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s4">null</span><span class="s2">&gt;&gt; ? </span><span class="s1">T </span><span
+    class="s4">extends </span><span class="s1">readonly </span><span class="s2">(</span><span
+    class="s1">infer E</span><span class="s2">)[] ? {</span>
+    <span class="s1">elements</span><span class="s2">: </span><span class="s1">JTDSchemaType</span><span
+    class="s2">&lt;</span><span class="s1">E</span><span class="s2">, </span><span class="s1">D</span><span class="s2">&gt;;</span>
+<span class="s2">} : </span><span class="s1">never </span><span class="s2">: </span><span
+    class="s4">true extends </span><span class="s1">IsEmptyRecord</span><span class="s2">&lt;</span><span class="s1">Exclude</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span class="s4">null</span><span
+    class="s2">&gt;&gt; ? {</span>
+    <span class="s1">properties</span><span class="s2">: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">never</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">optionalProperties</span><span class="s2">?: </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">never</span><span class="s2">&gt;;</span>
+<span class="s2">} | {</span>
+    <span class="s1">optionalProperties</span><span class="s2">: </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">never</span><span class="s2">&gt;;</span>
+<span class="s2">} : </span><span class="s4">true extends </span><span class="s1">IsValues</span><span
+    class="s2">&lt;</span><span class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s4">null</span><span class="s2">&gt;&gt; ? </span><span class="s1">T </span><span
+    class="s4">extends </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">infer V</span><span class="s2">&gt; ? {</span>
+    <span class="s1">values</span><span class="s2">: </span><span class="s1">JTDSchemaType</span><span
+    class="s2">&lt;</span><span class="s1">V</span><span class="s2">, </span><span class="s1">D</span><span class="s2">&gt;;</span>
+<span class="s2">} : </span><span class="s1">never </span><span class="s2">: </span><span
+    class="s4">true extends </span><span class="s1">IsRecord</span><span class="s2">&lt;</span><span
+    class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span
+    class="s4">null</span><span class="s2">&gt;, </span><span class="s4">false</span><span
+    class="s2">&gt; ? ([</span><span class="s1">RequiredKeys</span><span class="s2">&lt;</span><span
+    class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span
+    class="s4">null</span><span class="s2">&gt;&gt;] </span><span class="s4">extends </span><span
+    class="s2">[</span><span class="s1">never</span><span class="s2">] ? {</span>
+    <span class="s1">properties</span><span class="s2">?: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">never</span><span
+    class="s2">&gt;;</span>
+<span class="s2">} : {</span>
+    <span class="s1">properties</span><span class="s2">: {</span>
+        <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span
+    class="s1">RequiredKeys</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;]: </span><span class="s1">JTDSchemaType</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">[</span><span class="s1">K</span><span class="s2">], </span><span
+    class="s1">D</span><span class="s2">&gt;;</span>
+    <span class="s2">};</span>
+<span class="s2">}) &amp; ([</span><span class="s1">OptionalKeys</span><span class="s2">&lt;</span><span class="s1">Exclude</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span class="s4">null</span><span
+    class="s2">&gt;&gt;] </span><span class="s4">extends </span><span class="s2">[</span><span
+    class="s1">never</span><span class="s2">] ? {</span>
+    <span class="s1">optionalProperties</span><span class="s2">?: </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">never</span><span class="s2">&gt;;</span>
+<span class="s2">} : {</span>
+    <span class="s1">optionalProperties</span><span class="s2">: {</span>
+        <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span
+    class="s1">OptionalKeys</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;]: </span><span class="s1">JTDSchemaType</span><span class="s2">&lt;</span><span
+    class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">[</span><span
+    class="s1">K</span><span class="s2">], </span><span class="s1">undefined</span><span class="s2">&gt;, </span><span
+    class="s1">D</span><span class="s2">&gt;;</span>
+    <span class="s2">};</span>
+<span class="s2">}) &amp; {</span>
+    <span class="s1">additionalProperties</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+<span class="s2">} : </span><span class="s4">true extends </span><span class="s1">IsRecord</span><span
+    class="s2">&lt;</span><span class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">, </span><span class="s4">null</span><span class="s2">&gt;, </span><span class="s4">true</span><span
+    class="s2">&gt; ? {</span>
+    <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span
+    class="s1">keyof Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span
+    class="s4">null</span><span class="s2">&gt;]-?: </span><span class="s1">Exclude</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span class="s4">null</span><span
+    class="s2">&gt;[</span><span class="s1">K</span><span class="s2">] </span><span class="s4">extends </span><span
+    class="s1">string </span><span class="s2">? {</span>
+        <span class="s1">discriminator</span><span class="s2">: </span><span class="s1">K</span><span
+    class="s2">;</span>
+        <span class="s1">mapping</span><span class="s2">: {</span>
+            <span class="s2">[</span><span class="s1">M </span><span class="s4">in </span><span
+    class="s1">Exclude</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">, </span><span
+    class="s4">null</span><span class="s2">&gt;[</span><span class="s1">K</span><span class="s2">]]: </span><span
+    class="s1">JTDSchemaType</span><span class="s2">&lt;</span><span class="s1">Omit</span><span
+    class="s2">&lt;</span><span class="s1">T </span><span class="s4">extends </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">K</span><span class="s2">, </span><span class="s1">M</span><span class="s2">&gt; ? </span><span
+    class="s1">T </span><span class="s2">: </span><span class="s1">never</span><span class="s2">, </span><span
+    class="s1">K</span><span class="s2">&gt;, </span><span class="s1">D</span><span class="s2">&gt;;</span>
+        <span class="s2">};</span>
+    <span class="s2">} : </span><span class="s1">never</span><span class="s2">;</span>
+<span class="s2">}[</span><span class="s1">keyof Exclude</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">, </span><span class="s4">null</span><span class="s2">&gt;] : </span><span
+    class="s1">never</span><span class="s2">) &amp; (</span><span class="s4">null extends </span><span
+    class="s1">T </span><span class="s2">? {</span>
+    <span class="s1">nullable</span><span class="s2">: </span><span class="s4">true</span><span class="s2">;</span>
+<span class="s2">} : {</span>
+    <span class="s1">nullable</span><span class="s2">?: </span><span class="s4">false</span><span class="s2">;</span>
+<span class="s2">}))) &amp; {</span>
+    <span class="s1">metadata</span><span class="s2">?: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">definitions</span><span class="s2">?: {</span>
+        <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span
+    class="s1">keyof D</span><span class="s2">]: </span><span class="s1">JTDSchemaType</span><span
+    class="s2">&lt;</span><span class="s1">D</span><span class="s2">[</span><span class="s1">K</span><span
+    class="s2">], </span><span class="s1">D</span><span class="s2">&gt;;</span>
+    <span class="s2">};</span>
+<span class="s2">};</span>
+<span class="s1">type JTDDataDef</span><span class="s2">&lt;</span><span class="s1">S</span><span
+    class="s2">, </span><span class="s1">D </span><span class="s4">extends </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span
+    class="s2">&gt;&gt; = </span><span class="s5">// ref</span>
+<span class="s2">(</span><span class="s1">S </span><span class="s4">extends </span><span class="s2">{</span>
+    <span class="s1">ref</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+<span class="s2">} ? </span><span class="s1">D </span><span class="s4">extends </span><span class="s2">{</span>
+    <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span class="s1">S</span><span
+    class="s2">[</span><span class="s3">&quot;ref&quot;</span><span class="s2">]]: </span><span
+    class="s1">infer V</span><span class="s2">;</span>
+<span class="s2">} ? </span><span class="s1">JTDDataDef</span><span class="s2">&lt;</span><span class="s1">V</span><span
+    class="s2">, </span><span class="s1">D</span><span class="s2">&gt; : </span><span class="s1">never </span><span
+    class="s2">: </span><span class="s1">S </span><span class="s4">extends </span><span class="s2">{</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s1">NumberType</span><span class="s2">;</span>
+<span class="s2">} ? </span><span class="s1">number </span><span class="s2">: </span><span class="s1">S </span><span
+    class="s4">extends </span><span class="s2">{</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">;</span>
+<span class="s2">} ? </span><span class="s1">boolean </span><span class="s2">: </span><span class="s1">S </span><span
+    class="s4">extends </span><span class="s2">{</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">;</span>
+<span class="s2">} ? </span><span class="s1">string </span><span class="s2">: </span><span class="s1">S </span><span
+    class="s4">extends </span><span class="s2">{</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;timestamp&quot;</span><span class="s2">;</span>
+<span class="s2">} ? </span><span class="s1">string </span><span class="s2">| </span><span class="s1">Date </span><span
+    class="s2">: </span><span class="s1">S </span><span class="s4">extends </span><span class="s2">{</span>
+    <span class="s4">enum</span><span class="s2">: </span><span class="s1">readonly </span><span
+    class="s2">(</span><span class="s1">infer E</span><span class="s2">)[];</span>
+<span class="s2">} ? </span><span class="s1">string </span><span class="s4">extends </span><span
+    class="s1">E </span><span class="s2">? </span><span class="s1">never </span><span class="s2">: [</span><span
+    class="s1">E</span><span class="s2">] </span><span class="s4">extends </span><span class="s2">[</span><span
+    class="s1">string</span><span class="s2">] ? </span><span class="s1">E </span><span class="s2">: </span><span
+    class="s1">never </span><span class="s2">: </span><span class="s1">S </span><span class="s4">extends </span><span
+    class="s2">{</span>
+    <span class="s1">elements</span><span class="s2">: </span><span class="s1">infer E</span><span class="s2">;</span>
+<span class="s2">} ? </span><span class="s1">JTDDataDef</span><span class="s2">&lt;</span><span class="s1">E</span><span
+    class="s2">, </span><span class="s1">D</span><span class="s2">&gt;[] : </span><span class="s1">S </span><span
+    class="s4">extends </span><span class="s2">{</span>
+    <span class="s1">properties</span><span class="s2">: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">optionalProperties</span><span class="s2">?: </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span class="s2">&gt;;</span>
+    <span class="s1">additionalProperties</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+<span class="s2">} ? {</span>
+    <span class="s2">-</span><span class="s1">readonly </span><span class="s2">[</span><span class="s1">K </span><span
+    class="s4">in </span><span class="s1">keyof S</span><span class="s2">[</span><span
+    class="s3">&quot;properties&quot;</span><span class="s2">]]-?: </span><span class="s1">JTDDataDef</span><span
+    class="s2">&lt;</span><span class="s1">S</span><span class="s2">[</span><span
+    class="s3">&quot;properties&quot;</span><span class="s2">][</span><span class="s1">K</span><span
+    class="s2">], </span><span class="s1">D</span><span class="s2">&gt;;</span>
+<span class="s2">} &amp; {</span>
+    <span class="s2">-</span><span class="s1">readonly </span><span class="s2">[</span><span class="s1">K </span><span
+    class="s4">in </span><span class="s1">keyof S</span><span class="s2">[</span><span class="s3">&quot;optionalProperties&quot;</span><span
+    class="s2">]]+?: </span><span class="s1">JTDDataDef</span><span class="s2">&lt;</span><span class="s1">S</span><span
+    class="s2">[</span><span class="s3">&quot;optionalProperties&quot;</span><span class="s2">][</span><span class="s1">K</span><span
+    class="s2">], </span><span class="s1">D</span><span class="s2">&gt;;</span>
+<span class="s2">} &amp; ([</span><span class="s1">S</span><span class="s2">[</span><span class="s3">&quot;additionalProperties&quot;</span><span
+    class="s2">]] </span><span class="s4">extends </span><span class="s2">[</span><span class="s4">true</span><span
+    class="s2">] ? </span><span class="s1">Record</span><span class="s2">&lt;</span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">unknown</span><span class="s2">&gt; : </span><span
+    class="s1">unknown</span><span class="s2">) : </span><span class="s1">S </span><span class="s4">extends </span><span
+    class="s2">{</span>
+    <span class="s1">properties</span><span class="s2">?: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">optionalProperties</span><span class="s2">: </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span class="s2">&gt;;</span>
+    <span class="s1">additionalProperties</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+<span class="s2">} ? {</span>
+    <span class="s2">-</span><span class="s1">readonly </span><span class="s2">[</span><span class="s1">K </span><span
+    class="s4">in </span><span class="s1">keyof S</span><span class="s2">[</span><span
+    class="s3">&quot;properties&quot;</span><span class="s2">]]-?: </span><span class="s1">JTDDataDef</span><span
+    class="s2">&lt;</span><span class="s1">S</span><span class="s2">[</span><span
+    class="s3">&quot;properties&quot;</span><span class="s2">][</span><span class="s1">K</span><span
+    class="s2">], </span><span class="s1">D</span><span class="s2">&gt;;</span>
+<span class="s2">} &amp; {</span>
+    <span class="s2">-</span><span class="s1">readonly </span><span class="s2">[</span><span class="s1">K </span><span
+    class="s4">in </span><span class="s1">keyof S</span><span class="s2">[</span><span class="s3">&quot;optionalProperties&quot;</span><span
+    class="s2">]]+?: </span><span class="s1">JTDDataDef</span><span class="s2">&lt;</span><span class="s1">S</span><span
+    class="s2">[</span><span class="s3">&quot;optionalProperties&quot;</span><span class="s2">][</span><span class="s1">K</span><span
+    class="s2">], </span><span class="s1">D</span><span class="s2">&gt;;</span>
+<span class="s2">} &amp; ([</span><span class="s1">S</span><span class="s2">[</span><span class="s3">&quot;additionalProperties&quot;</span><span
+    class="s2">]] </span><span class="s4">extends </span><span class="s2">[</span><span class="s4">true</span><span
+    class="s2">] ? </span><span class="s1">Record</span><span class="s2">&lt;</span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">unknown</span><span class="s2">&gt; : </span><span
+    class="s1">unknown</span><span class="s2">) : </span><span class="s1">S </span><span class="s4">extends </span><span
+    class="s2">{</span>
+    <span class="s1">values</span><span class="s2">: </span><span class="s1">infer V</span><span class="s2">;</span>
+<span class="s2">} ? </span><span class="s1">Record</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">JTDDataDef</span><span
+    class="s2">&lt;</span><span class="s1">V</span><span class="s2">, </span><span class="s1">D</span><span class="s2">&gt;&gt; : </span><span
+    class="s1">S </span><span class="s4">extends </span><span class="s2">{</span>
+    <span class="s1">discriminator</span><span class="s2">: </span><span class="s1">infer M</span><span
+    class="s2">;</span>
+    <span class="s1">mapping</span><span class="s2">: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span
+    class="s2">&gt;;</span>
+<span class="s2">} ? [</span><span class="s1">M</span><span class="s2">] </span><span class="s4">extends </span><span
+    class="s2">[</span><span class="s1">string</span><span class="s2">] ? {</span>
+    <span class="s2">[</span><span class="s1">K </span><span class="s4">in </span><span class="s1">keyof S</span><span
+    class="s2">[</span><span class="s3">&quot;mapping&quot;</span><span class="s2">]]: </span><span class="s1">JTDDataDef</span><span
+    class="s2">&lt;</span><span class="s1">S</span><span class="s2">[</span><span
+    class="s3">&quot;mapping&quot;</span><span class="s2">][</span><span class="s1">K</span><span
+    class="s2">], </span><span class="s1">D</span><span class="s2">&gt; &amp; {</span>
+        <span class="s2">[</span><span class="s1">KM </span><span class="s4">in </span><span class="s1">M</span><span
+    class="s2">]: </span><span class="s1">K</span><span class="s2">;</span>
+    <span class="s2">};</span>
+<span class="s2">}[</span><span class="s1">keyof S</span><span class="s2">[</span><span
+    class="s3">&quot;mapping&quot;</span><span class="s2">]] : </span><span class="s1">never </span><span
+    class="s2">: </span><span class="s1">unknown</span><span class="s2">) | (</span><span class="s1">S </span><span
+    class="s4">extends </span><span class="s2">{</span>
+    <span class="s1">nullable</span><span class="s2">: </span><span class="s4">true</span><span class="s2">;</span>
+<span class="s2">} ? </span><span class="s4">null </span><span class="s2">: </span><span class="s1">never</span><span
+    class="s2">);</span>
+<span class="s4">export </span><span class="s1">type JTDDataType</span><span class="s2">&lt;</span><span
+    class="s1">S</span><span class="s2">&gt; = </span><span class="s1">S </span><span class="s4">extends </span><span
+    class="s2">{</span>
+    <span class="s1">definitions</span><span class="s2">: </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">unknown</span><span
+    class="s2">&gt;;</span>
+<span class="s2">} ? </span><span class="s1">JTDDataDef</span><span class="s2">&lt;</span><span class="s1">S</span><span
+    class="s2">, </span><span class="s1">S</span><span class="s2">[</span><span
+    class="s3">&quot;definitions&quot;</span><span class="s2">]&gt; : </span><span class="s1">JTDDataDef</span><span
+    class="s2">&lt;</span><span class="s1">S</span><span class="s2">, </span><span class="s1">Record</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">never</span><span
+    class="s2">&gt;&gt;;</span>
+<span class="s4">export </span><span class="s2">{};</span>
+</pre>
+</body>
+</html>

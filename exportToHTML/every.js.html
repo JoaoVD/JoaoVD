@@ -1,0 +1,123 @@
+<html>
+<head>
+  <title>every.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          every.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">arrayEvery </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_arrayEvery'</span><span class="s2">),</span>
+    <span class="s1">baseEvery </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_baseEvery'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">),</span>
+    <span class="s1">isIterateeCall </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_isIterateeCall'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Checks if `predicate` returns truthy for **all** elements of `collection`.</span>
+ <span class="s4">* Iteration is stopped once `predicate` returns falsey. The predicate is</span>
+ <span class="s4">* invoked with three arguments: (value, index|key, collection).</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This method returns `true` for</span>
+ <span class="s4">* [empty collections](https://en.wikipedia.org/wiki/Empty_set) because</span>
+ <span class="s4">* [everything is true](https://en.wikipedia.org/wiki/Vacuous_truth) of</span>
+ <span class="s4">* elements of empty collections.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Collection</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array|Object} collection The collection to iterate over.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [predicate=_.identity] The function invoked per iteration.</span>
+ <span class="s4">* </span><span class="s5">@param- </span><span class="s4">{Object} [guard] Enables use as an iteratee for methods like `_.map`.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{boolean} Returns `true` if all elements pass the predicate check,</span>
+ <span class="s4">*  else `false`.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.every([true, 1, null, 'yes'], Boolean);</span>
+ <span class="s4">* // =&gt; false</span>
+ <span class="s4">*</span>
+ <span class="s4">* var users = [</span>
+ <span class="s4">*   { 'user': 'barney', 'age': 36, 'active': false },</span>
+ <span class="s4">*   { 'user': 'fred',   'age': 40, 'active': false }</span>
+ <span class="s4">* ];</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.matches` iteratee shorthand.</span>
+ <span class="s4">* _.every(users, { 'user': 'barney', 'active': false });</span>
+ <span class="s4">* // =&gt; false</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.matchesProperty` iteratee shorthand.</span>
+ <span class="s4">* _.every(users, ['active', false]);</span>
+ <span class="s4">* // =&gt; true</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.property` iteratee shorthand.</span>
+ <span class="s4">* _.every(users, 'active');</span>
+ <span class="s4">* // =&gt; false</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">every</span><span class="s2">(</span><span
+    class="s1">collection</span><span class="s2">, </span><span class="s1">predicate</span><span
+    class="s2">, </span><span class="s1">guard</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">func </span><span class="s2">= </span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">) ? </span><span class="s1">arrayEvery </span><span class="s2">: </span><span class="s1">baseEvery</span><span
+    class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">guard </span><span
+    class="s2">&amp;&amp; </span><span class="s1">isIterateeCall</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">, </span><span class="s1">predicate</span><span class="s2">, </span><span class="s1">guard</span><span
+    class="s2">)) {</span>
+    <span class="s1">predicate </span><span class="s2">= </span><span class="s1">undefined</span><span
+    class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">func</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">, </span><span class="s1">baseIteratee</span><span class="s2">(</span><span
+    class="s1">predicate</span><span class="s2">, </span><span class="s6">3</span><span class="s2">));</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">every</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<html>
+<head>
+  <title>tty.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          tty.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:tty` module provides the `tty.ReadStream` and `tty.WriteStream` classes. In most cases, it will not be necessary or possible to use this module</span>
+ <span class="s0">* directly. However, it can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import tty from 'node:tty';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* When Node.js detects that it is being run with a text terminal (&quot;TTY&quot;)</span>
+ <span class="s0">* attached, `process.stdin` will, by default, be initialized as an instance of `tty.ReadStream` and both `process.stdout` and `process.stderr` will, by</span>
+ <span class="s0">* default, be instances of `tty.WriteStream`. The preferred method of determining</span>
+ <span class="s0">* whether Node.js is being run within a TTY context is to check that the value of</span>
+ <span class="s0">* the `process.stdout.isTTY` property is `true`:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```console</span>
+ <span class="s0">* $ node -p -e &quot;Boolean(process.stdout.isTTY)&quot;</span>
+ <span class="s0">* true</span>
+ <span class="s0">* $ node -p -e &quot;Boolean(process.stdout.isTTY)&quot; | cat</span>
+ <span class="s0">* false</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* In most cases, there should be little to no reason for an application to</span>
+ <span class="s0">* manually create instances of the `tty.ReadStream` and `tty.WriteStream` classes.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/tty.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;tty&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">net from </span><span class="s3">&quot;node:net&quot;</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `tty.isatty()` method returns `true` if the given `fd` is associated with</span>
+     <span class="s0">* a TTY and `false` if it is not, including whenever `fd` is not a non-negative</span>
+     <span class="s0">* integer.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">fd A numeric file descriptor</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">isatty</span><span class="s4">(</span><span
+    class="s2">fd</span><span class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Represents the readable side of a TTY. In normal circumstances `process.stdin` will be the only `tty.ReadStream` instance in a Node.js</span>
+     <span class="s0">* process and there should be no reason to create additional instances.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">ReadStream </span><span class="s5">extends </span><span class="s2">net</span><span
+    class="s4">.</span><span class="s2">Socket </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">fd</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">net</span><span class="s4">.</span><span class="s2">SocketConstructorOpts</span><span
+    class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A `boolean` that is `true` if the TTY is currently configured to operate as a</span>
+         <span class="s0">* raw device.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This flag is always `false` when a process starts, even if the terminal is</span>
+         <span class="s0">* operating in raw mode. Its value will change with subsequent calls to `setRawMode`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">*/</span>
+        <span class="s2">isRaw</span><span class="s4">: </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Allows configuration of `tty.ReadStream` so that it operates as a raw device.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When in raw mode, input is always available character-by-character, not</span>
+         <span class="s0">* including modifiers. Additionally, all special processing of characters by the</span>
+         <span class="s0">* terminal is disabled, including echoing input</span>
+         <span class="s0">* characters. Ctrl+C will no longer cause a `SIGINT` when</span>
+         <span class="s0">* in this mode.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">mode If `true`, configures the `tty.ReadStream` to operate as a raw device. If `false`, configures the `tty.ReadStream` to operate in its default mode. The `readStream.isRaw`</span>
+         <span class="s0">* property will be set to the resulting mode.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The read stream instance.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setRawMode</span><span class="s4">(</span><span class="s2">mode</span><span
+    class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A `boolean` that is always `true` for `tty.ReadStream` instances.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+         <span class="s0">*/</span>
+        <span class="s2">isTTY</span><span class="s4">: </span><span class="s2">boolean</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* -1 - to the left from cursor</span>
+     <span class="s0">*  0 - the entire line</span>
+     <span class="s0">*  1 - to the right from cursor</span>
+     <span class="s0">*/</span>
+    <span class="s2">type Direction </span><span class="s4">= -</span><span class="s6">1 </span><span
+    class="s4">| </span><span class="s6">0 </span><span class="s4">| </span><span class="s6">1</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Represents the writable side of a TTY. In normal circumstances, `process.stdout` and `process.stderr` will be the only`tty.WriteStream` instances created for a Node.js process and there</span>
+     <span class="s0">* should be no reason to create additional instances.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">WriteStream </span><span class="s5">extends </span><span class="s2">net</span><span
+    class="s4">.</span><span class="s2">Socket </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">fd</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">);</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resize&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resize&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resize&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resize&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resize&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resize&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `writeStream.clearLine()` clears the current line of this `WriteStream` in a</span>
+         <span class="s0">* direction identified by `dir`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Invoked once the operation completes.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`false` if the stream wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">clearLine</span><span class="s4">(</span><span class="s2">dir</span><span
+    class="s4">: </span><span class="s2">Direction</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `writeStream.clearScreenDown()` clears this `WriteStream` from the current</span>
+         <span class="s0">* cursor down.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Invoked once the operation completes.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`false` if the stream wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">clearScreenDown</span><span class="s4">(</span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `writeStream.cursorTo()` moves this `WriteStream`'s cursor to the specified</span>
+         <span class="s0">* position.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Invoked once the operation completes.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`false` if the stream wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">cursorTo</span><span class="s4">(</span><span class="s2">x</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">y</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">cursorTo</span><span class="s4">(</span><span class="s2">x</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `writeStream.moveCursor()` moves this `WriteStream`'s cursor _relative_ to its</span>
+         <span class="s0">* current position.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Invoked once the operation completes.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`false` if the stream wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">moveCursor</span><span class="s4">(</span><span class="s2">dx</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">dy</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * `1` for 2,</span>
+         <span class="s0">* * `4` for 16,</span>
+         <span class="s0">* * `8` for 256,</span>
+         <span class="s0">* * `24` for 16,777,216 colors supported.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Use this to determine what colors the terminal supports. Due to the nature of</span>
+         <span class="s0">* colors in terminals it is possible to either have false positives or false</span>
+         <span class="s0">* negatives. It depends on process information and the environment variables that</span>
+         <span class="s0">* may lie about what terminal is used.</span>
+         <span class="s0">* It is possible to pass in an `env` object to simulate the usage of a specific</span>
+         <span class="s0">* terminal. This can be useful to check how specific environment settings behave.</span>
+         <span class="s0">*</span>
+         <span class="s0">* To enforce a specific color support, use one of the below environment settings.</span>
+         <span class="s0">*</span>
+         <span class="s0">* * 2 colors: `FORCE_COLOR = 0` (Disables colors)</span>
+         <span class="s0">* * 16 colors: `FORCE_COLOR = 1`</span>
+         <span class="s0">* * 256 colors: `FORCE_COLOR = 2`</span>
+         <span class="s0">* * 16,777,216 colors: `FORCE_COLOR = 3`</span>
+         <span class="s0">*</span>
+         <span class="s0">* Disabling color support is also possible by using the `NO_COLOR` and `NODE_DISABLE_COLORS` environment variables.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.9.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[env=process.env] An object containing the environment variables to check. This enables simulating the usage of a specific terminal.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getColorDepth</span><span class="s4">(</span><span class="s2">env</span><span
+    class="s4">?: </span><span class="s2">object</span><span class="s4">): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns `true` if the `writeStream` supports at least as many colors as provided</span>
+         <span class="s0">* in `count`. Minimum support is 2 (black and white).</span>
+         <span class="s0">*</span>
+         <span class="s0">* This has the same false positives and negatives as described in `writeStream.getColorDepth()`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* process.stdout.hasColors();</span>
+         <span class="s0">* // Returns true or false depending on if `stdout` supports at least 16 colors.</span>
+         <span class="s0">* process.stdout.hasColors(256);</span>
+         <span class="s0">* // Returns true or false depending on if `stdout` supports at least 256 colors.</span>
+         <span class="s0">* process.stdout.hasColors({ TMUX: '1' });</span>
+         <span class="s0">* // Returns true.</span>
+         <span class="s0">* process.stdout.hasColors(2 ** 24, { TMUX: '1' });</span>
+         <span class="s0">* // Returns false (the environment setting pretends to support 2 ** 8 colors).</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.13.0, v10.16.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[count=16] The number of colors that are requested (minimum 2).</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[env=process.env] An object containing the environment variables to check. This enables simulating the usage of a specific terminal.</span>
+         <span class="s0">*/</span>
+        <span class="s2">hasColors</span><span class="s4">(</span><span class="s2">count</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">hasColors</span><span class="s4">(</span><span class="s2">env</span><span class="s4">?: </span><span
+    class="s2">object</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">hasColors</span><span class="s4">(</span><span class="s2">count</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">env</span><span
+    class="s4">?: </span><span class="s2">object</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `writeStream.getWindowSize()` returns the size of the TTY</span>
+         <span class="s0">* corresponding to this `WriteStream`. The array is of the type `[numColumns, numRows]` where `numColumns` and `numRows` represent the number</span>
+         <span class="s0">* of columns and rows in the corresponding TTY.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">*/</span>
+        <span class="s2">getWindowSize</span><span class="s4">(): [</span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">number</span><span class="s4">];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A `number` specifying the number of columns the TTY currently has. This property</span>
+         <span class="s0">* is updated whenever the `'resize'` event is emitted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">*/</span>
+        <span class="s2">columns</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A `number` specifying the number of rows the TTY currently has. This property</span>
+         <span class="s0">* is updated whenever the `'resize'` event is emitted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+         <span class="s0">*/</span>
+        <span class="s2">rows</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A `boolean` that is always `true`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.8</span>
+         <span class="s0">*/</span>
+        <span class="s2">isTTY</span><span class="s4">: </span><span class="s2">boolean</span><span class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:tty&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;tty&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<html>
+<head>
+  <title>_composeArgs.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _composeArgs.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s2">var </span><span class="s1">nativeMax </span><span class="s3">= </span><span
+    class="s1">Math</span><span class="s3">.</span><span class="s1">max</span><span class="s3">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates an array that is the composition of partially applied arguments,</span>
+ <span class="s4">* placeholders, and provided arguments into a single array of arguments.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array} args The provided arguments.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array} partials The arguments to prepend to those provided.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array} holders The `partials` placeholder indexes.</span>
+ <span class="s4">* </span><span class="s5">@params </span><span class="s4">{boolean} [isCurried] Specify composing for a curried function.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Array} Returns the new array of composed arguments.</span>
+ <span class="s4">*/</span>
+<span class="s2">function </span><span class="s1">composeArgs</span><span class="s3">(</span><span
+    class="s1">args</span><span class="s3">, </span><span class="s1">partials</span><span class="s3">, </span><span
+    class="s1">holders</span><span class="s3">, </span><span class="s1">isCurried</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">argsIndex </span><span class="s3">= -</span><span
+    class="s6">1</span><span class="s3">,</span>
+      <span class="s1">argsLength </span><span class="s3">= </span><span class="s1">args</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">,</span>
+      <span class="s1">holdersLength </span><span class="s3">= </span><span class="s1">holders</span><span
+    class="s3">.</span><span class="s1">length</span><span class="s3">,</span>
+      <span class="s1">leftIndex </span><span class="s3">= -</span><span class="s6">1</span><span class="s3">,</span>
+      <span class="s1">leftLength </span><span class="s3">= </span><span class="s1">partials</span><span
+    class="s3">.</span><span class="s1">length</span><span class="s3">,</span>
+      <span class="s1">rangeLength </span><span class="s3">= </span><span class="s1">nativeMax</span><span
+    class="s3">(</span><span class="s1">argsLength </span><span class="s3">- </span><span
+    class="s1">holdersLength</span><span class="s3">, </span><span class="s6">0</span><span class="s3">),</span>
+      <span class="s1">result </span><span class="s3">= </span><span class="s1">Array</span><span
+    class="s3">(</span><span class="s1">leftLength </span><span class="s3">+ </span><span
+    class="s1">rangeLength</span><span class="s3">),</span>
+      <span class="s1">isUncurried </span><span class="s3">= !</span><span class="s1">isCurried</span><span
+    class="s3">;</span>
+
+  <span class="s2">while </span><span class="s3">(++</span><span class="s1">leftIndex </span><span
+    class="s3">&lt; </span><span class="s1">leftLength</span><span class="s3">) {</span>
+    <span class="s1">result</span><span class="s3">[</span><span class="s1">leftIndex</span><span class="s3">] = </span><span
+    class="s1">partials</span><span class="s3">[</span><span class="s1">leftIndex</span><span class="s3">];</span>
+  <span class="s3">}</span>
+  <span class="s2">while </span><span class="s3">(++</span><span class="s1">argsIndex </span><span
+    class="s3">&lt; </span><span class="s1">holdersLength</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">isUncurried </span><span
+    class="s3">|| </span><span class="s1">argsIndex </span><span class="s3">&lt; </span><span
+    class="s1">argsLength</span><span class="s3">) {</span>
+      <span class="s1">result</span><span class="s3">[</span><span class="s1">holders</span><span
+    class="s3">[</span><span class="s1">argsIndex</span><span class="s3">]] = </span><span class="s1">args</span><span
+    class="s3">[</span><span class="s1">argsIndex</span><span class="s3">];</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+  <span class="s2">while </span><span class="s3">(</span><span class="s1">rangeLength</span><span
+    class="s3">--) {</span>
+    <span class="s1">result</span><span class="s3">[</span><span class="s1">leftIndex</span><span
+    class="s3">++] = </span><span class="s1">args</span><span class="s3">[</span><span class="s1">argsIndex</span><span
+    class="s3">++];</span>
+  <span class="s3">}</span>
+  <span class="s2">return </span><span class="s1">result</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">composeArgs</span><span class="s3">;</span>
+</pre>
+</body>
+</html>

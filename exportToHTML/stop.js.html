@@ -1,0 +1,111 @@
+<html>
+<head>
+  <title>stop.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          stop.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">retry </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'../lib/retry'</span><span class="s2">);</span>
+
+<span class="s0">function </span><span class="s1">attemptAsyncOperation</span><span class="s2">(</span><span class="s1">someInput</span><span
+    class="s2">, </span><span class="s1">cb</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">opts </span><span class="s2">= {</span>
+    <span class="s1">retries</span><span class="s2">: </span><span class="s4">2</span><span class="s2">,</span>
+    <span class="s1">factor</span><span class="s2">: </span><span class="s4">2</span><span class="s2">,</span>
+    <span class="s1">minTimeout</span><span class="s2">: </span><span class="s4">1 </span><span
+    class="s2">* </span><span class="s4">1000</span><span class="s2">,</span>
+    <span class="s1">maxTimeout</span><span class="s2">: </span><span class="s4">2 </span><span
+    class="s2">* </span><span class="s4">1000</span><span class="s2">,</span>
+    <span class="s1">randomize</span><span class="s2">: </span><span class="s0">true</span>
+  <span class="s2">};</span>
+  <span class="s0">var </span><span class="s1">operation </span><span class="s2">= </span><span
+    class="s1">retry</span><span class="s2">.</span><span class="s1">operation</span><span class="s2">(</span><span
+    class="s1">opts</span><span class="s2">);</span>
+
+  <span class="s1">operation</span><span class="s2">.</span><span class="s1">attempt</span><span
+    class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span
+    class="s1">currentAttempt</span><span class="s2">) {</span>
+    <span class="s1">failingAsyncOperation</span><span class="s2">(</span><span class="s1">someInput</span><span
+    class="s2">, </span><span class="s0">function</span><span class="s2">(</span><span class="s1">err</span><span
+    class="s2">, </span><span class="s1">result</span><span class="s2">) {</span>
+
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">err </span><span
+    class="s2">&amp;&amp; </span><span class="s1">err</span><span class="s2">.</span><span
+    class="s1">message </span><span class="s2">=== </span><span class="s3">'A fatal error'</span><span
+    class="s2">) {</span>
+        <span class="s1">operation</span><span class="s2">.</span><span class="s1">stop</span><span
+    class="s2">();</span>
+        <span class="s0">return </span><span class="s1">cb</span><span class="s2">(</span><span
+    class="s1">err</span><span class="s2">);</span>
+      <span class="s2">}</span>
+
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">operation</span><span
+    class="s2">.</span><span class="s1">retry</span><span class="s2">(</span><span class="s1">err</span><span
+    class="s2">)) {</span>
+        <span class="s0">return</span><span class="s2">;</span>
+      <span class="s2">}</span>
+
+      <span class="s1">cb</span><span class="s2">(</span><span class="s1">operation</span><span class="s2">.</span><span
+    class="s1">mainError</span><span class="s2">(), </span><span class="s1">operation</span><span
+    class="s2">.</span><span class="s1">errors</span><span class="s2">(), </span><span class="s1">result</span><span
+    class="s2">);</span>
+    <span class="s2">});</span>
+  <span class="s2">});</span>
+<span class="s2">}</span>
+
+<span class="s1">attemptAsyncOperation</span><span class="s2">(</span><span class="s3">'test input'</span><span
+    class="s2">, </span><span class="s0">function</span><span class="s2">(</span><span class="s1">err</span><span
+    class="s2">, </span><span class="s1">errors</span><span class="s2">, </span><span class="s1">result</span><span
+    class="s2">) {</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">warn</span><span class="s2">(</span><span
+    class="s3">'err:'</span><span class="s2">);</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s1">err</span><span class="s2">);</span>
+
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">warn</span><span class="s2">(</span><span
+    class="s3">'result:'</span><span class="s2">);</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s1">result</span><span class="s2">);</span>
+<span class="s2">});</span>
+
+<span class="s0">function </span><span class="s1">failingAsyncOperation</span><span class="s2">(</span><span class="s1">input</span><span
+    class="s2">, </span><span class="s1">cb</span><span class="s2">) {</span>
+  <span class="s0">return </span><span class="s1">setImmediate</span><span class="s2">(</span><span class="s1">cb</span><span
+    class="s2">.</span><span class="s1">bind</span><span class="s2">(</span><span class="s0">null</span><span
+    class="s2">, </span><span class="s0">new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">'A fatal error'</span><span class="s2">)));</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

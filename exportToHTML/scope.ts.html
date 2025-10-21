@@ -1,0 +1,441 @@
+<html>
+<head>
+  <title>scope.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          scope.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+  class="s1">nil</span><span class="s2">, </span><span class="s1">Code</span><span class="s2">, </span><span class="s1">Name</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./code&quot;</span>
+
+<span class="s0">interface </span><span class="s1">NameGroup </span><span class="s2">{</span>
+  <span class="s1">prefix</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">index</span><span class="s2">: </span><span class="s1">number</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">NameValue </span><span class="s2">{</span>
+  <span class="s1">ref</span><span class="s2">: </span><span class="s1">ValueReference </span><span class="s4">// this is the reference to any value that can be referred to from generated code via `globals` var in the closure</span>
+  <span class="s1">key</span><span class="s2">?: </span><span class="s1">unknown </span><span class="s4">// any key to identify a global to avoid duplicates, if not passed ref is used</span>
+  <span class="s1">code</span><span class="s2">?: </span><span class="s1">Code </span><span class="s4">// this is the code creating the value needed for standalone code wit_out closure - can be a primitive value, function or import (`require`)</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type ValueReference </span><span class="s2">= </span><span class="s1">unknown </span><span
+    class="s4">// possibly make CodeGen parameterized type on this type</span>
+
+<span class="s0">class </span><span class="s1">ValueError </span><span class="s0">extends </span><span
+    class="s1">Error </span><span class="s2">{</span>
+  <span class="s1">readonly value</span><span class="s2">?: </span><span class="s1">NameValue</span>
+  <span class="s1">constructor</span><span class="s2">(</span><span class="s1">name</span><span
+    class="s2">: </span><span class="s1">ValueScopeName</span><span class="s2">) {</span>
+    <span class="s0">super</span><span class="s2">(</span><span class="s3">`CodeGen: &quot;code&quot; for </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">name</span><span class="s2">} </span><span class="s3">not defined`</span><span
+    class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">value </span><span class="s2">= </span><span
+    class="s1">name</span><span class="s2">.</span><span class="s1">value</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">ScopeOptions </span><span class="s2">{</span>
+  <span class="s1">prefixes</span><span class="s2">?: </span><span class="s1">Set</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt;</span>
+  <span class="s1">parent</span><span class="s2">?: </span><span class="s1">Scope</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">ValueScopeOptions </span><span class="s0">extends </span><span
+    class="s1">ScopeOptions </span><span class="s2">{</span>
+  <span class="s1">scope</span><span class="s2">: </span><span class="s1">ScopeStore</span>
+  <span class="s1">es5</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">lines</span><span class="s2">?: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type ScopeStore </span><span class="s2">= </span><span
+    class="s1">Record</span><span class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">ValueReference</span><span class="s2">[] | </span><span class="s1">undefined</span><span
+    class="s2">&gt;</span>
+
+<span class="s1">type ScopeValues </span><span class="s2">= {</span>
+  <span class="s2">[</span><span class="s1">Prefix </span><span class="s0">in </span><span class="s1">string</span><span
+    class="s2">]?: </span><span class="s1">Map</span><span class="s2">&lt;</span><span class="s1">unknown</span><span
+    class="s2">, </span><span class="s1">ValueScopeName</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type ScopeValueSets </span><span class="s2">= {</span>
+  <span class="s2">[</span><span class="s1">Prefix </span><span class="s0">in </span><span class="s1">string</span><span
+    class="s2">]?: </span><span class="s1">Set</span><span class="s2">&lt;</span><span
+    class="s1">ValueScopeName</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export enum </span><span class="s1">UsedValueState </span><span class="s2">{</span>
+  <span class="s1">Started</span><span class="s2">,</span>
+  <span class="s1">Completed</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type UsedScopeValues </span><span class="s2">= {</span>
+  <span class="s2">[</span><span class="s1">Prefix </span><span class="s0">in </span><span class="s1">string</span><span
+    class="s2">]?: </span><span class="s1">Map</span><span class="s2">&lt;</span><span
+    class="s1">ValueScopeName</span><span class="s2">, </span><span class="s1">UsedValueState </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export const </span><span class="s1">varKinds </span><span class="s2">= {</span>
+  <span class="s0">const</span><span class="s2">: </span><span class="s0">new </span><span class="s1">Name</span><span
+    class="s2">(</span><span class="s3">&quot;const&quot;</span><span class="s2">),</span>
+  <span class="s0">let</span><span class="s2">: </span><span class="s0">new </span><span class="s1">Name</span><span
+    class="s2">(</span><span class="s3">&quot;let&quot;</span><span class="s2">),</span>
+  <span class="s0">var</span><span class="s2">: </span><span class="s0">new </span><span class="s1">Name</span><span
+    class="s2">(</span><span class="s3">&quot;var&quot;</span><span class="s2">),</span>
+<span class="s2">}</span>
+
+<span class="s0">export class </span><span class="s1">Scope </span><span class="s2">{</span>
+  <span class="s0">protected </span><span class="s1">readonly _names</span><span class="s2">: {[</span><span class="s1">Prefix </span><span
+    class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">NameGroup</span><span class="s2">} = {}</span>
+  <span class="s0">protected </span><span class="s1">readonly _prefixes</span><span class="s2">?: </span><span
+    class="s1">Set</span><span class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt;</span>
+  <span class="s0">protected </span><span class="s1">readonly _parent</span><span class="s2">?: </span><span class="s1">Scope</span>
+
+  <span class="s1">constructor</span><span class="s2">({</span><span class="s1">prefixes</span><span
+    class="s2">, </span><span class="s1">parent</span><span class="s2">}: </span><span
+    class="s1">ScopeOptions </span><span class="s2">= {}) {</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_prefixes </span><span
+    class="s2">= </span><span class="s1">prefixes</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_parent </span><span class="s2">= </span><span
+    class="s1">parent</span>
+  <span class="s2">}</span>
+
+  <span class="s1">toName</span><span class="s2">(</span><span class="s1">nameOrPrefix</span><span
+    class="s2">: </span><span class="s1">Name </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Name </span><span class="s2">{</span>
+    <span class="s0">return </span><span class="s1">nameOrPrefix </span><span class="s0">instanceof </span><span
+    class="s1">Name </span><span class="s2">? </span><span class="s1">nameOrPrefix </span><span
+    class="s2">: </span><span class="s0">this</span><span class="s2">.</span><span class="s1">name</span><span
+    class="s2">(</span><span class="s1">nameOrPrefix</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">name</span><span class="s2">(</span><span class="s1">prefix</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Name </span><span class="s2">{</span>
+    <span class="s0">return new </span><span class="s1">Name</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_newName</span><span class="s2">(</span><span class="s1">prefix</span><span
+    class="s2">))</span>
+  <span class="s2">}</span>
+
+  <span class="s0">protected </span><span class="s1">_newName</span><span class="s2">(</span><span
+    class="s1">prefix</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">string </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">ng </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_names</span><span class="s2">[</span><span class="s1">prefix</span><span
+    class="s2">] || </span><span class="s0">this</span><span class="s2">.</span><span class="s1">_nameGroup</span><span
+    class="s2">(</span><span class="s1">prefix</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">prefix</span><span class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">ng</span><span
+    class="s2">.</span><span class="s1">index</span><span class="s2">++}</span><span class="s3">`</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">_nameGroup</span><span class="s2">(</span><span
+    class="s1">prefix</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">NameGroup </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_parent</span><span class="s2">?.</span><span class="s1">_prefixes</span><span class="s2">?.</span><span
+    class="s1">has</span><span class="s2">(</span><span class="s1">prefix</span><span class="s2">) || (</span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_prefixes </span><span
+    class="s2">&amp;&amp; !</span><span class="s0">this</span><span class="s2">.</span><span class="s1">_prefixes</span><span
+    class="s2">.</span><span class="s1">has</span><span class="s2">(</span><span class="s1">prefix</span><span
+    class="s2">))) {</span>
+      <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`CodeGen: prefix &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">prefix</span><span class="s2">}</span><span class="s3">&quot; is not allowed in this scope`</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_names</span><span class="s2">[</span><span class="s1">prefix</span><span class="s2">] = {</span><span
+    class="s1">prefix</span><span class="s2">, </span><span class="s1">index</span><span class="s2">: </span><span
+    class="s5">0</span><span class="s2">})</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">ScopePath </span><span class="s2">{</span>
+  <span class="s1">property</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">itemIndex</span><span class="s2">: </span><span class="s1">number</span>
+<span class="s2">}</span>
+
+<span class="s0">export class </span><span class="s1">ValueScopeName </span><span class="s0">extends </span><span
+    class="s1">Name </span><span class="s2">{</span>
+  <span class="s1">readonly prefix</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">value</span><span class="s2">?: </span><span class="s1">NameValue</span>
+  <span class="s1">scopePath</span><span class="s2">?: </span><span class="s1">Code</span>
+
+  <span class="s1">constructor</span><span class="s2">(</span><span class="s1">prefix</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">nameStr</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">) {</span>
+    <span class="s0">super</span><span class="s2">(</span><span class="s1">nameStr</span><span class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">prefix </span><span class="s2">= </span><span
+    class="s1">prefix</span>
+  <span class="s2">}</span>
+
+  <span class="s1">setValue</span><span class="s2">(</span><span class="s1">value</span><span class="s2">: </span><span
+    class="s1">NameValue</span><span class="s2">, {</span><span class="s1">property</span><span
+    class="s2">, </span><span class="s1">itemIndex</span><span class="s2">}: </span><span
+    class="s1">ScopePath</span><span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">value </span><span class="s2">= </span><span
+    class="s1">value</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">scopePath </span><span
+    class="s2">= </span><span class="s1">_</span><span class="s3">`.</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s0">new </span><span class="s1">Name</span><span class="s2">(</span><span
+    class="s1">property</span><span class="s2">)}</span><span class="s3">[</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">itemIndex</span><span class="s2">}</span><span class="s3">]`</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">VSOptions </span><span class="s0">extends </span><span class="s1">ValueScopeOptions </span><span
+    class="s2">{</span>
+  <span class="s1">_n</span><span class="s2">: </span><span class="s1">Code</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">line </span><span class="s2">= </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s0">\n</span><span class="s3">`</span>
+
+<span class="s0">export class </span><span class="s1">ValueScope </span><span class="s0">extends </span><span
+    class="s1">Scope </span><span class="s2">{</span>
+  <span class="s0">protected </span><span class="s1">readonly _values</span><span class="s2">: </span><span class="s1">ScopeValues </span><span
+    class="s2">= {}</span>
+  <span class="s0">protected </span><span class="s1">readonly _scope</span><span class="s2">: </span><span class="s1">ScopeStore</span>
+  <span class="s1">readonly opts</span><span class="s2">: </span><span class="s1">VSOptions</span>
+
+  <span class="s1">constructor</span><span class="s2">(</span><span class="s1">opts</span><span
+    class="s2">: </span><span class="s1">ValueScopeOptions</span><span class="s2">) {</span>
+    <span class="s0">super</span><span class="s2">(</span><span class="s1">opts</span><span class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_scope </span><span class="s2">= </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">scope</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">opts </span><span class="s2">= {</span><span
+    class="s1">...opts</span><span class="s2">, </span><span class="s1">_n</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">lines </span><span class="s2">? </span><span
+    class="s1">line </span><span class="s2">: </span><span class="s1">nil</span><span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s1">get</span><span class="s2">(): </span><span class="s1">ScopeStore </span><span class="s2">{</span>
+    <span class="s0">return this</span><span class="s2">.</span><span class="s1">_scope</span>
+  <span class="s2">}</span>
+
+  <span class="s1">name</span><span class="s2">(</span><span class="s1">prefix</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">ValueScopeName </span><span class="s2">{</span>
+    <span class="s0">return new </span><span class="s1">ValueScopeName</span><span class="s2">(</span><span class="s1">prefix</span><span
+    class="s2">, </span><span class="s0">this</span><span class="s2">.</span><span class="s1">_newName</span><span
+    class="s2">(</span><span class="s1">prefix</span><span class="s2">))</span>
+  <span class="s2">}</span>
+
+  <span class="s1">value</span><span class="s2">(</span><span class="s1">nameOrPrefix</span><span
+    class="s2">: </span><span class="s1">ValueScopeName </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">value</span><span class="s2">: </span><span
+    class="s1">NameValue</span><span class="s2">): </span><span class="s1">ValueScopeName </span><span
+    class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">value</span><span class="s2">.</span><span
+    class="s1">ref </span><span class="s2">=== </span><span class="s1">undefined</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;CodeGen: ref must be passed in value&quot;</span><span
+    class="s2">)</span>
+    <span class="s0">const </span><span class="s1">name </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">toName</span><span class="s2">(</span><span
+    class="s1">nameOrPrefix</span><span class="s2">) as </span><span class="s1">ValueScopeName</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">prefix</span><span
+    class="s2">} = </span><span class="s1">name</span>
+    <span class="s0">const </span><span class="s1">valueKey </span><span class="s2">= </span><span
+    class="s1">value</span><span class="s2">.</span><span class="s1">key </span><span class="s2">?? </span><span
+    class="s1">value</span><span class="s2">.</span><span class="s1">ref</span>
+    <span class="s0">let </span><span class="s1">vs </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_values</span><span class="s2">[</span><span class="s1">prefix</span><span
+    class="s2">]</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">vs</span><span class="s2">) {</span>
+      <span class="s0">const </span><span class="s1">_name </span><span class="s2">= </span><span
+    class="s1">vs</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">valueKey</span><span
+    class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">_name</span><span class="s2">) </span><span
+    class="s0">return </span><span class="s1">_name</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">vs </span><span class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_values</span><span class="s2">[</span><span class="s1">prefix</span><span class="s2">] = </span><span
+    class="s0">new </span><span class="s1">Map</span><span class="s2">()</span>
+    <span class="s2">}</span>
+    <span class="s1">vs</span><span class="s2">.</span><span class="s1">set</span><span class="s2">(</span><span
+    class="s1">valueKey</span><span class="s2">, </span><span class="s1">name</span><span class="s2">)</span>
+
+    <span class="s0">const </span><span class="s1">s </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_scope</span><span class="s2">[</span><span class="s1">prefix</span><span
+    class="s2">] || (</span><span class="s0">this</span><span class="s2">.</span><span class="s1">_scope</span><span
+    class="s2">[</span><span class="s1">prefix</span><span class="s2">] = [])</span>
+    <span class="s0">const </span><span class="s1">itemIndex </span><span class="s2">= </span><span
+    class="s1">s</span><span class="s2">.</span><span class="s1">length</span>
+    <span class="s1">s</span><span class="s2">[</span><span class="s1">itemIndex</span><span class="s2">] = </span><span
+    class="s1">value</span><span class="s2">.</span><span class="s1">ref</span>
+    <span class="s1">name</span><span class="s2">.</span><span class="s1">setValue</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">, {</span><span class="s1">property</span><span class="s2">: </span><span
+    class="s1">prefix</span><span class="s2">, </span><span class="s1">itemIndex</span><span class="s2">})</span>
+    <span class="s0">return </span><span class="s1">name</span>
+  <span class="s2">}</span>
+
+  <span class="s1">getValue</span><span class="s2">(</span><span class="s1">prefix</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">keyOrRef</span><span class="s2">: </span><span
+    class="s1">unknown</span><span class="s2">): </span><span class="s1">ValueScopeName </span><span
+    class="s2">| </span><span class="s1">undefined </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">vs </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_values</span><span class="s2">[</span><span class="s1">prefix</span><span
+    class="s2">]</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">vs</span><span class="s2">) </span><span
+    class="s0">return</span>
+    <span class="s0">return </span><span class="s1">vs</span><span class="s2">.</span><span class="s1">get</span><span
+    class="s2">(</span><span class="s1">keyOrRef</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">scopeRefs</span><span class="s2">(</span><span class="s1">scopeName</span><span
+    class="s2">: </span><span class="s1">Name</span><span class="s2">, </span><span class="s1">values</span><span
+    class="s2">: </span><span class="s1">ScopeValues </span><span class="s2">| </span><span
+    class="s1">ScopeValueSets </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_values</span><span class="s2">): </span><span class="s1">Code </span><span
+    class="s2">{</span>
+    <span class="s0">return this</span><span class="s2">.</span><span class="s1">_reduceValues</span><span
+    class="s2">(</span><span class="s1">values</span><span class="s2">, (</span><span class="s1">name</span><span
+    class="s2">: </span><span class="s1">ValueScopeName</span><span class="s2">) =&gt; {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">name</span><span class="s2">.</span><span
+    class="s1">scopePath </span><span class="s2">=== </span><span class="s1">undefined</span><span
+    class="s2">) </span><span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">`CodeGen: name &quot;</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">name</span><span class="s2">}</span><span class="s3">&quot; has no value`</span><span class="s2">)</span>
+      <span class="s0">return </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">scopeName</span><span class="s2">}</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">name</span><span class="s2">.</span><span class="s1">scopePath</span><span
+    class="s2">}</span><span class="s3">`</span>
+    <span class="s2">})</span>
+  <span class="s2">}</span>
+
+  <span class="s1">scopeCode</span><span class="s2">(</span>
+    <span class="s1">values</span><span class="s2">: </span><span class="s1">ScopeValues </span><span
+    class="s2">| </span><span class="s1">ScopeValueSets </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_values</span><span class="s2">,</span>
+    <span class="s1">usedValues</span><span class="s2">?: </span><span class="s1">UsedScopeValues</span><span
+    class="s2">,</span>
+    <span class="s1">getCode</span><span class="s2">?: (</span><span class="s1">n</span><span class="s2">: </span><span
+    class="s1">ValueScopeName</span><span class="s2">) =&gt; </span><span class="s1">Code </span><span
+    class="s2">| </span><span class="s1">undefined</span>
+  <span class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+    <span class="s0">return this</span><span class="s2">.</span><span class="s1">_reduceValues</span><span
+    class="s2">(</span>
+      <span class="s1">values</span><span class="s2">,</span>
+      <span class="s2">(</span><span class="s1">name</span><span class="s2">: </span><span
+    class="s1">ValueScopeName</span><span class="s2">) =&gt; {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">name</span><span class="s2">.</span><span
+    class="s1">value </span><span class="s2">=== </span><span class="s1">undefined</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`CodeGen: name &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">name</span><span class="s2">}</span><span class="s3">&quot; has no value`</span><span
+    class="s2">)</span>
+        <span class="s0">return </span><span class="s1">name</span><span class="s2">.</span><span
+    class="s1">value</span><span class="s2">.</span><span class="s1">code</span>
+      <span class="s2">},</span>
+      <span class="s1">usedValues</span><span class="s2">,</span>
+      <span class="s1">getCode</span>
+    <span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">_reduceValues</span><span class="s2">(</span>
+    <span class="s1">values</span><span class="s2">: </span><span class="s1">ScopeValues </span><span
+    class="s2">| </span><span class="s1">ScopeValueSets</span><span class="s2">,</span>
+    <span class="s1">valueCode</span><span class="s2">: (</span><span class="s1">n</span><span class="s2">: </span><span
+    class="s1">ValueScopeName</span><span class="s2">) =&gt; </span><span class="s1">Code </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">,</span>
+    <span class="s1">usedValues</span><span class="s2">: </span><span class="s1">UsedScopeValues </span><span
+    class="s2">= {},</span>
+    <span class="s1">getCode</span><span class="s2">?: (</span><span class="s1">n</span><span class="s2">: </span><span
+    class="s1">ValueScopeName</span><span class="s2">) =&gt; </span><span class="s1">Code </span><span
+    class="s2">| </span><span class="s1">undefined</span>
+  <span class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+    <span class="s0">let </span><span class="s1">code</span><span class="s2">: </span><span class="s1">Code </span><span
+    class="s2">= </span><span class="s1">nil</span>
+    <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">prefix </span><span class="s0">in </span><span class="s1">values</span><span class="s2">) {</span>
+      <span class="s0">const </span><span class="s1">vs </span><span class="s2">= </span><span
+    class="s1">values</span><span class="s2">[</span><span class="s1">prefix</span><span class="s2">]</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">vs</span><span class="s2">) </span><span
+    class="s0">continue</span>
+      <span class="s0">const </span><span class="s1">nameSet </span><span class="s2">= (</span><span class="s1">usedValues</span><span
+    class="s2">[</span><span class="s1">prefix</span><span class="s2">] = </span><span class="s1">usedValues</span><span
+    class="s2">[</span><span class="s1">prefix</span><span class="s2">] || </span><span class="s0">new </span><span
+    class="s1">Map</span><span class="s2">())</span>
+      <span class="s1">vs</span><span class="s2">.</span><span class="s1">forEach</span><span class="s2">((</span><span
+    class="s1">name</span><span class="s2">: </span><span class="s1">ValueScopeName</span><span
+    class="s2">) =&gt; {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">nameSet</span><span
+    class="s2">.</span><span class="s1">has</span><span class="s2">(</span><span class="s1">name</span><span class="s2">)) </span><span
+    class="s0">return</span>
+        <span class="s1">nameSet</span><span class="s2">.</span><span class="s1">set</span><span
+    class="s2">(</span><span class="s1">name</span><span class="s2">, </span><span class="s1">UsedValueState</span><span
+    class="s2">.</span><span class="s1">Started</span><span class="s2">)</span>
+        <span class="s0">let </span><span class="s1">c </span><span class="s2">= </span><span
+    class="s1">valueCode</span><span class="s2">(</span><span class="s1">name</span><span class="s2">)</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">c</span><span class="s2">) {</span>
+          <span class="s0">const </span><span class="s1">def </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">es5 </span><span class="s2">? </span><span class="s1">varKinds</span><span class="s2">.</span><span
+    class="s1">var </span><span class="s2">: </span><span class="s1">varKinds</span><span class="s2">.</span><span
+    class="s1">const</span>
+          <span class="s1">code </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">code</span><span class="s2">}</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">def</span><span class="s2">} </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">name</span><span class="s2">} </span><span
+    class="s3">= </span><span class="s1">$</span><span class="s2">{</span><span class="s1">c</span><span
+    class="s2">}</span><span class="s3">;</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">_n</span><span class="s2">}</span><span class="s3">`</span>
+        <span class="s2">} </span><span class="s0">else if </span><span class="s2">((</span><span
+    class="s1">c </span><span class="s2">= </span><span class="s1">getCode</span><span class="s2">?.(</span><span
+    class="s1">name</span><span class="s2">))) {</span>
+          <span class="s1">code </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">code</span><span class="s2">}</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">c</span><span class="s2">}</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s0">this</span><span class="s2">.</span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">_n</span><span class="s2">}</span><span class="s3">`</span>
+        <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+          <span class="s0">throw new </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s1">name</span><span
+    class="s2">)</span>
+        <span class="s2">}</span>
+        <span class="s1">nameSet</span><span class="s2">.</span><span class="s1">set</span><span
+    class="s2">(</span><span class="s1">name</span><span class="s2">, </span><span class="s1">UsedValueState</span><span
+    class="s2">.</span><span class="s1">Completed</span><span class="s2">)</span>
+      <span class="s2">})</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s1">code</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

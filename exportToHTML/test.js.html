@@ -1,0 +1,1248 @@
+<html>
+<head>
+  <title>test.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #7a7e85;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          test.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">/* eslint-disable no-var */</span>
+
+<span class="s3">var </span><span class="s1">test </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'tape'</span><span class="s4">)</span>
+<span class="s3">var </span><span class="s1">buildQueue </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'../'</span><span class="s4">)</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'concurrency'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">6</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">throws</span><span class="s4">(</span><span
+    class="s1">buildQueue</span><span class="s4">.</span><span class="s1">bind</span><span class="s4">(</span><span
+    class="s3">null</span><span class="s4">, </span><span class="s1">worker</span><span class="s4">, </span><span
+    class="s5">0</span><span class="s4">))</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">throws</span><span class="s4">(</span><span
+    class="s1">buildQueue</span><span class="s4">.</span><span class="s1">bind</span><span class="s4">(</span><span
+    class="s3">null</span><span class="s4">, </span><span class="s1">worker</span><span class="s4">, </span><span
+    class="s1">NaN</span><span class="s4">))</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">doesNotThrow</span><span class="s4">(</span><span
+    class="s1">buildQueue</span><span class="s4">.</span><span class="s1">bind</span><span class="s4">(</span><span
+    class="s3">null</span><span class="s4">, </span><span class="s1">worker</span><span class="s4">, </span><span
+    class="s5">1</span><span class="s4">))</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">throws</span><span class="s4">(</span><span
+    class="s3">function </span><span class="s4">() {</span>
+    <span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency </span><span class="s4">= </span><span
+    class="s5">0</span>
+  <span class="s4">})</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">throws</span><span class="s4">(</span><span
+    class="s3">function </span><span class="s4">() {</span>
+    <span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency </span><span class="s4">= </span><span
+    class="s1">NaN</span>
+  <span class="s4">})</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">doesNotThrow</span><span class="s4">(</span><span
+    class="s3">function </span><span class="s4">() {</span>
+    <span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency </span><span class="s4">= </span><span
+    class="s5">2</span>
+  <span class="s4">})</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'worker execution'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">3</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s5">42</span><span class="s4">)</span>
+    <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'limit'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">4</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">expected </span><span class="s4">= [</span><span
+    class="s5">10</span><span class="s4">, </span><span class="s5">0</span><span class="s4">]</span>
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">10</span><span class="s4">, </span><span class="s1">result</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">0</span><span class="s4">, </span><span class="s1">result</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">result </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">arg</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">expected</span><span class="s4">.</span><span
+    class="s1">shift</span><span class="s4">(), </span><span class="s0">'the result matches'</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">setTimeout</span><span class="s4">(</span><span class="s1">cb</span><span class="s4">, </span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s3">null</span><span class="s4">, </span><span
+    class="s1">arg</span><span class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'multiple executions'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">15</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">toExec </span><span class="s4">= [</span><span class="s5">1</span><span
+    class="s4">, </span><span class="s5">2</span><span class="s4">, </span><span class="s5">3</span><span
+    class="s4">, </span><span class="s5">4</span><span class="s4">, </span><span class="s5">5</span><span
+    class="s4">]</span>
+  <span class="s3">var </span><span class="s1">count </span><span class="s4">= </span><span class="s5">0</span>
+
+  <span class="s1">toExec</span><span class="s4">.</span><span class="s1">forEach</span><span class="s4">(</span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">task</span><span class="s4">) {</span>
+    <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s1">task</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s1">toExec</span><span class="s4">[</span><span
+    class="s1">count </span><span class="s4">- </span><span class="s5">1</span><span class="s4">], </span><span
+    class="s0">'the result matches'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">toExec</span><span class="s4">[</span><span
+    class="s1">count</span><span class="s4">], </span><span class="s0">'arg matches'</span><span class="s4">)</span>
+    <span class="s1">count</span><span class="s4">++</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s1">cb</span><span
+    class="s4">, </span><span class="s3">null</span><span class="s4">, </span><span class="s1">arg</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span
+    class="s0">'multiple executions, one after another'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">15</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">toExec </span><span class="s4">= [</span><span class="s5">1</span><span
+    class="s4">, </span><span class="s5">2</span><span class="s4">, </span><span class="s5">3</span><span
+    class="s4">, </span><span class="s5">4</span><span class="s4">, </span><span class="s5">5</span><span
+    class="s4">]</span>
+  <span class="s3">var </span><span class="s1">count </span><span class="s4">= </span><span class="s5">0</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s1">toExec</span><span class="s4">[</span><span class="s5">0</span><span class="s4">], </span><span
+    class="s1">done</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s1">toExec</span><span class="s4">[</span><span
+    class="s1">count </span><span class="s4">- </span><span class="s5">1</span><span class="s4">], </span><span
+    class="s0">'the result matches'</span><span class="s4">)</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">count </span><span class="s4">&lt; </span><span
+    class="s1">toExec</span><span class="s4">.</span><span class="s1">length</span><span class="s4">) {</span>
+      <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s1">toExec</span><span class="s4">[</span><span class="s1">count</span><span class="s4">], </span><span
+    class="s1">done</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">toExec</span><span class="s4">[</span><span
+    class="s1">count</span><span class="s4">], </span><span class="s0">'arg matches'</span><span class="s4">)</span>
+    <span class="s1">count</span><span class="s4">++</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s1">cb</span><span
+    class="s4">, </span><span class="s3">null</span><span class="s4">, </span><span class="s1">arg</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'set this'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">3</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">that </span><span class="s4">= {}</span>
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">that</span><span class="s4">, </span><span class="s1">worker</span><span
+    class="s4">, </span><span class="s5">1</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s3">this</span><span class="s4">, </span><span class="s1">that</span><span class="s4">, </span><span
+    class="s0">'this matches'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s3">this</span><span class="s4">, </span><span class="s1">that</span><span class="s4">, </span><span
+    class="s0">'this matches'</span><span class="s4">)</span>
+    <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'drain'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">4</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">worked </span><span class="s4">= </span><span class="s3">false</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">drain </span><span class="s4">= </span><span
+    class="s3">function </span><span class="s4">() {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s3">true</span><span class="s4">, </span><span class="s1">worked</span><span class="s4">, </span><span
+    class="s0">'drained'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s5">42</span><span class="s4">)</span>
+    <span class="s1">worked </span><span class="s4">= </span><span class="s3">true</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s1">cb</span><span
+    class="s4">, </span><span class="s3">null</span><span class="s4">, </span><span class="s3">true</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'pause &amp;&amp; resume'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">13</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">worked </span><span class="s4">= </span><span class="s3">false</span>
+  <span class="s3">var </span><span class="s1">expected </span><span class="s4">= [</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s5">24</span><span class="s4">]</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should not be paused'</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">worked</span><span class="s4">, </span><span class="s0">'it should be paused'</span><span
+    class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span class="s1">queue</span><span
+    class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should be paused'</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">() </span><span
+    class="s2">// second resume is a no-op</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should not be paused'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">running</span><span
+    class="s4">() &lt;= </span><span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency</span><span
+    class="s4">, </span><span class="s0">'should respect the concurrency'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">expected</span><span class="s4">.</span><span
+    class="s1">shift</span><span class="s4">())</span>
+    <span class="s1">worked </span><span class="s4">= </span><span class="s3">true</span>
+    <span class="s1">process</span><span class="s4">.</span><span class="s1">nextTick</span><span
+    class="s4">(</span><span class="s3">function </span><span class="s4">() { </span><span class="s1">cb</span><span
+    class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span class="s3">true</span><span
+    class="s4">) })</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'pause in flight &amp;&amp; resume'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">16</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">expected </span><span class="s4">= [</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s5">24</span><span class="s4">, </span><span class="s5">12</span><span
+    class="s4">]</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should not be paused'</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should be paused'</span><span class="s4">)</span>
+    <span class="s1">process</span><span class="s4">.</span><span class="s1">nextTick</span><span
+    class="s4">(</span><span class="s3">function </span><span class="s4">() {</span>
+      <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+      <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+      <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+    <span class="s4">})</span>
+  <span class="s4">})</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should not be paused'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">12</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should not be paused'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">running</span><span
+    class="s4">() &lt;= </span><span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency</span><span
+    class="s4">, </span><span class="s0">'should respect the concurrency'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">expected</span><span class="s4">.</span><span
+    class="s1">shift</span><span class="s4">())</span>
+    <span class="s1">process</span><span class="s4">.</span><span class="s1">nextTick</span><span
+    class="s4">(</span><span class="s3">function </span><span class="s4">() { </span><span class="s1">cb</span><span
+    class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span class="s3">true</span><span
+    class="s4">) })</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'altering concurrency'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s1">workDone</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s1">workDone</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s1">workDone</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency </span><span
+    class="s4">= </span><span class="s5">3 </span><span
+    class="s2">// concurrency changes are ignored while paused</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency </span><span
+    class="s4">= </span><span class="s5">2</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">running</span><span class="s4">(), </span><span
+    class="s5">2</span><span class="s4">, </span><span class="s0">'2 jobs running'</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency </span><span
+    class="s4">= </span><span class="s5">3</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">running</span><span class="s4">(), </span><span
+    class="s5">3</span><span class="s4">, </span><span class="s0">'3 jobs running'</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency </span><span
+    class="s4">= </span><span class="s5">1</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">running</span><span class="s4">(), </span><span
+    class="s5">3</span><span class="s4">, </span><span class="s0">'3 jobs running'</span><span class="s4">) </span><span
+    class="s2">// running jobs can't be killed</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s1">workDone</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s1">workDone</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s1">workDone</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">24</span><span class="s4">, </span><span class="s1">workDone</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">workDone </span><span class="s4">(</span><span class="s1">err</span><span
+    class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">running</span><span
+    class="s4">() &lt;= </span><span class="s1">queue</span><span class="s4">.</span><span class="s1">concurrency</span><span
+    class="s4">, </span><span class="s0">'should respect the concurrency'</span><span class="s4">)</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'idle()'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">12</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span class="s1">queue</span><span
+    class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'queue is idle'</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'queue is not idle'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+    <span class="s2">// it will go idle after executing this function</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'queue is now idle'</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">})</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'queue is not idle'</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'queue is not idle'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s5">42</span><span class="s4">)</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s1">cb</span><span
+    class="s4">, </span><span class="s3">null</span><span class="s4">, </span><span class="s3">true</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'saturated'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">9</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">preworked </span><span class="s4">= </span><span class="s5">0</span>
+  <span class="s3">var </span><span class="s1">worked </span><span class="s4">= </span><span class="s5">0</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">saturated </span><span
+    class="s4">= </span><span class="s3">function </span><span class="s4">() {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">pass</span><span class="s4">(</span><span
+    class="s0">'saturated'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">preworked</span><span class="s4">, </span><span class="s5">1</span><span class="s4">, </span><span
+    class="s0">'started 1 task'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">worked</span><span class="s4">, </span><span class="s5">0</span><span class="s4">, </span><span
+    class="s0">'worked zero task'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s5">42</span><span class="s4">)</span>
+    <span class="s1">preworked</span><span class="s4">++</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">worked</span><span class="s4">++</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'length'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">7</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">length</span><span class="s4">(), </span><span
+    class="s5">0</span><span class="s4">, </span><span class="s0">'nothing waiting'</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">length</span><span class="s4">(), </span><span
+    class="s5">0</span><span class="s4">, </span><span class="s0">'nothing waiting'</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">length</span><span class="s4">(), </span><span
+    class="s5">1</span><span class="s4">, </span><span class="s0">'one task waiting'</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">length</span><span class="s4">(), </span><span
+    class="s5">2</span><span class="s4">, </span><span class="s0">'two tasks waiting'</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'getQueue'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">10</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">getQueue</span><span class="s4">().</span><span
+    class="s1">length</span><span class="s4">, </span><span class="s5">0</span><span class="s4">, </span><span
+    class="s0">'nothing waiting'</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">getQueue</span><span class="s4">().</span><span
+    class="s1">length</span><span class="s4">, </span><span class="s5">0</span><span class="s4">, </span><span
+    class="s0">'nothing waiting'</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">getQueue</span><span class="s4">().</span><span
+    class="s1">length</span><span class="s4">, </span><span class="s5">1</span><span class="s4">, </span><span
+    class="s0">'one task waiting'</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">getQueue</span><span class="s4">()[</span><span
+    class="s5">0</span><span class="s4">], </span><span class="s5">42</span><span class="s4">, </span><span class="s0">'should be equal'</span><span
+    class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">43</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">getQueue</span><span class="s4">().</span><span
+    class="s1">length</span><span class="s4">, </span><span class="s5">2</span><span class="s4">, </span><span
+    class="s0">'two tasks waiting'</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">getQueue</span><span class="s4">()[</span><span
+    class="s5">0</span><span class="s4">], </span><span class="s5">42</span><span class="s4">, </span><span class="s0">'should be equal'</span><span
+    class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">getQueue</span><span class="s4">()[</span><span
+    class="s5">1</span><span class="s4">], </span><span class="s5">43</span><span class="s4">, </span><span class="s0">'should be equal'</span><span
+    class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'unshift'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">8</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">expected </span><span class="s4">= [</span><span class="s5">1</span><span
+    class="s4">, </span><span class="s5">2</span><span class="s4">, </span><span class="s5">3</span><span
+    class="s4">, </span><span class="s5">4</span><span class="s4">]</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">1</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">4</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">3</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">2</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">expected</span><span class="s4">.</span><span class="s1">shift</span><span class="s4">(), </span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s0">'tasks come in order'</span><span
+    class="s4">)</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'unshift &amp;&amp; empty'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">2</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">completed </span><span class="s4">= </span><span class="s3">false</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">empty </span><span class="s4">= </span><span
+    class="s3">function </span><span class="s4">() {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">completed</span><span class="s4">, </span><span class="s0">'the task has not completed yet'</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">1</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">completed </span><span class="s4">= </span><span class="s3">true</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'push &amp;&amp; empty'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">2</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">completed </span><span class="s4">= </span><span class="s3">false</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">empty </span><span class="s4">= </span><span
+    class="s3">function </span><span class="s4">() {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">completed</span><span class="s4">, </span><span class="s0">'the task has not completed yet'</span><span
+    class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">1</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">completed </span><span class="s4">= </span><span class="s3">true</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'kill'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">5</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">expected </span><span class="s4">= [</span><span class="s5">1</span><span
+    class="s4">]</span>
+
+  <span class="s3">var </span><span class="s1">predrain </span><span class="s4">= </span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">drain</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">drain </span><span class="s4">= </span><span
+    class="s3">function </span><span class="s1">drain </span><span class="s4">() {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">fail</span><span class="s4">(</span><span
+    class="s0">'drain should never be called'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">1</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">4</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">3</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">2</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">kill</span><span class="s4">()</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">length</span><span class="s4">(), </span><span
+    class="s5">0</span><span class="s4">, </span><span class="s0">'no queued tasks'</span><span class="s4">)</span>
+      <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">running</span><span class="s4">(), </span><span
+    class="s5">0</span><span class="s4">, </span><span class="s0">'no running tasks'</span><span class="s4">)</span>
+      <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">drain</span><span class="s4">, </span><span
+    class="s1">predrain</span><span class="s4">, </span><span class="s0">'drain is back to default'</span><span
+    class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">expected</span><span class="s4">.</span><span class="s1">shift</span><span class="s4">(), </span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s0">'tasks come in order'</span><span
+    class="s4">)</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'killAndDrain'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">6</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">expected </span><span class="s4">= [</span><span class="s5">1</span><span
+    class="s4">]</span>
+
+  <span class="s3">var </span><span class="s1">predrain </span><span class="s4">= </span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">drain</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">drain </span><span class="s4">= </span><span
+    class="s3">function </span><span class="s1">drain </span><span class="s4">() {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">pass</span><span class="s4">(</span><span
+    class="s0">'drain has been called'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">1</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">4</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">3</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">2</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">killAndDrain</span><span class="s4">()</span>
+
+  <span class="s3">function </span><span class="s1">done </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">length</span><span class="s4">(), </span><span
+    class="s5">0</span><span class="s4">, </span><span class="s0">'no queued tasks'</span><span class="s4">)</span>
+      <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">running</span><span class="s4">(), </span><span
+    class="s5">0</span><span class="s4">, </span><span class="s0">'no running tasks'</span><span class="s4">)</span>
+      <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">drain</span><span class="s4">, </span><span
+    class="s1">predrain</span><span class="s4">, </span><span class="s0">'drain is back to default'</span><span
+    class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">expected</span><span class="s4">.</span><span class="s1">shift</span><span class="s4">(), </span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s0">'tasks come in order'</span><span
+    class="s4">)</span>
+    <span class="s1">setImmediate</span><span class="s4">(</span><span class="s3">function </span><span
+    class="s4">() {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'pause &amp;&amp; idle'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">11</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s3">var </span><span class="s1">worked </span><span class="s4">= </span><span class="s3">false</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should not be paused'</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span class="s1">queue</span><span
+    class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'should be idle'</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s1">result</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">, </span><span class="s0">'no error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">result</span><span class="s4">, </span><span class="s3">true</span><span class="s4">, </span><span
+    class="s0">'result matches'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">worked</span><span class="s4">, </span><span class="s0">'it should be paused'</span><span
+    class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span class="s1">queue</span><span
+    class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should be paused'</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'should not be idle'</span><span class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s0">'it should not be paused'</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">notOk</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'it should not be idle'</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s5">42</span><span class="s4">)</span>
+    <span class="s1">worked </span><span class="s4">= </span><span class="s3">true</span>
+    <span class="s1">process</span><span class="s4">.</span><span class="s1">nextTick</span><span
+    class="s4">(</span><span class="s1">cb</span><span class="s4">.</span><span class="s1">bind</span><span
+    class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span class="s3">null</span><span
+    class="s4">, </span><span class="s3">true</span><span class="s4">))</span>
+    <span class="s1">process</span><span class="s4">.</span><span class="s1">nextTick</span><span
+    class="s4">(</span><span class="s3">function </span><span class="s4">() {</span>
+      <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">idle</span><span class="s4">(), </span><span
+    class="s0">'is should be idle'</span><span class="s4">)</span>
+    <span class="s4">})</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'push without cb'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">1</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s5">42</span><span class="s4">)</span>
+    <span class="s1">cb</span><span class="s4">()</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'unshift without cb'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">1</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">)</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s5">42</span><span class="s4">)</span>
+    <span class="s1">cb</span><span class="s4">()</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'push with worker throwing error'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">5</span><span class="s4">)</span>
+  <span class="s3">var </span><span class="s1">q </span><span class="s4">= </span><span
+    class="s1">buildQueue</span><span class="s4">(</span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">task</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">cb</span><span class="s4">(</span><span class="s3">new </span><span class="s1">Error</span><span
+    class="s4">(</span><span class="s0">'test error'</span><span class="s4">), </span><span class="s3">null</span><span
+    class="s4">)</span>
+  <span class="s4">}, </span><span class="s5">1</span><span class="s4">)</span>
+  <span class="s1">q</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">err</span><span class="s4">, </span><span
+    class="s1">task</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">err </span><span class="s3">instanceof </span><span class="s1">Error</span><span
+    class="s4">, </span><span class="s0">'global error handler should catch the error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">match</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">.</span><span class="s1">message</span><span class="s4">, </span><span
+    class="s6">/test error/</span><span class="s4">, </span><span class="s0">'error message should be &quot;test error&quot;'</span><span
+    class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">task</span><span class="s4">, </span><span class="s5">42</span><span class="s4">, </span><span
+    class="s0">'The task executed should be passed'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+  <span class="s1">q</span><span class="s4">.</span><span class="s1">push</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">err </span><span class="s3">instanceof </span><span class="s1">Error</span><span
+    class="s4">, </span><span class="s0">'push callback should catch the error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">match</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">.</span><span class="s1">message</span><span class="s4">, </span><span
+    class="s6">/test error/</span><span class="s4">, </span><span class="s0">'error message should be &quot;test error&quot;'</span><span
+    class="s4">)</span>
+  <span class="s4">})</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'unshift with worker throwing error'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">5</span><span class="s4">)</span>
+  <span class="s3">var </span><span class="s1">q </span><span class="s4">= </span><span
+    class="s1">buildQueue</span><span class="s4">(</span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">task</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">cb</span><span class="s4">(</span><span class="s3">new </span><span class="s1">Error</span><span
+    class="s4">(</span><span class="s0">'test error'</span><span class="s4">), </span><span class="s3">null</span><span
+    class="s4">)</span>
+  <span class="s4">}, </span><span class="s5">1</span><span class="s4">)</span>
+  <span class="s1">q</span><span class="s4">.</span><span class="s1">error</span><span class="s4">(</span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">err</span><span class="s4">, </span><span
+    class="s1">task</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">err </span><span class="s3">instanceof </span><span class="s1">Error</span><span
+    class="s4">, </span><span class="s0">'global error handler should catch the error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">match</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">.</span><span class="s1">message</span><span class="s4">, </span><span
+    class="s6">/test error/</span><span class="s4">, </span><span class="s0">'error message should be &quot;test error&quot;'</span><span
+    class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">task</span><span class="s4">, </span><span class="s5">42</span><span class="s4">, </span><span
+    class="s0">'The task executed should be passed'</span><span class="s4">)</span>
+  <span class="s4">})</span>
+  <span class="s1">q</span><span class="s4">.</span><span class="s1">unshift</span><span class="s4">(</span><span
+    class="s5">42</span><span class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">) {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">ok</span><span class="s4">(</span><span
+    class="s1">err </span><span class="s3">instanceof </span><span class="s1">Error</span><span
+    class="s4">, </span><span class="s0">'unshift callback should catch the error'</span><span class="s4">)</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">match</span><span class="s4">(</span><span
+    class="s1">err</span><span class="s4">.</span><span class="s1">message</span><span class="s4">, </span><span
+    class="s6">/test error/</span><span class="s4">, </span><span class="s0">'error message should be &quot;test error&quot;'</span><span
+    class="s4">)</span>
+  <span class="s4">})</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span
+    class="s0">'pause/resume should trigger drain event'</span><span class="s4">, </span><span
+    class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">1</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s1">worker</span><span class="s4">, </span><span class="s5">1</span><span
+    class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">drain </span><span class="s4">= </span><span
+    class="s3">function </span><span class="s4">() {</span>
+    <span class="s1">t</span><span class="s4">.</span><span class="s1">pass</span><span class="s4">(</span><span
+    class="s0">'drain should be called'</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">function </span><span class="s1">worker </span><span class="s4">(</span><span
+    class="s1">arg</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">resume</span><span class="s4">()</span>
+<span class="s4">})</span>
+
+<span class="s1">test</span><span class="s4">(</span><span class="s0">'paused flag'</span><span
+    class="s4">, </span><span class="s3">function </span><span class="s4">(</span><span class="s1">t</span><span
+    class="s4">) {</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">plan</span><span class="s4">(</span><span
+    class="s5">2</span><span class="s4">)</span>
+
+  <span class="s3">var </span><span class="s1">queue </span><span class="s4">= </span><span class="s1">buildQueue</span><span
+    class="s4">(</span><span class="s3">function </span><span class="s4">(</span><span class="s1">arg</span><span
+    class="s4">, </span><span class="s1">cb</span><span class="s4">) {</span>
+    <span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span class="s4">)</span>
+  <span class="s4">}, </span><span class="s5">1</span><span class="s4">)</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s3">false</span><span class="s4">)</span>
+  <span class="s1">queue</span><span class="s4">.</span><span class="s1">pause</span><span class="s4">()</span>
+  <span class="s1">t</span><span class="s4">.</span><span class="s1">equal</span><span class="s4">(</span><span
+    class="s1">queue</span><span class="s4">.</span><span class="s1">paused</span><span class="s4">, </span><span
+    class="s3">true</span><span class="s4">)</span>
+<span class="s4">})</span>
+</pre>
+</body>
+</html>

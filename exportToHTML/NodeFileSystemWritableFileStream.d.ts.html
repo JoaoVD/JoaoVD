@@ -1,0 +1,135 @@
+<html>
+<head>
+  <title>NodeFileSystemWritableFileStream.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          NodeFileSystemWritableFileStream.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+  class="s1">Data</span><span class="s2">, </span><span class="s1">FileSystemWritableFileStreamParams</span><span
+  class="s2">, </span><span class="s1">IFileSystemWritableFileStream </span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">'../fsa/types'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">IFileHandle </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types/misc'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">NodeFsaFs </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./types'</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* When Chrome writes to the file, it creates a copy of the file with extension</span>
+ <span class="s4">* `.crswap` and then replaces the original file with the copy only when the</span>
+ <span class="s4">* `close()` method is called. If the `abort()` method is called, the `.crswap`</span>
+ <span class="s4">* file is deleted.</span>
+ <span class="s4">*</span>
+ <span class="s4">* If a file name with with extension `.crswap` is already taken, it</span>
+ <span class="s4">* creates a new swap file with extension `.1.crswap` and so on.</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">const </span><span class="s1">createSwapFile</span><span
+    class="s2">: (</span><span class="s1">fs</span><span class="s2">: </span><span class="s1">NodeFsaFs</span><span
+    class="s2">, </span><span class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">keepExistingData</span><span class="s2">: </span><span
+    class="s1">boolean</span><span class="s2">) =&gt; </span><span class="s1">Promise</span><span
+    class="s2">&lt;[</span><span class="s1">handle</span><span class="s2">: </span><span
+    class="s1">IFileHandle</span><span class="s2">, </span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">]&gt;;</span>
+<span class="s0">interface </span><span class="s1">SwapFile </span><span class="s2">{</span>
+    <span class="s4">/** Swap file full path name. */</span>
+    <span class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s4">/** Seek offset in the file. */</span>
+    <span class="s1">offset</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s4">/** Node.js open FileHandle. */</span>
+    <span class="s1">handle</span><span class="s2">?: </span><span class="s1">IFileHandle</span><span
+    class="s2">;</span>
+    <span class="s4">/** Resolves when swap file is ready for operations. */</span>
+    <span class="s1">ready</span><span class="s2">?: </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+<span class="s2">}</span>
+<span class="s1">declare </span><span class="s0">const </span><span class="s1">WS</span><span class="s2">: </span><span
+    class="s0">typeof </span><span class="s1">WritableStream</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* Is a WritableStream object with additional convenience methods, which</span>
+ <span class="s4">* operates on a single file on disk. The interface is accessed through the</span>
+ <span class="s4">* `FileSystemFileHandle.createWritable()` method.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemWritableFileStream</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">NodeFileSystemWritableFileStream </span><span
+    class="s0">extends </span><span class="s1">WS </span><span class="s0">implements </span><span class="s1">IFileSystemWritableFileStream </span><span
+    class="s2">{</span>
+    <span class="s0">protected </span><span class="s1">readonly fs</span><span class="s2">: </span><span class="s1">NodeFsaFs</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly path</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly swap</span><span class="s2">: </span><span class="s1">SwapFile</span><span
+    class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">fs</span><span
+    class="s2">: </span><span class="s1">NodeFsaFs</span><span class="s2">, </span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">keepExistingData</span><span
+    class="s2">: </span><span class="s1">boolean</span><span class="s2">);</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@sse </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemWritableFileStream/seek</span>
+     <span class="s4">* </span><span class="s5">@param </span><span class="s4">position An `unsigned long` describing the byte position from the top</span>
+     <span class="s4">*                 (beginning) of the file.</span>
+     <span class="s4">*/</span>
+    <span class="s1">seek</span><span class="s2">(</span><span class="s1">position</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemWritableFileStream/truncate</span>
+     <span class="s4">* </span><span class="s5">@param </span><span class="s4">size An `unsigned long` of the amount of bytes to resize the stream to.</span>
+     <span class="s4">*/</span>
+    <span class="s1">truncate</span><span class="s2">(</span><span class="s1">size</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s0">protected </span><span class="s1">writeBase</span><span class="s2">(</span><span
+    class="s1">chunk</span><span class="s2">: </span><span class="s1">Data</span><span class="s2">): </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemWritableFileStream/write</span>
+     <span class="s4">*/</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">chunk</span><span class="s2">: </span><span
+    class="s1">Data</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">params</span><span class="s2">: </span><span
+    class="s1">FileSystemWritableFileStreamParams</span><span class="s2">): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s2">{};</span>
+</pre>
+</body>
+</html>

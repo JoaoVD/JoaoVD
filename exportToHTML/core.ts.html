@@ -1,0 +1,1805 @@
+<html>
+<head>
+  <title>core.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+
+    .s8 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          core.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">export </span><span class="s2">{</span>
+  <span class="s1">Format</span><span class="s2">,</span>
+  <span class="s1">FormatDefinition</span><span class="s2">,</span>
+  <span class="s1">AsyncFormatDefinition</span><span class="s2">,</span>
+  <span class="s1">KeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">KeywordErrorDefinition</span><span class="s2">,</span>
+  <span class="s1">CodeKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">MacroKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">FuncKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">Vocabulary</span><span class="s2">,</span>
+  <span class="s1">Schema</span><span class="s2">,</span>
+  <span class="s1">SchemaObject</span><span class="s2">,</span>
+  <span class="s1">AnySchemaObject</span><span class="s2">,</span>
+  <span class="s1">AsyncSchema</span><span class="s2">,</span>
+  <span class="s1">AnySchema</span><span class="s2">,</span>
+  <span class="s1">ValidateFunction</span><span class="s2">,</span>
+  <span class="s1">AsyncValidateFunction</span><span class="s2">,</span>
+  <span class="s1">AnyValidateFunction</span><span class="s2">,</span>
+  <span class="s1">ErrorObject</span><span class="s2">,</span>
+  <span class="s1">ErrorNoParams</span><span class="s2">,</span>
+<span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./types&quot;</span>
+
+<span class="s0">export </span><span class="s2">{</span><span class="s1">SchemaCxt</span><span class="s2">, </span><span
+    class="s1">SchemaObjCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile&quot;</span>
+<span class="s0">export interface </span><span class="s1">Plugin</span><span class="s2">&lt;</span><span
+    class="s1">Opts</span><span class="s2">&gt; {</span>
+  <span class="s2">(</span><span class="s1">ajv</span><span class="s2">: </span><span class="s1">Ajv</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span class="s1">Opts</span><span
+    class="s2">): </span><span class="s1">Ajv</span>
+  <span class="s2">[</span><span class="s1">prop</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">]: </span><span class="s1">any</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s2">{</span><span class="s1">KeywordCxt</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile/validate&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">DefinedError</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./vocabularies/errors&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">JSONType</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;./compile/rules&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">JSONSchemaType</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;./types/json-schema&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">JTDSchemaType</span><span
+    class="s2">, </span><span class="s1">SomeJTDSchemaType</span><span class="s2">, </span><span
+    class="s1">JTDDataType</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./types/jtd-schema&quot;</span>
+<span class="s0">export </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">, </span><span class="s1">stringify</span><span class="s2">, </span><span
+    class="s1">nil</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">, </span><span
+    class="s1">Code</span><span class="s2">, </span><span class="s1">CodeGen</span><span class="s2">, </span><span
+    class="s1">CodeGenOptions</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile/codegen&quot;</span>
+
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span>
+  <span class="s1">Schema</span><span class="s2">,</span>
+  <span class="s1">AnySchema</span><span class="s2">,</span>
+  <span class="s1">AnySchemaObject</span><span class="s2">,</span>
+  <span class="s1">SchemaObject</span><span class="s2">,</span>
+  <span class="s1">AsyncSchema</span><span class="s2">,</span>
+  <span class="s1">Vocabulary</span><span class="s2">,</span>
+  <span class="s1">KeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">AddedKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">AnyValidateFunction</span><span class="s2">,</span>
+  <span class="s1">ValidateFunction</span><span class="s2">,</span>
+  <span class="s1">AsyncValidateFunction</span><span class="s2">,</span>
+  <span class="s1">ErrorObject</span><span class="s2">,</span>
+  <span class="s1">Format</span><span class="s2">,</span>
+  <span class="s1">AddedFormat</span><span class="s2">,</span>
+  <span class="s1">RegExpEngine</span><span class="s2">,</span>
+  <span class="s1">UriResolver</span><span class="s2">,</span>
+<span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">JSONSchemaType</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./types/json-schema&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">JTDSchemaType</span><span class="s2">, </span><span class="s1">SomeJTDSchemaType</span><span
+    class="s2">, </span><span class="s1">JTDDataType</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;./types/jtd-schema&quot;</span>
+<span class="s0">import </span><span class="s1">ValidationError from </span><span class="s3">&quot;./runtime/validation_error&quot;</span>
+<span class="s0">import </span><span class="s1">MissingRefError from </span><span class="s3">&quot;./compile/ref_error&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">getRules</span><span class="s2">, </span><span
+    class="s1">ValidationRules</span><span class="s2">, </span><span class="s1">Rule</span><span
+    class="s2">, </span><span class="s1">RuleGroup</span><span class="s2">, </span><span class="s1">JSONType</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile/rules&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">SchemaEnv</span><span class="s2">, </span><span
+    class="s1">compileSchema</span><span class="s2">, </span><span class="s1">resolveSchema</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">Code</span><span class="s2">, </span><span
+    class="s1">ValueScope</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">normalizeId</span><span
+    class="s2">, </span><span class="s1">getSchemaRefs</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;./compile/resolve&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">getJSONTypes</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./compile/validate/dataType&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">eachItem</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;./compile/util&quot;</span>
+<span class="s0">import </span><span class="s2">* as </span><span class="s1">$dataRefSchema from </span><span
+    class="s3">&quot;./refs/data.json&quot;</span>
+
+<span class="s0">import </span><span class="s1">DefaultUriResolver from </span><span class="s3">&quot;./runtime/uri&quot;</span>
+
+<span class="s0">const </span><span class="s1">defaultRegExp</span><span class="s2">: </span><span class="s1">RegExpEngine </span><span
+    class="s2">= (</span><span class="s1">str</span><span class="s2">, </span><span class="s1">flags</span><span
+    class="s2">) =&gt; </span><span class="s0">new </span><span class="s1">RegExp</span><span class="s2">(</span><span
+    class="s1">str</span><span class="s2">, </span><span class="s1">flags</span><span class="s2">)</span>
+<span class="s1">defaultRegExp</span><span class="s2">.</span><span class="s1">code </span><span
+    class="s2">= </span><span class="s3">&quot;new RegExp&quot;</span>
+
+<span class="s0">const </span><span class="s1">META_IGNORE_OPTIONS</span><span class="s2">: (</span><span class="s1">keyof Options</span><span
+    class="s2">)[] = [</span><span class="s3">&quot;removeAdditional&quot;</span><span class="s2">, </span><span
+    class="s3">&quot;useDefaults&quot;</span><span class="s2">, </span><span
+    class="s3">&quot;coerceTypes&quot;</span><span class="s2">]</span>
+<span class="s0">const </span><span class="s1">EXT_SCOPE_NAMES </span><span class="s2">= </span><span
+    class="s0">new </span><span class="s1">Set</span><span class="s2">([</span>
+  <span class="s3">&quot;validate&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;serialize&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;parse&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;wrapper&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;root&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;schema&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;keyword&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;pattern&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;formats&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;validate$data&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;func&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;obj&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;Error&quot;</span><span class="s2">,</span>
+<span class="s2">])</span>
+
+<span class="s0">export </span><span class="s1">type Options </span><span class="s2">= </span><span class="s1">CurrentOptions </span><span
+    class="s2">&amp; </span><span class="s1">DeprecatedOptions</span>
+
+<span class="s0">export interface </span><span class="s1">CurrentOptions </span><span class="s2">{</span>
+  <span class="s4">// strict mode options (NEW)</span>
+  <span class="s1">strict</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span>
+  <span class="s1">strictSchema</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span>
+  <span class="s1">strictNumbers</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span>
+  <span class="s1">strictTypes</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span>
+  <span class="s1">strictTuples</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span>
+  <span class="s1">strictRequired</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span>
+  <span class="s1">allowMatchingProperties</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s4">// disables a strict mode restriction</span>
+  <span class="s1">allowUnionTypes</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">validateFormats</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s4">// validation and reporting options:</span>
+  <span class="s1">$data</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">allErrors</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">verbose</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">discriminator</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">unicodeRegExp</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">timestamp</span><span class="s2">?: </span><span class="s3">&quot;string&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;date&quot; </span><span class="s4">// JTD only</span>
+  <span class="s1">parseDate</span><span class="s2">?: </span><span class="s1">boolean </span><span class="s4">// JTD only</span>
+  <span class="s1">allowDate</span><span class="s2">?: </span><span class="s1">boolean </span><span class="s4">// JTD only</span>
+  <span class="s1">$comment</span><span class="s2">?:</span>
+    <span class="s2">| </span><span class="s0">true</span>
+    <span class="s2">| ((</span><span class="s1">comment</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">schemaPath</span><span class="s2">?: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">rootSchema</span><span class="s2">?: </span><span
+    class="s1">AnySchemaObject</span><span class="s2">) =&gt; </span><span class="s1">unknown</span><span
+    class="s2">)</span>
+  <span class="s1">formats</span><span class="s2">?: {[</span><span class="s1">Name </span><span
+    class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span class="s1">Format</span><span
+    class="s2">}</span>
+  <span class="s1">keywords</span><span class="s2">?: </span><span class="s1">Vocabulary</span>
+  <span class="s1">schemas</span><span class="s2">?: </span><span class="s1">AnySchema</span><span
+    class="s2">[] | {[</span><span class="s1">Key </span><span class="s0">in </span><span class="s1">string</span><span
+    class="s2">]?: </span><span class="s1">AnySchema</span><span class="s2">}</span>
+  <span class="s1">logger</span><span class="s2">?: </span><span class="s1">Logger </span><span
+    class="s2">| </span><span class="s0">false</span>
+  <span class="s1">loadSchema</span><span class="s2">?: (</span><span class="s1">uri</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">AnySchemaObject</span><span
+    class="s2">&gt;</span>
+  <span class="s4">// options to modify validated data:</span>
+  <span class="s1">removeAdditional</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;all&quot; </span><span class="s2">| </span><span class="s3">&quot;failing&quot;</span>
+  <span class="s1">useDefaults</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;empty&quot;</span>
+  <span class="s1">coerceTypes</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;array&quot;</span>
+  <span class="s4">// advanced options:</span>
+  <span class="s1">next</span><span class="s2">?: </span><span class="s1">boolean </span><span class="s4">// NEW</span>
+  <span class="s1">unevaluated</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s4">// NEW</span>
+  <span class="s1">dynamicRef</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s4">// NEW</span>
+  <span class="s1">schemaId</span><span class="s2">?: </span><span class="s3">&quot;id&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;$id&quot;</span>
+  <span class="s1">jtd</span><span class="s2">?: </span><span class="s1">boolean </span><span class="s4">// NEW</span>
+  <span class="s1">meta</span><span class="s2">?: </span><span class="s1">SchemaObject </span><span class="s2">| </span><span
+    class="s1">boolean</span>
+  <span class="s1">defaultMeta</span><span class="s2">?: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">AnySchemaObject</span>
+  <span class="s1">validateSchema</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s3">&quot;log&quot;</span>
+  <span class="s1">addUsedSchema</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">inlineRefs</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s1">number</span>
+  <span class="s1">passContext</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">loopRequired</span><span class="s2">?: </span><span class="s1">number</span>
+  <span class="s1">loopEnum</span><span class="s2">?: </span><span class="s1">number </span><span
+    class="s4">// NEW</span>
+  <span class="s1">ownProperties</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">multipleOfPrecision</span><span class="s2">?: </span><span class="s1">number</span>
+  <span class="s1">int32range</span><span class="s2">?: </span><span class="s1">boolean </span><span class="s4">// JTD only</span>
+  <span class="s1">messages</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">code</span><span class="s2">?: </span><span class="s1">CodeOptions </span><span
+    class="s4">// NEW</span>
+  <span class="s1">uriResolver</span><span class="s2">?: </span><span class="s1">UriResolver</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">CodeOptions </span><span class="s2">{</span>
+  <span class="s1">es5</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">esm</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">lines</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">optimize</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s1">number</span>
+  <span class="s1">formats</span><span class="s2">?: </span><span class="s1">Code </span><span class="s4">// code to require (or construct) map of available formats - for standalone code</span>
+  <span class="s1">source</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">process</span><span class="s2">?: (</span><span class="s1">code</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">?: </span><span
+    class="s1">SchemaEnv</span><span class="s2">) =&gt; </span><span class="s1">string</span>
+  <span class="s1">regExp</span><span class="s2">?: </span><span class="s1">RegExpEngine</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">InstanceCodeOptions </span><span class="s0">extends </span><span
+    class="s1">CodeOptions </span><span class="s2">{</span>
+  <span class="s1">regExp</span><span class="s2">: </span><span class="s1">RegExpEngine</span>
+  <span class="s1">optimize</span><span class="s2">: </span><span class="s1">number</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">DeprecatedOptions </span><span class="s2">{</span>
+  <span class="s5">/** </span><span class="s6">@deprecated </span><span class="s5">*/</span>
+  <span class="s1">ignoreKeywordsWithRef</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s5">/** </span><span class="s6">@deprecated </span><span class="s5">*/</span>
+  <span class="s1">jsPropertySyntax</span><span class="s2">?: </span><span class="s1">boolean </span><span class="s4">// added instead of jsonPointers</span>
+  <span class="s5">/** </span><span class="s6">@deprecated </span><span class="s5">*/</span>
+  <span class="s1">unicode</span><span class="s2">?: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">RemovedOptions </span><span class="s2">{</span>
+  <span class="s1">format</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">errorDataPath</span><span class="s2">?: </span><span class="s3">&quot;object&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;property&quot;</span>
+  <span class="s1">nullable</span><span class="s2">?: </span><span class="s1">boolean </span><span class="s4">// &quot;nullable&quot; keyword is supported by default</span>
+  <span class="s1">jsonPointers</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">extendRefs</span><span class="s2">?: </span><span class="s0">true </span><span
+    class="s2">| </span><span class="s3">&quot;ignore&quot; </span><span class="s2">| </span><span class="s3">&quot;fail&quot;</span>
+  <span class="s1">missingRefs</span><span class="s2">?: </span><span class="s0">true </span><span
+    class="s2">| </span><span class="s3">&quot;ignore&quot; </span><span class="s2">| </span><span class="s3">&quot;fail&quot;</span>
+  <span class="s1">processCode</span><span class="s2">?: (</span><span class="s1">code</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">schema</span><span
+    class="s2">?: </span><span class="s1">SchemaEnv</span><span class="s2">) =&gt; </span><span class="s1">string</span>
+  <span class="s1">sourceCode</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">strictDefaults</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">strictKeywords</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">uniqueItems</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">unknownFormats</span><span class="s2">?: </span><span class="s0">true </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">[] | </span><span
+    class="s3">&quot;ignore&quot;</span>
+  <span class="s1">cache</span><span class="s2">?: </span><span class="s1">any</span>
+  <span class="s1">serialize</span><span class="s2">?: (</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">AnySchema</span><span class="s2">) =&gt; </span><span class="s1">unknown</span>
+  <span class="s1">ajvErrors</span><span class="s2">?: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s1">type OptionsInfo</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s0">extends </span><span class="s1">RemovedOptions </span><span class="s2">| </span><span class="s1">DeprecatedOptions</span><span
+    class="s2">&gt; = {</span>
+  <span class="s2">[</span><span class="s1">K </span><span class="s0">in </span><span class="s1">keyof T</span><span
+    class="s2">]-?: </span><span class="s1">string </span><span class="s2">| </span><span class="s1">undefined</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">removedOptions</span><span class="s2">: </span><span class="s1">OptionsInfo</span><span
+    class="s2">&lt;</span><span class="s1">RemovedOptions</span><span class="s2">&gt; = {</span>
+  <span class="s1">errorDataPath</span><span class="s2">: </span><span class="s3">&quot;&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">format</span><span class="s2">: </span><span class="s3">&quot;`validateFormats: false` can be used instead.&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">nullable</span><span class="s2">: </span><span class="s3">'&quot;nullable&quot; keyword is supported by default.'</span><span
+    class="s2">,</span>
+  <span class="s1">jsonPointers</span><span class="s2">: </span><span class="s3">&quot;Deprecated jsPropertySyntax can be used instead.&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">extendRefs</span><span class="s2">: </span><span class="s3">&quot;Deprecated ignoreKeywordsWithRef can be used instead.&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">missingRefs</span><span class="s2">: </span><span class="s3">&quot;Pass empty schema with $id that should be ignored to ajv.addSchema.&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">processCode</span><span class="s2">: </span><span class="s3">&quot;Use option `code: {process: (code, schemaEnv: object) =&gt; string}`&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">sourceCode</span><span class="s2">: </span><span class="s3">&quot;Use option `code: {source: true}`&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">strictDefaults</span><span class="s2">: </span><span class="s3">&quot;It is default now, see option `strict`.&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">strictKeywords</span><span class="s2">: </span><span class="s3">&quot;It is default now, see option `strict`.&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">uniqueItems</span><span class="s2">: </span><span class="s3">'&quot;uniqueItems&quot; keyword is always validated.'</span><span
+    class="s2">,</span>
+  <span class="s1">unknownFormats</span><span class="s2">: </span><span class="s3">&quot;Disable strict mode or pass `true` to `ajv.addFormat` (or `formats` option).&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">cache</span><span class="s2">: </span><span class="s3">&quot;Map is used as cache, schema object as key.&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">serialize</span><span class="s2">: </span><span class="s3">&quot;Map is used as cache, schema object as key.&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">ajvErrors</span><span class="s2">: </span><span class="s3">&quot;It is default now.&quot;</span><span
+    class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">deprecatedOptions</span><span class="s2">: </span><span class="s1">OptionsInfo</span><span
+    class="s2">&lt;</span><span class="s1">DeprecatedOptions</span><span class="s2">&gt; = {</span>
+  <span class="s1">ignoreKeywordsWithRef</span><span class="s2">: </span><span class="s3">&quot;&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">jsPropertySyntax</span><span class="s2">: </span><span class="s3">&quot;&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">unicode</span><span class="s2">: </span><span class="s3">'&quot;minLength&quot;/&quot;maxLength&quot; account for unicode characters by default.'</span><span
+    class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s1">type RequiredInstanceOptions </span><span class="s2">= {</span>
+  <span class="s2">[</span><span class="s1">K </span><span class="s0">in</span>
+    <span class="s2">| </span><span class="s3">&quot;strictSchema&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;strictNumbers&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;strictTypes&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;strictTuples&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;strictRequired&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;inlineRefs&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;loopRequired&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;loopEnum&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;meta&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;messages&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;schemaId&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;addUsedSchema&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;validateSchema&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;validateFormats&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;int32range&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;unicodeRegExp&quot;</span>
+    <span class="s2">| </span><span class="s3">&quot;uriResolver&quot;</span><span class="s2">]: </span><span
+    class="s1">NonNullable</span><span class="s2">&lt;</span><span class="s1">Options</span><span
+    class="s2">[</span><span class="s1">K</span><span class="s2">]&gt;</span>
+<span class="s2">} &amp; {</span><span class="s1">code</span><span class="s2">: </span><span class="s1">InstanceCodeOptions</span><span
+    class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type InstanceOptions </span><span class="s2">= </span><span class="s1">Options </span><span
+    class="s2">&amp; </span><span class="s1">RequiredInstanceOptions</span>
+
+<span class="s0">const </span><span class="s1">MAX_EXPRESSION </span><span class="s2">= </span><span
+    class="s7">200</span>
+
+<span class="s4">// eslint-disable-next-line complexity</span>
+<span class="s0">function </span><span class="s1">requiredOptions</span><span class="s2">(</span><span
+    class="s1">o</span><span class="s2">: </span><span class="s1">Options</span><span class="s2">): </span><span
+    class="s1">RequiredInstanceOptions </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">s </span><span class="s2">= </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">strict</span>
+  <span class="s0">const </span><span class="s1">_optz </span><span class="s2">= </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">code</span><span class="s2">?.</span><span class="s1">optimize</span>
+  <span class="s0">const </span><span class="s1">optimize </span><span class="s2">= </span><span
+    class="s1">_optz </span><span class="s2">=== </span><span class="s0">true </span><span class="s2">|| </span><span
+    class="s1">_optz </span><span class="s2">=== </span><span class="s1">undefined </span><span
+    class="s2">? </span><span class="s7">1 </span><span class="s2">: </span><span class="s1">_optz </span><span
+    class="s2">|| </span><span class="s7">0</span>
+  <span class="s0">const </span><span class="s1">regExp </span><span class="s2">= </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">code</span><span class="s2">?.</span><span class="s1">regExp </span><span
+    class="s2">?? </span><span class="s1">defaultRegExp</span>
+  <span class="s0">const </span><span class="s1">uriResolver </span><span class="s2">= </span><span
+    class="s1">o</span><span class="s2">.</span><span class="s1">uriResolver </span><span class="s2">?? </span><span
+    class="s1">DefaultUriResolver</span>
+  <span class="s0">return </span><span class="s2">{</span>
+    <span class="s1">strictSchema</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">strictSchema </span><span class="s2">?? </span><span class="s1">s </span><span
+    class="s2">?? </span><span class="s0">true</span><span class="s2">,</span>
+    <span class="s1">strictNumbers</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">strictNumbers </span><span class="s2">?? </span><span class="s1">s </span><span
+    class="s2">?? </span><span class="s0">true</span><span class="s2">,</span>
+    <span class="s1">strictTypes</span><span class="s2">: </span><span class="s1">o</span><span class="s2">.</span><span
+    class="s1">strictTypes </span><span class="s2">?? </span><span class="s1">s </span><span class="s2">?? </span><span
+    class="s3">&quot;log&quot;</span><span class="s2">,</span>
+    <span class="s1">strictTuples</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">strictTuples </span><span class="s2">?? </span><span class="s1">s </span><span
+    class="s2">?? </span><span class="s3">&quot;log&quot;</span><span class="s2">,</span>
+    <span class="s1">strictRequired</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">strictRequired </span><span class="s2">?? </span><span class="s1">s </span><span
+    class="s2">?? </span><span class="s0">false</span><span class="s2">,</span>
+    <span class="s1">code</span><span class="s2">: </span><span class="s1">o</span><span class="s2">.</span><span
+    class="s1">code </span><span class="s2">? {</span><span class="s1">...o</span><span class="s2">.</span><span
+    class="s1">code</span><span class="s2">, </span><span class="s1">optimize</span><span class="s2">, </span><span
+    class="s1">regExp</span><span class="s2">} : {</span><span class="s1">optimize</span><span class="s2">, </span><span
+    class="s1">regExp</span><span class="s2">},</span>
+    <span class="s1">loopRequired</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">loopRequired </span><span class="s2">?? </span><span
+    class="s1">MAX_EXPRESSION</span><span class="s2">,</span>
+    <span class="s1">loopEnum</span><span class="s2">: </span><span class="s1">o</span><span class="s2">.</span><span
+    class="s1">loopEnum </span><span class="s2">?? </span><span class="s1">MAX_EXPRESSION</span><span
+    class="s2">,</span>
+    <span class="s1">meta</span><span class="s2">: </span><span class="s1">o</span><span class="s2">.</span><span
+    class="s1">meta </span><span class="s2">?? </span><span class="s0">true</span><span class="s2">,</span>
+    <span class="s1">messages</span><span class="s2">: </span><span class="s1">o</span><span class="s2">.</span><span
+    class="s1">messages </span><span class="s2">?? </span><span class="s0">true</span><span class="s2">,</span>
+    <span class="s1">inlineRefs</span><span class="s2">: </span><span class="s1">o</span><span class="s2">.</span><span
+    class="s1">inlineRefs </span><span class="s2">?? </span><span class="s0">true</span><span class="s2">,</span>
+    <span class="s1">schemaId</span><span class="s2">: </span><span class="s1">o</span><span class="s2">.</span><span
+    class="s1">schemaId </span><span class="s2">?? </span><span class="s3">&quot;$id&quot;</span><span
+    class="s2">,</span>
+    <span class="s1">addUsedSchema</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">addUsedSchema </span><span class="s2">?? </span><span
+    class="s0">true</span><span class="s2">,</span>
+    <span class="s1">validateSchema</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">validateSchema </span><span class="s2">?? </span><span
+    class="s0">true</span><span class="s2">,</span>
+    <span class="s1">validateFormats</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">validateFormats </span><span class="s2">?? </span><span
+    class="s0">true</span><span class="s2">,</span>
+    <span class="s1">unicodeRegExp</span><span class="s2">: </span><span class="s1">o</span><span
+    class="s2">.</span><span class="s1">unicodeRegExp </span><span class="s2">?? </span><span
+    class="s0">true</span><span class="s2">,</span>
+    <span class="s1">int32range</span><span class="s2">: </span><span class="s1">o</span><span class="s2">.</span><span
+    class="s1">int32range </span><span class="s2">?? </span><span class="s0">true</span><span class="s2">,</span>
+    <span class="s1">uriResolver</span><span class="s2">: </span><span class="s1">uriResolver</span><span
+    class="s2">,</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Logger </span><span class="s2">{</span>
+  <span class="s1">log</span><span class="s2">(</span><span class="s1">...args</span><span class="s2">: </span><span
+    class="s1">unknown</span><span class="s2">[]): </span><span class="s1">unknown</span>
+  <span class="s1">warn</span><span class="s2">(</span><span class="s1">...args</span><span class="s2">: </span><span
+    class="s1">unknown</span><span class="s2">[]): </span><span class="s1">unknown</span>
+  <span class="s1">error</span><span class="s2">(</span><span class="s1">...args</span><span class="s2">: </span><span
+    class="s1">unknown</span><span class="s2">[]): </span><span class="s1">unknown</span>
+<span class="s2">}</span>
+
+<span class="s0">export default class </span><span class="s1">Ajv </span><span class="s2">{</span>
+  <span class="s1">opts</span><span class="s2">: </span><span class="s1">InstanceOptions</span>
+  <span class="s1">errors</span><span class="s2">?: </span><span class="s1">ErrorObject</span><span
+    class="s2">[] | </span><span class="s0">null </span><span class="s4">// errors from the last validation</span>
+  <span class="s1">logger</span><span class="s2">: </span><span class="s1">Logger</span>
+  <span class="s4">// shared external scope values for compiled functions</span>
+  <span class="s1">readonly scope</span><span class="s2">: </span><span class="s1">ValueScope</span>
+  <span class="s1">readonly schemas</span><span class="s2">: {[</span><span class="s1">Key </span><span
+    class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">SchemaEnv</span><span class="s2">} = {}</span>
+  <span class="s1">readonly refs</span><span class="s2">: {[</span><span class="s1">Ref </span><span
+    class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">SchemaEnv </span><span class="s2">| </span><span class="s1">string</span><span class="s2">} = {}</span>
+  <span class="s1">readonly formats</span><span class="s2">: {[</span><span class="s1">Name </span><span
+    class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">AddedFormat</span><span class="s2">} = {}</span>
+  <span class="s1">readonly RULES</span><span class="s2">: </span><span class="s1">ValidationRules</span>
+  <span class="s1">readonly _compilations</span><span class="s2">: </span><span class="s1">Set</span><span class="s2">&lt;</span><span
+    class="s1">SchemaEnv</span><span class="s2">&gt; = </span><span class="s0">new </span><span
+    class="s1">Set</span><span class="s2">()</span>
+  <span class="s0">private </span><span class="s1">readonly _loading</span><span class="s2">: {[</span><span class="s1">Ref </span><span
+    class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">AnySchemaObject</span><span class="s2">&gt;} = {}</span>
+  <span class="s0">private </span><span class="s1">readonly _cache</span><span class="s2">: </span><span
+    class="s1">Map</span><span class="s2">&lt;</span><span class="s1">AnySchema</span><span class="s2">, </span><span
+    class="s1">SchemaEnv</span><span class="s2">&gt; = </span><span class="s0">new </span><span
+    class="s1">Map</span><span class="s2">()</span>
+  <span class="s0">private </span><span class="s1">readonly _metaOpts</span><span class="s2">: </span><span class="s1">InstanceOptions</span>
+
+  <span class="s0">static </span><span class="s1">ValidationError </span><span class="s2">= </span><span class="s1">ValidationError</span>
+  <span class="s0">static </span><span class="s1">MissingRefError </span><span class="s2">= </span><span class="s1">MissingRefError</span>
+
+  <span class="s1">constructor</span><span class="s2">(</span><span class="s1">opts</span><span
+    class="s2">: </span><span class="s1">Options </span><span class="s2">= {}) {</span>
+    <span class="s1">opts </span><span class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts </span><span class="s2">= {</span><span class="s1">...opts</span><span class="s2">, </span><span
+    class="s1">...requiredOptions</span><span class="s2">(</span><span class="s1">opts</span><span class="s2">)}</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">es5</span><span class="s2">, </span><span
+    class="s1">lines</span><span class="s2">} = </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">code</span>
+
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">scope </span><span class="s2">= </span><span
+    class="s0">new </span><span class="s1">ValueScope</span><span class="s2">({</span><span class="s1">scope</span><span
+    class="s2">: {}, </span><span class="s1">prefixes</span><span class="s2">: </span><span
+    class="s1">EXT_SCOPE_NAMES</span><span class="s2">, </span><span class="s1">es5</span><span
+    class="s2">, </span><span class="s1">lines</span><span class="s2">})</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">logger </span><span class="s2">= </span><span
+    class="s1">getLogger</span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">logger</span><span class="s2">)</span>
+    <span class="s0">const </span><span class="s1">formatOpt </span><span class="s2">= </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">validateFormats</span>
+    <span class="s1">opts</span><span class="s2">.</span><span class="s1">validateFormats </span><span
+    class="s2">= </span><span class="s0">false</span>
+
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">RULES </span><span class="s2">= </span><span
+    class="s1">getRules</span><span class="s2">()</span>
+    <span class="s1">checkOptions</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">removedOptions</span><span
+    class="s2">, </span><span class="s1">opts</span><span class="s2">, </span><span
+    class="s3">&quot;NOT SUPPORTED&quot;</span><span class="s2">)</span>
+    <span class="s1">checkOptions</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">deprecatedOptions</span><span class="s2">, </span><span class="s1">opts</span><span
+    class="s2">, </span><span class="s3">&quot;DEPRECATED&quot;</span><span class="s2">, </span><span class="s3">&quot;warn&quot;</span><span
+    class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_metaOpts </span><span
+    class="s2">= </span><span class="s1">getMetaSchemaOptions</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">)</span>
+
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">formats</span><span class="s2">) </span><span class="s1">addInitialFormats</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_addVocabularies</span><span
+    class="s2">()</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_addDefaultMetaSchema</span><span class="s2">()</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">keywords</span><span class="s2">) </span><span class="s1">addInitialKeywords</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">, </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">keywords</span><span
+    class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">meta </span><span class="s2">== </span><span
+    class="s3">&quot;object&quot;</span><span class="s2">) </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">addMetaSchema</span><span class="s2">(</span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">meta</span><span class="s2">)</span>
+    <span class="s1">addInitialSchemas</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">)</span>
+    <span class="s1">opts</span><span class="s2">.</span><span class="s1">validateFormats </span><span
+    class="s2">= </span><span class="s1">formatOpt</span>
+  <span class="s2">}</span>
+
+  <span class="s1">_addVocabularies</span><span class="s2">(): </span><span class="s0">void </span><span
+    class="s2">{</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">addKeyword</span><span
+    class="s2">(</span><span class="s3">&quot;$async&quot;</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">_addDefaultMetaSchema</span><span class="s2">(): </span><span class="s0">void </span><span
+    class="s2">{</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">$data</span><span class="s2">, </span><span
+    class="s1">meta</span><span class="s2">, </span><span class="s1">schemaId</span><span class="s2">} = </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">opts</span>
+    <span class="s0">let </span><span class="s1">_dataRefSchema</span><span class="s2">: </span><span class="s1">SchemaObject </span><span
+    class="s2">= </span><span class="s1">$dataRefSchema</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">schemaId </span><span
+    class="s2">=== </span><span class="s3">&quot;id&quot;</span><span class="s2">) {</span>
+      <span class="s1">_dataRefSchema </span><span class="s2">= {</span><span class="s1">...$dataRefSchema</span><span
+    class="s2">}</span>
+      <span class="s1">_dataRefSchema</span><span class="s2">.</span><span class="s1">id </span><span
+    class="s2">= </span><span class="s1">_dataRefSchema</span><span class="s2">.</span><span class="s1">$id</span>
+      <span class="s0">delete </span><span class="s1">_dataRefSchema</span><span class="s2">.</span><span
+    class="s1">$id</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">meta </span><span class="s2">&amp;&amp; </span><span
+    class="s1">$data</span><span class="s2">) </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">addMetaSchema</span><span class="s2">(</span><span class="s1">_dataRefSchema</span><span
+    class="s2">, </span><span class="s1">_dataRefSchema</span><span class="s2">[</span><span
+    class="s1">schemaId</span><span class="s2">], </span><span class="s0">false</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">defaultMeta</span><span class="s2">(): </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">AnySchemaObject </span><span class="s2">| </span><span
+    class="s1">undefined </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">meta</span><span class="s2">, </span><span
+    class="s1">schemaId</span><span class="s2">} = </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span>
+    <span class="s0">return </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">defaultMeta </span><span class="s2">= </span><span
+    class="s0">typeof </span><span class="s1">meta </span><span class="s2">== </span><span
+    class="s3">&quot;object&quot; </span><span class="s2">? </span><span class="s1">meta</span><span class="s2">[</span><span
+    class="s1">schemaId</span><span class="s2">] || </span><span class="s1">meta </span><span class="s2">: </span><span
+    class="s1">undefined</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Validate data using schema</span>
+  <span class="s4">// AnySchema will be compiled and cached using schema itself as a key for Map</span>
+  <span class="s1">validate</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">: </span><span
+    class="s1">Schema </span><span class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">: </span><span class="s1">unknown</span><span class="s2">): </span><span
+    class="s1">boolean</span>
+  <span class="s1">validate</span><span class="s2">(</span><span class="s1">schemaKeyRef</span><span
+    class="s2">: </span><span class="s1">AnySchema </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span class="s1">unknown</span><span
+    class="s2">): </span><span class="s1">boolean </span><span class="s2">| </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">unknown</span><span class="s2">&gt;</span>
+  <span class="s1">validate</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span class="s1">Schema </span><span
+    class="s2">| </span><span class="s1">JSONSchemaType</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt; | </span><span class="s1">string</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">: </span><span class="s1">unknown</span><span class="s2">): </span><span class="s1">data </span><span
+    class="s2">is </span><span class="s1">T</span>
+  <span class="s4">// Separated for type inference to work</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/unified-signatures</span>
+  <span class="s1">validate</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span class="s1">JTDSchemaType</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;, </span><span class="s1">data</span><span
+    class="s2">: </span><span class="s1">unknown</span><span class="s2">): </span><span class="s1">data </span><span
+    class="s2">is </span><span class="s1">T</span>
+  <span class="s4">// This overload is only intended for typescript inference, the first</span>
+  <span class="s4">// argument prevents manual type annotation from matching this overload</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/no-unused-vars</span>
+  <span class="s1">validate</span><span class="s2">&lt;</span><span class="s1">N </span><span class="s0">extends </span><span
+    class="s1">never</span><span class="s2">, </span><span class="s1">T </span><span class="s0">extends </span><span
+    class="s1">SomeJTDSchemaType</span><span class="s2">&gt;(</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">T</span><span class="s2">,</span>
+    <span class="s1">data</span><span class="s2">: </span><span class="s1">unknown</span>
+  <span class="s2">): </span><span class="s1">data </span><span class="s2">is </span><span class="s1">JTDDataType</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents</span>
+  <span class="s1">validate</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span
+    class="s1">AsyncSchema</span><span class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">unknown </span><span class="s2">| </span><span class="s1">T</span><span class="s2">): </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s1">validate</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;(</span><span class="s1">schemaKeyRef</span><span class="s2">: </span><span
+    class="s1">AnySchema </span><span class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">: </span><span class="s1">unknown</span><span class="s2">): </span><span
+    class="s1">data </span><span class="s2">is </span><span class="s1">T </span><span class="s2">| </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s1">validate</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;(</span>
+    <span class="s1">schemaKeyRef</span><span class="s2">: </span><span class="s1">AnySchema </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span class="s4">// key, ref or schema object</span>
+    <span class="s4">// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents</span>
+    <span class="s1">data</span><span class="s2">: </span><span class="s1">unknown </span><span
+    class="s2">| </span><span class="s1">T </span><span class="s4">// to be validated</span>
+  <span class="s2">): </span><span class="s1">boolean </span><span class="s2">| </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; {</span>
+    <span class="s0">let </span><span class="s1">v</span><span class="s2">: </span><span
+    class="s1">AnyValidateFunction </span><span class="s2">| </span><span class="s1">undefined</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schemaKeyRef </span><span class="s2">== </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">) {</span>
+      <span class="s1">v </span><span class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">getSchema</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;(</span><span
+    class="s1">schemaKeyRef</span><span class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">v</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`no schema with key or ref &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schemaKeyRef</span><span class="s2">}</span><span
+    class="s3">&quot;`</span><span class="s2">)</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">v </span><span class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">compile</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;(</span><span
+    class="s1">schemaKeyRef</span><span class="s2">)</span>
+    <span class="s2">}</span>
+
+    <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span class="s1">v</span><span
+    class="s2">(</span><span class="s1">data</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(!(</span><span class="s3">&quot;$async&quot; </span><span
+    class="s0">in </span><span class="s1">v</span><span class="s2">)) </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">errors </span><span class="s2">= </span><span class="s1">v</span><span
+    class="s2">.</span><span class="s1">errors</span>
+    <span class="s0">return </span><span class="s1">valid</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Create validation function for passed schema</span>
+  <span class="s4">// _meta: true if schema is a meta-schema. Used internally to compile meta schemas of user-defined keywords.</span>
+  <span class="s1">compile</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">= </span><span
+    class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span
+    class="s1">Schema </span><span class="s2">| </span><span class="s1">JSONSchemaType</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;, </span><span class="s1">_meta</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">): </span><span
+    class="s1">ValidateFunction</span><span class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s4">// Separated for type inference to work</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/unified-signatures</span>
+  <span class="s1">compile</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">= </span><span
+    class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span
+    class="s1">JTDSchemaType</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;, </span><span class="s1">_meta</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">): </span><span class="s1">ValidateFunction</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s4">// This overload is only intended for typescript inference, the first</span>
+  <span class="s4">// argument prevents manual type annotation from matching this overload</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/no-unused-vars</span>
+  <span class="s1">compile</span><span class="s2">&lt;</span><span class="s1">N </span><span
+    class="s0">extends </span><span class="s1">never</span><span class="s2">, </span><span class="s1">T </span><span
+    class="s0">extends </span><span class="s1">SomeJTDSchemaType</span><span class="s2">&gt;(</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">T</span><span class="s2">,</span>
+    <span class="s1">_meta</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s2">): </span><span class="s1">ValidateFunction</span><span class="s2">&lt;</span><span class="s1">JTDDataType</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;&gt;</span>
+  <span class="s1">compile</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">= </span><span
+    class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span
+    class="s1">AsyncSchema</span><span class="s2">, </span><span class="s1">_meta</span><span class="s2">?: </span><span
+    class="s1">boolean</span><span class="s2">): </span><span class="s1">AsyncValidateFunction</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s1">compile</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">= </span><span
+    class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span
+    class="s1">AnySchema</span><span class="s2">, </span><span class="s1">_meta</span><span class="s2">?: </span><span
+    class="s1">boolean</span><span class="s2">): </span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s1">compile</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">= </span><span
+    class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span class="s2">: </span><span
+    class="s1">AnySchema</span><span class="s2">, </span><span class="s1">_meta</span><span class="s2">?: </span><span
+    class="s1">boolean</span><span class="s2">): </span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; {</span>
+    <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_addSchema</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">_meta</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s2">(</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">validate </span><span class="s2">|| </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_compileSchemaEnv</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">)) as </span><span class="s1">AnyValidateFunction</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt;</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Creates validating function for passed schema with asynchronous loading of missing schemas.</span>
+  <span class="s4">// `loadSchema` option should be a function that accepts schema uri and returns promise that resolves with the schema.</span>
+  <span class="s4">// TODO allow passing schema URI</span>
+  <span class="s4">// meta - optional true to compile meta-schema</span>
+  <span class="s1">compileAsync</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">SchemaObject </span><span
+    class="s2">| </span><span class="s1">JSONSchemaType</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;,</span>
+    <span class="s1">_meta</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">ValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;&gt;</span>
+  <span class="s4">// Separated for type inference to work</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/unified-signatures</span>
+  <span class="s1">compileAsync</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">JTDSchemaType</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;, </span><span class="s1">_meta</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">ValidateFunction</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;&gt;</span>
+  <span class="s1">compileAsync</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">AsyncSchema</span><span class="s2">, </span><span class="s1">meta</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">AsyncValidateFunction</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt;&gt;</span>
+  <span class="s4">// eslint-disable-next-line @typescript-eslint/unified-signatures</span>
+  <span class="s1">compileAsync</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchemaObject</span><span
+    class="s2">,</span>
+    <span class="s1">meta</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;&gt;</span>
+  <span class="s1">compileAsync</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">unknown</span><span class="s2">&gt;(</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchemaObject</span><span
+    class="s2">,</span>
+    <span class="s1">meta</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt;&gt; {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof this</span><span
+    class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">loadSchema </span><span
+    class="s2">!= </span><span class="s3">&quot;function&quot;</span><span class="s2">) {</span>
+      <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;options.loadSchema should be a function&quot;</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">loadSchema</span><span
+    class="s2">} = </span><span class="s0">this</span><span class="s2">.</span><span class="s1">opts</span>
+    <span class="s0">return </span><span class="s1">runCompileAsync</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">meta</span><span class="s2">)</span>
+
+    <span class="s1">async </span><span class="s0">function </span><span class="s1">runCompileAsync</span><span
+    class="s2">(</span>
+      <span class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">,</span>
+      <span class="s1">_schema</span><span class="s2">: </span><span class="s1">AnySchemaObject</span><span
+    class="s2">,</span>
+      <span class="s1">_meta</span><span class="s2">?: </span><span class="s1">boolean</span>
+    <span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&gt; {</span>
+      <span class="s0">await </span><span class="s1">loadMetaSchema</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">_schema</span><span class="s2">.</span><span class="s1">$schema</span><span class="s2">)</span>
+      <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_addSchema</span><span class="s2">(</span><span
+    class="s1">_schema</span><span class="s2">, </span><span class="s1">_meta</span><span class="s2">)</span>
+      <span class="s0">return </span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">validate </span><span class="s2">|| </span><span class="s1">_compileAsync</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">sch</span><span class="s2">)</span>
+    <span class="s2">}</span>
+
+    <span class="s1">async </span><span class="s0">function </span><span class="s1">loadMetaSchema</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span
+    class="s2">, </span><span class="s1">$ref</span><span class="s2">?: </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt; {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">$ref </span><span
+    class="s2">&amp;&amp; !</span><span class="s0">this</span><span class="s2">.</span><span class="s1">getSchema</span><span
+    class="s2">(</span><span class="s1">$ref</span><span class="s2">)) {</span>
+        <span class="s0">await </span><span class="s1">runCompileAsync</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, {</span><span class="s1">$ref</span><span
+    class="s2">}, </span><span class="s0">true</span><span class="s2">)</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s1">async </span><span class="s0">function </span><span class="s1">_compileAsync</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span
+    class="s2">, </span><span class="s1">sch</span><span class="s2">: </span><span class="s1">SchemaEnv</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">AnyValidateFunction</span><span class="s2">&gt; {</span>
+      <span class="s0">try </span><span class="s2">{</span>
+        <span class="s0">return this</span><span class="s2">.</span><span class="s1">_compileSchemaEnv</span><span
+    class="s2">(</span><span class="s1">sch</span><span class="s2">)</span>
+      <span class="s2">} </span><span class="s0">catch </span><span class="s2">(</span><span class="s1">e</span><span
+    class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(!(</span><span class="s1">e </span><span
+    class="s0">instanceof </span><span class="s1">MissingRefError</span><span class="s2">)) </span><span class="s0">throw </span><span
+    class="s1">e</span>
+        <span class="s1">checkLoaded</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">e</span><span
+    class="s2">)</span>
+        <span class="s0">await </span><span class="s1">loadMissingSchema</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">e</span><span class="s2">.</span><span class="s1">missingSchema</span><span class="s2">)</span>
+        <span class="s0">return </span><span class="s1">_compileAsync</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">sch</span><span
+    class="s2">)</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">checkLoaded</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">, {</span><span
+    class="s1">missingSchema</span><span class="s2">: </span><span class="s1">ref</span><span class="s2">, </span><span
+    class="s1">missingRef</span><span class="s2">}: </span><span class="s1">MissingRefError</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">refs</span><span class="s2">[</span><span class="s1">ref</span><span class="s2">]) {</span>
+        <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`AnySchema </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">ref</span><span class="s2">} </span><span class="s3">is loaded but </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">missingRef</span><span class="s2">} </span><span
+    class="s3">cannot be resolved`</span><span class="s2">)</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s1">async </span><span class="s0">function </span><span class="s1">loadMissingSchema</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span
+    class="s2">, </span><span class="s1">ref</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt; {</span>
+      <span class="s0">const </span><span class="s1">_schema </span><span class="s2">= </span><span
+    class="s0">await </span><span class="s1">_loadSchema</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">ref</span><span class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">refs</span><span class="s2">[</span><span class="s1">ref</span><span class="s2">]) </span><span
+    class="s0">await </span><span class="s1">loadMetaSchema</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">_schema</span><span class="s2">.</span><span class="s1">$schema</span><span class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">refs</span><span class="s2">[</span><span class="s1">ref</span><span class="s2">]) </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">addSchema</span><span class="s2">(</span><span
+    class="s1">_schema</span><span class="s2">, </span><span class="s1">ref</span><span class="s2">, </span><span
+    class="s1">meta</span><span class="s2">)</span>
+    <span class="s2">}</span>
+
+    <span class="s1">async </span><span class="s0">function </span><span class="s1">_loadSchema</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span
+    class="s2">, </span><span class="s1">ref</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">AnySchemaObject</span><span class="s2">&gt; {</span>
+      <span class="s0">const </span><span class="s1">p </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_loading</span><span class="s2">[</span><span
+    class="s1">ref</span><span class="s2">]</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">p</span><span class="s2">) </span><span
+    class="s0">return </span><span class="s1">p</span>
+      <span class="s0">try </span><span class="s2">{</span>
+        <span class="s0">return await </span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_loading</span><span class="s2">[</span><span class="s1">ref</span><span
+    class="s2">] = </span><span class="s1">loadSchema</span><span class="s2">(</span><span class="s1">ref</span><span
+    class="s2">))</span>
+      <span class="s2">} </span><span class="s0">finally </span><span class="s2">{</span>
+        <span class="s0">delete this</span><span class="s2">.</span><span class="s1">_loading</span><span
+    class="s2">[</span><span class="s1">ref</span><span class="s2">]</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Adds schema to the instance</span>
+  <span class="s1">addSchema</span><span class="s2">(</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchema </span><span class="s2">| </span><span
+    class="s1">AnySchema</span><span class="s2">[], </span><span
+    class="s4">// If array is passed, `key` will be ignored</span>
+    <span class="s1">key</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s4">// Optional schema key. Can be passed to `validate` method instead of schema object or id/ref. One schema per instance can have empty `id` and `key`.</span>
+    <span class="s1">_meta</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">, </span><span class="s4">// true if schema is a meta-schema. Used internally, addMetaSchema should be used instead.</span>
+    <span class="s1">_validateSchema </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">validateSchema </span><span
+    class="s4">// false to skip schema validation. Used internally, option validateSchema should be used instead.</span>
+  <span class="s2">): </span><span class="s1">Ajv </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">)) {</span>
+      <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">sch of schema</span><span class="s2">) </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">addSchema</span><span class="s2">(</span><span class="s1">sch</span><span class="s2">, </span><span
+    class="s1">undefined</span><span class="s2">, </span><span class="s1">_meta</span><span class="s2">, </span><span
+    class="s1">_validateSchema</span><span class="s2">)</span>
+      <span class="s0">return this</span>
+    <span class="s2">}</span>
+    <span class="s0">let </span><span class="s1">id</span><span class="s2">: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">undefined</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schema </span><span class="s2">=== </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">) {</span>
+      <span class="s0">const </span><span class="s2">{</span><span class="s1">schemaId</span><span
+    class="s2">} = </span><span class="s0">this</span><span class="s2">.</span><span class="s1">opts</span>
+      <span class="s1">id </span><span class="s2">= </span><span class="s1">schema</span><span class="s2">[</span><span
+    class="s1">schemaId</span><span class="s2">]</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">id </span><span class="s2">!== </span><span
+    class="s1">undefined </span><span class="s2">&amp;&amp; </span><span class="s0">typeof </span><span
+    class="s1">id </span><span class="s2">!= </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">) {</span>
+        <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">`schema </span><span class="s1">$</span><span class="s2">{</span><span class="s1">schemaId</span><span
+    class="s2">} </span><span class="s3">must be string`</span><span class="s2">)</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+    <span class="s1">key </span><span class="s2">= </span><span class="s1">normalizeId</span><span
+    class="s2">(</span><span class="s1">key </span><span class="s2">|| </span><span class="s1">id</span><span
+    class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_checkUnique</span><span
+    class="s2">(</span><span class="s1">key</span><span class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">schemas</span><span class="s2">[</span><span
+    class="s1">key</span><span class="s2">] = </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_addSchema</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">_meta</span><span class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span
+    class="s1">_validateSchema</span><span class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+    <span class="s0">return this</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Add schema that will be used to validate other schemas</span>
+  <span class="s4">// options in META_IGNORE_OPTIONS are alway set to false</span>
+  <span class="s1">addMetaSchema</span><span class="s2">(</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchemaObject</span><span
+    class="s2">,</span>
+    <span class="s1">key</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s4">// schema key</span>
+    <span class="s1">_validateSchema </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">validateSchema </span><span
+    class="s4">// false to skip schema validation, can be used to override validateSchema option for meta-schema</span>
+  <span class="s2">): </span><span class="s1">Ajv </span><span class="s2">{</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">addSchema</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span
+    class="s0">true</span><span class="s2">, </span><span class="s1">_validateSchema</span><span class="s2">)</span>
+    <span class="s0">return this</span>
+  <span class="s2">}</span>
+
+  <span class="s4">//  Validate schema against its meta-schema</span>
+  <span class="s1">validateSchema</span><span class="s2">(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">AnySchema</span><span class="s2">, </span><span
+    class="s1">throwOrLogError</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">): </span><span class="s1">boolean </span><span class="s2">| </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">unknown</span><span class="s2">&gt; {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schema </span><span class="s2">== </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">) </span><span class="s0">return true</span>
+    <span class="s0">let </span><span class="s1">$schema</span><span class="s2">: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">AnySchemaObject </span><span class="s2">| </span><span
+    class="s1">undefined</span>
+    <span class="s1">$schema </span><span class="s2">= </span><span class="s1">schema</span><span
+    class="s2">.</span><span class="s1">$schema</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">$schema </span><span
+    class="s2">!== </span><span class="s1">undefined </span><span class="s2">&amp;&amp; </span><span
+    class="s0">typeof </span><span class="s1">$schema </span><span class="s2">!= </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">) {</span>
+      <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;$schema must be a string&quot;</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s1">$schema </span><span class="s2">= </span><span class="s1">$schema </span><span
+    class="s2">|| </span><span class="s0">this</span><span class="s2">.</span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">defaultMeta </span><span class="s2">|| </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">defaultMeta</span><span class="s2">()</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">$schema</span><span class="s2">) {</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">logger</span><span class="s2">.</span><span
+    class="s1">warn</span><span class="s2">(</span><span class="s3">&quot;meta-schema not available&quot;</span><span
+    class="s2">)</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">errors </span><span
+    class="s2">= </span><span class="s0">null</span>
+      <span class="s0">return true</span>
+    <span class="s2">}</span>
+    <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">validate</span><span class="s2">(</span><span
+    class="s1">$schema</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">valid </span><span
+    class="s2">&amp;&amp; </span><span class="s1">throwOrLogError</span><span class="s2">) {</span>
+      <span class="s0">const </span><span class="s1">message </span><span class="s2">= </span><span class="s3">&quot;schema is invalid: &quot; </span><span
+    class="s2">+ </span><span class="s0">this</span><span class="s2">.</span><span class="s1">errorsText</span><span
+    class="s2">()</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">validateSchema </span><span
+    class="s2">=== </span><span class="s3">&quot;log&quot;</span><span class="s2">) </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">logger</span><span class="s2">.</span><span
+    class="s1">error</span><span class="s2">(</span><span class="s1">message</span><span class="s2">)</span>
+      <span class="s0">else throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s1">message</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s1">valid</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Get compiled schema by `key` or `ref`.</span>
+  <span
+    class="s4">// (`key` that was passed to `addSchema` or full schema reference - `schema.$id` or resolved id)</span>
+  <span class="s1">getSchema</span><span class="s2">&lt;</span><span class="s1">T </span><span class="s2">= </span><span
+    class="s1">unknown</span><span class="s2">&gt;(</span><span class="s1">keyRef</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">AnyValidateFunction</span><span
+    class="s2">&lt;</span><span class="s1">T</span><span class="s2">&gt; | </span><span
+    class="s1">undefined </span><span class="s2">{</span>
+    <span class="s0">let </span><span class="s1">sch</span>
+    <span class="s0">while </span><span class="s2">(</span><span class="s0">typeof </span><span class="s2">(</span><span
+    class="s1">sch </span><span class="s2">= </span><span class="s1">getSchEnv</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">keyRef</span><span class="s2">)) == </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">) </span><span class="s1">keyRef </span><span class="s2">= </span><span class="s1">sch</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">sch </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+      <span class="s0">const </span><span class="s2">{</span><span class="s1">schemaId</span><span
+    class="s2">} = </span><span class="s0">this</span><span class="s2">.</span><span class="s1">opts</span>
+      <span class="s0">const </span><span class="s1">root </span><span class="s2">= </span><span
+    class="s0">new </span><span class="s1">SchemaEnv</span><span class="s2">({</span><span class="s1">schema</span><span
+    class="s2">: {}, </span><span class="s1">schemaId</span><span class="s2">})</span>
+      <span class="s1">sch </span><span class="s2">= </span><span class="s1">resolveSchema</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">, </span><span class="s1">root</span><span class="s2">, </span><span class="s1">keyRef</span><span
+    class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">sch</span><span class="s2">) </span><span
+    class="s0">return</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">refs</span><span class="s2">[</span><span
+    class="s1">keyRef</span><span class="s2">] = </span><span class="s1">sch</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s2">(</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">validate </span><span class="s2">|| </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_compileSchemaEnv</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">)) as </span><span class="s1">AnyValidateFunction</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt; | </span><span class="s1">undefined</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Remove cached schema(s).</span>
+  <span class="s4">// If no parameter is passed all schemas but meta-schemas are removed.</span>
+  <span class="s4">// If RegExp is passed all schemas with key/id matching pattern but meta-schemas are removed.</span>
+  <span class="s4">// Even if schema is referenced by other schemas it still can be removed as other schemas have local references.</span>
+  <span class="s1">removeSchema</span><span class="s2">(</span><span class="s1">schemaKeyRef</span><span
+    class="s2">?: </span><span class="s1">AnySchema </span><span class="s2">| </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">RegExp</span><span class="s2">): </span><span
+    class="s1">Ajv </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">schemaKeyRef </span><span
+    class="s0">instanceof </span><span class="s1">RegExp</span><span class="s2">) {</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">_removeAllSchemas</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span class="s1">schemas</span><span
+    class="s2">, </span><span class="s1">schemaKeyRef</span><span class="s2">)</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">_removeAllSchemas</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span class="s1">refs</span><span
+    class="s2">, </span><span class="s1">schemaKeyRef</span><span class="s2">)</span>
+      <span class="s0">return this</span>
+    <span class="s2">}</span>
+    <span class="s0">switch </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schemaKeyRef</span><span class="s2">) {</span>
+      <span class="s0">case </span><span class="s3">&quot;undefined&quot;</span><span class="s2">:</span>
+        <span class="s0">this</span><span class="s2">.</span><span class="s1">_removeAllSchemas</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span class="s1">schemas</span><span
+    class="s2">)</span>
+        <span class="s0">this</span><span class="s2">.</span><span class="s1">_removeAllSchemas</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span class="s1">refs</span><span
+    class="s2">)</span>
+        <span class="s0">this</span><span class="s2">.</span><span class="s1">_cache</span><span
+    class="s2">.</span><span class="s1">clear</span><span class="s2">()</span>
+        <span class="s0">return this</span>
+      <span class="s0">case </span><span class="s3">&quot;string&quot;</span><span class="s2">: {</span>
+        <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s1">getSchEnv</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">, </span><span class="s1">schemaKeyRef</span><span class="s2">)</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">sch </span><span class="s2">== </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">) </span><span class="s0">this</span><span class="s2">.</span><span class="s1">_cache</span><span
+    class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">.</span><span class="s1">schema</span><span class="s2">)</span>
+        <span class="s0">delete this</span><span class="s2">.</span><span class="s1">schemas</span><span
+    class="s2">[</span><span class="s1">schemaKeyRef</span><span class="s2">]</span>
+        <span class="s0">delete this</span><span class="s2">.</span><span class="s1">refs</span><span
+    class="s2">[</span><span class="s1">schemaKeyRef</span><span class="s2">]</span>
+        <span class="s0">return this</span>
+      <span class="s2">}</span>
+      <span class="s0">case </span><span class="s3">&quot;object&quot;</span><span class="s2">: {</span>
+        <span class="s0">const </span><span class="s1">cacheKey </span><span class="s2">= </span><span class="s1">schemaKeyRef</span>
+        <span class="s0">this</span><span class="s2">.</span><span class="s1">_cache</span><span
+    class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s1">cacheKey</span><span
+    class="s2">)</span>
+        <span class="s0">let </span><span class="s1">id </span><span class="s2">= </span><span
+    class="s1">schemaKeyRef</span><span class="s2">[</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">schemaId</span><span class="s2">]</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">id</span><span class="s2">) {</span>
+          <span class="s1">id </span><span class="s2">= </span><span class="s1">normalizeId</span><span
+    class="s2">(</span><span class="s1">id</span><span class="s2">)</span>
+          <span class="s0">delete this</span><span class="s2">.</span><span class="s1">schemas</span><span
+    class="s2">[</span><span class="s1">id</span><span class="s2">]</span>
+          <span class="s0">delete this</span><span class="s2">.</span><span class="s1">refs</span><span
+    class="s2">[</span><span class="s1">id</span><span class="s2">]</span>
+        <span class="s2">}</span>
+        <span class="s0">return this</span>
+      <span class="s2">}</span>
+      <span class="s0">default</span><span class="s2">:</span>
+        <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;ajv.removeSchema: invalid parameter&quot;</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// add &quot;vocabulary&quot; - a collection of keywords</span>
+  <span class="s1">addVocabulary</span><span class="s2">(</span><span class="s1">definitions</span><span
+    class="s2">: </span><span class="s1">Vocabulary</span><span class="s2">): </span><span class="s1">Ajv </span><span
+    class="s2">{</span>
+    <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">def of definitions</span><span
+    class="s2">) </span><span class="s0">this</span><span class="s2">.</span><span class="s1">addKeyword</span><span
+    class="s2">(</span><span class="s1">def</span><span class="s2">)</span>
+    <span class="s0">return this</span>
+  <span class="s2">}</span>
+
+  <span class="s1">addKeyword</span><span class="s2">(</span>
+    <span class="s1">kwdOrDef</span><span class="s2">: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">KeywordDefinition</span><span class="s2">,</span>
+    <span class="s1">def</span><span class="s2">?: </span><span class="s1">KeywordDefinition </span><span class="s4">// deprecated</span>
+  <span class="s2">): </span><span class="s1">Ajv </span><span class="s2">{</span>
+    <span class="s0">let </span><span class="s1">keyword</span><span class="s2">: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">[]</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">kwdOrDef </span><span
+    class="s2">== </span><span class="s3">&quot;string&quot;</span><span class="s2">) {</span>
+      <span class="s1">keyword </span><span class="s2">= </span><span class="s1">kwdOrDef</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">def </span><span class="s2">== </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">) {</span>
+        <span class="s0">this</span><span class="s2">.</span><span class="s1">logger</span><span
+    class="s2">.</span><span class="s1">warn</span><span class="s2">(</span><span class="s3">&quot;these parameters are deprecated, see docs for addKeyword&quot;</span><span
+    class="s2">)</span>
+        <span class="s1">def</span><span class="s2">.</span><span class="s1">keyword </span><span
+    class="s2">= </span><span class="s1">keyword</span>
+      <span class="s2">}</span>
+    <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span
+    class="s0">typeof </span><span class="s1">kwdOrDef </span><span class="s2">== </span><span class="s3">&quot;object&quot; </span><span
+    class="s2">&amp;&amp; </span><span class="s1">def </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+      <span class="s1">def </span><span class="s2">= </span><span class="s1">kwdOrDef</span>
+      <span class="s1">keyword </span><span class="s2">= </span><span class="s1">def</span><span
+    class="s2">.</span><span class="s1">keyword</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">keyword</span><span
+    class="s2">) &amp;&amp; !</span><span class="s1">keyword</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">) {</span>
+        <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;addKeywords: keyword must be string or non-empty array&quot;</span><span
+    class="s2">)</span>
+      <span class="s2">}</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;invalid addKeywords parameters&quot;</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+
+    <span class="s1">checkKeyword</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">keyword</span><span
+    class="s2">, </span><span class="s1">def</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">def</span><span class="s2">) {</span>
+      <span class="s1">eachItem</span><span class="s2">(</span><span class="s1">keyword</span><span
+    class="s2">, (</span><span class="s1">kwd</span><span class="s2">) =&gt; </span><span class="s1">addRule</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">, </span><span class="s1">kwd</span><span class="s2">))</span>
+      <span class="s0">return this</span>
+    <span class="s2">}</span>
+    <span class="s1">keywordMetaschema</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">def</span><span
+    class="s2">)</span>
+    <span class="s0">const </span><span class="s1">definition</span><span class="s2">: </span><span class="s1">AddedKeywordDefinition </span><span
+    class="s2">= {</span>
+      <span class="s1">...def</span><span class="s2">,</span>
+      <span class="s1">type</span><span class="s2">: </span><span class="s1">getJSONTypes</span><span
+    class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span class="s1">type</span><span class="s2">),</span>
+      <span class="s1">schemaType</span><span class="s2">: </span><span class="s1">getJSONTypes</span><span
+    class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span class="s1">schemaType</span><span
+    class="s2">),</span>
+    <span class="s2">}</span>
+    <span class="s1">eachItem</span><span class="s2">(</span>
+      <span class="s1">keyword</span><span class="s2">,</span>
+      <span class="s1">definition</span><span class="s2">.</span><span class="s1">type</span><span
+    class="s2">.</span><span class="s1">length </span><span class="s2">=== </span><span class="s7">0</span>
+        <span class="s2">? (</span><span class="s1">k</span><span class="s2">) =&gt; </span><span
+    class="s1">addRule</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">, </span><span class="s1">k</span><span class="s2">, </span><span class="s1">definition</span><span
+    class="s2">)</span>
+        <span class="s2">: (</span><span class="s1">k</span><span class="s2">) =&gt; </span><span
+    class="s1">definition</span><span class="s2">.</span><span class="s1">type</span><span class="s2">.</span><span
+    class="s1">forEach</span><span class="s2">((</span><span class="s1">t</span><span class="s2">) =&gt; </span><span
+    class="s1">addRule</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">, </span><span class="s1">k</span><span class="s2">, </span><span class="s1">definition</span><span
+    class="s2">, </span><span class="s1">t</span><span class="s2">))</span>
+    <span class="s2">)</span>
+    <span class="s0">return this</span>
+  <span class="s2">}</span>
+
+  <span class="s1">getKeyword</span><span class="s2">(</span><span class="s1">keyword</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">AddedKeywordDefinition </span><span class="s2">| </span><span class="s1">boolean </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">rule </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">RULES</span><span class="s2">.</span><span
+    class="s1">all</span><span class="s2">[</span><span class="s1">keyword</span><span class="s2">]</span>
+    <span class="s0">return typeof </span><span class="s1">rule </span><span class="s2">== </span><span class="s3">&quot;object&quot; </span><span
+    class="s2">? </span><span class="s1">rule</span><span class="s2">.</span><span class="s1">definition </span><span
+    class="s2">: !!</span><span class="s1">rule</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Remove keyword</span>
+  <span class="s1">removeKeyword</span><span class="s2">(</span><span class="s1">keyword</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">Ajv </span><span
+    class="s2">{</span>
+    <span class="s4">// TODO return type should be Ajv</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">RULES</span><span
+    class="s2">} = </span><span class="s0">this</span>
+    <span class="s0">delete </span><span class="s1">RULES</span><span class="s2">.</span><span
+    class="s1">keywords</span><span class="s2">[</span><span class="s1">keyword</span><span class="s2">]</span>
+    <span class="s0">delete </span><span class="s1">RULES</span><span class="s2">.</span><span
+    class="s1">all</span><span class="s2">[</span><span class="s1">keyword</span><span class="s2">]</span>
+    <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">group of RULES</span><span class="s2">.</span><span class="s1">rules</span><span class="s2">) {</span>
+      <span class="s0">const </span><span class="s1">i </span><span class="s2">= </span><span
+    class="s1">group</span><span class="s2">.</span><span class="s1">rules</span><span class="s2">.</span><span
+    class="s1">findIndex</span><span class="s2">((</span><span class="s1">rule</span><span
+    class="s2">) =&gt; </span><span class="s1">rule</span><span class="s2">.</span><span class="s1">keyword </span><span
+    class="s2">=== </span><span class="s1">keyword</span><span class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">i </span><span class="s2">&gt;= </span><span
+    class="s7">0</span><span class="s2">) </span><span class="s1">group</span><span class="s2">.</span><span class="s1">rules</span><span
+    class="s2">.</span><span class="s1">splice</span><span class="s2">(</span><span class="s1">i</span><span class="s2">, </span><span
+    class="s7">1</span><span class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s0">return this</span>
+  <span class="s2">}</span>
+
+  <span class="s4">// Add format</span>
+  <span class="s1">addFormat</span><span class="s2">(</span><span class="s1">name</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">format</span><span class="s2">: </span><span
+    class="s1">Format</span><span class="s2">): </span><span class="s1">Ajv </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">format </span><span class="s2">== </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">) </span><span class="s1">format </span><span class="s2">= </span><span class="s0">new </span><span
+    class="s1">RegExp</span><span class="s2">(</span><span class="s1">format</span><span class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">formats</span><span class="s2">[</span><span
+    class="s1">name</span><span class="s2">] = </span><span class="s1">format</span>
+    <span class="s0">return this</span>
+  <span class="s2">}</span>
+
+  <span class="s1">errorsText</span><span class="s2">(</span>
+    <span class="s1">errors</span><span class="s2">: </span><span class="s1">ErrorObject</span><span
+    class="s2">[] | </span><span class="s0">null </span><span class="s2">| </span><span
+    class="s1">undefined </span><span class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">errors</span><span class="s2">, </span><span class="s4">// optional array of validation errors</span>
+    <span class="s2">{</span><span class="s1">separator </span><span class="s2">= </span><span
+    class="s3">&quot;, &quot;</span><span class="s2">, </span><span class="s1">dataVar </span><span class="s2">= </span><span
+    class="s3">&quot;data&quot;</span><span class="s2">}: </span><span class="s1">ErrorsTextOptions </span><span
+    class="s2">= {} </span><span class="s4">// optional options with properties `separator` and `dataVar`</span>
+  <span class="s2">): </span><span class="s1">string </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">errors </span><span class="s2">|| </span><span
+    class="s1">errors</span><span class="s2">.</span><span class="s1">length </span><span class="s2">=== </span><span
+    class="s7">0</span><span class="s2">) </span><span class="s0">return </span><span
+    class="s3">&quot;No errors&quot;</span>
+    <span class="s0">return </span><span class="s1">errors</span>
+      <span class="s2">.</span><span class="s1">map</span><span class="s2">((</span><span class="s1">e</span><span
+    class="s2">) =&gt; </span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">dataVar</span><span class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">e</span><span class="s2">.</span><span class="s1">instancePath</span><span class="s2">} </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">e</span><span class="s2">.</span><span class="s1">message</span><span
+    class="s2">}</span><span class="s3">`</span><span class="s2">)</span>
+      <span class="s2">.</span><span class="s1">reduce</span><span class="s2">((</span><span class="s1">text</span><span
+    class="s2">, </span><span class="s1">msg</span><span class="s2">) =&gt; </span><span class="s1">text </span><span
+    class="s2">+ </span><span class="s1">separator </span><span class="s2">+ </span><span class="s1">msg</span><span
+    class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s1">$dataMetaSchema</span><span class="s2">(</span><span class="s1">metaSchema</span><span
+    class="s2">: </span><span class="s1">AnySchemaObject</span><span class="s2">, </span><span class="s1">keywordsJsonPointers</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">[]): </span><span
+    class="s1">AnySchemaObject </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">rules </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">RULES</span><span class="s2">.</span><span
+    class="s1">all</span>
+    <span class="s1">metaSchema </span><span class="s2">= </span><span class="s1">JSON</span><span
+    class="s2">.</span><span class="s1">parse</span><span class="s2">(</span><span class="s1">JSON</span><span
+    class="s2">.</span><span class="s1">stringify</span><span class="s2">(</span><span class="s1">metaSchema</span><span
+    class="s2">))</span>
+    <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">jsonPointer of keywordsJsonPointers</span><span
+    class="s2">) {</span>
+      <span class="s0">const </span><span class="s1">segments </span><span class="s2">= </span><span class="s1">jsonPointer</span><span
+    class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s3">&quot;/&quot;</span><span
+    class="s2">).</span><span class="s1">slice</span><span class="s2">(</span><span class="s7">1</span><span class="s2">) </span><span
+    class="s4">// first segment is an empty string</span>
+      <span class="s0">let </span><span class="s1">keywords </span><span class="s2">= </span><span
+    class="s1">metaSchema</span>
+      <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">seg of segments</span><span
+    class="s2">) </span><span class="s1">keywords </span><span class="s2">= </span><span class="s1">keywords</span><span
+    class="s2">[</span><span class="s1">seg</span><span class="s2">] as </span><span class="s1">AnySchemaObject</span>
+
+      <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">key </span><span class="s0">in </span><span class="s1">rules</span><span class="s2">) {</span>
+        <span class="s0">const </span><span class="s1">rule </span><span class="s2">= </span><span
+    class="s1">rules</span><span class="s2">[</span><span class="s1">key</span><span class="s2">]</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">rule </span><span
+    class="s2">!= </span><span class="s3">&quot;object&quot;</span><span class="s2">) </span><span
+    class="s0">continue</span>
+        <span class="s0">const </span><span class="s2">{</span><span class="s1">$data</span><span class="s2">} = </span><span
+    class="s1">rule</span><span class="s2">.</span><span class="s1">definition</span>
+        <span class="s0">const </span><span class="s1">schema </span><span class="s2">= </span><span
+    class="s1">keywords</span><span class="s2">[</span><span class="s1">key</span><span class="s2">] as </span><span
+    class="s1">AnySchemaObject </span><span class="s2">| </span><span class="s1">undefined</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">$data </span><span
+    class="s2">&amp;&amp; </span><span class="s1">schema</span><span class="s2">) </span><span
+    class="s1">keywords</span><span class="s2">[</span><span class="s1">key</span><span class="s2">] = </span><span
+    class="s1">schemaOrData</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">)</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">return </span><span class="s1">metaSchema</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">_removeAllSchemas</span><span class="s2">(</span><span class="s1">schemas</span><span
+    class="s2">: {[</span><span class="s1">Ref </span><span class="s0">in </span><span class="s1">string</span><span
+    class="s2">]?: </span><span class="s1">SchemaEnv </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">}, </span><span class="s1">regex</span><span class="s2">?: </span><span
+    class="s1">RegExp</span><span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+    <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">keyRef </span><span class="s0">in </span><span class="s1">schemas</span><span class="s2">) {</span>
+      <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s1">schemas</span><span class="s2">[</span><span class="s1">keyRef</span><span class="s2">]</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">regex </span><span
+    class="s2">|| </span><span class="s1">regex</span><span class="s2">.</span><span class="s1">test</span><span
+    class="s2">(</span><span class="s1">keyRef</span><span class="s2">)) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">sch </span><span class="s2">== </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">) {</span>
+          <span class="s0">delete </span><span class="s1">schemas</span><span class="s2">[</span><span
+    class="s1">keyRef</span><span class="s2">]</span>
+        <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span
+    class="s1">sch </span><span class="s2">&amp;&amp; !</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">meta</span><span class="s2">) {</span>
+          <span class="s0">this</span><span class="s2">.</span><span class="s1">_cache</span><span
+    class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">.</span><span class="s1">schema</span><span class="s2">)</span>
+          <span class="s0">delete </span><span class="s1">schemas</span><span class="s2">[</span><span
+    class="s1">keyRef</span><span class="s2">]</span>
+        <span class="s2">}</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s1">_addSchema</span><span class="s2">(</span>
+    <span class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchema</span><span class="s2">,</span>
+    <span class="s1">meta</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">,</span>
+    <span class="s1">baseId</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">,</span>
+    <span class="s1">validateSchema </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">validateSchema</span><span
+    class="s2">,</span>
+    <span class="s1">addSchema </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">addUsedSchema</span>
+  <span class="s2">): </span><span class="s1">SchemaEnv </span><span class="s2">{</span>
+    <span class="s0">let </span><span class="s1">id</span><span class="s2">: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">undefined</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">schemaId</span><span
+    class="s2">} = </span><span class="s0">this</span><span class="s2">.</span><span class="s1">opts</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schema </span><span class="s2">== </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">) {</span>
+      <span class="s1">id </span><span class="s2">= </span><span class="s1">schema</span><span class="s2">[</span><span
+    class="s1">schemaId</span><span class="s2">]</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">jtd</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;schema must be object&quot;</span><span
+    class="s2">)</span>
+      <span class="s0">else if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schema </span><span class="s2">!= </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">) </span><span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">&quot;schema must be object or boolean&quot;</span><span class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s0">let </span><span class="s1">sch </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">_cache</span><span class="s2">.</span><span class="s1">get</span><span
+    class="s2">(</span><span class="s1">schema</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">sch </span><span class="s2">!== </span><span
+    class="s1">undefined</span><span class="s2">) </span><span class="s0">return </span><span class="s1">sch</span>
+
+    <span class="s1">baseId </span><span class="s2">= </span><span class="s1">normalizeId</span><span
+    class="s2">(</span><span class="s1">id </span><span class="s2">|| </span><span class="s1">baseId</span><span
+    class="s2">)</span>
+    <span class="s0">const </span><span class="s1">localRefs </span><span class="s2">= </span><span class="s1">getSchemaRefs</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span class="s1">baseId</span><span
+    class="s2">)</span>
+    <span class="s1">sch </span><span class="s2">= </span><span class="s0">new </span><span
+    class="s1">SchemaEnv</span><span class="s2">({</span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">schemaId</span><span class="s2">, </span><span class="s1">meta</span><span class="s2">, </span><span
+    class="s1">baseId</span><span class="s2">, </span><span class="s1">localRefs</span><span class="s2">})</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">_cache</span><span class="s2">.</span><span
+    class="s1">set</span><span class="s2">(</span><span class="s1">sch</span><span class="s2">.</span><span class="s1">schema</span><span
+    class="s2">, </span><span class="s1">sch</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">addSchema </span><span
+    class="s2">&amp;&amp; !</span><span class="s1">baseId</span><span class="s2">.</span><span
+    class="s1">startsWith</span><span class="s2">(</span><span class="s3">&quot;#&quot;</span><span
+    class="s2">)) {</span>
+      <span class="s4">// TODO atm it is allowed to overwrite schemas without id (instead of not adding them)</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">baseId</span><span class="s2">) </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_checkUnique</span><span class="s2">(</span><span
+    class="s1">baseId</span><span class="s2">)</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">refs</span><span class="s2">[</span><span
+    class="s1">baseId</span><span class="s2">] = </span><span class="s1">sch</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">validateSchema</span><span class="s2">) </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">validateSchema</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s1">sch</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">_checkUnique</span><span class="s2">(</span><span
+    class="s1">id</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">schemas</span><span class="s2">[</span><span class="s1">id</span><span class="s2">] || </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">refs</span><span class="s2">[</span><span
+    class="s1">id</span><span class="s2">]) {</span>
+      <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`schema with key or id &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">id</span><span class="s2">}</span><span class="s3">&quot; already exists`</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">_compileSchemaEnv</span><span class="s2">(</span><span
+    class="s1">sch</span><span class="s2">: </span><span class="s1">SchemaEnv</span><span class="s2">): </span><span
+    class="s1">AnyValidateFunction </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">meta</span><span class="s2">) </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">_compileMetaSchema</span><span class="s2">(</span><span class="s1">sch</span><span class="s2">)</span>
+    <span class="s0">else </span><span class="s1">compileSchema</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">sch</span><span class="s2">)</span>
+
+    <span class="s4">/* istanbul ignore if */</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">validate</span><span class="s2">) </span><span class="s0">throw new </span><span
+    class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;ajv implementation error&quot;</span><span
+    class="s2">)</span>
+    <span class="s0">return </span><span class="s1">sch</span><span class="s2">.</span><span class="s1">validate</span>
+  <span class="s2">}</span>
+
+  <span class="s0">private </span><span class="s1">_compileMetaSchema</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">: </span><span class="s1">SchemaEnv</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+    <span class="s0">const </span><span class="s1">currentOpts </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">opts</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">opts </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">_metaOpts</span>
+    <span class="s0">try </span><span class="s2">{</span>
+      <span class="s1">compileSchema</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">sch</span><span
+    class="s2">)</span>
+    <span class="s2">} </span><span class="s0">finally </span><span class="s2">{</span>
+      <span class="s0">this</span><span class="s2">.</span><span class="s1">opts </span><span class="s2">= </span><span
+    class="s1">currentOpts</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ErrorsTextOptions </span><span class="s2">{</span>
+  <span class="s1">separator</span><span class="s2">?: </span><span class="s1">string</span>
+  <span class="s1">dataVar</span><span class="s2">?: </span><span class="s1">string</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">checkOptions</span><span class="s2">(</span>
+  <span class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">,</span>
+  <span class="s1">checkOpts</span><span class="s2">: </span><span class="s1">OptionsInfo</span><span
+    class="s2">&lt;</span><span class="s1">RemovedOptions </span><span class="s2">| </span><span class="s1">DeprecatedOptions</span><span
+    class="s2">&gt;,</span>
+  <span class="s1">options</span><span class="s2">: </span><span class="s1">Options </span><span
+    class="s2">&amp; </span><span class="s1">RemovedOptions</span><span class="s2">,</span>
+  <span class="s1">msg</span><span class="s2">: </span><span class="s1">string</span><span class="s2">,</span>
+  <span class="s1">log</span><span class="s2">: </span><span class="s3">&quot;warn&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;error&quot; </span><span class="s2">= </span><span class="s3">&quot;error&quot;</span>
+<span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">checkOpts</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">opt </span><span class="s2">= </span><span
+    class="s1">key </span><span class="s2">as </span><span class="s1">keyof </span><span class="s0">typeof </span><span
+    class="s1">checkOpts</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">opt </span><span class="s0">in </span><span
+    class="s1">options</span><span class="s2">) </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">logger</span><span class="s2">[</span><span class="s1">log</span><span class="s2">](</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">msg</span><span
+    class="s2">}</span><span class="s3">: option </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">key</span><span class="s2">}</span><span class="s3">. </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">checkOpts</span><span class="s2">[</span><span class="s1">opt</span><span
+    class="s2">]}</span><span class="s3">`</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">getSchEnv</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">, </span><span
+    class="s1">keyRef</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">SchemaEnv </span><span class="s2">| </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">undefined </span><span class="s2">{</span>
+  <span class="s1">keyRef </span><span class="s2">= </span><span class="s1">normalizeId</span><span
+    class="s2">(</span><span class="s1">keyRef</span><span class="s2">) </span><span class="s4">// TODO tests fail without this line</span>
+  <span class="s0">return this</span><span class="s2">.</span><span class="s1">schemas</span><span
+    class="s2">[</span><span class="s1">keyRef</span><span class="s2">] || </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">refs</span><span class="s2">[</span><span class="s1">keyRef</span><span
+    class="s2">]</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">addInitialSchemas</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">optsSchemas </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">schemas</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">optsSchemas</span><span
+    class="s2">) </span><span class="s0">return</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">optsSchemas</span><span
+    class="s2">)) </span><span class="s0">this</span><span class="s2">.</span><span class="s1">addSchema</span><span
+    class="s2">(</span><span class="s1">optsSchemas</span><span class="s2">)</span>
+  <span class="s0">else for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">key </span><span class="s0">in </span><span class="s1">optsSchemas</span><span class="s2">) </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">addSchema</span><span class="s2">(</span><span
+    class="s1">optsSchemas</span><span class="s2">[</span><span class="s1">key</span><span class="s2">] as </span><span
+    class="s1">AnySchema</span><span class="s2">, </span><span class="s1">key</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">addInitialFormats</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">name </span><span
+    class="s0">in this</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">formats</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">format </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">formats</span><span class="s2">[</span><span class="s1">name</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">format</span><span class="s2">) </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">addFormat</span><span class="s2">(</span><span
+    class="s1">name</span><span class="s2">, </span><span class="s1">format</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">addInitialKeywords</span><span class="s2">(</span>
+  <span class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">,</span>
+  <span class="s1">defs</span><span class="s2">: </span><span class="s1">Vocabulary </span><span
+    class="s2">| {[</span><span class="s1">K </span><span class="s0">in </span><span class="s1">string</span><span
+    class="s2">]?: </span><span class="s1">KeywordDefinition</span><span class="s2">}</span>
+<span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">defs</span><span class="s2">)) {</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">addVocabulary</span><span
+    class="s2">(</span><span class="s1">defs</span><span class="s2">)</span>
+    <span class="s0">return</span>
+  <span class="s2">}</span>
+  <span class="s0">this</span><span class="s2">.</span><span class="s1">logger</span><span class="s2">.</span><span
+    class="s1">warn</span><span class="s2">(</span><span class="s3">&quot;keywords option as map is deprecated, pass array&quot;</span><span
+    class="s2">)</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">keyword </span><span class="s0">in </span><span class="s1">defs</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">def </span><span class="s2">= </span><span
+    class="s1">defs</span><span class="s2">[</span><span class="s1">keyword</span><span class="s2">] as </span><span
+    class="s1">KeywordDefinition</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">keyword</span><span class="s2">) </span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">keyword </span><span class="s2">= </span><span class="s1">keyword</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">addKeyword</span><span
+    class="s2">(</span><span class="s1">def</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">getMetaSchemaOptions</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">: </span><span class="s1">Ajv</span><span class="s2">): </span><span
+    class="s1">InstanceOptions </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">metaOpts </span><span class="s2">= {</span><span
+    class="s1">...</span><span class="s0">this</span><span class="s2">.</span><span class="s1">opts</span><span
+    class="s2">}</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">opt of META_IGNORE_OPTIONS</span><span
+    class="s2">) </span><span class="s0">delete </span><span class="s1">metaOpts</span><span class="s2">[</span><span
+    class="s1">opt</span><span class="s2">]</span>
+  <span class="s0">return </span><span class="s1">metaOpts</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">noLogs </span><span class="s2">= {</span><span class="s1">log</span><span
+    class="s2">() {}, </span><span class="s1">warn</span><span class="s2">() {}, </span><span
+    class="s1">error</span><span class="s2">() {}}</span>
+
+<span class="s0">function </span><span class="s1">getLogger</span><span class="s2">(</span><span
+    class="s1">logger</span><span class="s2">?: </span><span class="s1">Partial</span><span class="s2">&lt;</span><span
+    class="s1">Logger</span><span class="s2">&gt; | </span><span class="s0">false</span><span class="s2">): </span><span
+    class="s1">Logger </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">logger </span><span class="s2">=== </span><span
+    class="s0">false</span><span class="s2">) </span><span class="s0">return </span><span class="s1">noLogs</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">logger </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) </span><span class="s0">return </span><span class="s1">console</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">logger</span><span class="s2">.</span><span
+    class="s1">log </span><span class="s2">&amp;&amp; </span><span class="s1">logger</span><span
+    class="s2">.</span><span class="s1">warn </span><span class="s2">&amp;&amp; </span><span
+    class="s1">logger</span><span class="s2">.</span><span class="s1">error</span><span class="s2">) </span><span
+    class="s0">return </span><span class="s1">logger </span><span class="s2">as </span><span class="s1">Logger</span>
+  <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;logger must implement log, warn and error methods&quot;</span><span
+    class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">KEYWORD_NAME </span><span class="s2">= </span><span class="s8">/^[a-z_$][a-z0-9_$:-]*$/i</span>
+
+<span class="s0">function </span><span class="s1">checkKeyword</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">, </span><span
+    class="s1">keyword</span><span class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">[], </span><span class="s1">def</span><span class="s2">?: </span><span
+    class="s1">KeywordDefinition</span><span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">RULES</span><span class="s2">} = </span><span
+    class="s0">this</span>
+  <span class="s1">eachItem</span><span class="s2">(</span><span class="s1">keyword</span><span
+    class="s2">, (</span><span class="s1">kwd</span><span class="s2">) =&gt; {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">RULES</span><span class="s2">.</span><span
+    class="s1">keywords</span><span class="s2">[</span><span class="s1">kwd</span><span class="s2">]) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">`Keyword </span><span class="s1">$</span><span class="s2">{</span><span class="s1">kwd</span><span
+    class="s2">} </span><span class="s3">is already defined`</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">KEYWORD_NAME</span><span
+    class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s1">kwd</span><span class="s2">)) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">`Keyword </span><span class="s1">$</span><span class="s2">{</span><span class="s1">kwd</span><span
+    class="s2">} </span><span class="s3">has invalid name`</span><span class="s2">)</span>
+  <span class="s2">})</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">def</span><span class="s2">) </span><span
+    class="s0">return</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">$data </span><span class="s2">&amp;&amp; !(</span><span class="s3">&quot;code&quot; </span><span
+    class="s0">in </span><span class="s1">def </span><span class="s2">|| </span><span
+    class="s3">&quot;validate&quot; </span><span class="s0">in </span><span class="s1">def</span><span
+    class="s2">)) {</span>
+    <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'$data keyword must have &quot;code&quot; or &quot;validate&quot; function'</span><span
+    class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">addRule</span><span class="s2">(</span>
+  <span class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">,</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s1">string</span><span class="s2">,</span>
+  <span class="s1">definition</span><span class="s2">?: </span><span class="s1">AddedKeywordDefinition</span><span
+    class="s2">,</span>
+  <span class="s1">dataType</span><span class="s2">?: </span><span class="s1">JSONType</span>
+<span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">post </span><span class="s2">= </span><span
+    class="s1">definition</span><span class="s2">?.</span><span class="s1">post</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">dataType </span><span
+    class="s2">&amp;&amp; </span><span class="s1">post</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'keyword with &quot;post&quot; flag cannot have &quot;type&quot;'</span><span
+    class="s2">)</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">RULES</span><span class="s2">} = </span><span
+    class="s0">this</span>
+  <span class="s0">let </span><span class="s1">ruleGroup </span><span class="s2">= </span><span
+    class="s1">post </span><span class="s2">? </span><span class="s1">RULES</span><span class="s2">.</span><span
+    class="s1">post </span><span class="s2">: </span><span class="s1">RULES</span><span class="s2">.</span><span
+    class="s1">rules</span><span class="s2">.</span><span class="s1">find</span><span class="s2">(({</span><span
+    class="s1">type</span><span class="s2">: </span><span class="s1">t</span><span class="s2">}) =&gt; </span><span
+    class="s1">t </span><span class="s2">=== </span><span class="s1">dataType</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">ruleGroup</span><span class="s2">) {</span>
+    <span class="s1">ruleGroup </span><span class="s2">= {</span><span class="s1">type</span><span
+    class="s2">: </span><span class="s1">dataType</span><span class="s2">, </span><span class="s1">rules</span><span
+    class="s2">: []}</span>
+    <span class="s1">RULES</span><span class="s2">.</span><span class="s1">rules</span><span class="s2">.</span><span
+    class="s1">push</span><span class="s2">(</span><span class="s1">ruleGroup</span><span class="s2">)</span>
+  <span class="s2">}</span>
+  <span class="s1">RULES</span><span class="s2">.</span><span class="s1">keywords</span><span class="s2">[</span><span
+    class="s1">keyword</span><span class="s2">] = </span><span class="s0">true</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">definition</span><span class="s2">) </span><span
+    class="s0">return</span>
+
+  <span class="s0">const </span><span class="s1">rule</span><span class="s2">: </span><span class="s1">Rule </span><span
+    class="s2">= {</span>
+    <span class="s1">keyword</span><span class="s2">,</span>
+    <span class="s1">definition</span><span class="s2">: {</span>
+      <span class="s1">...definition</span><span class="s2">,</span>
+      <span class="s1">type</span><span class="s2">: </span><span class="s1">getJSONTypes</span><span
+    class="s2">(</span><span class="s1">definition</span><span class="s2">.</span><span class="s1">type</span><span
+    class="s2">),</span>
+      <span class="s1">schemaType</span><span class="s2">: </span><span class="s1">getJSONTypes</span><span
+    class="s2">(</span><span class="s1">definition</span><span class="s2">.</span><span
+    class="s1">schemaType</span><span class="s2">),</span>
+    <span class="s2">},</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">definition</span><span class="s2">.</span><span
+    class="s1">before</span><span class="s2">) </span><span class="s1">addBeforeRule</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">, </span><span class="s1">ruleGroup</span><span class="s2">, </span><span class="s1">rule</span><span
+    class="s2">, </span><span class="s1">definition</span><span class="s2">.</span><span class="s1">before</span><span
+    class="s2">)</span>
+  <span class="s0">else </span><span class="s1">ruleGroup</span><span class="s2">.</span><span
+    class="s1">rules</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s1">rule</span><span class="s2">)</span>
+  <span class="s1">RULES</span><span class="s2">.</span><span class="s1">all</span><span class="s2">[</span><span
+    class="s1">keyword</span><span class="s2">] = </span><span class="s1">rule</span>
+  <span class="s1">definition</span><span class="s2">.</span><span class="s1">implements</span><span
+    class="s2">?.</span><span class="s1">forEach</span><span class="s2">((</span><span class="s1">kwd</span><span
+    class="s2">) =&gt; </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">addKeyword</span><span class="s2">(</span><span class="s1">kwd</span><span class="s2">))</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">addBeforeRule</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">, </span><span
+    class="s1">ruleGroup</span><span class="s2">: </span><span class="s1">RuleGroup</span><span
+    class="s2">, </span><span class="s1">rule</span><span class="s2">: </span><span class="s1">Rule</span><span
+    class="s2">, </span><span class="s1">before</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">i </span><span class="s2">= </span><span
+    class="s1">ruleGroup</span><span class="s2">.</span><span class="s1">rules</span><span class="s2">.</span><span
+    class="s1">findIndex</span><span class="s2">((</span><span class="s1">_rule</span><span
+    class="s2">) =&gt; </span><span class="s1">_rule</span><span class="s2">.</span><span
+    class="s1">keyword </span><span class="s2">=== </span><span class="s1">before</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">i </span><span class="s2">&gt;= </span><span
+    class="s7">0</span><span class="s2">) {</span>
+    <span class="s1">ruleGroup</span><span class="s2">.</span><span class="s1">rules</span><span
+    class="s2">.</span><span class="s1">splice</span><span class="s2">(</span><span class="s1">i</span><span class="s2">, </span><span
+    class="s7">0</span><span class="s2">, </span><span class="s1">rule</span><span class="s2">)</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">ruleGroup</span><span class="s2">.</span><span class="s1">rules</span><span
+    class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span class="s1">rule</span><span
+    class="s2">)</span>
+    <span class="s0">this</span><span class="s2">.</span><span class="s1">logger</span><span class="s2">.</span><span
+    class="s1">warn</span><span class="s2">(</span><span class="s3">`rule </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">before</span><span class="s2">} </span><span
+    class="s3">is not defined`</span><span class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">keywordMetaschema</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">, </span><span
+    class="s1">def</span><span class="s2">: </span><span class="s1">KeywordDefinition</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">let </span><span class="s2">{</span><span class="s1">metaSchema</span><span
+    class="s2">} = </span><span class="s1">def</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">metaSchema </span><span
+    class="s2">=== </span><span class="s1">undefined</span><span class="s2">) </span><span class="s0">return</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">$data </span><span class="s2">&amp;&amp; </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">$data</span><span
+    class="s2">) </span><span class="s1">metaSchema </span><span class="s2">= </span><span
+    class="s1">schemaOrData</span><span class="s2">(</span><span class="s1">metaSchema</span><span class="s2">)</span>
+  <span class="s1">def</span><span class="s2">.</span><span class="s1">validateSchema </span><span
+    class="s2">= </span><span class="s0">this</span><span class="s2">.</span><span class="s1">compile</span><span
+    class="s2">(</span><span class="s1">metaSchema</span><span class="s2">, </span><span class="s0">true</span><span
+    class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">$dataRef </span><span class="s2">= {</span>
+  <span class="s1">$ref</span><span class="s2">: </span><span class="s3">&quot;https://raw.githubusercontent.com/ajv-validator/ajv/master/lib/refs/data.json#&quot;</span><span
+    class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">schemaOrData</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchema</span><span class="s2">): </span><span
+    class="s1">AnySchemaObject </span><span class="s2">{</span>
+  <span class="s0">return </span><span class="s2">{</span><span class="s1">anyOf</span><span class="s2">: [</span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">$dataRef</span><span class="s2">]}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<html>
+<head>
+  <title>pattern.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          pattern.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">ErrorObject</span><span class="s2">, </span><span class="s1">KeywordErrorDefinition</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">usePattern</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../code&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+
+<span class="s0">export </span><span class="s1">type PatternError </span><span class="s2">= </span><span class="s1">ErrorObject</span><span
+    class="s2">&lt;</span><span class="s3">&quot;pattern&quot;</span><span class="s2">, {</span><span
+    class="s1">pattern</span><span class="s2">: </span><span class="s1">string</span><span class="s2">}, </span><span
+    class="s1">string </span><span class="s2">| {</span><span class="s1">$data</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">}&gt;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: ({</span><span class="s1">schemaCode</span><span
+    class="s2">}) =&gt; </span><span class="s1">str</span><span class="s3">`must match pattern &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span
+    class="s3">&quot;`</span><span class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">schemaCode</span><span
+    class="s2">}) =&gt; </span><span class="s1">_</span><span class="s3">`{pattern: </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span
+    class="s3">}`</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;pattern&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">$data</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">data</span><span class="s2">, </span><span
+    class="s1">$data</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">schemaCode</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+    <span class="s4">// TODO regexp should be wrapped in try/catchs</span>
+    <span class="s0">const </span><span class="s1">u </span><span class="s2">= </span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">unicodeRegExp </span><span
+    class="s2">? </span><span class="s3">&quot;u&quot; </span><span class="s2">: </span><span
+    class="s3">&quot;&quot;</span>
+    <span class="s0">const </span><span class="s1">regExp </span><span class="s2">= </span><span
+    class="s1">$data </span><span class="s2">? </span><span class="s1">_</span><span
+    class="s3">`(new RegExp(</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">schemaCode</span><span class="s2">}</span><span class="s3">, </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">u</span><span class="s2">}</span><span class="s3">))` </span><span
+    class="s2">: </span><span class="s1">usePattern</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">, </span><span class="s1">schema</span><span class="s2">)</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">fail$data</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`!</span><span class="s1">$</span><span class="s2">{</span><span class="s1">regExp</span><span
+    class="s2">}</span><span class="s3">.test(</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s3">)`</span><span class="s2">)</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

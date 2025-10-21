@@ -1,0 +1,98 @@
+<html>
+<head>
+  <title>NodeFileSystemFileHandle.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          NodeFileSystemFileHandle.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">NodeFileSystemHandle </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'./NodeFileSystemHandle'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">NodeFileSystemWritableFileStream </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./NodeFileSystemWritableFileStream'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">NodeFsaContext</span><span class="s2">, </span><span class="s1">NodeFsaFs </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./types'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">IFileSystemFileHandle</span><span
+    class="s2">, </span><span class="s1">IFileSystemSyncAccessHandle </span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">'../fsa/types'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">NodeFileSystemFileHandle </span><span
+    class="s0">extends </span><span class="s1">NodeFileSystemHandle </span><span class="s0">implements </span><span
+    class="s1">IFileSystemFileHandle </span><span class="s2">{</span>
+    <span class="s0">protected </span><span class="s1">readonly fs</span><span class="s2">: </span><span class="s1">NodeFsaFs</span><span
+    class="s2">;</span>
+    <span class="s1">readonly __path</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly ctx</span><span class="s2">: </span><span class="s1">NodeFsaContext</span><span
+    class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">fs</span><span
+    class="s2">: </span><span class="s1">NodeFsaFs</span><span class="s2">, </span><span class="s1">__path</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">ctx</span><span
+    class="s2">?: </span><span class="s1">Partial</span><span class="s2">&lt;</span><span
+    class="s1">NodeFsaContext</span><span class="s2">&gt;);</span>
+    <span class="s4">/**</span>
+     <span class="s4">* Returns a {</span><span class="s5">@link </span><span
+    class="s4">Promise} which resolves to a {</span><span class="s5">@link </span><span class="s4">File} object</span>
+     <span class="s4">* representing the state on disk of the entry represented by the handle.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/getFile</span>
+     <span class="s4">*/</span>
+    <span class="s1">getFile</span><span class="s2">(): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">File</span><span class="s2">&gt;;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createSyncAccessHandle</span>
+     <span class="s4">*/</span>
+    <span class="s1">get createSyncAccessHandle</span><span class="s2">(): </span><span
+    class="s1">undefined </span><span class="s2">| (() =&gt; </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">IFileSystemSyncAccessHandle</span><span class="s2">&gt;);</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable</span>
+     <span class="s4">*/</span>
+    <span class="s1">createWritable</span><span class="s2">({ </span><span class="s1">keepExistingData </span><span
+    class="s2">}?: </span><span class="s1">CreateWritableOptions</span><span class="s2">): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">NodeFileSystemWritableFileStream</span><span class="s2">&gt;;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">CreateWritableOptions </span><span class="s2">{</span>
+    <span class="s1">keepExistingData</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

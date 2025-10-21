@@ -1,0 +1,845 @@
+/* --- ESTILOS DA TELA DE LOGIN --- */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--light-bg);
+}
+
+.login-form {
+  padding: 40px;
+  background-color: var(--white-color);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-form h2 {
+  color: var(--primary-color);
+}
+
+.form-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: calc(100% - 24px);
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 15px;
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.login-error {
+  color: var(--danger-color);
+  margin-top: 15px;
+}
+
+/* --- AJUSTES GERAIS --- */
+#app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.user-info {
+  margin-left: auto;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#btn-logout {
+  background-color: var(--danger-color);
+}
+
+/* style.css - Design Moderno e Responsivo */
+
+/* --- Variáveis CSS (Cores e Fontes) --- */
+:root {
+  --primary-color: #007bff; /* Azul vibrante */
+  --secondary-color: #6c757d; /* Cinza */
+  --success-color: #28a745; /* Verde */
+  --danger-color: #dc3545; /* Vermelho */
+  --warning-color: #ffc107; /* Amarelo */
+  --info-color: #17a2b8; /* Azul claro */
+  --light-bg: #f8f9fa; /* Fundo claro */
+  --dark-bg: #343a40; /* Fundo escuro */
+  --text-color: #343a40;
+  --white-color: #ffffff;
+  --border-color: #ced4da;
+  --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  --font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* --- Base Geral --- */
+body {
+  font-family: var(--font-family);
+  margin: 0;
+  background-color: var(--light-bg);
+  color: var(--text-color);
+  line-height: 1.6;
+  display: flex; /* Para o layout principal */
+  flex-direction: column; /* Coloca a nav em cima do conteúdo */
+  min-height: 100vh; /* Garante que o body ocupa a altura total da viewport */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--dark-bg);
+  margin-bottom: 0.8rem;
+}
+
+button, input, select {
+  font-family: var(--font-family);
+  font-size: 1rem;
+}
+
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* --- Navegação Principal (Top Bar) --- */
+.main-nav {
+  background-color: var(--dark-bg);
+  padding: 15px 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  box-shadow: var(--box-shadow);
+}
+
+.nav-btn {
+  padding: 10px 25px;
+  background-color: var(--secondary-color);
+  color: var(--white-color);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.nav-btn:hover {
+  background-color: #5a6268;
+}
+
+.nav-btn.active {
+  background-color: var(--primary-color);
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+/* --- Estrutura das Views (SPA) --- */
+.view {
+  flex-grow: 1; /* Ocupa o espaço restante */
+  padding: 20px;
+  /* transition: opacity 0.3s ease-in-out; */ /* Para transições mais suaves, se o JS for ajustado */
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* --- Estilos da Tela do Caixa --- */
+.caixa-container {
+  display: flex;
+  flex-wrap: wrap; /* Permite quebrar em telas menores */
+  gap: 20px;
+  height: calc(100vh - 80px); /* Ajusta para a altura da tela menos a nav */
+}
+
+.produtos-section {
+  flex: 3; /* Ocupa mais espaço */
+  min-width: 300px;
+  background-color: var(--white-color);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  overflow-y: auto; /* Scroll para muitos produtos */
+}
+
+.produtos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.produto-btn {
+  padding: 15px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--light-bg);
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  min-height: 80px; /* Garante tamanho mínimo para consistência */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.produto-btn:hover {
+  background-color: #e2e6ea;
+  border-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.produto-btn .preco {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+}
+
+.pedido-section {
+  flex: 2; /* Ocupa menos espaço */
+  min-width: 280px;
+  background-color: var(--white-color);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.pedido-atual-itens {
+  flex-grow: 1;
+  background-color: #f0f0f0;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 15px;
+  overflow-y: auto;
+  margin-top: 15px;
+}
+
+.item-pedido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed #e0e0e0;
+  font-size: 1rem;
+}
+
+.item-pedido:last-child {
+  border-bottom: none;
+}
+
+
+.pedido-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  margin-top: 15px;
+  border-top: 2px solid var(--dark-bg);
+}
+
+.pedido-total h3 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--primary-color);
+}
+
+.pedido-acoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.pedido-acoes button {
+  padding: 15px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-pagar {
+  background-color: var(--success-color);
+  color: var(--white-color);
+}
+
+.btn-pagar:hover {
+  background-color: #218838;
+}
+
+.btn-cancelar {
+  background-color: var(--danger-color);
+  color: var(--white-color);
+}
+
+.btn-cancelar:hover {
+  background-color: #c82333;
+}
+
+
+/* --- Estilos do Modal de Pagamento --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-conteudo {
+  background-color: var(--white-color);
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 550px;
+  position: relative;
+  box-shadow: var(--box-shadow);
+  text-align: center;
+}
+
+.btn-fechar-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--secondary-color);
+}
+
+.modal-conteudo h2 {
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.total-modal {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.total-modal #total-modal-valor {
+  color: var(--success-color);
+}
+
+p {
+  margin-top: 20px;
+  font-size: 1.1rem;
+}
+
+.metodos-pagamento {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-metodo {
+  padding: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--light-bg);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-metodo:hover {
+  background-color: #e9ecef;
+  border-color: var(--primary-color);
+}
+
+/* Estilos para Dinheiro */
+#dinheiro-secao {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #e9f7ff; /* Fundo azul claro para destaque */
+  border: 1px solid #bce8f1;
+  border-radius: 8px;
+  text-align: left;
+}
+
+#dinheiro-secao label {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  display: block;
+  font-weight: bold;
+}
+
+#dinheiro-secao input {
+  width: calc(100% - 22px); /* Ajusta para padding */
+  padding: 12px;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+}
+
+.troco-display {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--info-color);
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.troco-display #troco-valor {
+  color: var(--primary-color);
+}
+
+.btn-confirmar {
+  background-color: var(--info-color); /* Cor azul para diferenciar */
+  color: white;
+}
+
+.btn-confirmar:hover {
+  background-color: #117a8b;
+}
+
+/* --- Estilos da Tela de Admin --- */
+.admin-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 30px;
+  background-color: var(--white-color);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+}
+
+.admin-container h1 {
+  text-align: center;
+  color: var(--primary-color);
+  margin-bottom: 30px;
+}
+
+.form-produto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #e9ecef;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-produto input {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 1rem;
+  width: auto; /* Remove width: 95% do input geral */
+}
+
+.form-produto button {
+  padding: 12px 20px;
+  border-radius: 5px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#btn-salvar-produto {
+  background-color: var(--success-color);
+  color: var(--white-color);
+}
+
+#btn-salvar-produto:hover {
+  background-color: #218838;
+}
+
+#btn-cancelar-edicao {
+  background-color: var(--secondary-color);
+  color: var(--white-color);
+}
+
+#btn-cancelar-edicao:hover {
+  background-color: #5a6268;
+}
+
+
+h2 {
+  color: var(--dark-bg);
+  margin-top: 40px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#tabela-produtos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: var(--box-shadow);
+  background-color: var(--white-color);
+  border-radius: 8px;
+  overflow: hidden; /* Para border-radius nas bordas da tabela */
+}
+
+#tabela-produtos thead {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+}
+
+#tabela-produtos th, #tabela-produtos td {
+  border: 1px solid #dee2e6;
+  padding: 12px 15px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+#tabela-produtos th {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+#tabela-produtos tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#tabela-produtos tbody tr:hover {
+  background-color: #e9ecef;
+  cursor: pointer;
+}
+
+#tabela-produtos td button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 5px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+#tabela-produtos td .btn-editar {
+  background-color: var(--info-color);
+  color: white;
+}
+
+#tabela-produtos td .btn-editar:hover {
+  background-color: #117a8b;
+}
+
+#tabela-produtos td .btn-excluir {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+#tabela-produtos td .btn-excluir:hover {
+  background-color: #c82333;
+}
+
+/* --- Responsividade Básica --- */
+@media (max-width: 768px) {
+  .caixa-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .produtos-section, .pedido-section {
+    flex: auto;
+    width: 100%;
+  }
+
+  .main-nav {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-btn {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  .form-produto {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- ESTILOS DA TELA DE RELATÓRIOS --- */
+
+.relatorios-container {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 30px;
+  background-color: var(--white-color);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+}
+
+.relatorios-filtros {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #e9ecef;
+  border-radius: 8px;
+}
+
+.relatorios-filtros label {
+  font-weight: bold;
+}
+
+.relatorios-filtros input[type="date"] {
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+}
+
+.relatorios-filtros button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.resumo-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.resumo-card {
+  background-color: var(--light-bg);
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.resumo-card h4 {
+  margin: 0 0 10px 0;
+  color: var(--secondary-color);
+}
+
+.resumo-card p {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.tabela-container {
+  overflow-x: auto; /* Adiciona scroll horizontal em telas pequenas */
+}
+
+#tabela-vendas {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#tabela-vendas td, #tabela-vendas th {
+  /* Herda os estilos da tabela de produtos */
+  border: 1px solid #dee2e6;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+#tabela-vendas thead {
+  background-color: var(--dark-bg);
+  color: var(--white-color);
+}
+
+#tabela-vendas tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* --- ESTILO PARA O BOTÃO DE EXPORTAR --- */
+.btn-exportar {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #217346; /* Um verde que lembra o Excel */
+  color: var(--white-color);
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: auto; /* Joga o botão para a direita */
+  transition: background-color 0.3s ease;
+}
+
+.btn-exportar:hover {
+  background-color: #1c5e3a;
+}
+
+/* --- ESTILOS PARA IMPRESSÃO DO RECIBO --- */
+
+/* Esconde a área do recibo na visualização normal da tela */
+#recibo-container {
+  display: none;
+}
+
+/* Regras que SÓ se aplicam na hora de imprimir */
+@media print {
+  /* Define o tamanho da página e remove margens padrão (que incluem cabeçalhos/rodapés) */
+  @page {
+    size: 76mm auto; /* Define a largura e altura automática para o rolo */
+    margin: 4mm;     /* Define uma pequena margem geral */
+  }
+
+  /* Reseta o corpo da página para impressão */
+  body, html {
+    background-color: #fff;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Esconde TUDO na página, exceto o recibo */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Torna VISÍVEL apenas a área do recibo e seu conteúdo */
+  #recibo-container, #recibo-container * {
+    visibility: visible;
+  }
+
+  /* Posiciona o recibo no topo da página de impressão */
+  #recibo-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%; /* Ocupa a largura definida no @page */
+    display: block !important; /* Garante que seja visível */
+  }
+
+  /* Estilos de fonte e espaçamento para o recibo */
+  #recibo-content {
+    font-family: 'Consolas', 'Courier New', monospace; /* Fonte monoespaçada */
+    font-size: 8pt; /* Tamanho pequeno comum em recibos */
+    color: #000;
+    line-height: 1.4;
+  }
+
+  .recibo-header h3 {
+    font-size: 10pt;
+    margin: 0;
+  }
+
+  .recibo-header p, .recibo-footer p {
+    margin: 3px 0;
+  }
+
+  /* Espaçamento vertical pequeno */
+  .text-center {
+    text-align: center;
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  /* Estilos da tabela de itens */
+  .recibo-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 5px 0;
+  }
+
+  .recibo-table thead {
+    border-top: 1px dashed #000;
+    border-bottom: 1px dashed #000;
+  }
+
+  .recibo-table th, .recibo-table td {
+    padding: 3px 1px; /* Espaçamento interno das células */
+    vertical-align: top; /* Alinha texto no topo se quebrar linha */
+  }
+
+  /* Alinhamentos específicos das colunas */
+  .recibo-table th:first-child, .recibo-table td:first-child {
+    text-align: left;
+  }
+
+  /* Descrição */
+  .recibo-table th:nth-child(2), .recibo-table td:nth-child(2) {
+    text-align: center;
+  }
+
+  /* Qtd */
+  .recibo-table th:nth-child(3), .recibo-table td:nth-child(3) {
+    text-align: right;
+  }
+
+  /* Vl. Unit */
+  .recibo-table th:last-child, .recibo-table td:last-child {
+    text-align: right;
+  }
+
+  /* Total */
+  /* Estilos dos totais */
+  .recibo-totais {
+    margin-top: 10px;
+  }
+
+  .total-linha {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9pt;
+    margin: 2px 0;
+  }
+
+  .total-linha span {
+    font-weight: normal;
+  }
+
+  .total-linha strong, .total-linha span:last-child {
+    font-weight: bold;
+  }
+
+  /* Garante que elementos escondidos fiquem escondidos */
+  .hidden {
+    display: none !important;
+  }
+}

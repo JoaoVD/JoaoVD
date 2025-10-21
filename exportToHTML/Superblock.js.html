@@ -1,0 +1,1497 @@
+<html>
+<head>
+  <title>Superblock.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          Superblock.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">Superblock </span><span
+    class="s1">= </span><span class="s3">void </span><span class="s4">0</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s2">path_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../vendor/node/path&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">Node_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./Node&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">Link_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./Link&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">File_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./File&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">buffer_1 </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;../vendor/node/internal/buffer&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">process_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../process&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">constants_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../constants&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">constants_2 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../node/constants&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">util_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../node/util&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">util_2 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./util&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">json_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./json&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">pathSep </span><span class="s1">= </span><span
+    class="s2">path_1</span><span class="s1">.</span><span class="s2">posix </span><span class="s1">? </span><span
+    class="s2">path_1</span><span class="s1">.</span><span class="s2">posix</span><span class="s1">.</span><span
+    class="s2">sep </span><span class="s1">: </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">sep</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s2">pathRelative </span><span class="s1">= </span><span
+    class="s2">path_1</span><span class="s1">.</span><span class="s2">posix </span><span class="s1">? </span><span
+    class="s2">path_1</span><span class="s1">.</span><span class="s2">posix</span><span class="s1">.</span><span
+    class="s2">relative </span><span class="s1">: </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">relative</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s2">pathJoin </span><span class="s1">= </span><span
+    class="s2">path_1</span><span class="s1">.</span><span class="s2">posix </span><span class="s1">? </span><span
+    class="s2">path_1</span><span class="s1">.</span><span class="s2">posix</span><span class="s1">.</span><span
+    class="s2">join </span><span class="s1">: </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">join</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s1">{ </span><span class="s2">O_RDONLY</span><span class="s1">, </span><span
+    class="s2">O_WRONLY</span><span class="s1">, </span><span class="s2">O_RDWR</span><span class="s1">, </span><span
+    class="s2">O_CREAT</span><span class="s1">, </span><span class="s2">O_EXCL</span><span class="s1">, </span><span
+    class="s2">O_TRUNC</span><span class="s1">, </span><span class="s2">O_APPEND</span><span class="s1">, </span><span
+    class="s2">O_DIRECTORY </span><span class="s1">} = </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">constants</span><span class="s1">;</span>
+<span class="s5">/**</span>
+ <span class="s5">* Represents a filesystem superblock, which is the root of a virtual</span>
+ <span class="s5">* filesystem in Linux.</span>
+ <span class="s5">* </span><span class="s6">@see </span><span class="s5">https://lxr.linux.no/linux+v3.11.2/include/linux/fs.h#L1242</span>
+ <span class="s5">*/</span>
+<span class="s3">class </span><span class="s2">Superblock </span><span class="s1">{</span>
+    <span class="s3">static </span><span class="s2">fromJSON</span><span class="s1">(</span><span class="s2">json</span><span
+    class="s1">, </span><span class="s2">cwd</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">vol </span><span class="s1">= </span><span class="s3">new </span><span
+    class="s2">Superblock</span><span class="s1">();</span>
+        <span class="s2">vol</span><span class="s1">.</span><span class="s2">fromJSON</span><span
+    class="s1">(</span><span class="s2">json</span><span class="s1">, </span><span class="s2">cwd</span><span
+    class="s1">);</span>
+        <span class="s3">return </span><span class="s2">vol</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s3">static </span><span class="s2">fromNestedJSON</span><span class="s1">(</span><span
+    class="s2">json</span><span class="s1">, </span><span class="s2">cwd</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">vol </span><span class="s1">= </span><span class="s3">new </span><span
+    class="s2">Superblock</span><span class="s1">();</span>
+        <span class="s2">vol</span><span class="s1">.</span><span class="s2">fromNestedJSON</span><span
+    class="s1">(</span><span class="s2">json</span><span class="s1">, </span><span class="s2">cwd</span><span
+    class="s1">);</span>
+        <span class="s3">return </span><span class="s2">vol</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">constructor</span><span class="s1">(</span><span class="s2">props </span><span
+    class="s1">= {}) {</span>
+        <span class="s7">// I-node number counter.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">ino </span><span class="s1">= </span><span
+    class="s4">0</span><span class="s1">;</span>
+        <span class="s7">// A mapping for i-node numbers to i-nodes (`Node`);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">inodes </span><span
+    class="s1">= {};</span>
+        <span class="s7">// List of released i-node numbers, for reuse.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">releasedInos </span><span
+    class="s1">= [];</span>
+        <span class="s7">// A mapping for file descriptors to `File`s.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">fds </span><span class="s1">= {};</span>
+        <span class="s7">// A list of reusable (opened and closed) file descriptors, that should be</span>
+        <span class="s7">// used first before creating a new file descriptor.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">releasedFds </span><span
+    class="s1">= [];</span>
+        <span class="s7">// Max number of open files.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">maxFiles </span><span class="s1">= </span><span
+    class="s4">10000</span><span class="s1">;</span>
+        <span class="s7">// Current number of open files.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">openFiles </span><span
+    class="s1">= </span><span class="s4">0</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">open </span><span
+    class="s1">= (</span><span class="s2">filename</span><span class="s1">, </span><span class="s2">flagsNum</span><span
+    class="s1">, </span><span class="s2">modeNum</span><span class="s1">, </span><span
+    class="s2">resolveSymlinks </span><span class="s1">= </span><span class="s3">true</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">file </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">openFile</span><span class="s1">(</span><span
+    class="s2">filename</span><span class="s1">, </span><span class="s2">flagsNum</span><span class="s1">, </span><span
+    class="s2">modeNum</span><span class="s1">, </span><span class="s2">resolveSymlinks</span><span class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">file</span><span class="s1">)</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOENT&quot; </span><span class="s7">/* ERROR_CODE.ENOENT */</span><span
+    class="s1">, </span><span class="s0">'open'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s3">return </span><span class="s2">file</span><span class="s1">.</span><span
+    class="s2">fd</span><span class="s1">;</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">writeFile </span><span
+    class="s1">= (</span><span class="s2">id</span><span class="s1">, </span><span class="s2">buf</span><span
+    class="s1">, </span><span class="s2">flagsNum</span><span class="s1">, </span><span class="s2">modeNum</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">isUserFd </span><span class="s1">= </span><span class="s3">typeof </span><span
+    class="s2">id </span><span class="s1">=== </span><span class="s0">'number'</span><span class="s1">;</span>
+            <span class="s3">let </span><span class="s2">fd</span><span class="s1">;</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">isUserFd</span><span
+    class="s1">)</span>
+                <span class="s2">fd </span><span class="s1">= </span><span class="s2">id</span><span class="s1">;</span>
+            <span class="s3">else</span>
+                <span class="s2">fd </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">open</span><span class="s1">((</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">pathToFilename</span><span class="s1">)(</span><span class="s2">id</span><span class="s1">), </span><span
+    class="s2">flagsNum</span><span class="s1">, </span><span class="s2">modeNum</span><span class="s1">);</span>
+            <span class="s3">let </span><span class="s2">offset </span><span class="s1">= </span><span
+    class="s4">0</span><span class="s1">;</span>
+            <span class="s3">let </span><span class="s2">length </span><span class="s1">= </span><span
+    class="s2">buf</span><span class="s1">.</span><span class="s2">length</span><span class="s1">;</span>
+            <span class="s3">let </span><span class="s2">position </span><span class="s1">= </span><span class="s2">flagsNum </span><span
+    class="s1">&amp; </span><span class="s2">O_APPEND </span><span class="s1">? </span><span
+    class="s2">undefined </span><span class="s1">: </span><span class="s4">0</span><span class="s1">;</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s3">while </span><span class="s1">(</span><span class="s2">length </span><span class="s1">&gt; </span><span
+    class="s4">0</span><span class="s1">) {</span>
+                    <span class="s3">const </span><span class="s2">written </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">write</span><span class="s1">(</span><span
+    class="s2">fd</span><span class="s1">, </span><span class="s2">buf</span><span class="s1">, </span><span class="s2">offset</span><span
+    class="s1">, </span><span class="s2">length</span><span class="s1">, </span><span class="s2">position</span><span
+    class="s1">);</span>
+                    <span class="s2">offset </span><span class="s1">+= </span><span class="s2">written</span><span
+    class="s1">;</span>
+                    <span class="s2">length </span><span class="s1">-= </span><span class="s2">written</span><span
+    class="s1">;</span>
+                    <span class="s3">if </span><span class="s1">(</span><span class="s2">position </span><span
+    class="s1">!== </span><span class="s2">undefined</span><span class="s1">)</span>
+                        <span class="s2">position </span><span class="s1">+= </span><span class="s2">written</span><span
+    class="s1">;</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s3">finally </span><span class="s1">{</span>
+                <span class="s3">if </span><span class="s1">(!</span><span class="s2">isUserFd</span><span
+    class="s1">)</span>
+                    <span class="s3">this</span><span class="s1">.</span><span class="s2">close</span><span
+    class="s1">(</span><span class="s2">fd</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">read </span><span
+    class="s1">= (</span><span class="s2">fd</span><span class="s1">, </span><span class="s2">buffer</span><span
+    class="s1">, </span><span class="s2">offset</span><span class="s1">, </span><span class="s2">length</span><span
+    class="s1">, </span><span class="s2">position</span><span class="s1">) =&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">buffer</span><span
+    class="s1">.</span><span class="s2">byteLength </span><span class="s1">&lt; </span><span
+    class="s2">length</span><span class="s1">) {</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ERR_OUT_OF_RANGE&quot; </span><span class="s7">/* ERROR_CODE.ERR_OUT_OF_RANGE */</span><span
+    class="s1">, </span><span class="s0">'read'</span><span class="s1">, </span><span class="s2">undefined</span><span
+    class="s1">, </span><span class="s2">undefined</span><span class="s1">, </span><span
+    class="s2">RangeError</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">const </span><span class="s2">file </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getFileByFdOrThrow</span><span
+    class="s1">(</span><span class="s2">fd</span><span class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">file</span><span
+    class="s1">.</span><span class="s2">node</span><span class="s1">.</span><span class="s2">isSymlink</span><span
+    class="s1">()) {</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EPERM&quot; </span><span class="s7">/* ERROR_CODE.EPERM */</span><span
+    class="s1">, </span><span class="s0">'read'</span><span class="s1">, </span><span class="s2">file</span><span
+    class="s1">.</span><span class="s2">link</span><span class="s1">.</span><span class="s2">getPath</span><span
+    class="s1">());</span>
+            <span class="s1">}</span>
+            <span class="s3">return </span><span class="s2">file</span><span class="s1">.</span><span
+    class="s2">read</span><span class="s1">(</span><span class="s2">buffer</span><span class="s1">, </span><span
+    class="s2">Number</span><span class="s1">(</span><span class="s2">offset</span><span class="s1">), </span><span
+    class="s2">Number</span><span class="s1">(</span><span class="s2">length</span><span class="s1">), </span><span
+    class="s2">position </span><span class="s1">=== -</span><span class="s4">1 </span><span class="s1">|| </span><span
+    class="s3">typeof </span><span class="s2">position </span><span class="s1">!== </span><span
+    class="s0">'number' </span><span class="s1">? </span><span class="s2">undefined </span><span
+    class="s1">: </span><span class="s2">position</span><span class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">readv </span><span
+    class="s1">= (</span><span class="s2">fd</span><span class="s1">, </span><span class="s2">buffers</span><span
+    class="s1">, </span><span class="s2">position</span><span class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">file </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getFileByFdOrThrow</span><span
+    class="s1">(</span><span class="s2">fd</span><span class="s1">);</span>
+            <span class="s3">let </span><span class="s2">p </span><span class="s1">= </span><span
+    class="s2">position </span><span class="s1">?? </span><span class="s2">undefined</span><span class="s1">;</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">p </span><span
+    class="s1">=== -</span><span class="s4">1</span><span class="s1">)</span>
+                <span class="s2">p </span><span class="s1">= </span><span class="s2">undefined</span><span
+    class="s1">;</span>
+            <span class="s3">let </span><span class="s2">bytesRead </span><span class="s1">= </span><span
+    class="s4">0</span><span class="s1">;</span>
+            <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span class="s2">buffer of buffers</span><span
+    class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">bytes </span><span class="s1">= </span><span class="s2">file</span><span
+    class="s1">.</span><span class="s2">read</span><span class="s1">(</span><span class="s2">buffer</span><span
+    class="s1">, </span><span class="s4">0</span><span class="s1">, </span><span class="s2">buffer</span><span
+    class="s1">.</span><span class="s2">byteLength</span><span class="s1">, </span><span class="s2">p</span><span
+    class="s1">);</span>
+                <span class="s2">p </span><span class="s1">= </span><span class="s2">undefined</span><span
+    class="s1">;</span>
+                <span class="s2">bytesRead </span><span class="s1">+= </span><span class="s2">bytes</span><span
+    class="s1">;</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">bytes </span><span
+    class="s1">&lt; </span><span class="s2">buffer</span><span class="s1">.</span><span
+    class="s2">byteLength</span><span class="s1">)</span>
+                    <span class="s3">break</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s3">return </span><span class="s2">bytesRead</span><span class="s1">;</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">link </span><span
+    class="s1">= (</span><span class="s2">filename1</span><span class="s1">, </span><span
+    class="s2">filename2</span><span class="s1">) =&gt; {</span>
+            <span class="s3">let </span><span class="s2">link1</span><span class="s1">;</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s2">link1 </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getLinkOrThrow</span><span class="s1">(</span><span
+    class="s2">filename1</span><span class="s1">, </span><span class="s0">'link'</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span class="s1">.</span><span
+    class="s2">code</span><span class="s1">)</span>
+                    <span class="s2">err </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s2">err</span><span class="s1">.</span><span class="s2">code</span><span
+    class="s1">, </span><span class="s0">'link'</span><span class="s1">, </span><span class="s2">filename1</span><span
+    class="s1">, </span><span class="s2">filename2</span><span class="s1">);</span>
+                <span class="s3">throw </span><span class="s2">err</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s3">const </span><span class="s2">dirname2 </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">dirname</span><span class="s1">)(</span><span class="s2">filename2</span><span class="s1">);</span>
+            <span class="s3">let </span><span class="s2">dir2</span><span class="s1">;</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s2">dir2 </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getLinkOrThrow</span><span class="s1">(</span><span
+    class="s2">dirname2</span><span class="s1">, </span><span class="s0">'link'</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s7">// Augment error with filename1</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span class="s1">.</span><span
+    class="s2">code</span><span class="s1">)</span>
+                    <span class="s2">err </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s2">err</span><span class="s1">.</span><span class="s2">code</span><span
+    class="s1">, </span><span class="s0">'link'</span><span class="s1">, </span><span class="s2">filename1</span><span
+    class="s1">, </span><span class="s2">filename2</span><span class="s1">);</span>
+                <span class="s3">throw </span><span class="s2">err</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s3">const </span><span class="s2">name </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">basename</span><span class="s1">)(</span><span class="s2">filename2</span><span class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">dir2</span><span
+    class="s1">.</span><span class="s2">getChild</span><span class="s1">(</span><span class="s2">name</span><span
+    class="s1">))</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EEXIST&quot; </span><span class="s7">/* ERROR_CODE.EEXIST */</span><span
+    class="s1">, </span><span class="s0">'link'</span><span class="s1">, </span><span class="s2">filename1</span><span
+    class="s1">, </span><span class="s2">filename2</span><span class="s1">);</span>
+            <span class="s3">const </span><span class="s2">node </span><span class="s1">= </span><span
+    class="s2">link1</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s2">node</span><span class="s1">.</span><span class="s2">nlink</span><span
+    class="s1">++;</span>
+            <span class="s2">dir2</span><span class="s1">.</span><span class="s2">createChild</span><span
+    class="s1">(</span><span class="s2">name</span><span class="s1">, </span><span class="s2">node</span><span
+    class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">unlink </span><span
+    class="s1">= (</span><span class="s2">filename</span><span class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">link </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getLinkOrThrow</span><span class="s1">(</span><span
+    class="s2">filename</span><span class="s1">, </span><span class="s0">'unlink'</span><span class="s1">);</span>
+            <span class="s7">// TODO: Check if it is file, dir, other...</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">length</span><span class="s1">)</span>
+                <span class="s3">throw </span><span class="s2">Error</span><span class="s1">(</span><span class="s0">'Dir not empty...'</span><span
+    class="s1">);</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">deleteLink</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">);</span>
+            <span class="s3">const </span><span class="s2">node </span><span class="s1">= </span><span
+    class="s2">link</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s2">node</span><span class="s1">.</span><span class="s2">nlink</span><span
+    class="s1">--;</span>
+            <span class="s7">// When all hard links to i-node are deleted, remove the i-node, too.</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">nlink </span><span class="s1">&lt;= </span><span class="s4">0</span><span
+    class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">deleteNode</span><span class="s1">(</span><span
+    class="s2">node</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">symlink </span><span class="s1">= (</span><span
+    class="s2">targetFilename</span><span class="s1">, </span><span class="s2">pathFilename</span><span class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">pathSteps </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_2</span><span class="s1">.</span><span
+    class="s2">filenameToSteps</span><span class="s1">)(</span><span class="s2">pathFilename</span><span
+    class="s1">);</span>
+            <span class="s7">// Check if directory exists, where we about to create a symlink.</span>
+            <span class="s3">let </span><span class="s2">dirLink</span><span class="s1">;</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s2">dirLink </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getLinkParentAsDirOrThrow</span><span class="s1">(</span><span class="s2">pathSteps</span><span
+    class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s7">// Catch error to populate with the correct fields - getLinkParentAsDirOrThrow won't be aware of the second path</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span class="s1">.</span><span
+    class="s2">code</span><span class="s1">)</span>
+                    <span class="s2">err </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s2">err</span><span class="s1">.</span><span class="s2">code</span><span
+    class="s1">, </span><span class="s0">'symlink'</span><span class="s1">, </span><span
+    class="s2">targetFilename</span><span class="s1">, </span><span class="s2">pathFilename</span><span
+    class="s1">);</span>
+                <span class="s3">throw </span><span class="s2">err</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s3">const </span><span class="s2">name </span><span class="s1">= </span><span class="s2">pathSteps</span><span
+    class="s1">[</span><span class="s2">pathSteps</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">- </span><span class="s4">1</span><span class="s1">];</span>
+            <span class="s7">// Check if new file already exists.</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">dirLink</span><span class="s1">.</span><span
+    class="s2">getChild</span><span class="s1">(</span><span class="s2">name</span><span class="s1">))</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EEXIST&quot; </span><span class="s7">/* ERROR_CODE.EEXIST */</span><span
+    class="s1">, </span><span class="s0">'symlink'</span><span class="s1">, </span><span
+    class="s2">targetFilename</span><span class="s1">, </span><span class="s2">pathFilename</span><span
+    class="s1">);</span>
+            <span class="s7">// Check permissions on the path where we are creating the symlink.</span>
+            <span class="s7">// Note we're not checking permissions on the target path: It is not an error to create a symlink to a</span>
+            <span class="s7">// non-existent or inaccessible target</span>
+            <span class="s3">const </span><span class="s2">node </span><span class="s1">= </span><span class="s2">dirLink</span><span
+    class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">canExecute</span><span class="s1">() || !</span><span
+    class="s2">node</span><span class="s1">.</span><span class="s2">canWrite</span><span class="s1">())</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s0">'symlink'</span><span class="s1">, </span><span
+    class="s2">targetFilename</span><span class="s1">, </span><span class="s2">pathFilename</span><span
+    class="s1">);</span>
+            <span class="s7">// Create symlink.</span>
+            <span class="s3">const </span><span class="s2">symlink </span><span class="s1">= </span><span class="s2">dirLink</span><span
+    class="s1">.</span><span class="s2">createChild</span><span class="s1">(</span><span class="s2">name</span><span
+    class="s1">);</span>
+            <span class="s2">symlink</span><span class="s1">.</span><span class="s2">getNode</span><span
+    class="s1">().</span><span class="s2">makeSymlink</span><span class="s1">(</span><span
+    class="s2">targetFilename</span><span class="s1">);</span>
+            <span class="s3">return </span><span class="s2">symlink</span><span class="s1">;</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">rename </span><span
+    class="s1">= (</span><span class="s2">oldPathFilename</span><span class="s1">, </span><span class="s2">newPathFilename</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s3">let </span><span class="s2">link</span><span class="s1">;</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s2">link </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getResolvedLinkOrThrow</span><span class="s1">(</span><span class="s2">oldPathFilename</span><span
+    class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s7">// Augment err with newPathFilename</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span class="s1">.</span><span
+    class="s2">code</span><span class="s1">)</span>
+                    <span class="s2">err </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s2">err</span><span class="s1">.</span><span class="s2">code</span><span
+    class="s1">, </span><span class="s0">'rename'</span><span class="s1">, </span><span
+    class="s2">oldPathFilename</span><span class="s1">, </span><span class="s2">newPathFilename</span><span class="s1">);</span>
+                <span class="s3">throw </span><span class="s2">err</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s7">// TODO: Check if it is directory, if non-empty, we cannot move it, right?</span>
+            <span class="s7">// Check directory exists for the new location.</span>
+            <span class="s3">let </span><span class="s2">newPathDirLink</span><span class="s1">;</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s2">newPathDirLink </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getLinkParentAsDirOrThrow</span><span class="s1">(</span><span class="s2">newPathFilename</span><span
+    class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s7">// Augment error with oldPathFilename</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span class="s1">.</span><span
+    class="s2">code</span><span class="s1">)</span>
+                    <span class="s2">err </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s2">err</span><span class="s1">.</span><span class="s2">code</span><span
+    class="s1">, </span><span class="s0">'rename'</span><span class="s1">, </span><span
+    class="s2">oldPathFilename</span><span class="s1">, </span><span class="s2">newPathFilename</span><span class="s1">);</span>
+                <span class="s3">throw </span><span class="s2">err</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s7">// TODO: Also treat cases with directories and symbolic links.</span>
+            <span class="s7">// TODO: See: http://man7.org/linux/man-pages/man2/rename.2.html</span>
+            <span class="s7">// Remove hard link from old folder.</span>
+            <span class="s3">const </span><span class="s2">oldLinkParent </span><span class="s1">= </span><span
+    class="s2">link</span><span class="s1">.</span><span class="s2">parent</span><span class="s1">;</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">oldLinkParent</span><span
+    class="s1">)</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EINVAL&quot; </span><span class="s7">/* ERROR_CODE.EINVAL */</span><span
+    class="s1">, </span><span class="s0">'rename'</span><span class="s1">, </span><span
+    class="s2">oldPathFilename</span><span class="s1">, </span><span class="s2">newPathFilename</span><span class="s1">);</span>
+            <span class="s7">// Check we have access and write permissions in both places</span>
+            <span class="s3">const </span><span class="s2">oldParentNode </span><span class="s1">= </span><span
+    class="s2">oldLinkParent</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s3">const </span><span class="s2">newPathDirNode </span><span class="s1">= </span><span
+    class="s2">newPathDirLink</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">oldParentNode</span><span
+    class="s1">.</span><span class="s2">canExecute</span><span class="s1">() ||</span>
+                <span class="s1">!</span><span class="s2">oldParentNode</span><span class="s1">.</span><span class="s2">canWrite</span><span
+    class="s1">() ||</span>
+                <span class="s1">!</span><span class="s2">newPathDirNode</span><span class="s1">.</span><span
+    class="s2">canExecute</span><span class="s1">() ||</span>
+                <span class="s1">!</span><span class="s2">newPathDirNode</span><span class="s1">.</span><span
+    class="s2">canWrite</span><span class="s1">()) {</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s0">'rename'</span><span class="s1">, </span><span
+    class="s2">oldPathFilename</span><span class="s1">, </span><span class="s2">newPathFilename</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s2">oldLinkParent</span><span class="s1">.</span><span class="s2">deleteChild</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">);</span>
+            <span class="s7">// Rename should overwrite the new path, if that exists.</span>
+            <span class="s3">const </span><span class="s2">name </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">basename</span><span class="s1">)(</span><span class="s2">newPathFilename</span><span
+    class="s1">);</span>
+            <span class="s2">link</span><span class="s1">.</span><span class="s2">name </span><span class="s1">= </span><span
+    class="s2">name</span><span class="s1">;</span>
+            <span class="s2">link</span><span class="s1">.</span><span class="s2">steps </span><span
+    class="s1">= [</span><span class="s2">...newPathDirLink</span><span class="s1">.</span><span class="s2">steps</span><span
+    class="s1">, </span><span class="s2">name</span><span class="s1">];</span>
+            <span class="s2">newPathDirLink</span><span class="s1">.</span><span class="s2">setChild</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">.</span><span class="s2">getName</span><span
+    class="s1">(), </span><span class="s2">link</span><span class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">mkdir </span><span
+    class="s1">= (</span><span class="s2">filename</span><span class="s1">, </span><span class="s2">modeNum</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">steps </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_2</span><span class="s1">.</span><span
+    class="s2">filenameToSteps</span><span class="s1">)(</span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s7">// This will throw if user tries to create root dir `fs.mkdirSync('/')`.</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">steps</span><span
+    class="s1">.</span><span class="s2">length</span><span class="s1">)</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EEXIST&quot; </span><span class="s7">/* ERROR_CODE.EEXIST */</span><span
+    class="s1">, </span><span class="s0">'mkdir'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s3">const </span><span class="s2">dir </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getLinkParentAsDirOrThrow</span><span
+    class="s1">(</span><span class="s2">filename</span><span class="s1">, </span><span class="s0">'mkdir'</span><span
+    class="s1">);</span>
+            <span class="s7">// Check path already exists.</span>
+            <span class="s3">const </span><span class="s2">name </span><span class="s1">= </span><span
+    class="s2">steps</span><span class="s1">[</span><span class="s2">steps</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">- </span><span class="s4">1</span><span class="s1">];</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">dir</span><span
+    class="s1">.</span><span class="s2">getChild</span><span class="s1">(</span><span class="s2">name</span><span
+    class="s1">))</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EEXIST&quot; </span><span class="s7">/* ERROR_CODE.EEXIST */</span><span
+    class="s1">, </span><span class="s0">'mkdir'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s3">const </span><span class="s2">node </span><span class="s1">= </span><span
+    class="s2">dir</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">canWrite</span><span class="s1">() || !</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">canExecute</span><span class="s1">())</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s0">'mkdir'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s2">dir</span><span class="s1">.</span><span class="s2">createChild</span><span
+    class="s1">(</span><span class="s2">name</span><span class="s1">, </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">createNode</span><span class="s1">(</span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">constants</span><span
+    class="s1">.</span><span class="s2">S_IFDIR </span><span class="s1">| </span><span class="s2">modeNum</span><span
+    class="s1">));</span>
+        <span class="s1">};</span>
+        <span class="s5">/**</span>
+         <span class="s5">* Creates directory tree recursively.</span>
+         <span class="s5">*/</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">mkdirp </span><span
+    class="s1">= (</span><span class="s2">filename</span><span class="s1">, </span><span class="s2">modeNum</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s3">let </span><span class="s2">created </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">;</span>
+            <span class="s3">const </span><span class="s2">steps </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_2</span><span class="s1">.</span><span
+    class="s2">filenameToSteps</span><span class="s1">)(</span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s3">let </span><span class="s2">curr </span><span class="s1">= </span><span
+    class="s3">null</span><span class="s1">;</span>
+            <span class="s3">let </span><span class="s2">i </span><span class="s1">= </span><span
+    class="s2">steps</span><span class="s1">.</span><span class="s2">length</span><span class="s1">;</span>
+            <span class="s7">// Find the longest subpath of filename that still exists:</span>
+            <span class="s3">for </span><span class="s1">(</span><span class="s2">i </span><span
+    class="s1">= </span><span class="s2">steps</span><span class="s1">.</span><span class="s2">length</span><span
+    class="s1">; </span><span class="s2">i </span><span class="s1">&gt;= </span><span class="s4">0</span><span
+    class="s1">; </span><span class="s2">i</span><span class="s1">--) {</span>
+                <span class="s2">curr </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getResolvedLink</span><span class="s1">(</span><span
+    class="s2">steps</span><span class="s1">.</span><span class="s2">slice</span><span class="s1">(</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">i</span><span class="s1">));</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">curr</span><span
+    class="s1">)</span>
+                    <span class="s3">break</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">curr</span><span class="s1">) {</span>
+                <span class="s2">curr </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">root</span><span class="s1">;</span>
+                <span class="s2">i </span><span class="s1">= </span><span class="s4">0</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s7">// curr is now the last directory that still exists.</span>
+            <span class="s7">// (If none of them existed, curr is the root.)</span>
+            <span class="s7">// Check access the lazy way:</span>
+            <span class="s2">curr </span><span class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">getResolvedLinkOrThrow</span><span class="s1">(</span><span class="s2">path_1</span><span
+    class="s1">.</span><span class="s2">sep </span><span class="s1">+ </span><span class="s2">steps</span><span
+    class="s1">.</span><span class="s2">slice</span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">i</span><span class="s1">).</span><span class="s2">join</span><span class="s1">(</span><span
+    class="s2">path_1</span><span class="s1">.</span><span class="s2">sep</span><span class="s1">), </span><span
+    class="s0">'mkdir'</span><span class="s1">);</span>
+            <span class="s7">// Start creating directories:</span>
+            <span class="s3">for </span><span class="s1">(</span><span class="s2">i</span><span
+    class="s1">; </span><span class="s2">i </span><span class="s1">&lt; </span><span class="s2">steps</span><span
+    class="s1">.</span><span class="s2">length</span><span class="s1">; </span><span class="s2">i</span><span
+    class="s1">++) {</span>
+                <span class="s3">const </span><span class="s2">node </span><span class="s1">= </span><span class="s2">curr</span><span
+    class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">isDirectory</span><span class="s1">()) {</span>
+                    <span class="s7">// Check we have permissions</span>
+                    <span class="s3">if </span><span class="s1">(!</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">canExecute</span><span class="s1">() || !</span><span
+    class="s2">node</span><span class="s1">.</span><span class="s2">canWrite</span><span class="s1">())</span>
+                        <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s0">'mkdir'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOTDIR&quot; </span><span
+    class="s7">/* ERROR_CODE.ENOTDIR */</span><span class="s1">, </span><span class="s0">'mkdir'</span><span class="s1">, </span><span
+    class="s2">filename</span><span class="s1">);</span>
+                <span class="s1">}</span>
+                <span class="s2">created </span><span class="s1">= </span><span class="s3">true</span><span
+    class="s1">;</span>
+                <span class="s2">curr </span><span class="s1">= </span><span class="s2">curr</span><span
+    class="s1">.</span><span class="s2">createChild</span><span class="s1">(</span><span class="s2">steps</span><span
+    class="s1">[</span><span class="s2">i</span><span class="s1">], </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">createNode</span><span class="s1">(</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">constants</span><span class="s1">.</span><span class="s2">S_IFDIR </span><span
+    class="s1">| </span><span class="s2">modeNum</span><span class="s1">));</span>
+            <span class="s1">}</span>
+            <span class="s3">return </span><span class="s2">created </span><span class="s1">? </span><span class="s2">filename </span><span
+    class="s1">: </span><span class="s2">undefined</span><span class="s1">;</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">rmdir </span><span
+    class="s1">= (</span><span class="s2">filename</span><span class="s1">, </span><span
+    class="s2">recursive </span><span class="s1">= </span><span class="s3">false</span><span class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">link </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getLinkAsDirOrThrow</span><span
+    class="s1">(</span><span class="s2">filename</span><span class="s1">, </span><span class="s0">'rmdir'</span><span
+    class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">length </span><span class="s1">&amp;&amp; !</span><span
+    class="s2">recursive</span><span class="s1">)</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOTEMPTY&quot; </span><span class="s7">/* ERROR_CODE.ENOTEMPTY */</span><span
+    class="s1">, </span><span class="s0">'rmdir'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">deleteLink</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">rm </span><span class="s1">= (</span><span
+    class="s2">filename</span><span class="s1">, </span><span class="s2">force </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">, </span><span class="s2">recursive </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">) =&gt; {</span>
+            <span class="s7">// &quot;stat&quot; is used to match Node's native error message.</span>
+            <span class="s3">let </span><span class="s2">link</span><span class="s1">;</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s2">link </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getResolvedLinkOrThrow</span><span class="s1">(</span><span
+    class="s2">filename</span><span class="s1">, </span><span class="s0">'stat'</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s7">// Silently ignore missing paths if force option is true</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span class="s1">.</span><span
+    class="s2">code </span><span class="s1">=== </span><span class="s0">&quot;ENOENT&quot; </span><span class="s7">/* ERROR_CODE.ENOENT */ </span><span
+    class="s1">&amp;&amp; </span><span class="s2">force</span><span class="s1">)</span>
+                    <span class="s3">return</span><span class="s1">;</span>
+                <span class="s3">else</span>
+                    <span class="s3">throw </span><span class="s2">err</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">getNode</span><span class="s1">().</span><span
+    class="s2">isDirectory</span><span class="s1">() &amp;&amp; !</span><span class="s2">recursive</span><span
+    class="s1">)</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ERR_FS_EISDIR&quot; </span><span class="s7">/* ERROR_CODE.ERR_FS_EISDIR */</span><span
+    class="s1">, </span><span class="s0">'rm'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">parent</span><span class="s1">?.</span><span class="s2">getNode</span><span
+    class="s1">().</span><span class="s2">canWrite</span><span class="s1">())</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s0">'rm'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">deleteLink</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">close </span><span
+    class="s1">= (</span><span class="s2">fd</span><span class="s1">) =&gt; {</span>
+            <span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">util_2</span><span class="s1">.</span><span class="s2">validateFd</span><span class="s1">)(</span><span
+    class="s2">fd</span><span class="s1">);</span>
+            <span class="s3">const </span><span class="s2">file </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getFileByFdOrThrow</span><span
+    class="s1">(</span><span class="s2">fd</span><span class="s1">, </span><span class="s0">'close'</span><span
+    class="s1">);</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeFile</span><span
+    class="s1">(</span><span class="s2">file</span><span class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">const </span><span class="s2">root </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">createLink</span><span class="s1">();</span>
+        <span class="s2">root</span><span class="s1">.</span><span class="s2">setNode</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">createNode</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">constants</span><span class="s1">.</span><span class="s2">S_IFDIR </span><span class="s1">| </span><span
+    class="s4">0o777</span><span class="s1">));</span>
+        <span class="s2">root</span><span class="s1">.</span><span class="s2">setChild</span><span
+    class="s1">(</span><span class="s0">'.'</span><span class="s1">, </span><span class="s2">root</span><span
+    class="s1">);</span>
+        <span class="s2">root</span><span class="s1">.</span><span class="s2">getNode</span><span
+    class="s1">().</span><span class="s2">nlink</span><span class="s1">++;</span>
+        <span class="s2">root</span><span class="s1">.</span><span class="s2">setChild</span><span
+    class="s1">(</span><span class="s0">'..'</span><span class="s1">, </span><span class="s2">root</span><span
+    class="s1">);</span>
+        <span class="s2">root</span><span class="s1">.</span><span class="s2">getNode</span><span
+    class="s1">().</span><span class="s2">nlink</span><span class="s1">++;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">root </span><span
+    class="s1">= </span><span class="s2">root</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">createLink</span><span class="s1">(</span><span class="s2">parent</span><span
+    class="s1">, </span><span class="s2">name</span><span class="s1">, </span><span class="s2">isDirectory </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">, </span><span class="s2">mode</span><span
+    class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">parent</span><span class="s1">) {</span>
+            <span class="s3">return new </span><span class="s2">Link_1</span><span class="s1">.</span><span class="s2">Link</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">, </span><span class="s3">void </span><span
+    class="s4">0</span><span class="s1">, </span><span class="s0">''</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">name</span><span class="s1">) {</span>
+            <span class="s3">throw new </span><span class="s2">Error</span><span class="s1">(</span><span class="s0">'createLink: name cannot be empty'</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s7">// If no explicit permission is provided, use defaults based on type</span>
+        <span class="s3">const </span><span class="s2">finalPerm </span><span class="s1">= </span><span
+    class="s2">mode </span><span class="s1">?? (</span><span class="s2">isDirectory </span><span
+    class="s1">? </span><span class="s4">0o777 </span><span class="s1">: </span><span class="s4">0o666</span><span
+    class="s1">);</span>
+        <span class="s7">// To prevent making a breaking change, `mode` can also just be a permission number</span>
+        <span class="s7">// and the file type is set based on `isDirectory`</span>
+        <span class="s3">const </span><span class="s2">hasFileType </span><span class="s1">= </span><span class="s2">mode </span><span
+    class="s1">&amp;&amp; </span><span class="s2">mode </span><span class="s1">&amp; </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">constants</span><span
+    class="s1">.</span><span class="s2">S_IFMT</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">modeType </span><span class="s1">= </span><span class="s2">hasFileType </span><span
+    class="s1">? </span><span class="s2">mode </span><span class="s1">&amp; </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">constants</span><span
+    class="s1">.</span><span class="s2">S_IFMT </span><span class="s1">: </span><span
+    class="s2">isDirectory </span><span class="s1">? </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">constants</span><span class="s1">.</span><span class="s2">S_IFDIR </span><span class="s1">: </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">constants</span><span
+    class="s1">.</span><span class="s2">S_IFREG</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">finalMode </span><span class="s1">= (</span><span class="s2">finalPerm </span><span
+    class="s1">&amp; ~</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">constants</span><span class="s1">.</span><span class="s2">S_IFMT</span><span class="s1">) | </span><span
+    class="s2">modeType</span><span class="s1">;</span>
+        <span class="s3">return </span><span class="s2">parent</span><span class="s1">.</span><span class="s2">createChild</span><span
+    class="s1">(</span><span class="s2">name</span><span class="s1">, </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">createNode</span><span class="s1">(</span><span class="s2">finalMode</span><span
+    class="s1">));</span>
+    <span class="s1">}</span>
+    <span class="s2">deleteLink</span><span class="s1">(</span><span class="s2">link</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">parent </span><span class="s1">= </span><span
+    class="s2">link</span><span class="s1">.</span><span class="s2">parent</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">parent</span><span class="s1">) {</span>
+            <span class="s2">parent</span><span class="s1">.</span><span class="s2">deleteChild</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">);</span>
+            <span class="s3">return true</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">return false</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">newInoNumber</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">releasedFd </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">releasedInos</span><span class="s1">.</span><span
+    class="s2">pop</span><span class="s1">();</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">releasedFd</span><span class="s1">)</span>
+            <span class="s3">return </span><span class="s2">releasedFd</span><span class="s1">;</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">ino </span><span class="s1">= (</span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">ino </span><span class="s1">+ </span><span
+    class="s4">1</span><span class="s1">) % </span><span class="s4">0xffffffff</span><span class="s1">;</span>
+            <span class="s3">return this</span><span class="s1">.</span><span class="s2">ino</span><span
+    class="s1">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">newFdNumber</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">releasedFd </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">releasedFds</span><span class="s1">.</span><span
+    class="s2">pop</span><span class="s1">();</span>
+        <span class="s3">return typeof </span><span class="s2">releasedFd </span><span class="s1">=== </span><span
+    class="s0">'number' </span><span class="s1">? </span><span class="s2">releasedFd </span><span
+    class="s1">: </span><span class="s2">Superblock</span><span class="s1">.</span><span class="s2">fd</span><span
+    class="s1">--;</span>
+    <span class="s1">}</span>
+    <span class="s2">createNode</span><span class="s1">(</span><span class="s2">mode</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">node </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">Node_1</span><span class="s1">.</span><span class="s2">Node</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">newInoNumber</span><span
+    class="s1">(), </span><span class="s2">mode</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">inodes</span><span
+    class="s1">[</span><span class="s2">node</span><span class="s1">.</span><span class="s2">ino</span><span class="s1">] = </span><span
+    class="s2">node</span><span class="s1">;</span>
+        <span class="s3">return </span><span class="s2">node</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">deleteNode</span><span class="s1">(</span><span class="s2">node</span><span class="s1">) {</span>
+        <span class="s2">node</span><span class="s1">.</span><span class="s2">del</span><span class="s1">();</span>
+        <span class="s3">delete this</span><span class="s1">.</span><span class="s2">inodes</span><span
+    class="s1">[</span><span class="s2">node</span><span class="s1">.</span><span class="s2">ino</span><span class="s1">];</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">releasedInos</span><span
+    class="s1">.</span><span class="s2">push</span><span class="s1">(</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">ino</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">walk</span><span class="s1">(</span><span class="s2">stepsOrFilenameOrLink</span><span
+    class="s1">, </span><span class="s2">resolveSymlinks </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">, </span><span class="s2">checkExistence </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">, </span><span class="s2">checkAccess </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">, </span><span class="s2">funcName</span><span
+    class="s1">) {</span>
+        <span class="s3">let </span><span class="s2">steps</span><span class="s1">;</span>
+        <span class="s3">let </span><span class="s2">filename</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">stepsOrFilenameOrLink </span><span
+    class="s3">instanceof </span><span class="s2">Link_1</span><span class="s1">.</span><span
+    class="s2">Link</span><span class="s1">) {</span>
+            <span class="s2">steps </span><span class="s1">= </span><span class="s2">stepsOrFilenameOrLink</span><span
+    class="s1">.</span><span class="s2">steps</span><span class="s1">;</span>
+            <span class="s2">filename </span><span class="s1">= </span><span class="s2">pathSep </span><span class="s1">+ </span><span
+    class="s2">steps</span><span class="s1">.</span><span class="s2">join</span><span class="s1">(</span><span
+    class="s2">pathSep</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">else if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">stepsOrFilenameOrLink </span><span
+    class="s1">=== </span><span class="s0">'string'</span><span class="s1">) {</span>
+            <span class="s2">steps </span><span class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">util_2</span><span class="s1">.</span><span class="s2">filenameToSteps</span><span
+    class="s1">)(</span><span class="s2">stepsOrFilenameOrLink</span><span class="s1">);</span>
+            <span class="s2">filename </span><span class="s1">= </span><span
+    class="s2">stepsOrFilenameOrLink</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s2">steps </span><span class="s1">= </span><span class="s2">stepsOrFilenameOrLink</span><span
+    class="s1">;</span>
+            <span class="s2">filename </span><span class="s1">= </span><span class="s2">pathSep </span><span class="s1">+ </span><span
+    class="s2">steps</span><span class="s1">.</span><span class="s2">join</span><span class="s1">(</span><span
+    class="s2">pathSep</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">let </span><span class="s2">curr </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">root</span><span class="s1">;</span>
+        <span class="s3">let </span><span class="s2">i </span><span class="s1">= </span><span class="s4">0</span><span
+    class="s1">;</span>
+        <span class="s3">while </span><span class="s1">(</span><span class="s2">i </span><span
+    class="s1">&lt; </span><span class="s2">steps</span><span class="s1">.</span><span class="s2">length</span><span
+    class="s1">) {</span>
+            <span class="s3">let </span><span class="s2">node </span><span class="s1">= </span><span
+    class="s2">curr</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s7">// Check access permissions if current link is a directory</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">isDirectory</span><span class="s1">()) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">checkAccess </span><span
+    class="s1">&amp;&amp; !</span><span class="s2">node</span><span class="s1">.</span><span
+    class="s2">canExecute</span><span class="s1">()) {</span>
+                    <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">i </span><span
+    class="s1">&lt; </span><span class="s2">steps</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">- </span><span class="s4">1</span><span class="s1">)</span>
+                    <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOTDIR&quot; </span><span
+    class="s7">/* ERROR_CODE.ENOTDIR */</span><span class="s1">, </span><span class="s2">funcName</span><span
+    class="s1">, </span><span class="s2">filename</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s2">curr </span><span class="s1">= </span><span class="s2">curr</span><span class="s1">.</span><span
+    class="s2">getChild</span><span class="s1">(</span><span class="s2">steps</span><span class="s1">[</span><span
+    class="s2">i</span><span class="s1">]) ?? </span><span class="s3">null</span><span class="s1">;</span>
+            <span class="s7">// Check existence of current link</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">curr</span><span class="s1">)</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">checkExistence</span><span
+    class="s1">)</span>
+                    <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOENT&quot; </span><span class="s7">/* ERROR_CODE.ENOENT */</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+                <span class="s3">else</span>
+                    <span class="s3">return null</span><span class="s1">;</span>
+            <span class="s2">node </span><span class="s1">= </span><span class="s2">curr</span><span
+    class="s1">?.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s7">// Resolve symlink if we're resolving all symlinks OR if this is an intermediate path component</span>
+            <span class="s7">// This allows lstat to traverse through symlinks in intermediate directories while not resolving the final component</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">isSymlink</span><span class="s1">() &amp;&amp; (</span><span class="s2">resolveSymlinks </span><span
+    class="s1">|| </span><span class="s2">i </span><span class="s1">&lt; </span><span class="s2">steps</span><span
+    class="s1">.</span><span class="s2">length </span><span class="s1">- </span><span class="s4">1</span><span
+    class="s1">)) {</span>
+                <span class="s3">const </span><span class="s2">resolvedPath </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">isAbsolute</span><span class="s1">)(</span><span class="s2">node</span><span class="s1">.</span><span
+    class="s2">symlink</span><span class="s1">) ? </span><span class="s2">node</span><span class="s1">.</span><span
+    class="s2">symlink </span><span class="s1">: </span><span class="s2">pathJoin</span><span class="s1">((</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">dirname</span><span class="s1">)(</span><span class="s2">curr</span><span class="s1">.</span><span
+    class="s2">getPath</span><span class="s1">()), </span><span class="s2">node</span><span class="s1">.</span><span
+    class="s2">symlink</span><span class="s1">); </span><span class="s7">// Relative to symlink's parent</span>
+                <span class="s2">steps </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_2</span><span class="s1">.</span><span
+    class="s2">filenameToSteps</span><span class="s1">)(</span><span class="s2">resolvedPath</span><span
+    class="s1">).</span><span class="s2">concat</span><span class="s1">(</span><span class="s2">steps</span><span
+    class="s1">.</span><span class="s2">slice</span><span class="s1">(</span><span class="s2">i </span><span class="s1">+ </span><span
+    class="s4">1</span><span class="s1">));</span>
+                <span class="s2">curr </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">root</span><span class="s1">;</span>
+                <span class="s2">i </span><span class="s1">= </span><span class="s4">0</span><span class="s1">;</span>
+                <span class="s3">continue</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span
+              class="s7">// After resolving symlinks, check if it's not a directory and we still have more steps</span>
+            <span class="s7">// This handles the case where we try to traverse through a file</span>
+            <span class="s7">// Only do this check when we're doing filesystem operations (checkExistence = true)</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">checkExistence </span><span class="s1">&amp;&amp; !</span><span
+    class="s2">node</span><span class="s1">.</span><span class="s2">isDirectory</span><span
+    class="s1">() &amp;&amp; </span><span class="s2">i </span><span class="s1">&lt; </span><span class="s2">steps</span><span
+    class="s1">.</span><span class="s2">length </span><span class="s1">- </span><span class="s4">1</span><span
+    class="s1">) {</span>
+                <span class="s7">// On Windows, use ENOENT for consistency with Node.js behavior</span>
+                <span class="s7">// On other platforms, use ENOTDIR which is more semantically correct</span>
+                <span class="s3">const </span><span class="s2">errorCode </span><span class="s1">= </span><span
+    class="s2">process_1</span><span class="s1">.</span><span class="s2">default</span><span class="s1">.</span><span
+    class="s2">platform </span><span class="s1">=== </span><span class="s0">'win32' </span><span
+    class="s1">? </span><span class="s0">&quot;ENOENT&quot; </span><span class="s7">/* ERROR_CODE.ENOENT */ </span><span
+    class="s1">: </span><span class="s0">&quot;ENOTDIR&quot; </span><span
+    class="s7">/* ERROR_CODE.ENOTDIR */</span><span class="s1">;</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s2">errorCode</span><span class="s1">, </span><span class="s2">funcName</span><span
+    class="s1">, </span><span class="s2">filename</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s2">i</span><span class="s1">++;</span>
+        <span class="s1">}</span>
+        <span class="s3">return </span><span class="s2">curr</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s7">// Returns a `Link` (hard link) referenced by path &quot;split&quot; into steps.</span>
+    <span class="s2">getLink</span><span class="s1">(</span><span class="s2">steps</span><span class="s1">) {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">walk</span><span
+    class="s1">(</span><span class="s2">steps</span><span class="s1">, </span><span class="s3">false</span><span
+    class="s1">, </span><span class="s3">false</span><span class="s1">, </span><span class="s3">false</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s7">// Just link `getLink`, but throws a correct user error, if link to found.</span>
+    <span class="s2">getLinkOrThrow</span><span class="s1">(</span><span class="s2">filename</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">) {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">walk</span><span
+    class="s1">(</span><span class="s2">filename</span><span class="s1">, </span><span class="s3">false</span><span
+    class="s1">, </span><span class="s3">true</span><span class="s1">, </span><span class="s3">true</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s7">// Just like `getLink`, but also dereference/resolves symbolic links.</span>
+    <span class="s2">getResolvedLink</span><span class="s1">(</span><span class="s2">filenameOrSteps</span><span
+    class="s1">) {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">walk</span><span
+    class="s1">(</span><span class="s2">filenameOrSteps</span><span class="s1">, </span><span
+    class="s3">true</span><span class="s1">, </span><span class="s3">false</span><span class="s1">, </span><span
+    class="s3">false</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Just like `getLinkOrThrow`, but also dereference/resolves symbolic links.</span>
+     <span class="s5">*/</span>
+    <span class="s2">getResolvedLinkOrThrow</span><span class="s1">(</span><span class="s2">filename</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">) {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">walk</span><span
+    class="s1">(</span><span class="s2">filename</span><span class="s1">, </span><span class="s3">true</span><span
+    class="s1">, </span><span class="s3">true</span><span class="s1">, </span><span class="s3">true</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">resolveSymlinks</span><span class="s1">(</span><span class="s2">link</span><span
+    class="s1">) {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">getResolvedLink</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">.</span><span class="s2">steps</span><span
+    class="s1">.</span><span class="s2">slice</span><span class="s1">(</span><span class="s4">1</span><span class="s1">));</span>
+    <span class="s1">}</span>
+    <span class="s5">/**</span>
+     <span class="s5">* Just like `getLinkOrThrow`, but also verifies that the link is a directory.</span>
+     <span class="s5">*/</span>
+    <span class="s2">getLinkAsDirOrThrow</span><span class="s1">(</span><span class="s2">filename</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">link </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getLinkOrThrow</span><span class="s1">(</span><span
+    class="s2">filename</span><span class="s1">, </span><span class="s2">funcName</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">link</span><span class="s1">.</span><span
+    class="s2">getNode</span><span class="s1">().</span><span class="s2">isDirectory</span><span class="s1">())</span>
+            <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOTDIR&quot; </span><span
+    class="s7">/* ERROR_CODE.ENOTDIR */</span><span class="s1">, </span><span class="s2">funcName</span><span
+    class="s1">, </span><span class="s2">filename</span><span class="s1">);</span>
+        <span class="s3">return </span><span class="s2">link</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s7">// Get the immediate parent directory of the link.</span>
+    <span class="s2">getLinkParent</span><span class="s1">(</span><span class="s2">steps</span><span
+    class="s1">) {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">getLink</span><span
+    class="s1">(</span><span class="s2">steps</span><span class="s1">.</span><span class="s2">slice</span><span
+    class="s1">(</span><span class="s4">0</span><span class="s1">, -</span><span class="s4">1</span><span
+    class="s1">));</span>
+    <span class="s1">}</span>
+    <span class="s2">getLinkParentAsDirOrThrow</span><span class="s1">(</span><span
+    class="s2">filenameOrSteps</span><span class="s1">, </span><span class="s2">funcName</span><span
+    class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">steps </span><span class="s1">= (</span><span class="s2">filenameOrSteps </span><span
+    class="s3">instanceof </span><span class="s2">Array </span><span class="s1">? </span><span class="s2">filenameOrSteps </span><span
+    class="s1">: (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_2</span><span
+    class="s1">.</span><span class="s2">filenameToSteps</span><span class="s1">)(</span><span
+    class="s2">filenameOrSteps</span><span class="s1">)).</span><span class="s2">slice</span><span
+    class="s1">(</span><span class="s4">0</span><span class="s1">, -</span><span class="s4">1</span><span
+    class="s1">);</span>
+        <span class="s3">const </span><span class="s2">filename </span><span class="s1">= </span><span class="s2">pathSep </span><span
+    class="s1">+ </span><span class="s2">steps</span><span class="s1">.</span><span class="s2">join</span><span
+    class="s1">(</span><span class="s2">pathSep</span><span class="s1">);</span>
+        <span class="s3">const </span><span class="s2">link </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getLinkOrThrow</span><span class="s1">(</span><span
+    class="s2">filename</span><span class="s1">, </span><span class="s2">funcName</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">link</span><span class="s1">.</span><span
+    class="s2">getNode</span><span class="s1">().</span><span class="s2">isDirectory</span><span class="s1">())</span>
+            <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOTDIR&quot; </span><span
+    class="s7">/* ERROR_CODE.ENOTDIR */</span><span class="s1">, </span><span class="s2">funcName</span><span
+    class="s1">, </span><span class="s2">filename</span><span class="s1">);</span>
+        <span class="s3">return </span><span class="s2">link</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">getFileByFd</span><span class="s1">(</span><span class="s2">fd</span><span class="s1">) {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">fds</span><span class="s1">[</span><span
+    class="s2">String</span><span class="s1">(</span><span class="s2">fd</span><span class="s1">)];</span>
+    <span class="s1">}</span>
+    <span class="s2">getFileByFdOrThrow</span><span class="s1">(</span><span class="s2">fd</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(!(</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">util_2</span><span class="s1">.</span><span class="s2">isFd</span><span class="s1">)(</span><span
+    class="s2">fd</span><span class="s1">))</span>
+            <span class="s3">throw </span><span class="s2">TypeError</span><span class="s1">(</span><span class="s2">constants_2</span><span
+    class="s1">.</span><span class="s2">ERRSTR</span><span class="s1">.</span><span class="s2">FD</span><span
+    class="s1">);</span>
+        <span class="s3">const </span><span class="s2">file </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getFileByFd</span><span class="s1">(</span><span
+    class="s2">fd</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">file</span><span class="s1">)</span>
+            <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EBADF&quot; </span><span class="s7">/* ERROR_CODE.EBADF */</span><span
+    class="s1">, </span><span class="s2">funcName</span><span class="s1">);</span>
+        <span class="s3">return </span><span class="s2">file</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">_toJSON</span><span class="s1">(</span><span class="s2">link </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">root</span><span class="s1">, </span><span
+    class="s2">json </span><span class="s1">= {}, </span><span class="s2">path</span><span class="s1">, </span><span
+    class="s2">asBuffer</span><span class="s1">) {</span>
+        <span class="s3">let </span><span class="s2">isEmpty </span><span class="s1">= </span><span
+    class="s3">true</span><span class="s1">;</span>
+        <span class="s3">let </span><span class="s2">children </span><span class="s1">= </span><span
+    class="s2">link</span><span class="s1">.</span><span class="s2">children</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">link</span><span class="s1">.</span><span
+    class="s2">getNode</span><span class="s1">().</span><span class="s2">isFile</span><span class="s1">()) {</span>
+            <span class="s2">children </span><span class="s1">= </span><span class="s3">new </span><span
+    class="s2">Map</span><span class="s1">([[</span><span class="s2">link</span><span class="s1">.</span><span
+    class="s2">getName</span><span class="s1">(), </span><span class="s2">link</span><span class="s1">.</span><span
+    class="s2">parent</span><span class="s1">.</span><span class="s2">getChild</span><span class="s1">(</span><span
+    class="s2">link</span><span class="s1">.</span><span class="s2">getName</span><span class="s1">())]]);</span>
+            <span class="s2">link </span><span class="s1">= </span><span class="s2">link</span><span class="s1">.</span><span
+    class="s2">parent</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span class="s2">name of children</span><span
+    class="s1">.</span><span class="s2">keys</span><span class="s1">()) {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">name </span><span
+    class="s1">=== </span><span class="s0">'.' </span><span class="s1">|| </span><span class="s2">name </span><span
+    class="s1">=== </span><span class="s0">'..'</span><span class="s1">) {</span>
+                <span class="s3">continue</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s2">isEmpty </span><span class="s1">= </span><span class="s3">false</span><span
+    class="s1">;</span>
+            <span class="s3">const </span><span class="s2">child </span><span class="s1">= </span><span
+    class="s2">link</span><span class="s1">.</span><span class="s2">getChild</span><span class="s1">(</span><span
+    class="s2">name</span><span class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">child</span><span
+    class="s1">) {</span>
+                <span class="s3">throw new </span><span class="s2">Error</span><span class="s1">(</span><span
+    class="s0">'_toJSON: unexpected undefined'</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">const </span><span class="s2">node </span><span class="s1">= </span><span
+    class="s2">child</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">isFile</span><span class="s1">()) {</span>
+                <span class="s3">let </span><span class="s2">filename </span><span class="s1">= </span><span class="s2">child</span><span
+    class="s1">.</span><span class="s2">getPath</span><span class="s1">();</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">path</span><span
+    class="s1">)</span>
+                    <span class="s2">filename </span><span class="s1">= </span><span class="s2">pathRelative</span><span
+    class="s1">(</span><span class="s2">path</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+                <span class="s2">json</span><span class="s1">[</span><span class="s2">filename</span><span class="s1">] = </span><span
+    class="s2">asBuffer </span><span class="s1">? </span><span class="s2">node</span><span class="s1">.</span><span
+    class="s2">getBuffer</span><span class="s1">() : </span><span class="s2">node</span><span class="s1">.</span><span
+    class="s2">getString</span><span class="s1">();</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">isDirectory</span><span class="s1">()) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">_toJSON</span><span
+    class="s1">(</span><span class="s2">child</span><span class="s1">, </span><span class="s2">json</span><span
+    class="s1">, </span><span class="s2">path</span><span class="s1">, </span><span class="s2">asBuffer</span><span
+    class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span class="s3">let </span><span class="s2">dirPath </span><span class="s1">= </span><span
+    class="s2">link</span><span class="s1">.</span><span class="s2">getPath</span><span class="s1">();</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">path</span><span class="s1">)</span>
+            <span class="s2">dirPath </span><span class="s1">= </span><span class="s2">pathRelative</span><span
+    class="s1">(</span><span class="s2">path</span><span class="s1">, </span><span class="s2">dirPath</span><span
+    class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">dirPath </span><span
+    class="s1">&amp;&amp; </span><span class="s2">isEmpty</span><span class="s1">) {</span>
+            <span class="s2">json</span><span class="s1">[</span><span class="s2">dirPath</span><span
+    class="s1">] = </span><span class="s3">null</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">return </span><span class="s2">json</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">toJSON</span><span class="s1">(</span><span class="s2">paths</span><span class="s1">, </span><span
+    class="s2">json </span><span class="s1">= {}, </span><span class="s2">isRelative </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">, </span><span class="s2">asBuffer </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">links </span><span class="s1">= [];</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">paths</span><span class="s1">) {</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">Array</span><span
+    class="s1">.</span><span class="s2">isArray</span><span class="s1">(</span><span class="s2">paths</span><span
+    class="s1">))</span>
+                <span class="s2">paths </span><span class="s1">= [</span><span class="s2">paths</span><span class="s1">];</span>
+            <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span class="s2">path of paths</span><span
+    class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">filename </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">pathToFilename</span><span class="s1">)(</span><span class="s2">path</span><span class="s1">);</span>
+                <span class="s3">const </span><span class="s2">link </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getResolvedLink</span><span class="s1">(</span><span
+    class="s2">filename</span><span class="s1">);</span>
+                <span class="s3">if </span><span class="s1">(!</span><span class="s2">link</span><span
+    class="s1">)</span>
+                    <span class="s3">continue</span><span class="s1">;</span>
+                <span class="s2">links</span><span class="s1">.</span><span class="s2">push</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s2">links</span><span class="s1">.</span><span class="s2">push</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">root</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">links</span><span class="s1">.</span><span
+    class="s2">length</span><span class="s1">)</span>
+            <span class="s3">return </span><span class="s2">json</span><span class="s1">;</span>
+        <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span class="s2">link of links</span><span
+    class="s1">)</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">_toJSON</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">, </span><span class="s2">json</span><span
+    class="s1">, </span><span class="s2">isRelative </span><span class="s1">? </span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">getPath</span><span class="s1">() : </span><span class="s0">''</span><span
+    class="s1">, </span><span class="s2">asBuffer</span><span class="s1">);</span>
+        <span class="s3">return </span><span class="s2">json</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s7">// TODO: `cwd` should probably not invoke `process.cwd()`.</span>
+    <span class="s2">fromJSON</span><span class="s1">(</span><span class="s2">json</span><span class="s1">, </span><span
+    class="s2">cwd </span><span class="s1">= </span><span class="s2">process_1</span><span class="s1">.</span><span
+    class="s2">default</span><span class="s1">.</span><span class="s2">cwd</span><span class="s1">()) {</span>
+        <span class="s3">for </span><span class="s1">(</span><span class="s3">let </span><span
+    class="s2">filename </span><span class="s3">in </span><span class="s2">json</span><span class="s1">) {</span>
+            <span class="s3">const </span><span class="s2">data </span><span class="s1">= </span><span
+    class="s2">json</span><span class="s1">[</span><span class="s2">filename</span><span class="s1">];</span>
+            <span class="s2">filename </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_2</span><span class="s1">.</span><span class="s2">resolve</span><span
+    class="s1">)(</span><span class="s2">filename</span><span class="s1">, </span><span class="s2">cwd</span><span
+    class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span
+    class="s2">data </span><span class="s1">=== </span><span class="s0">'string' </span><span class="s1">|| </span><span
+    class="s2">data </span><span class="s3">instanceof </span><span class="s2">buffer_1</span><span
+    class="s1">.</span><span class="s2">Buffer</span><span class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">dir </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">dirname</span><span class="s1">)(</span><span class="s2">filename</span><span class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">mkdirp</span><span
+    class="s1">(</span><span class="s2">dir</span><span class="s1">, </span><span class="s4">511 </span><span
+    class="s7">/* MODE.DIR */</span><span class="s1">);</span>
+                <span class="s3">const </span><span class="s2">buffer </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_2</span><span class="s1">.</span><span
+    class="s2">dataToBuffer</span><span class="s1">)(</span><span class="s2">data</span><span class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">writeFile</span><span
+    class="s1">(</span><span class="s2">filename</span><span class="s1">, </span><span class="s2">buffer</span><span
+    class="s1">, </span><span class="s2">constants_2</span><span class="s1">.</span><span class="s2">FLAGS</span><span
+    class="s1">.</span><span class="s2">w</span><span class="s1">, </span><span class="s4">438 </span><span class="s7">/* MODE.DEFAULT */</span><span
+    class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">mkdirp</span><span
+    class="s1">(</span><span class="s2">filename</span><span class="s1">, </span><span class="s4">511 </span><span
+    class="s7">/* MODE.DIR */</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">fromNestedJSON</span><span class="s1">(</span><span class="s2">json</span><span
+    class="s1">, </span><span class="s2">cwd</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">fromJSON</span><span
+    class="s1">((</span><span class="s4">0</span><span class="s1">, </span><span class="s2">json_1</span><span
+    class="s1">.</span><span class="s2">flattenJSON</span><span class="s1">)(</span><span class="s2">json</span><span
+    class="s1">), </span><span class="s2">cwd</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">reset</span><span class="s1">() {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">ino </span><span class="s1">= </span><span
+    class="s4">0</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">inodes </span><span
+    class="s1">= {};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">releasedInos </span><span
+    class="s1">= [];</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">fds </span><span class="s1">= {};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">releasedFds </span><span
+    class="s1">= [];</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">openFiles </span><span
+    class="s1">= </span><span class="s4">0</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">root </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">createLink</span><span
+    class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">root</span><span class="s1">.</span><span
+    class="s2">setNode</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">createNode</span><span class="s1">(</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">constants</span><span class="s1">.</span><span class="s2">S_IFDIR </span><span
+    class="s1">| </span><span class="s4">0o777</span><span class="s1">));</span>
+    <span class="s1">}</span>
+    <span class="s7">// Legacy interface</span>
+    <span class="s2">mountSync</span><span class="s1">(</span><span class="s2">mountpoint</span><span
+    class="s1">, </span><span class="s2">json</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">fromJSON</span><span
+    class="s1">(</span><span class="s2">json</span><span class="s1">, </span><span class="s2">mountpoint</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">openLink</span><span class="s1">(</span><span class="s2">link</span><span class="s1">, </span><span
+    class="s2">flagsNum</span><span class="s1">, </span><span class="s2">resolveSymlinks </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">openFiles </span><span class="s1">&gt;= </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">maxFiles</span><span class="s1">) {</span>
+            <span class="s7">// Too many open files.</span>
+            <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EMFILE&quot; </span><span class="s7">/* ERROR_CODE.EMFILE */</span><span
+    class="s1">, </span><span class="s0">'open'</span><span class="s1">, </span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">getPath</span><span class="s1">());</span>
+        <span class="s1">}</span>
+        <span class="s7">// Resolve symlinks.</span>
+        <span class="s7">//</span>
+        <span class="s7">// @TODO: This should be superfluous. This method is only ever called by openFile(), which does its own symlink resolution</span>
+        <span class="s7">// prior to calling.</span>
+        <span class="s3">let </span><span class="s2">realLink </span><span class="s1">= </span><span
+    class="s2">link</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">resolveSymlinks</span><span
+    class="s1">)</span>
+            <span class="s2">realLink </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getResolvedLinkOrThrow</span><span class="s1">(</span><span
+    class="s2">link</span><span class="s1">.</span><span class="s2">getPath</span><span class="s1">(), </span><span
+    class="s0">'open'</span><span class="s1">);</span>
+        <span class="s3">const </span><span class="s2">node </span><span class="s1">= </span><span
+    class="s2">realLink</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+        <span class="s7">// Check whether node is a directory</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">node</span><span class="s1">.</span><span
+    class="s2">isDirectory</span><span class="s1">()) {</span>
+            <span class="s3">if </span><span class="s1">((</span><span class="s2">flagsNum </span><span class="s1">&amp; (</span><span
+    class="s2">O_RDONLY </span><span class="s1">| </span><span class="s2">O_RDWR </span><span class="s1">| </span><span
+    class="s2">O_WRONLY</span><span class="s1">)) !== </span><span class="s2">O_RDONLY</span><span class="s1">)</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EISDIR&quot; </span><span class="s7">/* ERROR_CODE.EISDIR */</span><span
+    class="s1">, </span><span class="s0">'open'</span><span class="s1">, </span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">getPath</span><span class="s1">());</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">flagsNum </span><span
+    class="s1">&amp; </span><span class="s2">O_DIRECTORY</span><span class="s1">)</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOTDIR&quot; </span><span
+    class="s7">/* ERROR_CODE.ENOTDIR */</span><span class="s1">, </span><span class="s0">'open'</span><span
+    class="s1">, </span><span class="s2">link</span><span class="s1">.</span><span class="s2">getPath</span><span
+    class="s1">());</span>
+        <span class="s1">}</span>
+        <span class="s7">// Check node permissions</span>
+        <span class="s7">// For read access: check if flags are O_RDONLY or O_RDWR (i.e., not only O_WRONLY)</span>
+        <span class="s3">if </span><span class="s1">((</span><span class="s2">flagsNum </span><span
+    class="s1">&amp; (</span><span class="s2">O_RDONLY </span><span class="s1">| </span><span
+    class="s2">O_RDWR </span><span class="s1">| </span><span class="s2">O_WRONLY</span><span
+    class="s1">)) !== </span><span class="s2">O_WRONLY</span><span class="s1">) {</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">canRead</span><span class="s1">()) {</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s0">'open'</span><span class="s1">, </span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">getPath</span><span class="s1">());</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span class="s7">// For write access: check if flags are O_WRONLY or O_RDWR</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">flagsNum </span><span
+    class="s1">&amp; (</span><span class="s2">O_WRONLY </span><span class="s1">| </span><span
+    class="s2">O_RDWR</span><span class="s1">)) {</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">node</span><span
+    class="s1">.</span><span class="s2">canWrite</span><span class="s1">()) {</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s0">'open'</span><span class="s1">, </span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">getPath</span><span class="s1">());</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span class="s3">const </span><span class="s2">file </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">File_1</span><span class="s1">.</span><span class="s2">File</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">, </span><span class="s2">node</span><span
+    class="s1">, </span><span class="s2">flagsNum</span><span class="s1">, </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">newFdNumber</span><span class="s1">());</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">fds</span><span class="s1">[</span><span
+    class="s2">file</span><span class="s1">.</span><span class="s2">fd</span><span class="s1">] = </span><span
+    class="s2">file</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">openFiles</span><span
+    class="s1">++;</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">flagsNum </span><span
+    class="s1">&amp; </span><span class="s2">O_TRUNC</span><span class="s1">)</span>
+            <span class="s2">file</span><span class="s1">.</span><span class="s2">truncate</span><span
+    class="s1">();</span>
+        <span class="s3">return </span><span class="s2">file</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">openFile</span><span class="s1">(</span><span class="s2">filename</span><span
+    class="s1">, </span><span class="s2">flagsNum</span><span class="s1">, </span><span class="s2">modeNum</span><span
+    class="s1">, </span><span class="s2">resolveSymlinks </span><span class="s1">= </span><span
+    class="s3">true</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">steps </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_2</span><span class="s1">.</span><span
+    class="s2">filenameToSteps</span><span class="s1">)(</span><span class="s2">filename</span><span
+    class="s1">);</span>
+        <span class="s3">let </span><span class="s2">link</span><span class="s1">;</span>
+        <span class="s3">try </span><span class="s1">{</span>
+            <span class="s2">link </span><span class="s1">= </span><span class="s2">resolveSymlinks </span><span
+    class="s1">? </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">getResolvedLinkOrThrow</span><span class="s1">(</span><span class="s2">filename</span><span
+    class="s1">, </span><span class="s0">'open'</span><span class="s1">) : </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">getLinkOrThrow</span><span class="s1">(</span><span
+    class="s2">filename</span><span class="s1">, </span><span class="s0">'open'</span><span class="s1">);</span>
+            <span class="s7">// Check if file already existed when trying to create it exclusively (O_CREAT and O_EXCL flags are set).</span>
+            <span class="s7">// This is an error, see https://pubs.opengroup.org/onlinepubs/009695399/functions/open.html:</span>
+            <span class="s7">// &quot;If O_CREAT and O_EXCL are set, open() shall fail if the file exists.&quot;</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">link </span><span
+    class="s1">&amp;&amp; </span><span class="s2">flagsNum </span><span class="s1">&amp; </span><span
+    class="s2">O_CREAT </span><span class="s1">&amp;&amp; </span><span class="s2">flagsNum </span><span
+    class="s1">&amp; </span><span class="s2">O_EXCL</span><span class="s1">)</span>
+                <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EEXIST&quot; </span><span class="s7">/* ERROR_CODE.EEXIST */</span><span
+    class="s1">, </span><span class="s0">'open'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span class="s1">) {</span>
+            <span class="s7">// Try creating a new file, if it does not exist and O_CREAT flag is set.</span>
+            <span class="s7">// Note that this will still throw if the ENOENT came from one of the</span>
+            <span class="s7">// intermediate directories instead of the file itself.</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">.</span><span class="s2">code </span><span class="s1">=== </span><span
+    class="s0">&quot;ENOENT&quot; </span><span class="s7">/* ERROR_CODE.ENOENT */ </span><span
+    class="s1">&amp;&amp; </span><span class="s2">flagsNum </span><span class="s1">&amp; </span><span
+    class="s2">O_CREAT</span><span class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">dirName </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">path_1</span><span class="s1">.</span><span
+    class="s2">dirname</span><span class="s1">)(</span><span class="s2">filename</span><span class="s1">);</span>
+                <span class="s3">const </span><span class="s2">dirLink </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getResolvedLinkOrThrow</span><span
+    class="s1">(</span><span class="s2">dirName</span><span class="s1">);</span>
+                <span class="s3">const </span><span class="s2">dirNode </span><span class="s1">= </span><span
+    class="s2">dirLink</span><span class="s1">.</span><span class="s2">getNode</span><span class="s1">();</span>
+                <span class="s7">// Check that the place we create the new file is actually a directory and that we are allowed to do so:</span>
+                <span class="s3">if </span><span class="s1">(!</span><span class="s2">dirNode</span><span
+    class="s1">.</span><span class="s2">isDirectory</span><span class="s1">())</span>
+                    <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;ENOTDIR&quot; </span><span
+    class="s7">/* ERROR_CODE.ENOTDIR */</span><span class="s1">, </span><span class="s0">'open'</span><span
+    class="s1">, </span><span class="s2">filename</span><span class="s1">);</span>
+                <span class="s3">if </span><span class="s1">(!</span><span class="s2">dirNode</span><span
+    class="s1">.</span><span class="s2">canExecute</span><span class="s1">() || !</span><span
+    class="s2">dirNode</span><span class="s1">.</span><span class="s2">canWrite</span><span class="s1">())</span>
+                    <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EACCES&quot; </span><span class="s7">/* ERROR_CODE.EACCES */</span><span
+    class="s1">, </span><span class="s0">'open'</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">);</span>
+                <span class="s7">// This is a difference to the original implementation, which would simply not create a file unless modeNum was specified.</span>
+                <span class="s7">// However, current Node versions will default to 0o666.</span>
+                <span class="s2">modeNum </span><span class="s1">?? (</span><span class="s2">modeNum </span><span
+    class="s1">= </span><span class="s4">0o666</span><span class="s1">);</span>
+                <span class="s2">link </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">createLink</span><span class="s1">(</span><span class="s2">dirLink</span><span
+    class="s1">, </span><span class="s2">steps</span><span class="s1">[</span><span class="s2">steps</span><span
+    class="s1">.</span><span class="s2">length </span><span class="s1">- </span><span class="s4">1</span><span
+    class="s1">], </span><span class="s3">false</span><span class="s1">, </span><span class="s2">modeNum</span><span
+    class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">else</span>
+                <span class="s3">throw </span><span class="s2">err</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">link</span><span class="s1">)</span>
+            <span class="s3">return this</span><span class="s1">.</span><span class="s2">openLink</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">, </span><span class="s2">flagsNum</span><span
+    class="s1">, </span><span class="s2">resolveSymlinks</span><span class="s1">);</span>
+        <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span class="s1">)(</span><span
+    class="s0">&quot;ENOENT&quot; </span><span class="s7">/* ERROR_CODE.ENOENT */</span><span class="s1">, </span><span
+    class="s0">'open'</span><span class="s1">, </span><span class="s2">filename</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">closeFile</span><span class="s1">(</span><span class="s2">file</span><span class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">fds</span><span class="s1">[</span><span class="s2">file</span><span class="s1">.</span><span class="s2">fd</span><span
+    class="s1">])</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">openFiles</span><span
+    class="s1">--;</span>
+        <span class="s3">delete this</span><span class="s1">.</span><span class="s2">fds</span><span class="s1">[</span><span
+    class="s2">file</span><span class="s1">.</span><span class="s2">fd</span><span class="s1">];</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">releasedFds</span><span
+    class="s1">.</span><span class="s2">push</span><span class="s1">(</span><span class="s2">file</span><span
+    class="s1">.</span><span class="s2">fd</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">write</span><span class="s1">(</span><span class="s2">fd</span><span class="s1">, </span><span
+    class="s2">buf</span><span class="s1">, </span><span class="s2">offset</span><span class="s1">, </span><span
+    class="s2">length</span><span class="s1">, </span><span class="s2">position</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">file </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getFileByFdOrThrow</span><span
+    class="s1">(</span><span class="s2">fd</span><span class="s1">, </span><span class="s0">'write'</span><span
+    class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">file</span><span class="s1">.</span><span
+    class="s2">node</span><span class="s1">.</span><span class="s2">isSymlink</span><span class="s1">()) {</span>
+            <span class="s3">throw </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">createError</span><span
+    class="s1">)(</span><span class="s0">&quot;EBADF&quot; </span><span class="s7">/* ERROR_CODE.EBADF */</span><span
+    class="s1">, </span><span class="s0">'write'</span><span class="s1">, </span><span class="s2">file</span><span
+    class="s1">.</span><span class="s2">link</span><span class="s1">.</span><span class="s2">getPath</span><span
+    class="s1">());</span>
+        <span class="s1">}</span>
+        <span class="s3">return </span><span class="s2">file</span><span class="s1">.</span><span
+    class="s2">write</span><span class="s1">(</span><span class="s2">buf</span><span class="s1">, </span><span
+    class="s2">offset</span><span class="s1">, </span><span class="s2">length</span><span class="s1">, </span><span
+    class="s2">position </span><span class="s1">=== -</span><span class="s4">1 </span><span class="s1">|| </span><span
+    class="s3">typeof </span><span class="s2">position </span><span class="s1">!== </span><span
+    class="s0">'number' </span><span class="s1">? </span><span class="s2">undefined </span><span
+    class="s1">: </span><span class="s2">position</span><span class="s1">);</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">Superblock </span><span
+    class="s1">= </span><span class="s2">Superblock</span><span class="s1">;</span>
+<span class="s5">/**</span>
+ <span class="s5">* Global file descriptor counter. UNIX file descriptors start from 0 and go sequentially</span>
+ <span class="s5">* up, so here, in order not to conflict with them, we choose some big number and descrease</span>
+ <span class="s5">* the file descriptor of every new opened file.</span>
+ <span class="s5">* </span><span class="s6">@type </span><span class="s5">{number}</span>
+ <span class="s5">* </span><span class="s6">@todo </span><span class="s5">This should not be static, right?</span>
+ <span class="s5">*/</span>
+<span class="s2">Superblock</span><span class="s1">.</span><span class="s2">fd </span><span class="s1">= </span><span
+    class="s4">0x7fffffff</span><span class="s1">;</span>
+<span class="s7">//# sourceMappingURL=Superblock.js.map</span></pre>
+</body>
+</html>

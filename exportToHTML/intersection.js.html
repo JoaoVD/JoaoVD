@@ -1,0 +1,94 @@
+<html>
+<head>
+  <title>intersection.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          intersection.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">arrayMap </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_arrayMap'</span><span class="s2">),</span>
+    <span class="s1">baseIntersection </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIntersection'</span><span class="s2">),</span>
+    <span class="s1">baseRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">),</span>
+    <span class="s1">castArrayLikeObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_castArrayLikeObject'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates an array of unique values that are included in all given arrays</span>
+ <span class="s4">* using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)</span>
+ <span class="s4">* for equality comparisons. The order and references of result values are</span>
+ <span class="s4">* determined by the first array.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Array</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{...Array} [arrays] The arrays to inspect.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Array} Returns the new array of intersecting values.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.intersection([2, 1], [2, 3]);</span>
+ <span class="s4">* // =&gt; [2]</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">intersection </span><span class="s2">= </span><span
+    class="s1">baseRest</span><span class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span
+    class="s1">arrays</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">mapped </span><span class="s2">= </span><span
+    class="s1">arrayMap</span><span class="s2">(</span><span class="s1">arrays</span><span class="s2">, </span><span
+    class="s1">castArrayLikeObject</span><span class="s2">);</span>
+  <span class="s0">return </span><span class="s2">(</span><span class="s1">mapped</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">&amp;&amp; </span><span class="s1">mapped</span><span
+    class="s2">[</span><span class="s6">0</span><span class="s2">] === </span><span class="s1">arrays</span><span
+    class="s2">[</span><span class="s6">0</span><span class="s2">])</span>
+    <span class="s2">? </span><span class="s1">baseIntersection</span><span class="s2">(</span><span
+    class="s1">mapped</span><span class="s2">)</span>
+    <span class="s2">: [];</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">intersection</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

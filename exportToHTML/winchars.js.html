@@ -1,0 +1,92 @@
+<html>
+<head>
+  <title>winchars.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #7a7e85;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          winchars.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">// When writing files on Windows, translate the characters to their</span>
+<span class="s2">// 0xf000 higher-encoded versions.</span>
+
+<span class="s3">const </span><span class="s1">raw </span><span class="s4">= [</span>
+  <span class="s0">'|'</span><span class="s4">,</span>
+  <span class="s0">'&lt;'</span><span class="s4">,</span>
+  <span class="s0">'&gt;'</span><span class="s4">,</span>
+  <span class="s0">'?'</span><span class="s4">,</span>
+  <span class="s0">':'</span><span class="s4">,</span>
+<span class="s4">]</span>
+
+<span class="s3">const </span><span class="s1">win </span><span class="s4">= </span><span class="s1">raw</span><span
+    class="s4">.</span><span class="s1">map</span><span class="s4">(</span><span class="s1">char </span><span
+    class="s4">=&gt;</span>
+  <span class="s1">String</span><span class="s4">.</span><span class="s1">fromCharCode</span><span
+    class="s4">(</span><span class="s5">0xf000 </span><span class="s4">+ </span><span class="s1">char</span><span
+    class="s4">.</span><span class="s1">charCodeAt</span><span class="s4">(</span><span class="s5">0</span><span
+    class="s4">)))</span>
+
+<span class="s3">const </span><span class="s1">toWin </span><span class="s4">= </span><span class="s3">new </span><span
+    class="s1">Map</span><span class="s4">(</span><span class="s1">raw</span><span class="s4">.</span><span class="s1">map</span><span
+    class="s4">((</span><span class="s1">char</span><span class="s4">, </span><span class="s1">i</span><span class="s4">) =&gt; [</span><span
+    class="s1">char</span><span class="s4">, </span><span class="s1">win</span><span class="s4">[</span><span
+    class="s1">i</span><span class="s4">]]))</span>
+<span class="s3">const </span><span class="s1">toRaw </span><span class="s4">= </span><span class="s3">new </span><span
+    class="s1">Map</span><span class="s4">(</span><span class="s1">win</span><span class="s4">.</span><span class="s1">map</span><span
+    class="s4">((</span><span class="s1">char</span><span class="s4">, </span><span class="s1">i</span><span class="s4">) =&gt; [</span><span
+    class="s1">char</span><span class="s4">, </span><span class="s1">raw</span><span class="s4">[</span><span
+    class="s1">i</span><span class="s4">]]))</span>
+
+<span class="s1">module</span><span class="s4">.</span><span class="s1">exports </span><span class="s4">= {</span>
+  <span class="s1">encode</span><span class="s4">: </span><span class="s1">s </span><span class="s4">=&gt; </span><span
+    class="s1">raw</span><span class="s4">.</span><span class="s1">reduce</span><span class="s4">((</span><span
+    class="s1">s</span><span class="s4">, </span><span class="s1">c</span><span class="s4">) =&gt; </span><span
+    class="s1">s</span><span class="s4">.</span><span class="s1">split</span><span class="s4">(</span><span
+    class="s1">c</span><span class="s4">).</span><span class="s1">join</span><span class="s4">(</span><span class="s1">toWin</span><span
+    class="s4">.</span><span class="s1">get</span><span class="s4">(</span><span class="s1">c</span><span
+    class="s4">)), </span><span class="s1">s</span><span class="s4">),</span>
+  <span class="s1">decode</span><span class="s4">: </span><span class="s1">s </span><span class="s4">=&gt; </span><span
+    class="s1">win</span><span class="s4">.</span><span class="s1">reduce</span><span class="s4">((</span><span
+    class="s1">s</span><span class="s4">, </span><span class="s1">c</span><span class="s4">) =&gt; </span><span
+    class="s1">s</span><span class="s4">.</span><span class="s1">split</span><span class="s4">(</span><span
+    class="s1">c</span><span class="s4">).</span><span class="s1">join</span><span class="s4">(</span><span class="s1">toRaw</span><span
+    class="s4">.</span><span class="s1">get</span><span class="s4">(</span><span class="s1">c</span><span
+    class="s4">)), </span><span class="s1">s</span><span class="s4">),</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<html>
+<head>
+  <title>ignore.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #6aab73;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          ignore.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">process from </span><span class="s2">'node:process'</span><span
+  class="s3">;</span>
+<span class="s0">import </span><span class="s1">fs from </span><span class="s2">'node:fs'</span><span
+    class="s3">;</span>
+<span class="s0">import </span><span class="s1">path from </span><span class="s2">'node:path'</span><span
+    class="s3">;</span>
+<span class="s0">import </span><span class="s1">fastGlob from </span><span class="s2">'fast-glob'</span><span
+    class="s3">;</span>
+<span class="s0">import </span><span class="s1">gitIgnore from </span><span class="s2">'ignore'</span><span
+    class="s3">;</span>
+<span class="s0">import </span><span class="s1">slash from </span><span class="s2">'slash'</span><span
+    class="s3">;</span>
+<span class="s0">import </span><span class="s3">{</span><span class="s1">toPath</span><span class="s3">, </span><span
+    class="s1">isNegativePattern</span><span class="s3">} </span><span class="s1">from </span><span class="s2">'./utilities.js'</span><span
+    class="s3">;</span>
+
+<span class="s0">const </span><span class="s1">ignoreFilesGlobOptions </span><span class="s3">= {</span>
+	<span class="s1">ignore</span><span class="s3">: [</span>
+		<span class="s2">'**/node_modules'</span><span class="s3">,</span>
+		<span class="s2">'**/flow-typed'</span><span class="s3">,</span>
+		<span class="s2">'**/coverage'</span><span class="s3">,</span>
+		<span class="s2">'**/.git'</span><span class="s3">,</span>
+	<span class="s3">],</span>
+	<span class="s1">absolute</span><span class="s3">: </span><span class="s0">true</span><span class="s3">,</span>
+	<span class="s1">dot</span><span class="s3">: </span><span class="s0">true</span><span class="s3">,</span>
+<span class="s3">};</span>
+
+<span class="s0">export const </span><span class="s1">GITIGNORE_FILES_PATTERN </span><span class="s3">= </span><span
+    class="s2">'**/.gitignore'</span><span class="s3">;</span>
+
+<span class="s0">const </span><span class="s1">applyBaseToPattern </span><span class="s3">= (</span><span class="s1">pattern</span><span
+    class="s3">, </span><span class="s1">base</span><span class="s3">) =&gt; </span><span
+    class="s1">isNegativePattern</span><span class="s3">(</span><span class="s1">pattern</span><span class="s3">)</span>
+	<span class="s3">? </span><span class="s2">'!' </span><span class="s3">+ </span><span class="s1">path</span><span
+    class="s3">.</span><span class="s1">posix</span><span class="s3">.</span><span class="s1">join</span><span
+    class="s3">(</span><span class="s1">base</span><span class="s3">, </span><span class="s1">pattern</span><span
+    class="s3">.</span><span class="s1">slice</span><span class="s3">(</span><span class="s4">1</span><span class="s3">))</span>
+	<span class="s3">: </span><span class="s1">path</span><span class="s3">.</span><span class="s1">posix</span><span
+    class="s3">.</span><span class="s1">join</span><span class="s3">(</span><span class="s1">base</span><span
+    class="s3">, </span><span class="s1">pattern</span><span class="s3">);</span>
+
+<span class="s0">const </span><span class="s1">parseIgnoreFile </span><span class="s3">= (</span><span
+    class="s1">file</span><span class="s3">, </span><span class="s1">cwd</span><span class="s3">) =&gt; {</span>
+	<span class="s0">const </span><span class="s1">base </span><span class="s3">= </span><span
+    class="s1">slash</span><span class="s3">(</span><span class="s1">path</span><span class="s3">.</span><span
+    class="s1">relative</span><span class="s3">(</span><span class="s1">cwd</span><span class="s3">, </span><span
+    class="s1">path</span><span class="s3">.</span><span class="s1">dirname</span><span class="s3">(</span><span
+    class="s1">file</span><span class="s3">.</span><span class="s1">filePath</span><span class="s3">)));</span>
+
+	<span class="s0">return </span><span class="s1">file</span><span class="s3">.</span><span class="s1">content</span>
+		<span class="s3">.</span><span class="s1">split</span><span class="s3">(</span><span class="s5">/\r?\n/</span><span
+    class="s3">)</span>
+		<span class="s3">.</span><span class="s1">filter</span><span class="s3">(</span><span class="s1">line </span><span
+    class="s3">=&gt; </span><span class="s1">line </span><span class="s3">&amp;&amp; !</span><span
+    class="s1">line</span><span class="s3">.</span><span class="s1">startsWith</span><span class="s3">(</span><span
+    class="s2">'#'</span><span class="s3">))</span>
+		<span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span class="s1">pattern </span><span
+    class="s3">=&gt; </span><span class="s1">applyBaseToPattern</span><span class="s3">(</span><span
+    class="s1">pattern</span><span class="s3">, </span><span class="s1">base</span><span class="s3">));</span>
+<span class="s3">};</span>
+
+<span class="s0">const </span><span class="s1">toRelativePath </span><span class="s3">= (</span><span class="s1">fileOrDirectory</span><span
+    class="s3">, </span><span class="s1">cwd</span><span class="s3">) =&gt; {</span>
+	<span class="s1">cwd </span><span class="s3">= </span><span class="s1">slash</span><span class="s3">(</span><span
+    class="s1">cwd</span><span class="s3">);</span>
+	<span class="s0">if </span><span class="s3">(</span><span class="s1">path</span><span class="s3">.</span><span
+    class="s1">isAbsolute</span><span class="s3">(</span><span class="s1">fileOrDirectory</span><span
+    class="s3">)) {</span>
+		<span class="s0">if </span><span class="s3">(</span><span class="s1">slash</span><span class="s3">(</span><span
+    class="s1">fileOrDirectory</span><span class="s3">).</span><span class="s1">startsWith</span><span
+    class="s3">(</span><span class="s1">cwd</span><span class="s3">)) {</span>
+			<span class="s0">return </span><span class="s1">path</span><span class="s3">.</span><span
+    class="s1">relative</span><span class="s3">(</span><span class="s1">cwd</span><span class="s3">, </span><span
+    class="s1">fileOrDirectory</span><span class="s3">);</span>
+		<span class="s3">}</span>
+
+		<span class="s0">throw new </span><span class="s1">Error</span><span class="s3">(</span><span
+    class="s2">`Path </span><span class="s1">$</span><span class="s3">{</span><span
+    class="s1">fileOrDirectory</span><span class="s3">} </span><span class="s2">is not in cwd </span><span
+    class="s1">$</span><span class="s3">{</span><span class="s1">cwd</span><span class="s3">}</span><span
+    class="s2">`</span><span class="s3">);</span>
+	<span class="s3">}</span>
+
+	<span class="s0">return </span><span class="s1">fileOrDirectory</span><span class="s3">;</span>
+<span class="s3">};</span>
+
+<span class="s0">const </span><span class="s1">getIsIgnoredPredicate </span><span class="s3">= (</span><span class="s1">files</span><span
+    class="s3">, </span><span class="s1">cwd</span><span class="s3">) =&gt; {</span>
+	<span class="s0">const </span><span class="s1">patterns </span><span class="s3">= </span><span class="s1">files</span><span
+    class="s3">.</span><span class="s1">flatMap</span><span class="s3">(</span><span class="s1">file </span><span
+    class="s3">=&gt; </span><span class="s1">parseIgnoreFile</span><span class="s3">(</span><span class="s1">file</span><span
+    class="s3">, </span><span class="s1">cwd</span><span class="s3">));</span>
+	<span class="s0">const </span><span class="s1">ignores </span><span class="s3">= </span><span
+    class="s1">gitIgnore</span><span class="s3">().</span><span class="s1">add</span><span class="s3">(</span><span
+    class="s1">patterns</span><span class="s3">);</span>
+
+	<span class="s0">return </span><span class="s1">fileOrDirectory </span><span class="s3">=&gt; {</span>
+		<span class="s1">fileOrDirectory </span><span class="s3">= </span><span class="s1">toPath</span><span
+    class="s3">(</span><span class="s1">fileOrDirectory</span><span class="s3">);</span>
+		<span class="s1">fileOrDirectory </span><span class="s3">= </span><span class="s1">toRelativePath</span><span
+    class="s3">(</span><span class="s1">fileOrDirectory</span><span class="s3">, </span><span class="s1">cwd</span><span
+    class="s3">);</span>
+		<span class="s0">return </span><span class="s1">fileOrDirectory </span><span class="s3">? </span><span class="s1">ignores</span><span
+    class="s3">.</span><span class="s1">ignores</span><span class="s3">(</span><span class="s1">slash</span><span
+    class="s3">(</span><span class="s1">fileOrDirectory</span><span class="s3">)) : </span><span class="s0">false</span><span
+    class="s3">;</span>
+	<span class="s3">};</span>
+<span class="s3">};</span>
+
+<span class="s0">const </span><span class="s1">normalizeOptions </span><span class="s3">= (</span><span class="s1">options </span><span
+    class="s3">= {}) =&gt; ({</span>
+	<span class="s1">cwd</span><span class="s3">: </span><span class="s1">toPath</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">cwd</span><span class="s3">) || </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">cwd</span><span class="s3">(),</span>
+	<span class="s1">suppressErrors</span><span class="s3">: </span><span class="s1">Boolean</span><span
+    class="s3">(</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">suppressErrors</span><span class="s3">),</span>
+	<span class="s1">deep</span><span class="s3">: </span><span class="s0">typeof </span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">deep </span><span class="s3">=== </span><span
+    class="s2">'number' </span><span class="s3">? </span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">deep </span><span class="s3">: </span><span class="s1">Number</span><span class="s3">.</span><span
+    class="s1">POSITIVE_INFINITY</span><span class="s3">,</span>
+<span class="s3">});</span>
+
+<span class="s0">export const </span><span class="s1">isIgnoredByIgnoreFiles </span><span class="s3">= </span><span
+    class="s1">async </span><span class="s3">(</span><span class="s1">patterns</span><span class="s3">, </span><span
+    class="s1">options</span><span class="s3">) =&gt; {</span>
+	<span class="s0">const </span><span class="s3">{</span><span class="s1">cwd</span><span class="s3">, </span><span
+    class="s1">suppressErrors</span><span class="s3">, </span><span class="s1">deep</span><span
+    class="s3">} = </span><span class="s1">normalizeOptions</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">);</span>
+
+	<span class="s0">const </span><span class="s1">paths </span><span class="s3">= </span><span
+    class="s0">await </span><span class="s1">fastGlob</span><span class="s3">(</span><span
+    class="s1">patterns</span><span class="s3">, {</span><span class="s1">cwd</span><span class="s3">, </span><span
+    class="s1">suppressErrors</span><span class="s3">, </span><span class="s1">deep</span><span
+    class="s3">, </span><span class="s1">...ignoreFilesGlobOptions</span><span class="s3">});</span>
+
+	<span class="s0">const </span><span class="s1">files </span><span class="s3">= </span><span
+    class="s0">await </span><span class="s1">Promise</span><span class="s3">.</span><span class="s1">all</span><span
+    class="s3">(</span>
+		<span class="s1">paths</span><span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span
+    class="s1">async filePath </span><span class="s3">=&gt; ({</span>
+			<span class="s1">filePath</span><span class="s3">,</span>
+			<span class="s1">content</span><span class="s3">: </span><span class="s0">await </span><span
+    class="s1">fs</span><span class="s3">.</span><span class="s1">promises</span><span class="s3">.</span><span
+    class="s1">readFile</span><span class="s3">(</span><span class="s1">filePath</span><span class="s3">, </span><span
+    class="s2">'utf8'</span><span class="s3">),</span>
+		<span class="s3">})),</span>
+	<span class="s3">);</span>
+
+	<span class="s0">return </span><span class="s1">getIsIgnoredPredicate</span><span class="s3">(</span><span class="s1">files</span><span
+    class="s3">, </span><span class="s1">cwd</span><span class="s3">);</span>
+<span class="s3">};</span>
+
+<span class="s0">export const </span><span class="s1">isIgnoredByIgnoreFilesSync </span><span class="s3">= (</span><span
+    class="s1">patterns</span><span class="s3">, </span><span class="s1">options</span><span class="s3">) =&gt; {</span>
+	<span class="s0">const </span><span class="s3">{</span><span class="s1">cwd</span><span class="s3">, </span><span
+    class="s1">suppressErrors</span><span class="s3">, </span><span class="s1">deep</span><span
+    class="s3">} = </span><span class="s1">normalizeOptions</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">);</span>
+
+	<span class="s0">const </span><span class="s1">paths </span><span class="s3">= </span><span class="s1">fastGlob</span><span
+    class="s3">.</span><span class="s1">sync</span><span class="s3">(</span><span class="s1">patterns</span><span
+    class="s3">, {</span><span class="s1">cwd</span><span class="s3">, </span><span
+    class="s1">suppressErrors</span><span class="s3">, </span><span class="s1">deep</span><span
+    class="s3">, </span><span class="s1">...ignoreFilesGlobOptions</span><span class="s3">});</span>
+
+	<span class="s0">const </span><span class="s1">files </span><span class="s3">= </span><span
+    class="s1">paths</span><span class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span
+    class="s1">filePath </span><span class="s3">=&gt; ({</span>
+		<span class="s1">filePath</span><span class="s3">,</span>
+		<span class="s1">content</span><span class="s3">: </span><span class="s1">fs</span><span class="s3">.</span><span
+    class="s1">readFileSync</span><span class="s3">(</span><span class="s1">filePath</span><span
+    class="s3">, </span><span class="s2">'utf8'</span><span class="s3">),</span>
+	<span class="s3">}));</span>
+
+	<span class="s0">return </span><span class="s1">getIsIgnoredPredicate</span><span class="s3">(</span><span class="s1">files</span><span
+    class="s3">, </span><span class="s1">cwd</span><span class="s3">);</span>
+<span class="s3">};</span>
+
+<span class="s0">export const </span><span class="s1">isGitIgnored </span><span class="s3">= </span><span class="s1">options </span><span
+    class="s3">=&gt; </span><span class="s1">isIgnoredByIgnoreFiles</span><span class="s3">(</span><span class="s1">GITIGNORE_FILES_PATTERN</span><span
+    class="s3">, </span><span class="s1">options</span><span class="s3">);</span>
+<span class="s0">export const </span><span class="s1">isGitIgnoredSync </span><span class="s3">= </span><span
+    class="s1">options </span><span class="s3">=&gt; </span><span class="s1">isIgnoredByIgnoreFilesSync</span><span
+    class="s3">(</span><span class="s1">GITIGNORE_FILES_PATTERN</span><span class="s3">, </span><span
+    class="s1">options</span><span class="s3">);</span>
+</pre>
+</body>
+</html>

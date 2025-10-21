@@ -1,0 +1,340 @@
+<html>
+<head>
+  <title>Dir.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          Dir.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">Dir </span><span class="s1">= </span><span
+    class="s3">void </span><span class="s4">0</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s2">util_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./util&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">Dirent_1 </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;./Dirent&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">errors </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../vendor/node/internal/errors&quot;</span><span
+    class="s1">);</span>
+<span class="s5">/**</span>
+ <span class="s5">* A directory stream, like `fs.Dir`.</span>
+ <span class="s5">*/</span>
+<span class="s3">class </span><span class="s2">Dir </span><span class="s1">{</span>
+    <span class="s2">constructor</span><span class="s1">(</span><span class="s2">link</span><span
+    class="s1">, </span><span class="s2">options</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">link </span><span
+    class="s1">= </span><span class="s2">link</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">options </span><span
+    class="s1">= </span><span class="s2">options</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">iteratorInfo </span><span
+    class="s1">= [];</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">closed </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">operationQueue </span><span
+    class="s1">= </span><span class="s3">null</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">path </span><span
+    class="s1">= </span><span class="s2">link</span><span class="s1">.</span><span class="s2">getPath</span><span
+    class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">iteratorInfo</span><span
+    class="s1">.</span><span class="s2">push</span><span class="s1">(</span><span class="s2">link</span><span
+    class="s1">.</span><span class="s2">children</span><span class="s1">[</span><span class="s2">Symbol</span><span
+    class="s1">.</span><span class="s2">iterator</span><span class="s1">]());</span>
+    <span class="s1">}</span>
+    <span class="s2">closeBase</span><span class="s1">() {</span>
+        <span class="s6">// In a real filesystem implementation, this would close file descriptors</span>
+        <span class="s6">// For memfs, we just need to mark as closed</span>
+    <span class="s1">}</span>
+    <span class="s2">readBase</span><span class="s1">(</span><span class="s2">iteratorInfo</span><span
+    class="s1">) {</span>
+        <span class="s3">let </span><span class="s2">done</span><span class="s1">;</span>
+        <span class="s3">let </span><span class="s2">value</span><span class="s1">;</span>
+        <span class="s3">let </span><span class="s2">name</span><span class="s1">;</span>
+        <span class="s3">let </span><span class="s2">link</span><span class="s1">;</span>
+        <span class="s3">do </span><span class="s1">{</span>
+            <span class="s3">do </span><span class="s1">{</span>
+                <span class="s1">({ </span><span class="s2">done</span><span class="s1">, </span><span
+    class="s2">value </span><span class="s1">} = </span><span class="s2">iteratorInfo</span><span
+    class="s1">[</span><span class="s2">iteratorInfo</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">- </span><span class="s4">1</span><span class="s1">].</span><span class="s2">next</span><span class="s1">());</span>
+                <span class="s3">if </span><span class="s1">(!</span><span class="s2">done</span><span
+    class="s1">) {</span>
+                    <span class="s1">[</span><span class="s2">name</span><span class="s1">, </span><span
+    class="s2">link</span><span class="s1">] = </span><span class="s2">value</span><span class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s3">break</span><span class="s1">;</span>
+                <span class="s1">}</span>
+            <span class="s1">} </span><span class="s3">while </span><span class="s1">(</span><span
+    class="s2">name </span><span class="s1">=== </span><span class="s0">'.' </span><span class="s1">|| </span><span
+    class="s2">name </span><span class="s1">=== </span><span class="s0">'..'</span><span class="s1">);</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">done</span><span class="s1">) {</span>
+                <span class="s2">iteratorInfo</span><span class="s1">.</span><span class="s2">pop</span><span
+    class="s1">();</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">iteratorInfo</span><span
+    class="s1">.</span><span class="s2">length </span><span class="s1">=== </span><span class="s4">0</span><span
+    class="s1">) {</span>
+                    <span class="s3">break</span><span class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s2">done </span><span class="s1">= </span><span class="s3">false</span><span
+    class="s1">;</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">recursive </span><span
+    class="s1">&amp;&amp; </span><span class="s2">link</span><span class="s1">.</span><span
+    class="s2">children</span><span class="s1">.</span><span class="s2">size</span><span class="s1">) {</span>
+                    <span class="s2">iteratorInfo</span><span class="s1">.</span><span class="s2">push</span><span
+    class="s1">(</span><span class="s2">link</span><span class="s1">.</span><span class="s2">children</span><span
+    class="s1">[</span><span class="s2">Symbol</span><span class="s1">.</span><span class="s2">iterator</span><span
+    class="s1">]());</span>
+                <span class="s1">}</span>
+                <span class="s3">return </span><span class="s2">Dirent_1</span><span class="s1">.</span><span
+    class="s2">default</span><span class="s1">.</span><span class="s2">build</span><span class="s1">(</span><span
+    class="s2">link</span><span class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">encoding</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">} </span><span class="s3">while </span><span class="s1">(!</span><span
+    class="s2">done</span><span class="s1">);</span>
+        <span class="s3">return null</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">close</span><span class="s1">(</span><span class="s2">callback</span><span class="s1">) {</span>
+        <span class="s6">// Promise-based close</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">callback </span><span
+    class="s1">=== </span><span class="s2">undefined</span><span class="s1">) {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">closed</span><span class="s1">) {</span>
+                <span class="s3">return </span><span class="s2">Promise</span><span class="s1">.</span><span class="s2">reject</span><span
+    class="s1">(</span><span class="s3">new </span><span class="s2">errors</span><span class="s1">.</span><span
+    class="s2">Error</span><span class="s1">(</span><span class="s0">'ERR_DIR_CLOSED'</span><span class="s1">));</span>
+            <span class="s1">}</span>
+            <span class="s3">return new </span><span class="s2">Promise</span><span class="s1">((</span><span
+    class="s2">resolve</span><span class="s1">, </span><span class="s2">reject</span><span class="s1">) =&gt; {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">close</span><span
+    class="s1">(</span><span class="s2">err </span><span class="s1">=&gt; {</span>
+                    <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">)</span>
+                        <span class="s2">reject</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">);</span>
+                    <span class="s3">else</span>
+                        <span class="s2">resolve</span><span class="s1">();</span>
+                <span class="s1">});</span>
+            <span class="s1">});</span>
+        <span class="s1">}</span>
+        <span class="s6">// Callback-based close</span>
+        <span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">validateCallback</span><span class="s1">)(</span><span
+    class="s2">callback</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">closed</span><span class="s1">) {</span>
+            <span class="s2">process</span><span class="s1">.</span><span class="s2">nextTick</span><span
+    class="s1">(</span><span class="s2">callback</span><span class="s1">, </span><span class="s3">new </span><span
+    class="s2">errors</span><span class="s1">.</span><span class="s2">Error</span><span class="s1">(</span><span
+    class="s0">'ERR_DIR_CLOSED'</span><span class="s1">));</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">operationQueue </span><span class="s1">!== </span><span class="s3">null</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">operationQueue</span><span class="s1">.</span><span
+    class="s2">push</span><span class="s1">(() =&gt; {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">close</span><span
+    class="s1">(</span><span class="s2">callback</span><span class="s1">);</span>
+            <span class="s1">});</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">closed </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+        <span class="s3">try </span><span class="s1">{</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeBase</span><span
+    class="s1">();</span>
+            <span class="s2">process</span><span class="s1">.</span><span class="s2">nextTick</span><span
+    class="s1">(</span><span class="s2">callback</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span class="s1">) {</span>
+            <span class="s2">process</span><span class="s1">.</span><span class="s2">nextTick</span><span
+    class="s1">(</span><span class="s2">callback</span><span class="s1">, </span><span class="s2">err</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">closeSync</span><span class="s1">() {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">closed</span><span class="s1">) {</span>
+            <span class="s3">throw new </span><span class="s2">errors</span><span class="s1">.</span><span class="s2">Error</span><span
+    class="s1">(</span><span class="s0">'ERR_DIR_CLOSED'</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">operationQueue </span><span class="s1">!== </span><span class="s3">null</span><span class="s1">) {</span>
+            <span class="s3">throw new </span><span class="s2">errors</span><span class="s1">.</span><span class="s2">Error</span><span
+    class="s1">(</span><span class="s0">'ERR_DIR_CONCURRENT_OPERATION'</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">closed </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">closeBase</span><span
+    class="s1">();</span>
+    <span class="s1">}</span>
+    <span class="s2">read</span><span class="s1">(</span><span class="s2">callback</span><span class="s1">) {</span>
+        <span class="s6">// Promise-based read</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">callback </span><span
+    class="s1">=== </span><span class="s2">undefined</span><span class="s1">) {</span>
+            <span class="s3">return new </span><span class="s2">Promise</span><span class="s1">((</span><span
+    class="s2">resolve</span><span class="s1">, </span><span class="s2">reject</span><span class="s1">) =&gt; {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">read</span><span
+    class="s1">((</span><span class="s2">err</span><span class="s1">, </span><span class="s2">result</span><span
+    class="s1">) =&gt; {</span>
+                    <span class="s3">if </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">)</span>
+                        <span class="s2">reject</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">);</span>
+                    <span class="s3">else</span>
+                        <span class="s2">resolve</span><span class="s1">(</span><span class="s2">result </span><span
+    class="s1">?? </span><span class="s3">null</span><span class="s1">);</span>
+                <span class="s1">});</span>
+            <span class="s1">});</span>
+        <span class="s1">}</span>
+        <span class="s6">// Callback-based read</span>
+        <span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">validateCallback</span><span class="s1">)(</span><span
+    class="s2">callback</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">closed</span><span class="s1">) {</span>
+            <span class="s2">process</span><span class="s1">.</span><span class="s2">nextTick</span><span
+    class="s1">(</span><span class="s2">callback</span><span class="s1">, </span><span class="s3">new </span><span
+    class="s2">errors</span><span class="s1">.</span><span class="s2">Error</span><span class="s1">(</span><span
+    class="s0">'ERR_DIR_CLOSED'</span><span class="s1">));</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">operationQueue </span><span class="s1">!== </span><span class="s3">null</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">operationQueue</span><span class="s1">.</span><span
+    class="s2">push</span><span class="s1">(() =&gt; {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">read</span><span
+    class="s1">(</span><span class="s2">callback</span><span class="s1">);</span>
+            <span class="s1">});</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">operationQueue </span><span class="s1">= [];</span>
+        <span class="s3">try </span><span class="s1">{</span>
+            <span class="s3">const </span><span class="s2">result </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">readBase</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">iteratorInfo</span><span class="s1">);</span>
+            <span class="s2">process</span><span class="s1">.</span><span class="s2">nextTick</span><span class="s1">(() =&gt; {</span>
+                <span class="s3">const </span><span class="s2">queue </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">operationQueue</span><span class="s1">;</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">operationQueue </span><span
+    class="s1">= </span><span class="s3">null</span><span class="s1">;</span>
+                <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span class="s2">op of queue</span><span
+    class="s1">)</span>
+                    <span class="s2">op</span><span class="s1">();</span>
+                <span class="s2">callback</span><span class="s1">(</span><span class="s3">null</span><span
+    class="s1">, </span><span class="s2">result</span><span class="s1">);</span>
+            <span class="s1">});</span>
+        <span class="s1">}</span>
+        <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span class="s1">) {</span>
+            <span class="s2">process</span><span class="s1">.</span><span class="s2">nextTick</span><span class="s1">(() =&gt; {</span>
+                <span class="s3">const </span><span class="s2">queue </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">operationQueue</span><span class="s1">;</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">operationQueue </span><span
+    class="s1">= </span><span class="s3">null</span><span class="s1">;</span>
+                <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span class="s2">op of queue</span><span
+    class="s1">)</span>
+                    <span class="s2">op</span><span class="s1">();</span>
+                <span class="s2">callback</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">);</span>
+            <span class="s1">});</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">readSync</span><span class="s1">() {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">closed</span><span class="s1">) {</span>
+            <span class="s3">throw new </span><span class="s2">errors</span><span class="s1">.</span><span class="s2">Error</span><span
+    class="s1">(</span><span class="s0">'ERR_DIR_CLOSED'</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">operationQueue </span><span class="s1">!== </span><span class="s3">null</span><span class="s1">) {</span>
+            <span class="s3">throw new </span><span class="s2">errors</span><span class="s1">.</span><span class="s2">Error</span><span
+    class="s1">(</span><span class="s0">'ERR_DIR_CONCURRENT_OPERATION'</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">readBase</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">iteratorInfo</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s1">[</span><span class="s2">Symbol</span><span class="s1">.</span><span
+    class="s2">asyncIterator</span><span class="s1">]() {</span>
+        <span class="s3">return </span><span class="s1">{</span>
+            <span class="s2">next</span><span class="s1">: </span><span class="s2">async </span><span class="s1">() =&gt; {</span>
+                <span class="s3">try </span><span class="s1">{</span>
+                    <span class="s3">const </span><span class="s2">dirEnt </span><span class="s1">= </span><span
+    class="s3">await this</span><span class="s1">.</span><span class="s2">read</span><span class="s1">();</span>
+                    <span class="s3">if </span><span class="s1">(</span><span class="s2">dirEnt </span><span class="s1">!== </span><span
+    class="s3">null</span><span class="s1">) {</span>
+                        <span class="s3">return </span><span class="s1">{ </span><span class="s2">done</span><span
+    class="s1">: </span><span class="s3">false</span><span class="s1">, </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s2">dirEnt </span><span class="s1">};</span>
+                    <span class="s1">}</span>
+                    <span class="s3">else </span><span class="s1">{</span>
+                        <span class="s3">return </span><span class="s1">{ </span><span class="s2">done</span><span
+    class="s1">: </span><span class="s3">true</span><span class="s1">, </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s2">undefined </span><span class="s1">};</span>
+                    <span class="s1">}</span>
+                <span class="s1">}</span>
+                <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                    <span class="s3">throw </span><span class="s2">err</span><span class="s1">;</span>
+                <span class="s1">}</span>
+            <span class="s1">},</span>
+            <span class="s1">[</span><span class="s2">Symbol</span><span class="s1">.</span><span class="s2">asyncIterator</span><span
+    class="s1">]() {</span>
+                <span class="s3">return this</span><span class="s1">;</span>
+            <span class="s1">},</span>
+        <span class="s1">};</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">Dir </span><span class="s1">= </span><span
+    class="s2">Dir</span><span class="s1">;</span>
+<span class="s6">//# sourceMappingURL=Dir.js.map</span></pre>
+</body>
+</html>

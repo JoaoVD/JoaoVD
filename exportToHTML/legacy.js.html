@@ -1,0 +1,1114 @@
+<html>
+<head>
+  <title>legacy.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          legacy.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+
+<span class="s3">function </span><span class="s2">_typeof</span><span class="s1">(</span><span
+    class="s2">obj</span><span class="s1">) { </span><span class="s0">&quot;@babel/helpers - typeof&quot;</span><span
+    class="s1">; </span><span class="s3">return </span><span class="s2">_typeof </span><span class="s1">= </span><span
+    class="s0">&quot;function&quot; </span><span class="s1">== </span><span class="s3">typeof </span><span class="s2">Symbol </span><span
+    class="s1">&amp;&amp; </span><span class="s0">&quot;symbol&quot; </span><span class="s1">== </span><span class="s3">typeof </span><span
+    class="s2">Symbol</span><span class="s1">.</span><span class="s2">iterator </span><span class="s1">? </span><span
+    class="s3">function </span><span class="s1">(</span><span class="s2">obj</span><span class="s1">) { </span><span
+    class="s3">return typeof </span><span class="s2">obj</span><span class="s1">; } : </span><span
+    class="s3">function </span><span class="s1">(</span><span class="s2">obj</span><span class="s1">) { </span><span
+    class="s3">return </span><span class="s2">obj </span><span class="s1">&amp;&amp; </span><span class="s0">&quot;function&quot; </span><span
+    class="s1">== </span><span class="s3">typeof </span><span class="s2">Symbol </span><span
+    class="s1">&amp;&amp; </span><span class="s2">obj</span><span class="s1">.</span><span
+    class="s2">constructor </span><span class="s1">=== </span><span class="s2">Symbol </span><span
+    class="s1">&amp;&amp; </span><span class="s2">obj </span><span class="s1">!== </span><span
+    class="s2">Symbol</span><span class="s1">.</span><span class="s2">prototype </span><span class="s1">? </span><span
+    class="s0">&quot;symbol&quot; </span><span class="s1">: </span><span class="s3">typeof </span><span
+    class="s2">obj</span><span class="s1">; }, </span><span class="s2">_typeof</span><span class="s1">(</span><span
+    class="s2">obj</span><span class="s1">); }</span>
+<span class="s3">function </span><span class="s2">_defineProperties</span><span class="s1">(</span><span class="s2">target</span><span
+    class="s1">, </span><span class="s2">props</span><span class="s1">) { </span><span class="s3">for </span><span
+    class="s1">(</span><span class="s3">var </span><span class="s2">i </span><span class="s1">= </span><span class="s4">0</span><span
+    class="s1">; </span><span class="s2">i </span><span class="s1">&lt; </span><span class="s2">props</span><span
+    class="s1">.</span><span class="s2">length</span><span class="s1">; </span><span class="s2">i</span><span
+    class="s1">++) { </span><span class="s3">var </span><span class="s2">descriptor </span><span
+    class="s1">= </span><span class="s2">props</span><span class="s1">[</span><span class="s2">i</span><span class="s1">]; </span><span
+    class="s2">descriptor</span><span class="s1">.</span><span class="s2">enumerable </span><span
+    class="s1">= </span><span class="s2">descriptor</span><span class="s1">.</span><span
+    class="s2">enumerable </span><span class="s1">|| </span><span class="s3">false</span><span class="s1">; </span><span
+    class="s2">descriptor</span><span class="s1">.</span><span class="s2">configurable </span><span class="s1">= </span><span
+    class="s3">true</span><span class="s1">; </span><span class="s3">if </span><span class="s1">(</span><span
+    class="s0">&quot;value&quot; </span><span class="s3">in </span><span class="s2">descriptor</span><span
+    class="s1">) </span><span class="s2">descriptor</span><span class="s1">.</span><span
+    class="s2">writable </span><span class="s1">= </span><span class="s3">true</span><span class="s1">; </span><span
+    class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">target</span><span class="s1">, </span><span
+    class="s2">_toPropertyKey</span><span class="s1">(</span><span class="s2">descriptor</span><span class="s1">.</span><span
+    class="s2">key</span><span class="s1">), </span><span class="s2">descriptor</span><span class="s1">); } }</span>
+<span class="s3">function </span><span class="s2">_createClass</span><span class="s1">(</span><span class="s2">Constructor</span><span
+    class="s1">, </span><span class="s2">protoProps</span><span class="s1">, </span><span
+    class="s2">staticProps</span><span class="s1">) { </span><span class="s3">if </span><span class="s1">(</span><span
+    class="s2">protoProps</span><span class="s1">) </span><span class="s2">_defineProperties</span><span
+    class="s1">(</span><span class="s2">Constructor</span><span class="s1">.</span><span
+    class="s2">prototype</span><span class="s1">, </span><span class="s2">protoProps</span><span
+    class="s1">); </span><span class="s3">if </span><span class="s1">(</span><span class="s2">staticProps</span><span
+    class="s1">) </span><span class="s2">_defineProperties</span><span class="s1">(</span><span
+    class="s2">Constructor</span><span class="s1">, </span><span class="s2">staticProps</span><span
+    class="s1">); </span><span class="s2">Object</span><span class="s1">.</span><span
+    class="s2">defineProperty</span><span class="s1">(</span><span class="s2">Constructor</span><span
+    class="s1">, </span><span class="s0">&quot;prototype&quot;</span><span class="s1">, { </span><span class="s2">writable</span><span
+    class="s1">: </span><span class="s3">false </span><span class="s1">}); </span><span class="s3">return </span><span
+    class="s2">Constructor</span><span class="s1">; }</span>
+<span class="s3">function </span><span class="s2">_toPropertyKey</span><span class="s1">(</span><span
+    class="s2">arg</span><span class="s1">) { </span><span class="s3">var </span><span class="s2">key </span><span
+    class="s1">= </span><span class="s2">_toPrimitive</span><span class="s1">(</span><span class="s2">arg</span><span
+    class="s1">, </span><span class="s0">&quot;string&quot;</span><span class="s1">); </span><span
+    class="s3">return </span><span class="s2">_typeof</span><span class="s1">(</span><span class="s2">key</span><span
+    class="s1">) === </span><span class="s0">&quot;symbol&quot; </span><span class="s1">? </span><span
+    class="s2">key </span><span class="s1">: </span><span class="s2">String</span><span class="s1">(</span><span
+    class="s2">key</span><span class="s1">); }</span>
+<span class="s3">function </span><span class="s2">_toPrimitive</span><span class="s1">(</span><span
+    class="s2">input</span><span class="s1">, </span><span class="s2">hint</span><span class="s1">) { </span><span
+    class="s3">if </span><span class="s1">(</span><span class="s2">_typeof</span><span class="s1">(</span><span
+    class="s2">input</span><span class="s1">) !== </span><span class="s0">&quot;object&quot; </span><span
+    class="s1">|| </span><span class="s2">input </span><span class="s1">=== </span><span class="s3">null</span><span
+    class="s1">) </span><span class="s3">return </span><span class="s2">input</span><span class="s1">; </span><span
+    class="s3">var </span><span class="s2">prim </span><span class="s1">= </span><span class="s2">input</span><span
+    class="s1">[</span><span class="s2">Symbol</span><span class="s1">.</span><span class="s2">toPrimitive</span><span
+    class="s1">]; </span><span class="s3">if </span><span class="s1">(</span><span class="s2">prim </span><span
+    class="s1">!== </span><span class="s2">undefined</span><span class="s1">) { </span><span class="s3">var </span><span
+    class="s2">res </span><span class="s1">= </span><span class="s2">prim</span><span class="s1">.</span><span
+    class="s2">call</span><span class="s1">(</span><span class="s2">input</span><span class="s1">, </span><span
+    class="s2">hint </span><span class="s1">|| </span><span class="s0">&quot;default&quot;</span><span
+    class="s1">); </span><span class="s3">if </span><span class="s1">(</span><span class="s2">_typeof</span><span
+    class="s1">(</span><span class="s2">res</span><span class="s1">) !== </span><span
+    class="s0">&quot;object&quot;</span><span class="s1">) </span><span class="s3">return </span><span
+    class="s2">res</span><span class="s1">; </span><span class="s3">throw new </span><span
+    class="s2">TypeError</span><span class="s1">(</span><span class="s0">&quot;@@toPrimitive must return a primitive value.&quot;</span><span
+    class="s1">); } </span><span class="s3">return </span><span class="s1">(</span><span class="s2">hint </span><span
+    class="s1">=== </span><span class="s0">&quot;string&quot; </span><span class="s1">? </span><span
+    class="s2">String </span><span class="s1">: </span><span class="s2">Number</span><span class="s1">)(</span><span
+    class="s2">input</span><span class="s1">); }</span>
+<span class="s3">function </span><span class="s2">_classCallCheck</span><span class="s1">(</span><span class="s2">instance</span><span
+    class="s1">, </span><span class="s2">Constructor</span><span class="s1">) { </span><span class="s3">if </span><span
+    class="s1">(!(</span><span class="s2">instance </span><span class="s3">instanceof </span><span class="s2">Constructor</span><span
+    class="s1">)) { </span><span class="s3">throw new </span><span class="s2">TypeError</span><span
+    class="s1">(</span><span class="s0">&quot;Cannot call a class as a function&quot;</span><span
+    class="s1">); } }</span>
+<span class="s3">function </span><span class="s2">_slicedToArray</span><span class="s1">(</span><span
+    class="s2">arr</span><span class="s1">, </span><span class="s2">i</span><span class="s1">) { </span><span
+    class="s3">return </span><span class="s2">_arrayWithHoles</span><span class="s1">(</span><span class="s2">arr</span><span
+    class="s1">) || </span><span class="s2">_iterableToArrayLimit</span><span class="s1">(</span><span
+    class="s2">arr</span><span class="s1">, </span><span class="s2">i</span><span class="s1">) || </span><span
+    class="s2">_unsupportedIterableToArray</span><span class="s1">(</span><span class="s2">arr</span><span
+    class="s1">, </span><span class="s2">i</span><span class="s1">) || </span><span
+    class="s2">_nonIterableRest</span><span class="s1">(); }</span>
+<span class="s3">function </span><span class="s2">_nonIterableRest</span><span class="s1">() { </span><span class="s3">throw new </span><span
+    class="s2">TypeError</span><span class="s1">(</span><span class="s0">&quot;Invalid attempt to destructure non-iterable instance.</span><span
+    class="s3">\n</span><span class="s0">In order to be iterable, non-array objects must have a [Symbol.iterator]() method.&quot;</span><span
+    class="s1">); }</span>
+<span class="s3">function </span><span class="s2">_unsupportedIterableToArray</span><span class="s1">(</span><span
+    class="s2">o</span><span class="s1">, </span><span class="s2">minLen</span><span class="s1">) { </span><span
+    class="s3">if </span><span class="s1">(!</span><span class="s2">o</span><span class="s1">) </span><span class="s3">return</span><span
+    class="s1">; </span><span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span
+    class="s2">o </span><span class="s1">=== </span><span class="s0">&quot;string&quot;</span><span class="s1">) </span><span
+    class="s3">return </span><span class="s2">_arrayLikeToArray</span><span class="s1">(</span><span class="s2">o</span><span
+    class="s1">, </span><span class="s2">minLen</span><span class="s1">); </span><span class="s3">var </span><span
+    class="s2">n </span><span class="s1">= </span><span class="s2">Object</span><span class="s1">.</span><span
+    class="s2">prototype</span><span class="s1">.</span><span class="s2">toString</span><span class="s1">.</span><span
+    class="s2">call</span><span class="s1">(</span><span class="s2">o</span><span class="s1">).</span><span class="s2">slice</span><span
+    class="s1">(</span><span class="s4">8</span><span class="s1">, -</span><span class="s4">1</span><span
+    class="s1">); </span><span class="s3">if </span><span class="s1">(</span><span class="s2">n </span><span class="s1">=== </span><span
+    class="s0">&quot;Object&quot; </span><span class="s1">&amp;&amp; </span><span class="s2">o</span><span
+    class="s1">.</span><span class="s2">constructor</span><span class="s1">) </span><span class="s2">n </span><span
+    class="s1">= </span><span class="s2">o</span><span class="s1">.</span><span class="s2">constructor</span><span
+    class="s1">.</span><span class="s2">name</span><span class="s1">; </span><span class="s3">if </span><span
+    class="s1">(</span><span class="s2">n </span><span class="s1">=== </span><span
+    class="s0">&quot;Map&quot; </span><span class="s1">|| </span><span class="s2">n </span><span
+    class="s1">=== </span><span class="s0">&quot;Set&quot;</span><span class="s1">) </span><span
+    class="s3">return </span><span class="s2">Array</span><span class="s1">.</span><span class="s2">from</span><span
+    class="s1">(</span><span class="s2">o</span><span class="s1">); </span><span class="s3">if </span><span
+    class="s1">(</span><span class="s2">n </span><span class="s1">=== </span><span
+    class="s0">&quot;Arguments&quot; </span><span class="s1">|| </span><span class="s5">/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/</span><span
+    class="s1">.</span><span class="s2">test</span><span class="s1">(</span><span class="s2">n</span><span
+    class="s1">)) </span><span class="s3">return </span><span class="s2">_arrayLikeToArray</span><span
+    class="s1">(</span><span class="s2">o</span><span class="s1">, </span><span class="s2">minLen</span><span
+    class="s1">); }</span>
+<span class="s3">function </span><span class="s2">_arrayLikeToArray</span><span class="s1">(</span><span
+    class="s2">arr</span><span class="s1">, </span><span class="s2">len</span><span class="s1">) { </span><span
+    class="s3">if </span><span class="s1">(</span><span class="s2">len </span><span class="s1">== </span><span
+    class="s3">null </span><span class="s1">|| </span><span class="s2">len </span><span class="s1">&gt; </span><span
+    class="s2">arr</span><span class="s1">.</span><span class="s2">length</span><span class="s1">) </span><span
+    class="s2">len </span><span class="s1">= </span><span class="s2">arr</span><span class="s1">.</span><span
+    class="s2">length</span><span class="s1">; </span><span class="s3">for </span><span class="s1">(</span><span
+    class="s3">var </span><span class="s2">i </span><span class="s1">= </span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">arr2 </span><span class="s1">= </span><span class="s3">new </span><span class="s2">Array</span><span
+    class="s1">(</span><span class="s2">len</span><span class="s1">); </span><span class="s2">i </span><span class="s1">&lt; </span><span
+    class="s2">len</span><span class="s1">; </span><span class="s2">i</span><span class="s1">++) </span><span
+    class="s2">arr2</span><span class="s1">[</span><span class="s2">i</span><span class="s1">] = </span><span
+    class="s2">arr</span><span class="s1">[</span><span class="s2">i</span><span class="s1">]; </span><span class="s3">return </span><span
+    class="s2">arr2</span><span class="s1">; }</span>
+<span class="s3">function </span><span class="s2">_iterableToArrayLimit</span><span class="s1">(</span><span class="s2">arr</span><span
+    class="s1">, </span><span class="s2">i</span><span class="s1">) { </span><span class="s3">var </span><span
+    class="s2">_i </span><span class="s1">= </span><span class="s3">null </span><span class="s1">== </span><span
+    class="s2">arr </span><span class="s1">? </span><span class="s3">null </span><span class="s1">: </span><span
+    class="s0">&quot;undefined&quot; </span><span class="s1">!= </span><span class="s3">typeof </span><span class="s2">Symbol </span><span
+    class="s1">&amp;&amp; </span><span class="s2">arr</span><span class="s1">[</span><span class="s2">Symbol</span><span
+    class="s1">.</span><span class="s2">iterator</span><span class="s1">] || </span><span class="s2">arr</span><span
+    class="s1">[</span><span class="s0">&quot;@@iterator&quot;</span><span class="s1">]; </span><span
+    class="s3">if </span><span class="s1">(</span><span class="s3">null </span><span class="s1">!= </span><span
+    class="s2">_i</span><span class="s1">) { </span><span class="s3">var </span><span class="s2">_s</span><span
+    class="s1">, </span><span class="s2">_e</span><span class="s1">, </span><span class="s2">_x</span><span
+    class="s1">, </span><span class="s2">_r</span><span class="s1">, </span><span class="s2">_arr </span><span
+    class="s1">= [], </span><span class="s2">_n </span><span class="s1">= !</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">_d </span><span class="s1">= !</span><span class="s4">1</span><span class="s1">; </span><span
+    class="s3">try </span><span class="s1">{ </span><span class="s3">if </span><span class="s1">(</span><span
+    class="s2">_x </span><span class="s1">= (</span><span class="s2">_i </span><span class="s1">= </span><span
+    class="s2">_i</span><span class="s1">.</span><span class="s2">call</span><span class="s1">(</span><span class="s2">arr</span><span
+    class="s1">)).</span><span class="s2">next</span><span class="s1">, </span><span class="s4">0 </span><span
+    class="s1">=== </span><span class="s2">i</span><span class="s1">) { </span><span class="s3">if </span><span
+    class="s1">(</span><span class="s2">Object</span><span class="s1">(</span><span class="s2">_i</span><span
+    class="s1">) !== </span><span class="s2">_i</span><span class="s1">) </span><span class="s3">return</span><span
+    class="s1">; </span><span class="s2">_n </span><span class="s1">= !</span><span class="s4">1</span><span class="s1">; } </span><span
+    class="s3">else for </span><span class="s1">(; !(</span><span class="s2">_n </span><span class="s1">= (</span><span
+    class="s2">_s </span><span class="s1">= </span><span class="s2">_x</span><span class="s1">.</span><span class="s2">call</span><span
+    class="s1">(</span><span class="s2">_i</span><span class="s1">)).</span><span class="s2">done</span><span
+    class="s1">) &amp;&amp; (</span><span class="s2">_arr</span><span class="s1">.</span><span
+    class="s2">push</span><span class="s1">(</span><span class="s2">_s</span><span class="s1">.</span><span class="s2">value</span><span
+    class="s1">), </span><span class="s2">_arr</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">!== </span><span class="s2">i</span><span class="s1">); </span><span class="s2">_n </span><span
+    class="s1">= !</span><span class="s4">0</span><span class="s1">); } </span><span class="s3">catch </span><span
+    class="s1">(</span><span class="s2">err</span><span class="s1">) { </span><span class="s2">_d </span><span
+    class="s1">= !</span><span class="s4">0</span><span class="s1">, </span><span class="s2">_e </span><span class="s1">= </span><span
+    class="s2">err</span><span class="s1">; } </span><span class="s3">finally </span><span class="s1">{ </span><span
+    class="s3">try </span><span class="s1">{ </span><span class="s3">if </span><span class="s1">(!</span><span
+    class="s2">_n </span><span class="s1">&amp;&amp; </span><span class="s3">null </span><span
+    class="s1">!= </span><span class="s2">_i</span><span class="s1">[</span><span
+    class="s0">&quot;return&quot;</span><span class="s1">] &amp;&amp; (</span><span class="s2">_r </span><span
+    class="s1">= </span><span class="s2">_i</span><span class="s1">[</span><span
+    class="s0">&quot;return&quot;</span><span class="s1">](), </span><span class="s2">Object</span><span
+    class="s1">(</span><span class="s2">_r</span><span class="s1">) !== </span><span class="s2">_r</span><span
+    class="s1">)) </span><span class="s3">return</span><span class="s1">; } </span><span class="s3">finally </span><span
+    class="s1">{ </span><span class="s3">if </span><span class="s1">(</span><span class="s2">_d</span><span
+    class="s1">) </span><span class="s3">throw </span><span class="s2">_e</span><span class="s1">; } } </span><span
+    class="s3">return </span><span class="s2">_arr</span><span class="s1">; } }</span>
+<span class="s3">function </span><span class="s2">_arrayWithHoles</span><span class="s1">(</span><span
+    class="s2">arr</span><span class="s1">) { </span><span class="s3">if </span><span class="s1">(</span><span
+    class="s2">Array</span><span class="s1">.</span><span class="s2">isArray</span><span class="s1">(</span><span
+    class="s2">arr</span><span class="s1">)) </span><span class="s3">return </span><span class="s2">arr</span><span
+    class="s1">; }</span>
+<span class="s6">// A simple implementation of make-array</span>
+<span class="s3">function </span><span class="s2">makeArray</span><span class="s1">(</span><span
+    class="s2">subject</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">Array</span><span class="s1">.</span><span
+    class="s2">isArray</span><span class="s1">(</span><span class="s2">subject</span><span class="s1">) ? </span><span
+    class="s2">subject </span><span class="s1">: [</span><span class="s2">subject</span><span class="s1">];</span>
+<span class="s1">}</span>
+<span class="s3">var </span><span class="s2">EMPTY </span><span class="s1">= </span><span class="s0">''</span><span
+    class="s1">;</span>
+<span class="s3">var </span><span class="s2">SPACE </span><span class="s1">= </span><span class="s0">' '</span><span
+    class="s1">;</span>
+<span class="s3">var </span><span class="s2">ESCAPE </span><span class="s1">= </span><span class="s0">'</span><span
+    class="s3">\\</span><span class="s0">'</span><span class="s1">;</span>
+<span class="s3">var </span><span class="s2">REGEX_TEST_BLANK_LINE </span><span class="s1">= </span><span class="s5">/^\s+$/</span><span
+    class="s1">;</span>
+<span class="s3">var </span><span class="s2">REGEX_INVALID_TRAILING_BACKSLASH </span><span class="s1">= </span><span
+    class="s5">/(?:[^\\]|^)\\$/</span><span class="s1">;</span>
+<span class="s3">var </span><span class="s2">REGEX_REPLACE_LEADING_EXCAPED_EXCLAMATION </span><span class="s1">= </span><span
+    class="s5">/^\\!/</span><span class="s1">;</span>
+<span class="s3">var </span><span class="s2">REGEX_REPLACE_LEADING_EXCAPED_HASH </span><span class="s1">= </span><span
+    class="s5">/^\\#/</span><span class="s1">;</span>
+<span class="s3">var </span><span class="s2">REGEX_SPLITALL_CRLF </span><span class="s1">= </span><span class="s5">/\r?\n/g</span><span
+    class="s1">;</span>
+<span class="s6">// /foo,</span>
+<span class="s6">// ./foo,</span>
+<span class="s6">// ../foo,</span>
+<span class="s6">// .</span>
+<span class="s6">// ..</span>
+<span class="s3">var </span><span class="s2">REGEX_TEST_INVALID_PATH </span><span class="s1">= </span><span class="s5">/^\.*\/|^\.+$/</span><span
+    class="s1">;</span>
+<span class="s3">var </span><span class="s2">SLASH </span><span class="s1">= </span><span class="s0">'/'</span><span
+    class="s1">;</span>
+
+<span class="s6">// Do not use ternary expression here, since &quot;istanbul ignore next&quot; is buggy</span>
+<span class="s3">var </span><span class="s2">TMP_KEY_IGNORE </span><span class="s1">= </span><span class="s0">'node-ignore'</span><span
+    class="s1">;</span>
+<span class="s6">/* istanbul ignore else */</span>
+<span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">Symbol </span><span
+    class="s1">!== </span><span class="s0">'undefined'</span><span class="s1">) {</span>
+  <span class="s2">TMP_KEY_IGNORE </span><span class="s1">= </span><span class="s2">Symbol</span><span
+    class="s1">[</span><span class="s0">&quot;for&quot;</span><span class="s1">](</span><span
+    class="s0">'node-ignore'</span><span class="s1">);</span>
+<span class="s1">}</span>
+<span class="s3">var </span><span class="s2">KEY_IGNORE </span><span class="s1">= </span><span
+    class="s2">TMP_KEY_IGNORE</span><span class="s1">;</span>
+<span class="s3">var </span><span class="s2">define </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">define</span><span class="s1">(</span><span
+    class="s2">object</span><span class="s1">, </span><span class="s2">key</span><span class="s1">, </span><span
+    class="s2">value</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">Object</span><span class="s1">.</span><span
+    class="s2">defineProperty</span><span class="s1">(</span><span class="s2">object</span><span
+    class="s1">, </span><span class="s2">key</span><span class="s1">, {</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s2">value</span>
+  <span class="s1">});</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">REGEX_REGEXP_RANGE </span><span class="s1">= </span><span class="s5">/([0-z])-([0-z])/g</span><span
+    class="s1">;</span>
+<span class="s3">var </span><span class="s2">RETURN_FALSE </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">RETURN_FALSE</span><span class="s1">() {</span>
+  <span class="s3">return false</span><span class="s1">;</span>
+<span class="s1">};</span>
+
+<span class="s6">// Sanitize the range of a regular expression</span>
+<span class="s6">// The cases are complicated, see test cases for details</span>
+<span class="s3">var </span><span class="s2">sanitizeRange </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">sanitizeRange</span><span class="s1">(</span><span
+    class="s2">range</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">range</span><span class="s1">.</span><span
+    class="s2">replace</span><span class="s1">(</span><span class="s2">REGEX_REGEXP_RANGE</span><span
+    class="s1">, </span><span class="s3">function </span><span class="s1">(</span><span class="s2">match</span><span
+    class="s1">, </span><span class="s2">from</span><span class="s1">, </span><span class="s2">to</span><span
+    class="s1">) {</span>
+    <span class="s3">return </span><span class="s2">from</span><span class="s1">.</span><span
+    class="s2">charCodeAt</span><span class="s1">(</span><span class="s4">0</span><span class="s1">) &lt;= </span><span
+    class="s2">to</span><span class="s1">.</span><span class="s2">charCodeAt</span><span class="s1">(</span><span
+    class="s4">0</span><span class="s1">) ? </span><span class="s2">match</span>
+    <span class="s6">// Invalid range (out of order) which is ok for gitignore rules but</span>
+    <span class="s6">//   fatal for JavaScript regular expression, so eliminate it.</span>
+    <span class="s1">: </span><span class="s2">EMPTY</span><span class="s1">;</span>
+  <span class="s1">});</span>
+<span class="s1">};</span>
+
+<span class="s6">// See fixtures #59</span>
+<span class="s3">var </span><span class="s2">cleanRangeBackSlash </span><span class="s1">= </span><span class="s3">function </span><span
+    class="s2">cleanRangeBackSlash</span><span class="s1">(</span><span class="s2">slashes</span><span
+    class="s1">) {</span>
+  <span class="s3">var </span><span class="s2">length </span><span class="s1">= </span><span
+    class="s2">slashes</span><span class="s1">.</span><span class="s2">length</span><span class="s1">;</span>
+  <span class="s3">return </span><span class="s2">slashes</span><span class="s1">.</span><span
+    class="s2">slice</span><span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span class="s2">length </span><span
+    class="s1">- </span><span class="s2">length </span><span class="s1">% </span><span class="s4">2</span><span
+    class="s1">);</span>
+<span class="s1">};</span>
+
+<span class="s6">// &gt; If the pattern ends with a slash,</span>
+<span class="s6">// &gt; it is removed for the purpose of the following description,</span>
+<span class="s6">// &gt; but it would only find a match with a directory.</span>
+<span class="s6">// &gt; In other words, foo/ will match a directory foo and paths underneath it,</span>
+<span class="s6">// &gt; but will not match a regular file or a symbolic link foo</span>
+<span class="s6">// &gt;  (this is consistent with the way how pathspec works in general in Git).</span>
+<span class="s6">// '`foo/`' will not match regular file '`foo`' or symbolic link '`foo`'</span>
+<span class="s6">// -&gt; ignore-rules will not deal with it, because it costs extra `fs.stat` call</span>
+<span class="s6">//      you could use option `mark: true` with `glob`</span>
+
+<span class="s6">// '`foo/`' should not continue with the '`..`'</span>
+<span class="s3">var </span><span class="s2">REPLACERS </span><span class="s1">= [[</span>
+<span class="s6">// remove BOM</span>
+<span class="s6">// TODO:</span>
+<span class="s6">// Other similar zero-width characters?</span>
+<span class="s5">/^\uFEFF/</span><span class="s1">, </span><span class="s3">function </span><span class="s1">() {</span>
+  <span class="s3">return </span><span class="s2">EMPTY</span><span class="s1">;</span>
+<span class="s1">}],</span>
+<span class="s6">// &gt; Trailing spaces are ignored unless they are quoted with backslash (&quot;\&quot;)</span>
+<span class="s1">[</span>
+<span class="s6">// (a\ ) -&gt; (a )</span>
+<span class="s6">// (a  ) -&gt; (a)</span>
+<span class="s6">// (a ) -&gt; (a)</span>
+<span class="s6">// (a \ ) -&gt; (a  )</span>
+<span class="s5">/((?:\\\\)*?)(\\?\s+)$/</span><span class="s1">, </span><span class="s3">function </span><span
+    class="s1">(</span><span class="s2">_</span><span class="s1">, </span><span class="s2">m1</span><span
+    class="s1">, </span><span class="s2">m2</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">m1 </span><span class="s1">+ (</span><span class="s2">m2</span><span
+    class="s1">.</span><span class="s2">indexOf</span><span class="s1">(</span><span class="s0">'</span><span
+    class="s3">\\</span><span class="s0">'</span><span class="s1">) === </span><span class="s4">0 </span><span
+    class="s1">? </span><span class="s2">SPACE </span><span class="s1">: </span><span class="s2">EMPTY</span><span
+    class="s1">);</span>
+<span class="s1">}],</span>
+<span class="s6">// replace (\ ) with ' '</span>
+<span class="s6">// (\ ) -&gt; ' '</span>
+<span class="s6">// (\\ ) -&gt; '\\ '</span>
+<span class="s6">// (\\\ ) -&gt; '\\ '</span>
+<span class="s1">[</span><span class="s5">/(\\+?)\s/g</span><span class="s1">, </span><span
+    class="s3">function </span><span class="s1">(</span><span class="s2">_</span><span class="s1">, </span><span
+    class="s2">m1</span><span class="s1">) {</span>
+  <span class="s3">var </span><span class="s2">length </span><span class="s1">= </span><span class="s2">m1</span><span
+    class="s1">.</span><span class="s2">length</span><span class="s1">;</span>
+  <span class="s3">return </span><span class="s2">m1</span><span class="s1">.</span><span class="s2">slice</span><span
+    class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span class="s2">length </span><span
+    class="s1">- </span><span class="s2">length </span><span class="s1">% </span><span class="s4">2</span><span
+    class="s1">) + </span><span class="s2">SPACE</span><span class="s1">;</span>
+<span class="s1">}],</span>
+<span class="s6">// Escape metacharacters</span>
+<span class="s6">// which is written down by users but means special for regular expressions.</span>
+
+<span class="s6">// &gt; There are 12 characters with special meanings:</span>
+<span class="s6">// &gt; - the backslash \,</span>
+<span class="s6">// &gt; - the caret ^,</span>
+<span class="s6">// &gt; - the dollar sign $,</span>
+<span class="s6">// &gt; - the period or dot .,</span>
+<span class="s6">// &gt; - the vertical bar or pipe symbol |,</span>
+<span class="s6">// &gt; - the question mark ?,</span>
+<span class="s6">// &gt; - the asterisk or star *,</span>
+<span class="s6">// &gt; - the plus sign +,</span>
+<span class="s6">// &gt; - the opening parenthesis (,</span>
+<span class="s6">// &gt; - the closing parenthesis ),</span>
+<span class="s6">// &gt; - and the opening square bracket [,</span>
+<span class="s6">// &gt; - the opening curly brace {,</span>
+<span class="s6">// &gt; These special characters are often called &quot;metacharacters&quot;.</span>
+<span class="s1">[</span><span class="s5">/[\\$.|*+(){^]/g</span><span class="s1">, </span><span
+    class="s3">function </span><span class="s1">(</span><span class="s2">match</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s0">&quot;</span><span class="s3">\\</span><span
+    class="s0">&quot;</span><span class="s1">.</span><span class="s2">concat</span><span class="s1">(</span><span
+    class="s2">match</span><span class="s1">);</span>
+<span class="s1">}], [</span>
+<span class="s6">// &gt; a question mark (?) matches a single character</span>
+<span class="s5">/(?!\\)\?/g</span><span class="s1">, </span><span class="s3">function </span><span
+    class="s1">() {</span>
+  <span class="s3">return </span><span class="s0">'[^/]'</span><span class="s1">;</span>
+<span class="s1">}],</span>
+<span class="s6">// leading slash</span>
+<span class="s1">[</span>
+<span class="s6">// &gt; A leading slash matches the beginning of the pathname.</span>
+<span class="s6">// &gt; For example, &quot;/*.c&quot; matches &quot;cat-file.c&quot; but not &quot;mozilla-sha1/sha1.c&quot;.</span>
+<span class="s6">// A leading slash matches the beginning of the pathname</span>
+<span class="s5">/^\//</span><span class="s1">, </span><span class="s3">function </span><span class="s1">() {</span>
+  <span class="s3">return </span><span class="s0">'^'</span><span class="s1">;</span>
+<span class="s1">}],</span>
+<span class="s6">// replace special metacharacter slash after the leading slash</span>
+<span class="s1">[</span><span class="s5">/\//g</span><span class="s1">, </span><span class="s3">function </span><span
+    class="s1">() {</span>
+  <span class="s3">return </span><span class="s0">'</span><span class="s3">\\</span><span class="s0">/'</span><span
+    class="s1">;</span>
+<span class="s1">}], [</span>
+<span class="s6">// &gt; A leading &quot;**&quot; followed by a slash means match in all directories.</span>
+<span class="s6">// &gt; For example, &quot;**/foo&quot; matches file or directory &quot;foo&quot; anywhere,</span>
+<span class="s6">// &gt; the same as pattern &quot;foo&quot;.</span>
+<span
+  class="s6">// &gt; &quot;**/foo/bar&quot; matches file or directory &quot;bar&quot; anywhere that is directly</span>
+<span class="s6">// &gt;   under directory &quot;foo&quot;.</span>
+<span class="s6">// Notice that the '*'s have been replaced as '\\*'</span>
+<span class="s5">/^\^*\\\*\\\*\\\//</span><span class="s1">,</span>
+<span class="s6">// '**/foo' &lt;-&gt; 'foo'</span>
+<span class="s3">function </span><span class="s1">() {</span>
+  <span class="s3">return </span><span class="s0">'^(?:.*</span><span class="s3">\\</span><span
+    class="s0">/)?'</span><span class="s1">;</span>
+<span class="s1">}],</span>
+<span class="s6">// starting</span>
+<span class="s1">[</span>
+<span class="s6">// there will be no leading '/'</span>
+<span class="s6">//   (which has been replaced by section &quot;leading slash&quot;)</span>
+<span class="s6">// If starts with '**', adding a '^' to the regular expression also works</span>
+<span class="s5">/^(?=[^^])/</span><span class="s1">, </span><span class="s3">function </span><span class="s2">startingReplacer</span><span
+    class="s1">() {</span>
+  <span class="s6">// If has a slash `/` at the beginning or middle</span>
+  <span class="s3">return </span><span class="s1">!</span><span class="s5">/\/(?!$)/</span><span
+    class="s1">.</span><span class="s2">test</span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">)</span>
+  <span class="s6">// &gt; Prior to 2.22.1</span>
+  <span class="s6">// &gt; If the pattern does not contain a slash /,</span>
+  <span class="s6">// &gt;   Git treats it as a shell glob pattern</span>
+  <span class="s6">// Actually, if there is only a trailing slash,</span>
+  <span class="s6">//   git also treats it as a shell glob pattern</span>
+
+  <span class="s6">// After 2.22.1 (compatible but clearer)</span>
+  <span class="s6">// &gt; If there is a separator at the beginning or middle (or both)</span>
+  <span class="s6">// &gt; of the pattern, then the pattern is relative to the directory</span>
+  <span class="s6">// &gt; level of the particular .gitignore file itself.</span>
+  <span class="s6">// &gt; Otherwise the pattern may also match at any level below</span>
+  <span class="s6">// &gt; the .gitignore level.</span>
+  <span class="s1">? </span><span class="s0">'(?:^|</span><span class="s3">\\</span><span class="s0">/)'</span>
+
+  <span class="s6">// &gt; Otherwise, Git treats the pattern as a shell glob suitable for</span>
+  <span class="s6">// &gt;   consumption by fnmatch(3)</span>
+  <span class="s1">: </span><span class="s0">'^'</span><span class="s1">;</span>
+<span class="s1">}],</span>
+<span class="s6">// two globstars</span>
+<span class="s1">[</span>
+<span class="s6">// Use lookahead assertions so that we could match more than one `'/**'`</span>
+<span class="s5">/\\\/\\\*\\\*(?=\\\/|$)/g</span><span class="s1">,</span>
+<span class="s6">// Zero, one or several directories</span>
+<span class="s6">// should not use '*', or it will be replaced by the next replacer</span>
+
+<span class="s6">// Check if it is not the last `'/**'`</span>
+<span class="s3">function </span><span class="s1">(</span><span class="s2">_</span><span class="s1">, </span><span
+    class="s2">index</span><span class="s1">, </span><span class="s2">str</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">index </span><span class="s1">+ </span><span class="s4">6 </span><span
+    class="s1">&lt; </span><span class="s2">str</span><span class="s1">.</span><span class="s2">length</span>
+
+  <span class="s6">// case: /**/</span>
+  <span class="s6">// &gt; A slash followed by two consecutive asterisks then a slash matches</span>
+  <span class="s6">// &gt;   zero or more directories.</span>
+  <span class="s6">// &gt; For example, &quot;a/**/b&quot; matches &quot;a/b&quot;, &quot;a/x/b&quot;, &quot;a/x/y/b&quot; and so on.</span>
+  <span class="s6">// '/**/'</span>
+  <span class="s1">? </span><span class="s0">'(?:</span><span class="s3">\\</span><span class="s0">/[^</span><span
+    class="s3">\\</span><span class="s0">/]+)*'</span>
+
+  <span class="s6">// case: /**</span>
+  <span class="s6">// &gt; A trailing `&quot;/**&quot;` matches everything inside.</span>
+
+  <span class="s6">// #21: everything inside but it should not include the current folder</span>
+  <span class="s1">: </span><span class="s0">'</span><span class="s3">\\</span><span class="s0">/.+'</span><span
+    class="s1">;</span>
+<span class="s1">}],</span>
+<span class="s6">// normal intermediate wildcards</span>
+<span class="s1">[</span>
+<span class="s6">// Never replace escaped '*'</span>
+<span class="s6">// ignore rule '\*' will match the path '*'</span>
+
+<span class="s6">// 'abc.*/' -&gt; go</span>
+<span class="s6">// 'abc.*'  -&gt; skip this rule,</span>
+<span class="s6">//    coz trailing single wildcard will be handed by [trailing wildcard]</span>
+<span class="s5">/(^|[^\\]+)(\\\*)+(?=.+)/g</span><span class="s1">,</span>
+<span class="s6">// '*.js' matches '.js'</span>
+<span class="s6">// '*.js' doesn't match 'abc'</span>
+<span class="s3">function </span><span class="s1">(</span><span class="s2">_</span><span class="s1">, </span><span
+    class="s2">p1</span><span class="s1">, </span><span class="s2">p2</span><span class="s1">) {</span>
+  <span class="s6">// 1.</span>
+  <span class="s6">// &gt; An asterisk &quot;*&quot; matches anything except a slash.</span>
+  <span class="s6">// 2.</span>
+  <span class="s6">// &gt; Other consecutive asterisks are considered regular asterisks</span>
+  <span class="s6">// &gt; and will match according to the previous rules.</span>
+  <span class="s3">var </span><span class="s2">unescaped </span><span class="s1">= </span><span
+    class="s2">p2</span><span class="s1">.</span><span class="s2">replace</span><span class="s1">(</span><span
+    class="s5">/\\\*/g</span><span class="s1">, </span><span class="s0">'[^</span><span class="s3">\\</span><span
+    class="s0">/]*'</span><span class="s1">);</span>
+  <span class="s3">return </span><span class="s2">p1 </span><span class="s1">+ </span><span
+    class="s2">unescaped</span><span class="s1">;</span>
+<span class="s1">}], [</span>
+<span class="s6">// unescape, revert step 3 except for back slash</span>
+<span class="s6">// For example, if a user escape a '\\*',</span>
+<span class="s6">// after step 3, the result will be '\\\\\\*'</span>
+<span class="s5">/\\\\\\(?=[$.|*+(){^])/g</span><span class="s1">, </span><span class="s3">function </span><span
+    class="s1">() {</span>
+  <span class="s3">return </span><span class="s2">ESCAPE</span><span class="s1">;</span>
+<span class="s1">}], [</span>
+<span class="s6">// '\\\\' -&gt; '\\'</span>
+<span class="s5">/\\\\/g</span><span class="s1">, </span><span class="s3">function </span><span class="s1">() {</span>
+  <span class="s3">return </span><span class="s2">ESCAPE</span><span class="s1">;</span>
+<span class="s1">}], [</span>
+<span class="s6">// &gt; The range notation, e.g. [a-zA-Z],</span>
+<span class="s6">// &gt; can be used to match one of the characters in a range.</span>
+
+<span class="s6">// `\` is escaped by step 3</span>
+<span class="s5">/(\\)?\[([^\]/]*?)(\\*)($|\])/g</span><span class="s1">, </span><span class="s3">function </span><span
+    class="s1">(</span><span class="s2">match</span><span class="s1">, </span><span class="s2">leadEscape</span><span
+    class="s1">, </span><span class="s2">range</span><span class="s1">, </span><span class="s2">endEscape</span><span
+    class="s1">, </span><span class="s2">close</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">leadEscape </span><span class="s1">=== </span><span
+    class="s2">ESCAPE</span>
+  <span class="s6">// '\\[bar]' -&gt; '\\\\[bar\\]'</span>
+  <span class="s1">? </span><span class="s0">&quot;</span><span class="s3">\\</span><span class="s0">[&quot;</span><span
+    class="s1">.</span><span class="s2">concat</span><span class="s1">(</span><span class="s2">range</span><span
+    class="s1">).</span><span class="s2">concat</span><span class="s1">(</span><span
+    class="s2">cleanRangeBackSlash</span><span class="s1">(</span><span class="s2">endEscape</span><span
+    class="s1">)).</span><span class="s2">concat</span><span class="s1">(</span><span class="s2">close</span><span
+    class="s1">) : </span><span class="s2">close </span><span class="s1">=== </span><span class="s0">']' </span><span
+    class="s1">? </span><span class="s2">endEscape</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">% </span><span class="s4">2 </span><span class="s1">=== </span><span class="s4">0</span>
+  <span class="s6">// A normal case, and it is a range notation</span>
+  <span class="s6">// '[bar]'</span>
+  <span class="s6">// '[bar\\\\]'</span>
+  <span class="s1">? </span><span class="s0">&quot;[&quot;</span><span class="s1">.</span><span class="s2">concat</span><span
+    class="s1">(</span><span class="s2">sanitizeRange</span><span class="s1">(</span><span class="s2">range</span><span
+    class="s1">)).</span><span class="s2">concat</span><span class="s1">(</span><span class="s2">endEscape</span><span
+    class="s1">, </span><span class="s0">&quot;]&quot;</span><span class="s1">) </span><span class="s6">// Invalid range notaton</span>
+  <span class="s6">// '[bar\\]' -&gt; '[bar\\\\]'</span>
+  <span class="s1">: </span><span class="s0">'[]' </span><span class="s1">: </span><span class="s0">'[]'</span><span
+    class="s1">;</span>
+<span class="s1">}],</span>
+<span class="s6">// ending</span>
+<span class="s1">[</span>
+<span class="s6">// 'js' will not match 'js.'</span>
+<span class="s6">// 'ab' will not match 'abc'</span>
+<span class="s5">/(?:[^*])$/</span><span class="s1">,</span>
+<span class="s6">// WTF!</span>
+<span class="s6">// https://git-scm.com/docs/gitignore</span>
+<span class="s6">// changes in [2.22.1](https://git-scm.com/docs/gitignore/2.22.1)</span>
+<span class="s6">// which re-fixes #24, #38</span>
+
+<span class="s6">// &gt; If there is a separator at the end of the pattern then the pattern</span>
+<span class="s6">// &gt; will only match directories, otherwise the pattern can match both</span>
+<span class="s6">// &gt; files and directories.</span>
+
+<span class="s6">// 'js*' will not match 'a.js'</span>
+<span class="s6">// 'js/' will not match 'a.js'</span>
+<span class="s6">// 'js' will match 'a.js' and 'a.js/'</span>
+<span class="s3">function </span><span class="s1">(</span><span class="s2">match</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s5">/\/$/</span><span class="s1">.</span><span class="s2">test</span><span
+    class="s1">(</span><span class="s2">match</span><span class="s1">)</span>
+  <span class="s6">// foo/ will not match 'foo'</span>
+  <span class="s1">? </span><span class="s0">&quot;&quot;</span><span class="s1">.</span><span
+    class="s2">concat</span><span class="s1">(</span><span class="s2">match</span><span class="s1">, </span><span
+    class="s0">&quot;$&quot;</span><span class="s1">) </span><span class="s6">// foo matches 'foo' and 'foo/'</span>
+  <span class="s1">: </span><span class="s0">&quot;&quot;</span><span class="s1">.</span><span
+    class="s2">concat</span><span class="s1">(</span><span class="s2">match</span><span class="s1">, </span><span
+    class="s0">&quot;(?=$|</span><span class="s3">\\</span><span class="s0">/$)&quot;</span><span class="s1">);</span>
+<span class="s1">}],</span>
+<span class="s6">// trailing wildcard</span>
+<span class="s1">[</span><span class="s5">/(\^|\\\/)?\\\*$/</span><span class="s1">, </span><span
+    class="s3">function </span><span class="s1">(</span><span class="s2">_</span><span class="s1">, </span><span
+    class="s2">p1</span><span class="s1">) {</span>
+  <span class="s3">var </span><span class="s2">prefix </span><span class="s1">= </span><span class="s2">p1</span>
+  <span class="s6">// '\^':</span>
+  <span class="s6">// '/*' does not match EMPTY</span>
+  <span class="s6">// '/*' does not match everything</span>
+
+  <span class="s6">// '\\\/':</span>
+  <span class="s6">// 'abc/*' does not match 'abc/'</span>
+  <span class="s1">? </span><span class="s0">&quot;&quot;</span><span class="s1">.</span><span
+    class="s2">concat</span><span class="s1">(</span><span class="s2">p1</span><span class="s1">, </span><span
+    class="s0">&quot;[^/]+&quot;</span><span class="s1">) </span><span class="s6">// 'a*' matches 'a'</span>
+  <span class="s6">// 'a*' matches 'aa'</span>
+  <span class="s1">: </span><span class="s0">'[^/]*'</span><span class="s1">;</span>
+  <span class="s3">return </span><span class="s0">&quot;&quot;</span><span class="s1">.</span><span
+    class="s2">concat</span><span class="s1">(</span><span class="s2">prefix</span><span class="s1">, </span><span
+    class="s0">&quot;(?=$|</span><span class="s3">\\</span><span class="s0">/$)&quot;</span><span class="s1">);</span>
+<span class="s1">}]];</span>
+
+<span class="s6">// A simple cache, because an ignore rule only has only one certain meaning</span>
+<span class="s3">var </span><span class="s2">regexCache </span><span class="s1">= </span><span
+    class="s2">Object</span><span class="s1">.</span><span class="s2">create</span><span class="s1">(</span><span
+    class="s3">null</span><span class="s1">);</span>
+
+<span class="s6">// @param {pattern}</span>
+<span class="s3">var </span><span class="s2">makeRegex </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">makeRegex</span><span class="s1">(</span><span class="s2">pattern</span><span
+    class="s1">, </span><span class="s2">ignoreCase</span><span class="s1">) {</span>
+  <span class="s3">var </span><span class="s2">source </span><span class="s1">= </span><span
+    class="s2">regexCache</span><span class="s1">[</span><span class="s2">pattern</span><span class="s1">];</span>
+  <span class="s3">if </span><span class="s1">(!</span><span class="s2">source</span><span class="s1">) {</span>
+    <span class="s2">source </span><span class="s1">= </span><span class="s2">REPLACERS</span><span
+    class="s1">.</span><span class="s2">reduce</span><span class="s1">(</span><span class="s3">function </span><span
+    class="s1">(</span><span class="s2">prev</span><span class="s1">, </span><span class="s2">_ref</span><span
+    class="s1">) {</span>
+      <span class="s3">var </span><span class="s2">_ref2 </span><span class="s1">= </span><span class="s2">_slicedToArray</span><span
+    class="s1">(</span><span class="s2">_ref</span><span class="s1">, </span><span class="s4">2</span><span class="s1">),</span>
+        <span class="s2">matcher </span><span class="s1">= </span><span class="s2">_ref2</span><span class="s1">[</span><span
+    class="s4">0</span><span class="s1">],</span>
+        <span class="s2">replacer </span><span class="s1">= </span><span class="s2">_ref2</span><span
+    class="s1">[</span><span class="s4">1</span><span class="s1">];</span>
+      <span class="s3">return </span><span class="s2">prev</span><span class="s1">.</span><span
+    class="s2">replace</span><span class="s1">(</span><span class="s2">matcher</span><span class="s1">, </span><span
+    class="s2">replacer</span><span class="s1">.</span><span class="s2">bind</span><span class="s1">(</span><span
+    class="s2">pattern</span><span class="s1">));</span>
+    <span class="s1">}, </span><span class="s2">pattern</span><span class="s1">);</span>
+    <span class="s2">regexCache</span><span class="s1">[</span><span class="s2">pattern</span><span
+    class="s1">] = </span><span class="s2">source</span><span class="s1">;</span>
+  <span class="s1">}</span>
+  <span class="s3">return </span><span class="s2">ignoreCase </span><span class="s1">? </span><span
+    class="s3">new </span><span class="s2">RegExp</span><span class="s1">(</span><span class="s2">source</span><span
+    class="s1">, </span><span class="s0">'i'</span><span class="s1">) : </span><span class="s3">new </span><span
+    class="s2">RegExp</span><span class="s1">(</span><span class="s2">source</span><span class="s1">);</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">isString </span><span class="s1">= </span><span class="s3">function </span><span
+    class="s2">isString</span><span class="s1">(</span><span class="s2">subject</span><span class="s1">) {</span>
+  <span class="s3">return typeof </span><span class="s2">subject </span><span class="s1">=== </span><span class="s0">'string'</span><span
+    class="s1">;</span>
+<span class="s1">};</span>
+
+<span class="s6">// &gt; A blank line matches no files, so it can serve as a separator for readability.</span>
+<span class="s3">var </span><span class="s2">checkPattern </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">checkPattern</span><span class="s1">(</span><span
+    class="s2">pattern</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">pattern </span><span class="s1">&amp;&amp; </span><span class="s2">isString</span><span
+    class="s1">(</span><span class="s2">pattern</span><span class="s1">) &amp;&amp; !</span><span class="s2">REGEX_TEST_BLANK_LINE</span><span
+    class="s1">.</span><span class="s2">test</span><span class="s1">(</span><span class="s2">pattern</span><span
+    class="s1">) &amp;&amp; !</span><span class="s2">REGEX_INVALID_TRAILING_BACKSLASH</span><span
+    class="s1">.</span><span class="s2">test</span><span class="s1">(</span><span class="s2">pattern</span><span
+    class="s1">)</span>
+
+  <span class="s6">// &gt; A line starting with # serves as a comment.</span>
+  <span class="s1">&amp;&amp; </span><span class="s2">pattern</span><span class="s1">.</span><span
+    class="s2">indexOf</span><span class="s1">(</span><span class="s0">'#'</span><span class="s1">) !== </span><span
+    class="s4">0</span><span class="s1">;</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">splitPattern </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">splitPattern</span><span class="s1">(</span><span
+    class="s2">pattern</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">pattern</span><span class="s1">.</span><span
+    class="s2">split</span><span class="s1">(</span><span class="s2">REGEX_SPLITALL_CRLF</span><span
+    class="s1">);</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">IgnoreRule </span><span class="s1">= </span><span
+    class="s6">/*#__PURE__*/</span><span class="s2">_createClass</span><span class="s1">(</span><span class="s3">function </span><span
+    class="s2">IgnoreRule</span><span class="s1">(</span><span class="s2">origin</span><span class="s1">, </span><span
+    class="s2">pattern</span><span class="s1">, </span><span class="s2">negative</span><span class="s1">, </span><span
+    class="s2">regex</span><span class="s1">) {</span>
+  <span class="s2">_classCallCheck</span><span class="s1">(</span><span class="s3">this</span><span class="s1">, </span><span
+    class="s2">IgnoreRule</span><span class="s1">);</span>
+  <span class="s3">this</span><span class="s1">.</span><span class="s2">origin </span><span class="s1">= </span><span
+    class="s2">origin</span><span class="s1">;</span>
+  <span class="s3">this</span><span class="s1">.</span><span class="s2">pattern </span><span class="s1">= </span><span
+    class="s2">pattern</span><span class="s1">;</span>
+  <span class="s3">this</span><span class="s1">.</span><span class="s2">negative </span><span class="s1">= </span><span
+    class="s2">negative</span><span class="s1">;</span>
+  <span class="s3">this</span><span class="s1">.</span><span class="s2">regex </span><span class="s1">= </span><span
+    class="s2">regex</span><span class="s1">;</span>
+<span class="s1">});</span>
+<span class="s3">var </span><span class="s2">createRule </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">createRule</span><span class="s1">(</span><span
+    class="s2">pattern</span><span class="s1">, </span><span class="s2">ignoreCase</span><span class="s1">) {</span>
+  <span class="s3">var </span><span class="s2">origin </span><span class="s1">= </span><span
+    class="s2">pattern</span><span class="s1">;</span>
+  <span class="s3">var </span><span class="s2">negative </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">;</span>
+
+  <span class="s6">// &gt; An optional prefix &quot;!&quot; which negates the pattern;</span>
+  <span class="s3">if </span><span class="s1">(</span><span class="s2">pattern</span><span class="s1">.</span><span
+    class="s2">indexOf</span><span class="s1">(</span><span class="s0">'!'</span><span class="s1">) === </span><span
+    class="s4">0</span><span class="s1">) {</span>
+    <span class="s2">negative </span><span class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+    <span class="s2">pattern </span><span class="s1">= </span><span class="s2">pattern</span><span
+    class="s1">.</span><span class="s2">substr</span><span class="s1">(</span><span class="s4">1</span><span class="s1">);</span>
+  <span class="s1">}</span>
+  <span class="s2">pattern </span><span class="s1">= </span><span class="s2">pattern</span>
+  <span class="s6">// &gt; Put a backslash (&quot;\&quot;) in front of the first &quot;!&quot; for patterns that</span>
+  <span class="s6">// &gt;   begin with a literal &quot;!&quot;, for example, `&quot;\!important!.txt&quot;`.</span>
+  <span class="s1">.</span><span class="s2">replace</span><span class="s1">(</span><span class="s2">REGEX_REPLACE_LEADING_EXCAPED_EXCLAMATION</span><span
+    class="s1">, </span><span class="s0">'!'</span><span class="s1">)</span>
+  <span class="s6">// &gt; Put a backslash (&quot;\&quot;) in front of the first hash for patterns that</span>
+  <span class="s6">// &gt;   begin with a hash.</span>
+  <span class="s1">.</span><span class="s2">replace</span><span class="s1">(</span><span class="s2">REGEX_REPLACE_LEADING_EXCAPED_HASH</span><span
+    class="s1">, </span><span class="s0">'#'</span><span class="s1">);</span>
+  <span class="s3">var </span><span class="s2">regex </span><span class="s1">= </span><span
+    class="s2">makeRegex</span><span class="s1">(</span><span class="s2">pattern</span><span class="s1">, </span><span
+    class="s2">ignoreCase</span><span class="s1">);</span>
+  <span class="s3">return new </span><span class="s2">IgnoreRule</span><span class="s1">(</span><span
+    class="s2">origin</span><span class="s1">, </span><span class="s2">pattern</span><span class="s1">, </span><span
+    class="s2">negative</span><span class="s1">, </span><span class="s2">regex</span><span class="s1">);</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">throwError </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">throwError</span><span class="s1">(</span><span
+    class="s2">message</span><span class="s1">, </span><span class="s2">Ctor</span><span class="s1">) {</span>
+  <span class="s3">throw new </span><span class="s2">Ctor</span><span class="s1">(</span><span class="s2">message</span><span
+    class="s1">);</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">checkPath </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">checkPath</span><span class="s1">(</span><span
+    class="s2">path</span><span class="s1">, </span><span class="s2">originalPath</span><span class="s1">, </span><span
+    class="s2">doThrow</span><span class="s1">) {</span>
+  <span class="s3">if </span><span class="s1">(!</span><span class="s2">isString</span><span class="s1">(</span><span
+    class="s2">path</span><span class="s1">)) {</span>
+    <span class="s3">return </span><span class="s2">doThrow</span><span class="s1">(</span><span class="s0">&quot;path must be a string, but got `&quot;</span><span
+    class="s1">.</span><span class="s2">concat</span><span class="s1">(</span><span class="s2">originalPath</span><span
+    class="s1">, </span><span class="s0">&quot;`&quot;</span><span class="s1">), </span><span
+    class="s2">TypeError</span><span class="s1">);</span>
+  <span class="s1">}</span>
+
+  <span class="s6">// We don't know if we should ignore EMPTY, so throw</span>
+  <span class="s3">if </span><span class="s1">(!</span><span class="s2">path</span><span class="s1">) {</span>
+    <span class="s3">return </span><span class="s2">doThrow</span><span class="s1">(</span><span class="s0">&quot;path must not be empty&quot;</span><span
+    class="s1">, </span><span class="s2">TypeError</span><span class="s1">);</span>
+  <span class="s1">}</span>
+
+  <span class="s6">// Check if it is a relative path</span>
+  <span class="s3">if </span><span class="s1">(</span><span class="s2">checkPath</span><span class="s1">.</span><span
+    class="s2">isNotRelative</span><span class="s1">(</span><span class="s2">path</span><span class="s1">)) {</span>
+    <span class="s3">var </span><span class="s2">r </span><span class="s1">= </span><span class="s0">'`path.relative()`d'</span><span
+    class="s1">;</span>
+    <span class="s3">return </span><span class="s2">doThrow</span><span class="s1">(</span><span class="s0">&quot;path should be a &quot;</span><span
+    class="s1">.</span><span class="s2">concat</span><span class="s1">(</span><span class="s2">r</span><span class="s1">, </span><span
+    class="s0">&quot; string, but got </span><span class="s3">\&quot;</span><span class="s0">&quot;</span><span
+    class="s1">).</span><span class="s2">concat</span><span class="s1">(</span><span class="s2">originalPath</span><span
+    class="s1">, </span><span class="s0">&quot;</span><span class="s3">\&quot;</span><span class="s0">&quot;</span><span
+    class="s1">), </span><span class="s2">RangeError</span><span class="s1">);</span>
+  <span class="s1">}</span>
+  <span class="s3">return true</span><span class="s1">;</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">isNotRelative </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">isNotRelative</span><span class="s1">(</span><span
+    class="s2">path</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">REGEX_TEST_INVALID_PATH</span><span class="s1">.</span><span
+    class="s2">test</span><span class="s1">(</span><span class="s2">path</span><span class="s1">);</span>
+<span class="s1">};</span>
+<span class="s2">checkPath</span><span class="s1">.</span><span class="s2">isNotRelative </span><span
+    class="s1">= </span><span class="s2">isNotRelative</span><span class="s1">;</span>
+<span class="s2">checkPath</span><span class="s1">.</span><span class="s2">convert </span><span
+    class="s1">= </span><span class="s3">function </span><span class="s1">(</span><span class="s2">p</span><span
+    class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">p</span><span class="s1">;</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">Ignore </span><span class="s1">= </span><span
+    class="s6">/*#__PURE__*/</span><span class="s3">function </span><span class="s1">() {</span>
+  <span class="s3">function </span><span class="s2">Ignore</span><span class="s1">() {</span>
+    <span class="s3">var </span><span class="s2">_ref3 </span><span class="s1">= </span><span
+    class="s2">arguments</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">&gt; </span><span class="s4">0 </span><span class="s1">&amp;&amp; </span><span
+    class="s2">arguments</span><span class="s1">[</span><span class="s4">0</span><span class="s1">] !== </span><span
+    class="s2">undefined </span><span class="s1">? </span><span class="s2">arguments</span><span
+    class="s1">[</span><span class="s4">0</span><span class="s1">] : {},</span>
+      <span class="s2">_ref3$ignorecase </span><span class="s1">= </span><span class="s2">_ref3</span><span
+    class="s1">.</span><span class="s2">ignorecase</span><span class="s1">,</span>
+      <span class="s2">ignorecase </span><span class="s1">= </span><span class="s2">_ref3$ignorecase </span><span
+    class="s1">=== </span><span class="s3">void </span><span class="s4">0 </span><span class="s1">? </span><span
+    class="s3">true </span><span class="s1">: </span><span class="s2">_ref3$ignorecase</span><span class="s1">,</span>
+      <span class="s2">_ref3$ignoreCase </span><span class="s1">= </span><span class="s2">_ref3</span><span
+    class="s1">.</span><span class="s2">ignoreCase</span><span class="s1">,</span>
+      <span class="s2">ignoreCase </span><span class="s1">= </span><span class="s2">_ref3$ignoreCase </span><span
+    class="s1">=== </span><span class="s3">void </span><span class="s4">0 </span><span class="s1">? </span><span
+    class="s2">ignorecase </span><span class="s1">: </span><span class="s2">_ref3$ignoreCase</span><span
+    class="s1">,</span>
+      <span class="s2">_ref3$allowRelativePa </span><span class="s1">= </span><span class="s2">_ref3</span><span
+    class="s1">.</span><span class="s2">allowRelativePaths</span><span class="s1">,</span>
+      <span class="s2">allowRelativePaths </span><span class="s1">= </span><span
+    class="s2">_ref3$allowRelativePa </span><span class="s1">=== </span><span class="s3">void </span><span
+    class="s4">0 </span><span class="s1">? </span><span class="s3">false </span><span class="s1">: </span><span
+    class="s2">_ref3$allowRelativePa</span><span class="s1">;</span>
+    <span class="s2">_classCallCheck</span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">, </span><span class="s2">Ignore</span><span class="s1">);</span>
+    <span class="s2">define</span><span class="s1">(</span><span class="s3">this</span><span class="s1">, </span><span
+    class="s2">KEY_IGNORE</span><span class="s1">, </span><span class="s3">true</span><span class="s1">);</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_rules </span><span class="s1">= [];</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_ignoreCase </span><span
+    class="s1">= </span><span class="s2">ignoreCase</span><span class="s1">;</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_allowRelativePaths </span><span
+    class="s1">= </span><span class="s2">allowRelativePaths</span><span class="s1">;</span>
+    <span class="s3">this</span><span class="s1">.</span><span class="s2">_initCache</span><span class="s1">();</span>
+  <span class="s1">}</span>
+  <span class="s2">_createClass</span><span class="s1">(</span><span class="s2">Ignore</span><span
+    class="s1">, [{</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;_initCache&quot;</span><span class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">_initCache</span><span class="s1">() {</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_ignoreCache </span><span
+    class="s1">= </span><span class="s2">Object</span><span class="s1">.</span><span class="s2">create</span><span
+    class="s1">(</span><span class="s3">null</span><span class="s1">);</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_testCache </span><span class="s1">= </span><span
+    class="s2">Object</span><span class="s1">.</span><span class="s2">create</span><span class="s1">(</span><span
+    class="s3">null</span><span class="s1">);</span>
+    <span class="s1">}</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;_addPattern&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">_addPattern</span><span class="s1">(</span><span class="s2">pattern</span><span class="s1">) {</span>
+      <span class="s6">// #32</span>
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">pattern </span><span
+    class="s1">&amp;&amp; </span><span class="s2">pattern</span><span class="s1">[</span><span
+    class="s2">KEY_IGNORE</span><span class="s1">]) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_rules </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">_rules</span><span
+    class="s1">.</span><span class="s2">concat</span><span class="s1">(</span><span class="s2">pattern</span><span
+    class="s1">.</span><span class="s2">_rules</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_added </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+        <span class="s3">return</span><span class="s1">;</span>
+      <span class="s1">}</span>
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">checkPattern</span><span
+    class="s1">(</span><span class="s2">pattern</span><span class="s1">)) {</span>
+        <span class="s3">var </span><span class="s2">rule </span><span class="s1">= </span><span
+    class="s2">createRule</span><span class="s1">(</span><span class="s2">pattern</span><span class="s1">, </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_ignoreCase</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_added </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_rules</span><span
+    class="s1">.</span><span class="s2">push</span><span class="s1">(</span><span class="s2">rule</span><span
+    class="s1">);</span>
+      <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s6">// @param {Array&lt;string&gt; | string | Ignore} pattern</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;add&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">add</span><span class="s1">(</span><span class="s2">pattern</span><span class="s1">) {</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_added </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">;</span>
+      <span class="s2">makeArray</span><span class="s1">(</span><span class="s2">isString</span><span
+    class="s1">(</span><span class="s2">pattern</span><span class="s1">) ? </span><span
+    class="s2">splitPattern</span><span class="s1">(</span><span class="s2">pattern</span><span
+    class="s1">) : </span><span class="s2">pattern</span><span class="s1">).</span><span class="s2">forEach</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">_addPattern</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">);</span>
+
+      <span class="s6">// Some rules have just added to the ignore,</span>
+      <span class="s6">// making the behavior changed.</span>
+      <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_added</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">_initCache</span><span
+    class="s1">();</span>
+      <span class="s1">}</span>
+      <span class="s3">return this</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s6">// legacy</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;addPattern&quot;</span><span class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">addPattern</span><span class="s1">(</span><span class="s2">pattern</span><span class="s1">) {</span>
+      <span class="s3">return this</span><span class="s1">.</span><span class="s2">add</span><span
+    class="s1">(</span><span class="s2">pattern</span><span class="s1">);</span>
+    <span class="s1">}</span>
+
+    <span class="s6">//          |           ignored : unignored</span>
+    <span class="s6">// negative |   0:0   |   0:1   |   1:0   |   1:1</span>
+    <span class="s6">// -------- | ------- | ------- | ------- | --------</span>
+    <span class="s6">//     0    |  TEST   |  TEST   |  SKIP   |    X</span>
+    <span class="s6">//     1    |  TESTIF |  SKIP   |  TEST   |    X</span>
+
+    <span class="s6">// - SKIP: always skip</span>
+    <span class="s6">// - TEST: always test</span>
+    <span class="s6">// - TESTIF: only test if checkUnignored</span>
+    <span class="s6">// - X: that never happen</span>
+
+    <span class="s6">// @param {boolean} whether should check if the path is unignored,</span>
+    <span class="s6">//   setting `checkUnignored` to `false` could reduce additional</span>
+    <span class="s6">//   path matching.</span>
+
+    <span class="s6">// @returns {TestResult} true if a file is ignored</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;_testOne&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">_testOne</span><span class="s1">(</span><span class="s2">path</span><span class="s1">, </span><span
+    class="s2">checkUnignored</span><span class="s1">) {</span>
+      <span class="s3">var </span><span class="s2">ignored </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">;</span>
+      <span class="s3">var </span><span class="s2">unignored </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">;</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">_rules</span><span class="s1">.</span><span
+    class="s2">forEach</span><span class="s1">(</span><span class="s3">function </span><span class="s1">(</span><span
+    class="s2">rule</span><span class="s1">) {</span>
+        <span class="s3">var </span><span class="s2">negative </span><span class="s1">= </span><span
+    class="s2">rule</span><span class="s1">.</span><span class="s2">negative</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">unignored </span><span
+    class="s1">=== </span><span class="s2">negative </span><span class="s1">&amp;&amp; </span><span
+    class="s2">ignored </span><span class="s1">!== </span><span class="s2">unignored </span><span
+    class="s1">|| </span><span class="s2">negative </span><span class="s1">&amp;&amp; !</span><span
+    class="s2">ignored </span><span class="s1">&amp;&amp; !</span><span class="s2">unignored </span><span class="s1">&amp;&amp; !</span><span
+    class="s2">checkUnignored</span><span class="s1">) {</span>
+          <span class="s3">return</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">var </span><span class="s2">matched </span><span class="s1">= </span><span
+    class="s2">rule</span><span class="s1">.</span><span class="s2">regex</span><span class="s1">.</span><span
+    class="s2">test</span><span class="s1">(</span><span class="s2">path</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">matched</span><span class="s1">) {</span>
+          <span class="s2">ignored </span><span class="s1">= !</span><span class="s2">negative</span><span
+    class="s1">;</span>
+          <span class="s2">unignored </span><span class="s1">= </span><span class="s2">negative</span><span
+    class="s1">;</span>
+        <span class="s1">}</span>
+      <span class="s1">});</span>
+      <span class="s3">return </span><span class="s1">{</span>
+        <span class="s2">ignored</span><span class="s1">: </span><span class="s2">ignored</span><span
+    class="s1">,</span>
+        <span class="s2">unignored</span><span class="s1">: </span><span class="s2">unignored</span>
+      <span class="s1">};</span>
+    <span class="s1">}</span>
+
+    <span class="s6">// @returns {TestResult}</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;_test&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">_test</span><span class="s1">(</span><span class="s2">originalPath</span><span class="s1">, </span><span
+    class="s2">cache</span><span class="s1">, </span><span class="s2">checkUnignored</span><span
+    class="s1">, </span><span class="s2">slices</span><span class="s1">) {</span>
+      <span class="s3">var </span><span class="s2">path </span><span class="s1">= </span><span
+    class="s2">originalPath</span>
+      <span class="s6">// Supports nullable path</span>
+      <span class="s1">&amp;&amp; </span><span class="s2">checkPath</span><span class="s1">.</span><span class="s2">convert</span><span
+    class="s1">(</span><span class="s2">originalPath</span><span class="s1">);</span>
+      <span class="s2">checkPath</span><span class="s1">(</span><span class="s2">path</span><span
+    class="s1">, </span><span class="s2">originalPath</span><span class="s1">, </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">_allowRelativePaths </span><span class="s1">? </span><span class="s2">RETURN_FALSE </span><span
+    class="s1">: </span><span class="s2">throwError</span><span class="s1">);</span>
+      <span class="s3">return this</span><span class="s1">.</span><span class="s2">_t</span><span
+    class="s1">(</span><span class="s2">path</span><span class="s1">, </span><span class="s2">cache</span><span
+    class="s1">, </span><span class="s2">checkUnignored</span><span class="s1">, </span><span
+    class="s2">slices</span><span class="s1">);</span>
+    <span class="s1">}</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;_t&quot;</span><span class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">_t</span><span class="s1">(</span><span class="s2">path</span><span class="s1">, </span><span class="s2">cache</span><span
+    class="s1">, </span><span class="s2">checkUnignored</span><span class="s1">, </span><span
+    class="s2">slices</span><span class="s1">) {</span>
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">path </span><span class="s3">in </span><span
+    class="s2">cache</span><span class="s1">) {</span>
+        <span class="s3">return </span><span class="s2">cache</span><span class="s1">[</span><span
+    class="s2">path</span><span class="s1">];</span>
+      <span class="s1">}</span>
+      <span class="s3">if </span><span class="s1">(!</span><span class="s2">slices</span><span class="s1">) {</span>
+        <span class="s6">// path/to/a.js</span>
+        <span class="s6">// ['path', 'to', 'a.js']</span>
+        <span class="s2">slices </span><span class="s1">= </span><span class="s2">path</span><span
+    class="s1">.</span><span class="s2">split</span><span class="s1">(</span><span class="s2">SLASH</span><span
+    class="s1">);</span>
+      <span class="s1">}</span>
+      <span class="s2">slices</span><span class="s1">.</span><span class="s2">pop</span><span class="s1">();</span>
+
+      <span class="s6">// If the path has no parent directory, just test it</span>
+      <span class="s3">if </span><span class="s1">(!</span><span class="s2">slices</span><span class="s1">.</span><span
+    class="s2">length</span><span class="s1">) {</span>
+        <span class="s3">return </span><span class="s2">cache</span><span class="s1">[</span><span
+    class="s2">path</span><span class="s1">] = </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_testOne</span><span class="s1">(</span><span class="s2">path</span><span class="s1">, </span><span
+    class="s2">checkUnignored</span><span class="s1">);</span>
+      <span class="s1">}</span>
+      <span class="s3">var </span><span class="s2">parent </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_t</span><span class="s1">(</span><span class="s2">slices</span><span
+    class="s1">.</span><span class="s2">join</span><span class="s1">(</span><span class="s2">SLASH</span><span
+    class="s1">) + </span><span class="s2">SLASH</span><span class="s1">, </span><span class="s2">cache</span><span
+    class="s1">, </span><span class="s2">checkUnignored</span><span class="s1">, </span><span
+    class="s2">slices</span><span class="s1">);</span>
+
+      <span class="s6">// If the path contains a parent directory, check the parent first</span>
+      <span class="s3">return </span><span class="s2">cache</span><span class="s1">[</span><span
+    class="s2">path</span><span class="s1">] = </span><span class="s2">parent</span><span class="s1">.</span><span
+    class="s2">ignored</span>
+      <span class="s6">// &gt; It is not possible to re-include a file if a parent directory of</span>
+      <span class="s6">// &gt;   that file is excluded.</span>
+      <span class="s1">? </span><span class="s2">parent </span><span class="s1">: </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">_testOne</span><span class="s1">(</span><span
+    class="s2">path</span><span class="s1">, </span><span class="s2">checkUnignored</span><span class="s1">);</span>
+    <span class="s1">}</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;ignores&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">ignores</span><span class="s1">(</span><span class="s2">path</span><span class="s1">) {</span>
+      <span class="s3">return this</span><span class="s1">.</span><span class="s2">_test</span><span class="s1">(</span><span
+    class="s2">path</span><span class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_ignoreCache</span><span class="s1">, </span><span class="s3">false</span><span class="s1">).</span><span
+    class="s2">ignored</span><span class="s1">;</span>
+    <span class="s1">}</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;createFilter&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span class="s2">createFilter</span><span
+    class="s1">() {</span>
+      <span class="s3">var </span><span class="s2">_this </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">;</span>
+      <span class="s3">return function </span><span class="s1">(</span><span class="s2">path</span><span
+    class="s1">) {</span>
+        <span class="s3">return </span><span class="s1">!</span><span class="s2">_this</span><span
+    class="s1">.</span><span class="s2">ignores</span><span class="s1">(</span><span class="s2">path</span><span
+    class="s1">);</span>
+      <span class="s1">};</span>
+    <span class="s1">}</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;filter&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s2">filter</span><span class="s1">(</span><span class="s2">paths</span><span class="s1">) {</span>
+      <span class="s3">return </span><span class="s2">makeArray</span><span class="s1">(</span><span
+    class="s2">paths</span><span class="s1">).</span><span class="s2">filter</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">createFilter</span><span class="s1">());</span>
+    <span class="s1">}</span>
+
+    <span class="s6">// @returns {TestResult}</span>
+  <span class="s1">}, {</span>
+    <span class="s2">key</span><span class="s1">: </span><span class="s0">&quot;test&quot;</span><span
+    class="s1">,</span>
+    <span class="s2">value</span><span class="s1">: </span><span class="s3">function </span><span class="s2">test</span><span
+    class="s1">(</span><span class="s2">path</span><span class="s1">) {</span>
+      <span class="s3">return this</span><span class="s1">.</span><span class="s2">_test</span><span class="s1">(</span><span
+    class="s2">path</span><span class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">_testCache</span><span class="s1">, </span><span class="s3">true</span><span class="s1">);</span>
+    <span class="s1">}</span>
+  <span class="s1">}]);</span>
+  <span class="s3">return </span><span class="s2">Ignore</span><span class="s1">;</span>
+<span class="s1">}();</span>
+<span class="s3">var </span><span class="s2">factory </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">factory</span><span class="s1">(</span><span
+    class="s2">options</span><span class="s1">) {</span>
+  <span class="s3">return new </span><span class="s2">Ignore</span><span class="s1">(</span><span
+    class="s2">options</span><span class="s1">);</span>
+<span class="s1">};</span>
+<span class="s3">var </span><span class="s2">isPathValid </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">isPathValid</span><span class="s1">(</span><span
+    class="s2">path</span><span class="s1">) {</span>
+  <span class="s3">return </span><span class="s2">checkPath</span><span class="s1">(</span><span class="s2">path </span><span
+    class="s1">&amp;&amp; </span><span class="s2">checkPath</span><span class="s1">.</span><span
+    class="s2">convert</span><span class="s1">(</span><span class="s2">path</span><span class="s1">), </span><span
+    class="s2">path</span><span class="s1">, </span><span class="s2">RETURN_FALSE</span><span class="s1">);</span>
+<span class="s1">};</span>
+<span class="s2">factory</span><span class="s1">.</span><span class="s2">isPathValid </span><span
+    class="s1">= </span><span class="s2">isPathValid</span><span class="s1">;</span>
+
+<span class="s6">// Fixes typescript</span>
+<span class="s2">factory</span><span class="s1">[</span><span class="s0">&quot;default&quot;</span><span
+    class="s1">] = </span><span class="s2">factory</span><span class="s1">;</span>
+<span class="s2">module</span><span class="s1">.</span><span class="s2">exports </span><span class="s1">= </span><span
+    class="s2">factory</span><span class="s1">;</span>
+
+<span class="s6">// Windows</span>
+<span class="s6">// --------------------------------------------------------------</span>
+<span class="s6">/* istanbul ignore if */</span>
+<span class="s3">if </span><span class="s1">(</span>
+<span class="s6">// Detect `process` so that it can run in browsers.</span>
+<span class="s3">typeof </span><span class="s2">process </span><span class="s1">!== </span><span
+    class="s0">'undefined' </span><span class="s1">&amp;&amp; (</span><span class="s2">process</span><span
+    class="s1">.</span><span class="s2">env </span><span class="s1">&amp;&amp; </span><span
+    class="s2">process</span><span class="s1">.</span><span class="s2">env</span><span class="s1">.</span><span
+    class="s2">IGNORE_TEST_WIN32 </span><span class="s1">|| </span><span class="s2">process</span><span
+    class="s1">.</span><span class="s2">platform </span><span class="s1">=== </span><span class="s0">'win32'</span><span
+    class="s1">)) {</span>
+  <span class="s6">/* eslint no-control-regex: &quot;off&quot; */</span>
+  <span class="s3">var </span><span class="s2">makePosix </span><span class="s1">= </span><span
+    class="s3">function </span><span class="s2">makePosix</span><span class="s1">(</span><span
+    class="s2">str</span><span class="s1">) {</span>
+    <span class="s3">return </span><span class="s5">/^\\\\\?\\/</span><span class="s1">.</span><span
+    class="s2">test</span><span class="s1">(</span><span class="s2">str</span><span class="s1">) || </span><span
+    class="s5">/[\0-\x1F&quot;&lt;&gt;\|]+/</span><span class="s1">.</span><span class="s2">test</span><span class="s1">(</span><span
+    class="s2">str</span><span class="s1">) ? </span><span class="s2">str </span><span class="s1">: </span><span
+    class="s2">str</span><span class="s1">.</span><span class="s2">replace</span><span class="s1">(</span><span
+    class="s5">/\\/g</span><span class="s1">, </span><span class="s0">'/'</span><span class="s1">);</span>
+  <span class="s1">};</span>
+  <span class="s2">checkPath</span><span class="s1">.</span><span class="s2">convert </span><span
+    class="s1">= </span><span class="s2">makePosix</span><span class="s1">;</span>
+
+  <span class="s6">// 'C:\\foo'     &lt;- 'C:\\foo' has been converted to 'C:/'</span>
+  <span class="s6">// 'd:\\foo'</span>
+  <span class="s3">var </span><span class="s2">REGIX_IS_WINDOWS_PATH_ABSOLUTE </span><span class="s1">= </span><span
+    class="s5">/^[a-z]:\//i</span><span class="s1">;</span>
+  <span class="s2">checkPath</span><span class="s1">.</span><span class="s2">isNotRelative </span><span
+    class="s1">= </span><span class="s3">function </span><span class="s1">(</span><span class="s2">path</span><span
+    class="s1">) {</span>
+    <span class="s3">return </span><span class="s2">REGIX_IS_WINDOWS_PATH_ABSOLUTE</span><span class="s1">.</span><span
+    class="s2">test</span><span class="s1">(</span><span class="s2">path</span><span class="s1">) || </span><span
+    class="s2">isNotRelative</span><span class="s1">(</span><span class="s2">path</span><span class="s1">);</span>
+  <span class="s1">};</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>
