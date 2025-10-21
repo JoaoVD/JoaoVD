@@ -1,0 +1,131 @@
+<html>
+<head>
+  <title>chunk.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          chunk.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseSlice </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseSlice'</span><span class="s2">),</span>
+    <span class="s1">isIterateeCall </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_isIterateeCall'</span><span class="s2">),</span>
+    <span class="s1">toInteger </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./toInteger'</span><span class="s2">);</span>
+
+<span class="s4">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeCeil </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">ceil</span><span class="s2">,</span>
+    <span class="s1">nativeMax </span><span class="s2">= </span><span class="s1">Math</span><span
+    class="s2">.</span><span class="s1">max</span><span class="s2">;</span>
+
+<span class="s5">/**</span>
+ <span class="s5">* Creates an array of elements split into groups the length of `size`.</span>
+ <span class="s5">* If `array` can't be split evenly, the final chunk will be the remaining</span>
+ <span class="s5">* elements.</span>
+ <span class="s5">*</span>
+ <span class="s5">* </span><span class="s6">@static</span>
+ <span class="s5">* </span><span class="s6">@memberOf </span><span class="s5">_</span>
+ <span class="s5">* </span><span class="s6">@since </span><span class="s5">3.0.0</span>
+ <span class="s5">* </span><span class="s6">@category </span><span class="s5">Array</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{Array} array The array to process.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span
+    class="s5">{number} [size=1] The length of each chunk</span>
+ <span class="s5">* </span><span class="s6">@param- </span><span class="s5">{Object} [guard] Enables use as an iteratee for methods like `_.map`.</span>
+ <span class="s5">* </span><span class="s6">@returns </span><span
+    class="s5">{Array} Returns the new array of chunks.</span>
+ <span class="s5">* </span><span class="s6">@example</span>
+ <span class="s5">*</span>
+ <span class="s5">* _.chunk(['a', 'b', 'c', 'd'], 2);</span>
+ <span class="s5">* // =&gt; [['a', 'b'], ['c', 'd']]</span>
+ <span class="s5">*</span>
+ <span class="s5">* _.chunk(['a', 'b', 'c', 'd'], 3);</span>
+ <span class="s5">* // =&gt; [['a', 'b', 'c'], ['d']]</span>
+ <span class="s5">*/</span>
+<span class="s0">function </span><span class="s1">chunk</span><span class="s2">(</span><span
+    class="s1">array</span><span class="s2">, </span><span class="s1">size</span><span class="s2">, </span><span
+    class="s1">guard</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">((</span><span class="s1">guard </span><span class="s2">? </span><span
+    class="s1">isIterateeCall</span><span class="s2">(</span><span class="s1">array</span><span
+    class="s2">, </span><span class="s1">size</span><span class="s2">, </span><span class="s1">guard</span><span
+    class="s2">) : </span><span class="s1">size </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">)) {</span>
+    <span class="s1">size </span><span class="s2">= </span><span class="s7">1</span><span class="s2">;</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">size </span><span class="s2">= </span><span class="s1">nativeMax</span><span
+    class="s2">(</span><span class="s1">toInteger</span><span class="s2">(</span><span class="s1">size</span><span
+    class="s2">), </span><span class="s7">0</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">length </span><span class="s2">= </span><span
+    class="s1">array </span><span class="s2">== </span><span class="s0">null </span><span class="s2">? </span><span
+    class="s7">0 </span><span class="s2">: </span><span class="s1">array</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">length </span><span class="s2">|| </span><span
+    class="s1">size </span><span class="s2">&lt; </span><span class="s7">1</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s2">[];</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">index </span><span class="s2">= </span><span class="s7">0</span><span
+    class="s2">,</span>
+      <span class="s1">resIndex </span><span class="s2">= </span><span class="s7">0</span><span class="s2">,</span>
+      <span class="s1">result </span><span class="s2">= </span><span class="s1">Array</span><span
+    class="s2">(</span><span class="s1">nativeCeil</span><span class="s2">(</span><span class="s1">length </span><span
+    class="s2">/ </span><span class="s1">size</span><span class="s2">));</span>
+
+  <span class="s0">while </span><span class="s2">(</span><span class="s1">index </span><span
+    class="s2">&lt; </span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s1">result</span><span class="s2">[</span><span class="s1">resIndex</span><span
+    class="s2">++] = </span><span class="s1">baseSlice</span><span class="s2">(</span><span class="s1">array</span><span
+    class="s2">, </span><span class="s1">index</span><span class="s2">, (</span><span class="s1">index </span><span
+    class="s2">+= </span><span class="s1">size</span><span class="s2">));</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">chunk</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

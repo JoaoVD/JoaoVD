@@ -1,0 +1,297 @@
+<html>
+<head>
+  <title>subschema.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          subschema.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+  class="s1">AnySchema</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">SchemaObjCxt</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;..&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">, </span><span class="s1">getProperty</span><span class="s2">, </span><span
+    class="s1">Code</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">escapeFragment</span><span class="s2">, </span><span
+    class="s1">getErrorPath</span><span class="s2">, </span><span class="s1">Type</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../util&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">JSONType</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../rules&quot;</span>
+
+<span class="s0">export interface </span><span class="s1">SubschemaContext </span><span class="s2">{</span>
+  <span class="s4">// TODO use Optional? align with SchemCxt property types</span>
+  <span class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchema</span>
+  <span class="s1">schemaPath</span><span class="s2">: </span><span class="s1">Code</span>
+  <span class="s1">errSchemaPath</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">topSchemaRef</span><span class="s2">?: </span><span class="s1">Code</span>
+  <span class="s1">errorPath</span><span class="s2">?: </span><span class="s1">Code</span>
+  <span class="s1">dataLevel</span><span class="s2">?: </span><span class="s1">number</span>
+  <span class="s1">dataTypes</span><span class="s2">?: </span><span class="s1">JSONType</span><span class="s2">[]</span>
+  <span class="s1">data</span><span class="s2">?: </span><span class="s1">Name</span>
+  <span class="s1">parentData</span><span class="s2">?: </span><span class="s1">Name</span>
+  <span class="s1">parentDataProperty</span><span class="s2">?: </span><span class="s1">Code </span><span
+    class="s2">| </span><span class="s1">number</span>
+  <span class="s1">dataNames</span><span class="s2">?: </span><span class="s1">Name</span><span class="s2">[]</span>
+  <span class="s1">dataPathArr</span><span class="s2">?: (</span><span class="s1">Code </span><span class="s2">| </span><span
+    class="s1">number</span><span class="s2">)[]</span>
+  <span class="s1">propertyName</span><span class="s2">?: </span><span class="s1">Name</span>
+  <span class="s1">jtdDiscriminator</span><span class="s2">?: </span><span class="s1">string</span>
+  <span class="s1">jtdMetadata</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">compositeRule</span><span class="s2">?: </span><span class="s0">true</span>
+  <span class="s1">createErrors</span><span class="s2">?: </span><span class="s1">boolean</span>
+  <span class="s1">allErrors</span><span class="s2">?: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type SubschemaArgs </span><span class="s2">= </span><span class="s1">Partial</span><span
+    class="s2">&lt;{</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">schemaProp</span><span class="s2">: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">number</span>
+  <span class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchema</span>
+  <span class="s1">schemaPath</span><span class="s2">: </span><span class="s1">Code</span>
+  <span class="s1">errSchemaPath</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">topSchemaRef</span><span class="s2">: </span><span class="s1">Code</span>
+  <span class="s1">data</span><span class="s2">: </span><span class="s1">Name </span><span class="s2">| </span><span
+    class="s1">Code</span>
+  <span class="s1">dataProp</span><span class="s2">: </span><span class="s1">Code </span><span class="s2">| </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">number</span>
+  <span class="s1">dataTypes</span><span class="s2">: </span><span class="s1">JSONType</span><span class="s2">[]</span>
+  <span class="s1">definedProperties</span><span class="s2">: </span><span class="s1">Set</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt;</span>
+  <span class="s1">propertyName</span><span class="s2">: </span><span class="s1">Name</span>
+  <span class="s1">dataPropType</span><span class="s2">: </span><span class="s1">Type</span>
+  <span class="s1">jtdDiscriminator</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">jtdMetadata</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">compositeRule</span><span class="s2">: </span><span class="s0">true</span>
+  <span class="s1">createErrors</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">allErrors</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}&gt;</span>
+
+<span class="s0">export function </span><span class="s1">getSubschema</span><span class="s2">(</span>
+  <span class="s1">it</span><span class="s2">: </span><span class="s1">SchemaObjCxt</span><span class="s2">,</span>
+  <span class="s2">{</span><span class="s1">keyword</span><span class="s2">, </span><span
+    class="s1">schemaProp</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">schemaPath</span><span class="s2">, </span><span class="s1">errSchemaPath</span><span
+    class="s2">, </span><span class="s1">topSchemaRef</span><span class="s2">}: </span><span
+    class="s1">SubschemaArgs</span>
+<span class="s2">): </span><span class="s1">SubschemaContext </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">keyword </span><span class="s2">!== </span><span
+    class="s1">undefined </span><span class="s2">&amp;&amp; </span><span class="s1">schema </span><span
+    class="s2">!== </span><span class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'both &quot;keyword&quot; and &quot;schema&quot; passed, only one allowed'</span><span
+    class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">keyword </span><span class="s2">!== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">schema</span><span class="s2">[</span><span class="s1">keyword</span><span
+    class="s2">]</span>
+    <span class="s0">return </span><span class="s1">schemaProp </span><span class="s2">=== </span><span class="s1">undefined</span>
+      <span class="s2">? {</span>
+          <span class="s1">schema</span><span class="s2">: </span><span class="s1">sch</span><span class="s2">,</span>
+          <span class="s1">schemaPath</span><span class="s2">: </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">it</span><span class="s2">.</span><span class="s1">schemaPath</span><span
+    class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">getProperty</span><span
+    class="s2">(</span><span class="s1">keyword</span><span class="s2">)}</span><span class="s3">`</span><span
+    class="s2">,</span>
+          <span class="s1">errSchemaPath</span><span class="s2">: </span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">it</span><span class="s2">.</span><span class="s1">errSchemaPath</span><span
+    class="s2">}</span><span class="s3">/</span><span class="s1">$</span><span class="s2">{</span><span class="s1">keyword</span><span
+    class="s2">}</span><span class="s3">`</span><span class="s2">,</span>
+        <span class="s2">}</span>
+      <span class="s2">: {</span>
+          <span class="s1">schema</span><span class="s2">: </span><span class="s1">sch</span><span
+    class="s2">[</span><span class="s1">schemaProp</span><span class="s2">],</span>
+          <span class="s1">schemaPath</span><span class="s2">: </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">it</span><span class="s2">.</span><span class="s1">schemaPath</span><span
+    class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">getProperty</span><span
+    class="s2">(</span><span class="s1">keyword</span><span class="s2">)}</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">getProperty</span><span class="s2">(</span><span
+    class="s1">schemaProp</span><span class="s2">)}</span><span class="s3">`</span><span class="s2">,</span>
+          <span class="s1">errSchemaPath</span><span class="s2">: </span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">it</span><span class="s2">.</span><span class="s1">errSchemaPath</span><span
+    class="s2">}</span><span class="s3">/</span><span class="s1">$</span><span class="s2">{</span><span class="s1">keyword</span><span
+    class="s2">}</span><span class="s3">/</span><span class="s1">$</span><span class="s2">{</span><span class="s1">escapeFragment</span><span
+    class="s2">(</span><span class="s1">schemaProp</span><span class="s2">)}</span><span class="s3">`</span><span
+    class="s2">,</span>
+        <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">schema </span><span class="s2">!== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">schemaPath </span><span
+    class="s2">=== </span><span class="s1">undefined </span><span class="s2">|| </span><span
+    class="s1">errSchemaPath </span><span class="s2">=== </span><span class="s1">undefined </span><span
+    class="s2">|| </span><span class="s1">topSchemaRef </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+      <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'&quot;schemaPath&quot;, &quot;errSchemaPath&quot; and &quot;topSchemaRef&quot; are required with &quot;schema&quot;'</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s2">{</span>
+      <span class="s1">schema</span><span class="s2">,</span>
+      <span class="s1">schemaPath</span><span class="s2">,</span>
+      <span class="s1">topSchemaRef</span><span class="s2">,</span>
+      <span class="s1">errSchemaPath</span><span class="s2">,</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'either &quot;keyword&quot; or &quot;schema&quot; must be passed'</span><span
+    class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">extendSubschemaData</span><span class="s2">(</span>
+  <span class="s1">subschema</span><span class="s2">: </span><span class="s1">SubschemaContext</span><span
+    class="s2">,</span>
+  <span class="s1">it</span><span class="s2">: </span><span class="s1">SchemaObjCxt</span><span class="s2">,</span>
+  <span class="s2">{</span><span class="s1">dataProp</span><span class="s2">, </span><span
+    class="s1">dataPropType</span><span class="s2">: </span><span class="s1">dpType</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s1">dataTypes</span><span
+    class="s2">, </span><span class="s1">propertyName</span><span class="s2">}: </span><span
+    class="s1">SubschemaArgs</span>
+<span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">data </span><span class="s2">!== </span><span
+    class="s1">undefined </span><span class="s2">&amp;&amp; </span><span class="s1">dataProp </span><span
+    class="s2">!== </span><span class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'both &quot;data&quot; and &quot;dataProp&quot; passed, only one allowed'</span><span
+    class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">} = </span><span
+    class="s1">it</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">dataProp </span><span class="s2">!== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">errorPath</span><span
+    class="s2">, </span><span class="s1">dataPathArr</span><span class="s2">, </span><span class="s1">opts</span><span
+    class="s2">} = </span><span class="s1">it</span>
+    <span class="s0">const </span><span class="s1">nextData </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;data&quot;</span><span
+    class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">it</span><span class="s2">.</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">getProperty</span><span
+    class="s2">(</span><span class="s1">dataProp</span><span class="s2">)}</span><span class="s3">`</span><span
+    class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+    <span class="s1">dataContextProps</span><span class="s2">(</span><span class="s1">nextData</span><span
+    class="s2">)</span>
+    <span class="s1">subschema</span><span class="s2">.</span><span class="s1">errorPath </span><span
+    class="s2">= </span><span class="s1">str</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">errorPath</span><span class="s2">}</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">getErrorPath</span><span class="s2">(</span><span
+    class="s1">dataProp</span><span class="s2">, </span><span class="s1">dpType</span><span class="s2">, </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">jsPropertySyntax</span><span
+    class="s2">)}</span><span class="s3">`</span>
+    <span class="s1">subschema</span><span class="s2">.</span><span class="s1">parentDataProperty </span><span
+    class="s2">= </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">dataProp</span><span class="s2">}</span><span class="s3">`</span>
+    <span class="s1">subschema</span><span class="s2">.</span><span class="s1">dataPathArr </span><span
+    class="s2">= [</span><span class="s1">...dataPathArr</span><span class="s2">, </span><span
+    class="s1">subschema</span><span class="s2">.</span><span class="s1">parentDataProperty</span><span
+    class="s2">]</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">data </span><span class="s2">!== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">nextData </span><span class="s2">= </span><span
+    class="s1">data </span><span class="s0">instanceof </span><span class="s1">Name </span><span
+    class="s2">? </span><span class="s1">data </span><span class="s2">: </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;data&quot;</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s0">true</span><span
+    class="s2">) </span><span class="s4">// replaceable if used once?</span>
+    <span class="s1">dataContextProps</span><span class="s2">(</span><span class="s1">nextData</span><span
+    class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">propertyName </span><span
+    class="s2">!== </span><span class="s1">undefined</span><span class="s2">) </span><span
+    class="s1">subschema</span><span class="s2">.</span><span class="s1">propertyName </span><span
+    class="s2">= </span><span class="s1">propertyName</span>
+    <span class="s4">// TODO something is possibly wrong here with not changing parentDataProperty and not appending dataPathArr</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">dataTypes</span><span class="s2">) </span><span
+    class="s1">subschema</span><span class="s2">.</span><span class="s1">dataTypes </span><span
+    class="s2">= </span><span class="s1">dataTypes</span>
+
+  <span class="s0">function </span><span class="s1">dataContextProps</span><span class="s2">(</span><span class="s1">_nextData</span><span
+    class="s2">: </span><span class="s1">Name</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+    <span class="s1">subschema</span><span class="s2">.</span><span class="s1">data </span><span
+    class="s2">= </span><span class="s1">_nextData</span>
+    <span class="s1">subschema</span><span class="s2">.</span><span class="s1">dataLevel </span><span
+    class="s2">= </span><span class="s1">it</span><span class="s2">.</span><span class="s1">dataLevel </span><span
+    class="s2">+ </span><span class="s5">1</span>
+    <span class="s1">subschema</span><span class="s2">.</span><span class="s1">dataTypes </span><span
+    class="s2">= []</span>
+    <span class="s1">it</span><span class="s2">.</span><span class="s1">definedProperties </span><span
+    class="s2">= </span><span class="s0">new </span><span class="s1">Set</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">&gt;()</span>
+    <span class="s1">subschema</span><span class="s2">.</span><span class="s1">parentData </span><span
+    class="s2">= </span><span class="s1">it</span><span class="s2">.</span><span class="s1">data</span>
+    <span class="s1">subschema</span><span class="s2">.</span><span class="s1">dataNames </span><span
+    class="s2">= [</span><span class="s1">...it</span><span class="s2">.</span><span class="s1">dataNames</span><span
+    class="s2">, </span><span class="s1">_nextData</span><span class="s2">]</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">extendSubschemaMode</span><span class="s2">(</span>
+  <span class="s1">subschema</span><span class="s2">: </span><span class="s1">SubschemaContext</span><span
+    class="s2">,</span>
+  <span class="s2">{</span><span class="s1">jtdDiscriminator</span><span class="s2">, </span><span class="s1">jtdMetadata</span><span
+    class="s2">, </span><span class="s1">compositeRule</span><span class="s2">, </span><span
+    class="s1">createErrors</span><span class="s2">, </span><span class="s1">allErrors</span><span class="s2">}: </span><span
+    class="s1">SubschemaArgs</span>
+<span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">compositeRule </span><span class="s2">!== </span><span
+    class="s1">undefined</span><span class="s2">) </span><span class="s1">subschema</span><span class="s2">.</span><span
+    class="s1">compositeRule </span><span class="s2">= </span><span class="s1">compositeRule</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">createErrors </span><span
+    class="s2">!== </span><span class="s1">undefined</span><span class="s2">) </span><span
+    class="s1">subschema</span><span class="s2">.</span><span class="s1">createErrors </span><span
+    class="s2">= </span><span class="s1">createErrors</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">allErrors </span><span
+    class="s2">!== </span><span class="s1">undefined</span><span class="s2">) </span><span
+    class="s1">subschema</span><span class="s2">.</span><span class="s1">allErrors </span><span
+    class="s2">= </span><span class="s1">allErrors</span>
+  <span class="s1">subschema</span><span class="s2">.</span><span class="s1">jtdDiscriminator </span><span
+    class="s2">= </span><span class="s1">jtdDiscriminator </span><span class="s4">// not inherited</span>
+  <span class="s1">subschema</span><span class="s2">.</span><span class="s1">jtdMetadata </span><span
+    class="s2">= </span><span class="s1">jtdMetadata </span><span class="s4">// not inherited</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<html>
+<head>
+  <title>FsaNodeWriteStream.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsaNodeWriteStream.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">FsaNodeWriteStream </span><span
+    class="s1">= </span><span class="s3">void </span><span class="s4">0</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s2">stream_1 </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;../vendor/node/stream&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">Defer_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;thingies/lib/Defer&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">concurrency_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;thingies/lib/concurrency&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">util_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../node/util&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">queueMicrotask_1 </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;../queueMicrotask&quot;</span><span class="s1">);</span>
+<span class="s5">/**</span>
+ <span class="s5">* This WriteStream implementation does not build on top of the `fs` module,</span>
+ <span class="s5">* but instead uses the lower-level `FileSystemFileHandle` interface. The reason</span>
+ <span class="s5">* is the different semantics in `fs` and FSA (File System Access API) write streams.</span>
+ <span class="s5">*</span>
+ <span class="s5">* When data is written to an FSA file, a new FSA stream is created, it copies</span>
+ <span class="s5">* the file to a temporary swap file. After each written chunk, that swap file</span>
+ <span class="s5">* is closed and the original file is replaced with the swap file. This means,</span>
+ <span class="s5">* if WriteStream was built on top of `fs`, each chunk write would result in</span>
+ <span class="s5">* a file copy, write, close, rename operations, which is not what we want.</span>
+ <span class="s5">*</span>
+ <span class="s5">* Instead this implementation hooks into the lower-level and closes the swap</span>
+ <span class="s5">* file only once the stream is closed. The downside is that the written data</span>
+ <span class="s5">* is not immediately visible to other processes (because it is written to the</span>
+ <span class="s5">* swap file), but that is the trade-off we have to make.</span>
+ <span class="s5">*</span>
+ <span class="s5">* </span><span class="s6">@todo </span><span class="s5">Could make this flush the data to the original file periodically, so that</span>
+ <span class="s5">*       the data is visible to other processes.</span>
+ <span class="s5">* </span><span class="s6">@todo </span><span class="s5">This stream could work through `FileSystemSyncAccessHandle.write` in a</span>
+ <span class="s5">*       Worker thread instead.</span>
+ <span class="s5">*/</span>
+<span class="s3">class </span><span class="s2">FsaNodeWriteStream </span><span class="s3">extends </span><span
+    class="s2">stream_1</span><span class="s1">.</span><span class="s2">Writable </span><span class="s1">{</span>
+    <span class="s2">constructor</span><span class="s1">(</span><span class="s2">handle</span><span class="s1">, </span><span
+    class="s2">path</span><span class="s1">, </span><span class="s2">options</span><span class="s1">) {</span>
+        <span class="s3">super</span><span class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">path </span><span
+    class="s1">= </span><span class="s2">path</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">options </span><span
+    class="s1">= </span><span class="s2">options</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">__pending__ </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">__closed__ </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">__bytes__ </span><span
+    class="s1">= </span><span class="s4">0</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">__mutex__ </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">concurrency_1</span><span
+    class="s1">.</span><span class="s2">concurrency</span><span class="s1">)(</span><span class="s4">1</span><span
+    class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">start </span><span class="s1">!== </span><span class="s2">undefined</span><span
+    class="s1">) {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">start </span><span class="s1">!== </span><span
+    class="s0">'number'</span><span class="s1">) {</span>
+                <span class="s3">throw new </span><span class="s2">TypeError</span><span class="s1">(</span><span
+    class="s0">'&quot;start&quot; option must be a Number'</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">start </span><span class="s1">&lt; </span><span class="s4">0</span><span class="s1">) {</span>
+                <span class="s3">throw new </span><span class="s2">TypeError</span><span class="s1">(</span><span
+    class="s0">'&quot;start&quot; must be &gt;= zero'</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span class="s3">const </span><span class="s2">stream </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">Defer_1</span><span class="s1">.</span><span class="s2">Defer</span><span
+    class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">__stream__ </span><span
+    class="s1">= </span><span class="s2">stream</span><span class="s1">.</span><span class="s2">promise</span><span
+    class="s1">;</span>
+        <span class="s1">(</span><span class="s2">async </span><span class="s1">() =&gt; {</span>
+            <span class="s3">const </span><span class="s2">fsaHandle </span><span class="s1">= </span><span class="s3">await </span><span
+    class="s2">handle</span><span class="s1">;</span>
+            <span class="s3">const </span><span class="s2">fileWasOpened </span><span class="s1">= !</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">fd</span><span class="s1">;</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">fileWasOpened</span><span
+    class="s1">)</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'open'</span><span class="s1">, </span><span class="s2">fsaHandle</span><span
+    class="s1">.</span><span class="s2">fd</span><span class="s1">);</span>
+            <span class="s3">const </span><span class="s2">flags </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">flagsToNumber</span><span class="s1">)(</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">flags </span><span class="s1">?? </span><span class="s0">'w'</span><span
+    class="s1">);</span>
+            <span class="s3">const </span><span class="s2">keepExistingData </span><span class="s1">= </span><span
+    class="s2">flags </span><span class="s1">&amp; </span><span class="s4">1024 </span><span class="s7">/* FLAG_CON.O_APPEND */ </span><span
+    class="s1">? </span><span class="s3">true </span><span class="s1">: </span><span class="s3">false</span><span
+    class="s1">;</span>
+            <span class="s3">const </span><span class="s2">writable </span><span class="s1">= </span><span class="s3">await </span><span
+    class="s2">fsaHandle</span><span class="s1">.</span><span class="s2">file</span><span class="s1">.</span><span
+    class="s2">createWritable</span><span class="s1">({ </span><span class="s2">keepExistingData </span><span
+    class="s1">});</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">keepExistingData</span><span
+    class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">start </span><span class="s1">= </span><span class="s2">Number</span><span
+    class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span class="s2">start </span><span
+    class="s1">?? </span><span class="s4">0</span><span class="s1">);</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">start</span><span
+    class="s1">)</span>
+                    <span class="s3">await </span><span class="s2">writable</span><span class="s1">.</span><span
+    class="s2">seek</span><span class="s1">(</span><span class="s2">start</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">__pending__ </span><span
+    class="s1">= </span><span class="s3">false</span><span class="s1">;</span>
+            <span class="s2">stream</span><span class="s1">.</span><span class="s2">resolve</span><span
+    class="s1">(</span><span class="s2">writable</span><span class="s1">);</span>
+        <span class="s1">})().</span><span class="s2">catch</span><span class="s1">(</span><span
+    class="s2">error </span><span class="s1">=&gt; {</span>
+            <span class="s2">stream</span><span class="s1">.</span><span class="s2">reject</span><span
+    class="s1">(</span><span class="s2">error</span><span class="s1">);</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">async ___write___</span><span class="s1">(</span><span class="s2">buffers</span><span class="s1">) {</span>
+        <span class="s3">await this</span><span class="s1">.</span><span class="s2">__mutex__</span><span
+    class="s1">(</span><span class="s2">async </span><span class="s1">() =&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">__closed__</span><span class="s1">)</span>
+                <span class="s3">return</span><span class="s1">;</span>
+            <span class="s7">// if (this.__closed__) throw new Error('WriteStream is closed');</span>
+            <span class="s3">const </span><span class="s2">writable </span><span class="s1">= </span><span class="s3">await this</span><span
+    class="s1">.</span><span class="s2">__stream__</span><span class="s1">;</span>
+            <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span class="s2">buffer of buffers</span><span
+    class="s1">) {</span>
+                <span class="s3">await </span><span class="s2">writable</span><span class="s1">.</span><span class="s2">write</span><span
+    class="s1">(</span><span class="s2">buffer</span><span class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">__bytes__ </span><span class="s1">+= </span><span
+    class="s2">buffer</span><span class="s1">.</span><span class="s2">byteLength</span><span class="s1">;</span>
+            <span class="s1">}</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">async __close__</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">emitClose </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">emitClose</span><span class="s1">;</span>
+        <span class="s3">await this</span><span class="s1">.</span><span class="s2">__mutex__</span><span
+    class="s1">(</span><span class="s2">async </span><span class="s1">() =&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">__closed__ </span><span class="s1">&amp;&amp; </span><span
+    class="s2">emitClose</span><span class="s1">) {</span>
+                <span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span class="s2">queueMicrotask_1</span><span
+    class="s1">.</span><span class="s2">default</span><span class="s1">)(() =&gt; </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span class="s1">(</span><span
+    class="s0">'close'</span><span class="s1">));</span>
+                <span class="s3">return</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s3">const </span><span class="s2">writable </span><span class="s1">= </span><span
+    class="s3">await this</span><span class="s1">.</span><span class="s2">__stream__</span><span class="s1">;</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">__closed__ </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+                <span class="s3">await </span><span class="s2">writable</span><span class="s1">.</span><span class="s2">close</span><span
+    class="s1">();</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">emitClose</span><span
+    class="s1">)</span>
+                    <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'close'</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">error</span><span
+    class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'error'</span><span class="s1">, </span><span class="s2">error</span><span
+    class="s1">);</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">emitClose</span><span
+    class="s1">)</span>
+                    <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'close'</span><span class="s1">, </span><span class="s2">error</span><span
+    class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s7">// ------------------------------------------------------------- IWriteStream</span>
+    <span class="s2">get bytesWritten</span><span class="s1">() {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">__bytes__</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">get pending</span><span class="s1">() {</span>
+        <span class="s3">return this</span><span class="s1">.</span><span class="s2">__pending__</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">close</span><span class="s1">(</span><span class="s2">cb</span><span class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">cb</span><span class="s1">)</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">once</span><span
+    class="s1">(</span><span class="s0">'close'</span><span class="s1">, </span><span class="s2">cb</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">__close__</span><span
+    class="s1">().</span><span class="s2">catch</span><span class="s1">(() =&gt; { });</span>
+    <span class="s1">}</span>
+    <span class="s7">// ----------------------------------------------------------------- Writable</span>
+    <span class="s2">_write</span><span class="s1">(</span><span class="s2">chunk</span><span class="s1">, </span><span
+    class="s2">encoding</span><span class="s1">, </span><span class="s2">callback</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">___write___</span><span
+    class="s1">([</span><span class="s2">chunk</span><span class="s1">])</span>
+            <span class="s1">.</span><span class="s2">then</span><span class="s1">(() =&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">callback</span><span
+    class="s1">)</span>
+                <span class="s2">callback</span><span class="s1">(</span><span class="s3">null</span><span
+    class="s1">);</span>
+        <span class="s1">})</span>
+            <span class="s1">.</span><span class="s2">catch</span><span class="s1">(</span><span
+    class="s2">error </span><span class="s1">=&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">callback</span><span
+    class="s1">)</span>
+                <span class="s2">callback</span><span class="s1">(</span><span class="s2">error</span><span class="s1">);</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">_writev</span><span class="s1">(</span><span class="s2">chunks</span><span
+    class="s1">, </span><span class="s2">callback</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">buffers </span><span class="s1">= </span><span
+    class="s2">chunks</span><span class="s1">.</span><span class="s2">map</span><span class="s1">(({ </span><span
+    class="s2">chunk </span><span class="s1">}) =&gt; </span><span class="s2">chunk</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">___write___</span><span
+    class="s1">(</span><span class="s2">buffers</span><span class="s1">)</span>
+            <span class="s1">.</span><span class="s2">then</span><span class="s1">(() =&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">callback</span><span
+    class="s1">)</span>
+                <span class="s2">callback</span><span class="s1">(</span><span class="s3">null</span><span
+    class="s1">);</span>
+        <span class="s1">})</span>
+            <span class="s1">.</span><span class="s2">catch</span><span class="s1">(</span><span
+    class="s2">error </span><span class="s1">=&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">callback</span><span
+    class="s1">)</span>
+                <span class="s2">callback</span><span class="s1">(</span><span class="s2">error</span><span class="s1">);</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">_final</span><span class="s1">(</span><span class="s2">callback</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">__close__</span><span class="s1">()</span>
+            <span class="s1">.</span><span class="s2">then</span><span class="s1">(() =&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">callback</span><span
+    class="s1">)</span>
+                <span class="s2">callback</span><span class="s1">(</span><span class="s3">null</span><span
+    class="s1">);</span>
+        <span class="s1">})</span>
+            <span class="s1">.</span><span class="s2">catch</span><span class="s1">(</span><span
+    class="s2">error </span><span class="s1">=&gt; {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">callback</span><span
+    class="s1">)</span>
+                <span class="s2">callback</span><span class="s1">(</span><span class="s2">error</span><span class="s1">);</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">FsaNodeWriteStream </span><span
+    class="s1">= </span><span class="s2">FsaNodeWriteStream</span><span class="s1">;</span>
+<span class="s7">//# sourceMappingURL=FsaNodeWriteStream.js.map</span></pre>
+</body>
+</html>

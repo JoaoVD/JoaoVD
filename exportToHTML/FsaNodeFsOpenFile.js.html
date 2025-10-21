@@ -1,0 +1,115 @@
+<html>
+<head>
+  <title>FsaNodeFsOpenFile.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsaNodeFsOpenFile.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">FsaNodeFsOpenFile </span><span
+    class="s1">= </span><span class="s3">void </span><span class="s4">0</span><span class="s1">;</span>
+<span class="s5">/**</span>
+ <span class="s5">* Represents an open file. Stores additional metadata about the open file, such</span>
+ <span class="s5">* as the seek position.</span>
+ <span class="s5">*/</span>
+<span class="s3">class </span><span class="s2">FsaNodeFsOpenFile </span><span class="s1">{</span>
+    <span class="s2">constructor</span><span class="s1">(</span><span class="s2">fd</span><span
+    class="s1">, </span><span class="s2">createMode</span><span class="s1">, </span><span class="s2">flags</span><span
+    class="s1">, </span><span class="s2">file</span><span class="s1">, </span><span class="s2">filename</span><span
+    class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">fd </span><span class="s1">= </span><span
+    class="s2">fd</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">createMode </span><span
+    class="s1">= </span><span class="s2">createMode</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">flags </span><span
+    class="s1">= </span><span class="s2">flags</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">file </span><span
+    class="s1">= </span><span class="s2">file</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">filename </span><span class="s1">= </span><span
+    class="s2">filename</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">seek </span><span
+    class="s1">= </span><span class="s4">0</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">keepExistingData </span><span class="s1">= !!(</span><span
+    class="s2">flags </span><span class="s1">&amp; </span><span class="s4">1024 </span><span class="s6">/* FLAG_CON.O_APPEND */</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">async close</span><span class="s1">() { }</span>
+    <span class="s2">async write</span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">, </span><span class="s2">seek</span><span class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">seek </span><span
+    class="s1">!== </span><span class="s0">'number'</span><span class="s1">)</span>
+            <span class="s2">seek </span><span class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">seek</span><span class="s1">;</span>
+        <span class="s3">else</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">keepExistingData </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">keepExistingData </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">keepExistingData</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">writer </span><span class="s1">= </span><span class="s3">await this</span><span
+    class="s1">.</span><span class="s2">file</span><span class="s1">.</span><span class="s2">createWritable</span><span
+    class="s1">({ </span><span class="s2">keepExistingData </span><span class="s1">});</span>
+        <span class="s3">await </span><span class="s2">writer</span><span class="s1">.</span><span
+    class="s2">write</span><span class="s1">({</span>
+            <span class="s2">type</span><span class="s1">: </span><span class="s0">'write'</span><span
+    class="s1">,</span>
+            <span class="s2">data</span><span class="s1">,</span>
+            <span class="s2">position</span><span class="s1">: </span><span class="s2">seek</span><span
+    class="s1">,</span>
+        <span class="s1">});</span>
+        <span class="s3">await </span><span class="s2">writer</span><span class="s1">.</span><span
+    class="s2">close</span><span class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">keepExistingData </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">seek </span><span
+    class="s1">+= </span><span class="s2">data</span><span class="s1">.</span><span class="s2">byteLength</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">FsaNodeFsOpenFile </span><span
+    class="s1">= </span><span class="s2">FsaNodeFsOpenFile</span><span class="s1">;</span>
+<span class="s6">//# sourceMappingURL=FsaNodeFsOpenFile.js.map</span></pre>
+</body>
+</html>

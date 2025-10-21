@@ -1,0 +1,180 @@
+<html>
+<head>
+  <title>scope.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          scope.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">Code</span><span
+  class="s2">, </span><span class="s1">Name </span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">&quot;./code&quot;</span><span class="s2">;</span>
+<span class="s0">interface </span><span class="s1">NameGroup </span><span class="s2">{</span>
+    <span class="s1">prefix</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">index</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">NameValue </span><span class="s2">{</span>
+    <span class="s1">ref</span><span class="s2">: </span><span class="s1">ValueReference</span><span class="s2">;</span>
+    <span class="s1">key</span><span class="s2">?: </span><span class="s1">unknown</span><span class="s2">;</span>
+    <span class="s1">code</span><span class="s2">?: </span><span class="s1">Code</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">type ValueReference </span><span class="s2">= </span><span class="s1">unknown</span><span
+    class="s2">;</span>
+<span class="s0">interface </span><span class="s1">ScopeOptions </span><span class="s2">{</span>
+    <span class="s1">prefixes</span><span class="s2">?: </span><span class="s1">Set</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt;;</span>
+    <span class="s1">parent</span><span class="s2">?: </span><span class="s1">Scope</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">interface </span><span class="s1">ValueScopeOptions </span><span class="s0">extends </span><span
+    class="s1">ScopeOptions </span><span class="s2">{</span>
+    <span class="s1">scope</span><span class="s2">: </span><span class="s1">ScopeStore</span><span class="s2">;</span>
+    <span class="s1">es5</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">lines</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">type ScopeStore </span><span class="s2">= </span><span
+    class="s1">Record</span><span class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">ValueReference</span><span class="s2">[] | </span><span class="s1">undefined</span><span
+    class="s2">&gt;;</span>
+<span class="s1">type ScopeValues </span><span class="s2">= {</span>
+    <span class="s2">[</span><span class="s1">Prefix </span><span class="s0">in </span><span
+    class="s1">string</span><span class="s2">]?: </span><span class="s1">Map</span><span class="s2">&lt;</span><span
+    class="s1">unknown</span><span class="s2">, </span><span class="s1">ValueScopeName</span><span
+    class="s2">&gt;;</span>
+<span class="s2">};</span>
+<span class="s0">export </span><span class="s1">type ScopeValueSets </span><span class="s2">= {</span>
+    <span class="s2">[</span><span class="s1">Prefix </span><span class="s0">in </span><span
+    class="s1">string</span><span class="s2">]?: </span><span class="s1">Set</span><span class="s2">&lt;</span><span
+    class="s1">ValueScopeName</span><span class="s2">&gt;;</span>
+<span class="s2">};</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">enum </span><span class="s1">UsedValueState </span><span
+    class="s2">{</span>
+    <span class="s1">Started </span><span class="s2">= </span><span class="s4">0</span><span class="s2">,</span>
+    <span class="s1">Completed </span><span class="s2">= </span><span class="s4">1</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">type UsedScopeValues </span><span class="s2">= {</span>
+    <span class="s2">[</span><span class="s1">Prefix </span><span class="s0">in </span><span
+    class="s1">string</span><span class="s2">]?: </span><span class="s1">Map</span><span class="s2">&lt;</span><span
+    class="s1">ValueScopeName</span><span class="s2">, </span><span class="s1">UsedValueState </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">&gt;;</span>
+<span class="s2">};</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">const </span><span
+    class="s1">varKinds</span><span class="s2">: {</span>
+    <span class="s0">const</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">;</span>
+    <span class="s0">let</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">;</span>
+    <span class="s0">var</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">;</span>
+<span class="s2">};</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">Scope </span><span class="s2">{</span>
+    <span class="s0">protected </span><span class="s1">readonly _names</span><span class="s2">: {</span>
+        <span class="s2">[</span><span class="s1">Prefix </span><span class="s0">in </span><span
+    class="s1">string</span><span class="s2">]?: </span><span class="s1">NameGroup</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">protected </span><span class="s1">readonly _prefixes</span><span class="s2">?: </span><span
+    class="s1">Set</span><span class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt;;</span>
+    <span class="s0">protected </span><span class="s1">readonly _parent</span><span class="s2">?: </span><span
+    class="s1">Scope</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">({ </span><span class="s1">prefixes</span><span
+    class="s2">, </span><span class="s1">parent </span><span class="s2">}?: </span><span
+    class="s1">ScopeOptions</span><span class="s2">);</span>
+    <span class="s1">toName</span><span class="s2">(</span><span class="s1">nameOrPrefix</span><span
+    class="s2">: </span><span class="s1">Name </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Name</span><span class="s2">;</span>
+    <span class="s1">name</span><span class="s2">(</span><span class="s1">prefix</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Name</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">_newName</span><span class="s2">(</span><span
+    class="s1">prefix</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">string</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_nameGroup</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">interface </span><span class="s1">ScopePath </span><span class="s2">{</span>
+    <span class="s1">property</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">itemIndex</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">ValueScopeName </span><span
+    class="s0">extends </span><span class="s1">Name </span><span class="s2">{</span>
+    <span class="s1">readonly prefix</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s1">value</span><span class="s2">?: </span><span class="s1">NameValue</span><span class="s2">;</span>
+    <span class="s1">scopePath</span><span class="s2">?: </span><span class="s1">Code</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">prefix</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">nameStr</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">);</span>
+    <span class="s1">setValue</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">: </span><span class="s1">NameValue</span><span class="s2">, { </span><span
+    class="s1">property</span><span class="s2">, </span><span class="s1">itemIndex </span><span
+    class="s2">}: </span><span class="s1">ScopePath</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">interface </span><span class="s1">VSOptions </span><span class="s0">extends </span><span class="s1">ValueScopeOptions </span><span
+    class="s2">{</span>
+    <span class="s1">_n</span><span class="s2">: </span><span class="s1">Code</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">ValueScope </span><span class="s0">extends </span><span class="s1">Scope </span><span class="s2">{</span>
+    <span class="s0">protected </span><span class="s1">readonly _values</span><span class="s2">: </span><span
+    class="s1">ScopeValues</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly _scope</span><span class="s2">: </span><span class="s1">ScopeStore</span><span
+    class="s2">;</span>
+    <span class="s1">readonly opts</span><span class="s2">: </span><span class="s1">VSOptions</span><span
+    class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">opts</span><span
+    class="s2">: </span><span class="s1">ValueScopeOptions</span><span class="s2">);</span>
+    <span class="s1">get</span><span class="s2">(): </span><span class="s1">ScopeStore</span><span class="s2">;</span>
+    <span class="s1">name</span><span class="s2">(</span><span class="s1">prefix</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">ValueScopeName</span><span class="s2">;</span>
+    <span class="s1">value</span><span class="s2">(</span><span class="s1">nameOrPrefix</span><span class="s2">: </span><span
+    class="s1">ValueScopeName </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">value</span><span class="s2">: </span><span class="s1">NameValue</span><span
+    class="s2">): </span><span class="s1">ValueScopeName</span><span class="s2">;</span>
+    <span class="s1">getValue</span><span class="s2">(</span><span class="s1">prefix</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">keyOrRef</span><span
+    class="s2">: </span><span class="s1">unknown</span><span class="s2">): </span><span
+    class="s1">ValueScopeName </span><span class="s2">| </span><span class="s1">undefined</span><span
+    class="s2">;</span>
+    <span class="s1">scopeRefs</span><span class="s2">(</span><span class="s1">scopeName</span><span
+    class="s2">: </span><span class="s1">Name</span><span class="s2">, </span><span class="s1">values</span><span
+    class="s2">?: </span><span class="s1">ScopeValues </span><span class="s2">| </span><span
+    class="s1">ScopeValueSets</span><span class="s2">): </span><span class="s1">Code</span><span class="s2">;</span>
+    <span class="s1">scopeCode</span><span class="s2">(</span><span class="s1">values</span><span
+    class="s2">?: </span><span class="s1">ScopeValues </span><span class="s2">| </span><span
+    class="s1">ScopeValueSets</span><span class="s2">, </span><span class="s1">usedValues</span><span
+    class="s2">?: </span><span class="s1">UsedScopeValues</span><span class="s2">, </span><span
+    class="s1">getCode</span><span class="s2">?: (</span><span class="s1">n</span><span class="s2">: </span><span
+    class="s1">ValueScopeName</span><span class="s2">) =&gt; </span><span class="s1">Code </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">): </span><span class="s1">Code</span><span
+    class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_reduceValues</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s2">{};</span>
+</pre>
+</body>
+</html>

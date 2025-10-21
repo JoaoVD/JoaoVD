@@ -1,0 +1,93 @@
+<html>
+<head>
+  <title>_createToPairs.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _createToPairs.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseToPairs </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseToPairs'</span><span class="s2">),</span>
+    <span class="s1">getTag </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_getTag'</span><span class="s2">),</span>
+    <span class="s1">mapToArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_mapToArray'</span><span class="s2">),</span>
+    <span class="s1">setToPairs </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_setToPairs'</span><span class="s2">);</span>
+
+<span class="s4">/** `Object#toString` result references. */</span>
+<span class="s0">var </span><span class="s1">mapTag </span><span class="s2">= </span><span
+    class="s3">'[object Map]'</span><span class="s2">,</span>
+    <span class="s1">setTag </span><span class="s2">= </span><span class="s3">'[object Set]'</span><span
+    class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a `_.toPairs` or `_.toPairsIn` function.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} keysFunc The function to get the keys of a given object.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span
+    class="s4">{Function} Returns the new pairs function.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">createToPairs</span><span class="s2">(</span><span
+    class="s1">keysFunc</span><span class="s2">) {</span>
+  <span class="s0">return function</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">tag </span><span class="s2">= </span><span
+    class="s1">getTag</span><span class="s2">(</span><span class="s1">object</span><span class="s2">);</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">tag </span><span class="s2">== </span><span
+    class="s1">mapTag</span><span class="s2">) {</span>
+      <span class="s0">return </span><span class="s1">mapToArray</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">tag </span><span class="s2">== </span><span
+    class="s1">setTag</span><span class="s2">) {</span>
+      <span class="s0">return </span><span class="s1">setToPairs</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s1">baseToPairs</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">keysFunc</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">));</span>
+  <span class="s2">};</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">createToPairs</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

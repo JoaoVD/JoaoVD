@@ -1,0 +1,222 @@
+<html>
+<head>
+  <title>read-entry.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          read-entry.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">Minipass </span><span
+    class="s3">} = </span><span class="s1">require</span><span class="s3">(</span><span
+    class="s0">'minipass'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">normPath </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'./normalize-windows-path.js'</span><span class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">SLURP </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'slurp'</span><span class="s3">)</span>
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s2">class </span><span class="s1">ReadEntry </span><span class="s2">extends </span><span
+    class="s1">Minipass </span><span class="s3">{</span>
+  <span class="s1">constructor </span><span class="s3">(</span><span class="s1">header</span><span
+    class="s3">, </span><span class="s1">ex</span><span class="s3">, </span><span class="s1">gex</span><span class="s3">) {</span>
+    <span class="s2">super</span><span class="s3">()</span>
+    <span class="s4">// read entries always start life paused.  this is to avoid the</span>
+    <span class="s4">// situation where Minipass's auto-ending empty streams results</span>
+    <span class="s4">// in an entry ending before we're ready for it.</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">pause</span><span class="s3">()</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">extended </span><span
+    class="s3">= </span><span class="s1">ex</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">globalExtended </span><span
+    class="s3">= </span><span class="s1">gex</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">header </span><span class="s3">= </span><span
+    class="s1">header</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">startBlockSize </span><span
+    class="s3">= </span><span class="s5">512 </span><span class="s3">* </span><span class="s1">Math</span><span
+    class="s3">.</span><span class="s1">ceil</span><span class="s3">(</span><span class="s1">header</span><span
+    class="s3">.</span><span class="s1">size </span><span class="s3">/ </span><span class="s5">512</span><span
+    class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain </span><span
+    class="s3">= </span><span class="s2">this</span><span class="s3">.</span><span class="s1">startBlockSize</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">remain </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">size</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">type </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">type</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">meta </span><span class="s3">= </span><span
+    class="s2">false</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">ignore </span><span class="s3">= </span><span
+    class="s2">false</span>
+    <span class="s2">switch </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">) {</span>
+      <span class="s2">case </span><span class="s0">'File'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'OldFile'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'Link'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'SymbolicLink'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'CharacterDevice'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'BlockDevice'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'Directory'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'FIFO'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'ContiguousFile'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'GNUDumpDir'</span><span class="s3">:</span>
+        <span class="s2">break</span>
+
+      <span class="s2">case </span><span class="s0">'NextFileHasLongLinkpath'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'NextFileHasLongPath'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'OldGnuLongPath'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'GlobalExtendedHeader'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'ExtendedHeader'</span><span class="s3">:</span>
+      <span class="s2">case </span><span class="s0">'OldExtendedHeader'</span><span class="s3">:</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">meta </span><span
+    class="s3">= </span><span class="s2">true</span>
+        <span class="s2">break</span>
+
+      <span class="s4">// NOTE: gnutar and bsdtar treat unrecognized types as 'File'</span>
+      <span class="s4">// it may be worth doing the same, but with a warning.</span>
+      <span class="s2">default</span><span class="s3">:</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">ignore </span><span
+    class="s3">= </span><span class="s2">true</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s1">normPath</span><span class="s3">(</span><span class="s1">header</span><span class="s3">.</span><span
+    class="s1">path</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">mode </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">mode</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">mode</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">mode </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">mode </span><span class="s3">&amp; </span><span
+    class="s5">0o7777</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">uid </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">uid</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">gid </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">gid</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">uname </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">uname</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">gname </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">gname</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">size </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">size</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">mtime </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">mtime</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">atime </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">atime</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">ctime </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">ctime</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath </span><span
+    class="s3">= </span><span class="s1">normPath</span><span class="s3">(</span><span class="s1">header</span><span
+    class="s3">.</span><span class="s1">linkpath</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">uname </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">uname</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">gname </span><span class="s3">= </span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">gname</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">ex</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">SLURP</span><span class="s3">](</span><span
+    class="s1">ex</span><span class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">gex</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">SLURP</span><span class="s3">](</span><span
+    class="s1">gex</span><span class="s3">, </span><span class="s2">true</span><span class="s3">)</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s1">write </span><span class="s3">(</span><span class="s1">data</span><span class="s3">) {</span>
+    <span class="s2">const </span><span class="s1">writeLen </span><span class="s3">= </span><span
+    class="s1">data</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">writeLen </span><span
+    class="s3">&gt; </span><span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain</span><span
+    class="s3">) {</span>
+      <span class="s2">throw new </span><span class="s1">Error</span><span class="s3">(</span><span class="s0">'writing more to entry than is appropriate'</span><span
+    class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s2">const </span><span class="s1">r </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">remain</span>
+    <span class="s2">const </span><span class="s1">br </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">blockRemain</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">remain </span><span class="s3">= </span><span
+    class="s1">Math</span><span class="s3">.</span><span class="s1">max</span><span class="s3">(</span><span class="s5">0</span><span
+    class="s3">, </span><span class="s1">r </span><span class="s3">- </span><span class="s1">writeLen</span><span
+    class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain </span><span
+    class="s3">= </span><span class="s1">Math</span><span class="s3">.</span><span class="s1">max</span><span
+    class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span class="s1">br </span><span
+    class="s3">- </span><span class="s1">writeLen</span><span class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">ignore</span><span class="s3">) {</span>
+      <span class="s2">return true</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">r </span><span class="s3">&gt;= </span><span
+    class="s1">writeLen</span><span class="s3">) {</span>
+      <span class="s2">return super</span><span class="s3">.</span><span class="s1">write</span><span
+    class="s3">(</span><span class="s1">data</span><span class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s4">// r &lt; writeLen</span>
+    <span class="s2">return super</span><span class="s3">.</span><span class="s1">write</span><span
+    class="s3">(</span><span class="s1">data</span><span class="s3">.</span><span class="s1">slice</span><span
+    class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span class="s1">r</span><span
+    class="s3">))</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">SLURP</span><span class="s3">] (</span><span class="s1">ex</span><span
+    class="s3">, </span><span class="s1">global</span><span class="s3">) {</span>
+    <span class="s2">for </span><span class="s3">(</span><span class="s2">const </span><span class="s1">k </span><span
+    class="s2">in </span><span class="s1">ex</span><span class="s3">) {</span>
+      <span class="s4">// we slurp in everything except for the path attribute in</span>
+      <span class="s4">// a global extended header, because that's weird.</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">ex</span><span class="s3">[</span><span
+    class="s1">k</span><span class="s3">] !== </span><span class="s2">null </span><span
+    class="s3">&amp;&amp; </span><span class="s1">ex</span><span class="s3">[</span><span class="s1">k</span><span
+    class="s3">] !== </span><span class="s1">undefined </span><span class="s3">&amp;&amp;</span>
+          <span class="s3">!(</span><span class="s1">global </span><span class="s3">&amp;&amp; </span><span
+    class="s1">k </span><span class="s3">=== </span><span class="s0">'path'</span><span class="s3">)) {</span>
+        <span class="s2">this</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">k </span><span class="s3">=== </span><span class="s0">'path' </span><span class="s3">|| </span><span
+    class="s1">k </span><span class="s3">=== </span><span class="s0">'linkpath' </span><span class="s3">? </span><span
+    class="s1">normPath</span><span class="s3">(</span><span class="s1">ex</span><span class="s3">[</span><span
+    class="s1">k</span><span class="s3">]) : </span><span class="s1">ex</span><span class="s3">[</span><span class="s1">k</span><span
+    class="s3">]</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

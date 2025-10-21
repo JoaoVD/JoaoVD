@@ -1,0 +1,124 @@
+<html>
+<head>
+  <title>test-node.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          test-node.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">pump </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./index'</span><span class="s2">)</span>
+
+<span class="s0">var </span><span class="s1">rs </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'fs'</span><span class="s2">).</span><span
+    class="s1">createReadStream</span><span class="s2">(</span><span class="s3">'/dev/random'</span><span
+    class="s2">)</span>
+<span class="s0">var </span><span class="s1">ws </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'fs'</span><span class="s2">).</span><span
+    class="s1">createWriteStream</span><span class="s2">(</span><span class="s3">'/dev/null'</span><span
+    class="s2">)</span>
+
+<span class="s0">var </span><span class="s1">toHex </span><span class="s2">= </span><span
+    class="s0">function </span><span class="s2">() {</span>
+  <span class="s0">var </span><span class="s1">reverse </span><span class="s2">= </span><span
+    class="s0">new </span><span class="s2">(</span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'stream'</span><span class="s2">).</span><span class="s1">Transform</span><span class="s2">)()</span>
+
+  <span class="s1">reverse</span><span class="s2">.</span><span class="s1">_transform </span><span
+    class="s2">= </span><span class="s0">function </span><span class="s2">(</span><span class="s1">chunk</span><span
+    class="s2">, </span><span class="s1">enc</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">) {</span>
+    <span class="s1">reverse</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s1">chunk</span><span class="s2">.</span><span class="s1">toString</span><span class="s2">(</span><span
+    class="s3">'hex'</span><span class="s2">))</span>
+    <span class="s1">callback</span><span class="s2">()</span>
+  <span class="s2">}</span>
+
+  <span class="s0">return </span><span class="s1">reverse</span>
+<span class="s2">}</span>
+
+<span class="s0">var </span><span class="s1">wsClosed </span><span class="s2">= </span><span class="s0">false</span>
+<span class="s0">var </span><span class="s1">rsClosed </span><span class="s2">= </span><span class="s0">false</span>
+<span class="s0">var </span><span class="s1">callbackCalled </span><span class="s2">= </span><span
+    class="s0">false</span>
+
+<span class="s0">var </span><span class="s1">check </span><span class="s2">= </span><span
+    class="s0">function </span><span class="s2">() {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">wsClosed </span><span
+    class="s2">&amp;&amp; </span><span class="s1">rsClosed </span><span class="s2">&amp;&amp; </span><span class="s1">callbackCalled</span><span
+    class="s2">) {</span>
+    <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s3">'test-node.js passes'</span><span class="s2">)</span>
+    <span class="s1">clearTimeout</span><span class="s2">(</span><span class="s1">timeout</span><span
+    class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s1">ws</span><span class="s2">.</span><span class="s1">on</span><span class="s2">(</span><span class="s3">'close'</span><span
+    class="s2">, </span><span class="s0">function </span><span class="s2">() {</span>
+  <span class="s1">wsClosed </span><span class="s2">= </span><span class="s0">true</span>
+  <span class="s1">check</span><span class="s2">()</span>
+<span class="s2">})</span>
+
+<span class="s1">rs</span><span class="s2">.</span><span class="s1">on</span><span class="s2">(</span><span class="s3">'close'</span><span
+    class="s2">, </span><span class="s0">function </span><span class="s2">() {</span>
+  <span class="s1">rsClosed </span><span class="s2">= </span><span class="s0">true</span>
+  <span class="s1">check</span><span class="s2">()</span>
+<span class="s2">})</span>
+
+<span class="s0">var </span><span class="s1">res </span><span class="s2">= </span><span class="s1">pump</span><span
+    class="s2">(</span><span class="s1">rs</span><span class="s2">, </span><span class="s1">toHex</span><span
+    class="s2">(), </span><span class="s1">toHex</span><span class="s2">(), </span><span class="s1">toHex</span><span
+    class="s2">(), </span><span class="s1">ws</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">() {</span>
+  <span class="s1">callbackCalled </span><span class="s2">= </span><span class="s0">true</span>
+  <span class="s1">check</span><span class="s2">()</span>
+<span class="s2">})</span>
+
+<span class="s0">if </span><span class="s2">(</span><span class="s1">res </span><span class="s2">!== </span><span
+    class="s1">ws</span><span class="s2">) {</span>
+  <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'should return last stream'</span><span
+    class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s1">setTimeout</span><span class="s2">(</span><span class="s0">function </span><span class="s2">() {</span>
+  <span class="s1">rs</span><span class="s2">.</span><span class="s1">destroy</span><span class="s2">()</span>
+<span class="s2">}, </span><span class="s4">1000</span><span class="s2">)</span>
+
+<span class="s0">var </span><span class="s1">timeout </span><span class="s2">= </span><span class="s1">setTimeout</span><span
+    class="s2">(</span><span class="s0">function </span><span class="s2">() {</span>
+  <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">'timeout'</span><span class="s2">)</span>
+<span class="s2">}, </span><span class="s4">5000</span><span class="s2">)</span>
+</pre>
+</body>
+</html>

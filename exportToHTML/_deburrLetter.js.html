@@ -1,0 +1,369 @@
+<html>
+<head>
+  <title>_deburrLetter.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _deburrLetter.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">basePropertyOf </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_basePropertyOf'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to map Latin Unicode letters to basic Latin letters. */</span>
+<span class="s0">var </span><span class="s1">deburredLetters </span><span class="s2">= {</span>
+  <span class="s5">// Latin-1 Supplement block.</span>
+  <span class="s3">'</span><span class="s0">\xc0</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'A'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xc1</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'A'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xc2</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'A'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xc3</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'A'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\xc4</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'A'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xc5</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'A'</span><span
+    class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xe0</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'a'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xe1</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'a'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xe2</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'a'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xe3</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'a'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\xe4</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'a'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xe5</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'a'</span><span
+    class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xc7</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'C'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xe7</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'c'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xd0</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'D'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xf0</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'d'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xc8</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'E'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xc9</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'E'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xca</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'E'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xcb</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'E'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xe8</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'e'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xe9</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'e'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xea</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'e'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xeb</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'e'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xcc</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'I'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xcd</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'I'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xce</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'I'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xcf</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'I'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xec</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'i'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xed</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'i'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xee</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'i'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xef</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'i'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xd1</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'N'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xf1</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'n'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xd2</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'O'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xd3</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'O'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xd4</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'O'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xd5</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'O'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\xd6</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'O'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xd8</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'O'</span><span
+    class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xf2</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'o'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xf3</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'o'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xf4</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'o'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xf5</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'o'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\xf6</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'o'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xf8</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'o'</span><span
+    class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xd9</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'U'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xda</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'U'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xdb</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'U'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xdc</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'U'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xf9</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'u'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xfa</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'u'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xfb</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'u'</span><span
+    class="s2">, </span><span class="s3">'</span><span class="s0">\xfc</span><span class="s3">'</span><span
+    class="s2">: </span><span class="s3">'u'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xdd</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'Y'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\xfd</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'y'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\xff</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'y'</span><span
+    class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xc6</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'Ae'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\xe6</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'ae'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xde</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'Th'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\xfe</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'th'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\xdf</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'ss'</span><span class="s2">,</span>
+  <span class="s5">// Latin Extended-A block.</span>
+  <span class="s3">'</span><span class="s0">\u0100</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'A'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0102</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'A'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0104</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'A'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0101</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'a'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0103</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'a'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0105</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'a'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0106</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'C'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0108</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'C'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u010a</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'C'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u010c</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'C'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0107</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'c'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0109</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'c'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u010b</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'c'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u010d</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'c'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u010e</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'D'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0110</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'D'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u010f</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'d'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0111</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'d'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0112</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'E'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0114</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'E'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0116</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'E'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0118</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'E'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u011a</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'E'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0113</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'e'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0115</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'e'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0117</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'e'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0119</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'e'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u011b</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'e'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u011c</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'G'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u011e</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'G'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0120</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'G'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0122</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'G'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u011d</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'g'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u011f</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'g'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0121</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'g'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0123</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'g'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0124</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'H'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0126</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'H'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0125</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'h'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0127</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'h'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0128</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'I'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u012a</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'I'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u012c</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'I'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u012e</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'I'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0130</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'I'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0129</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'i'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u012b</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'i'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u012d</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'i'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u012f</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'i'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0131</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'i'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0134</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'J'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0135</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'j'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0136</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'K'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0137</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'k'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0138</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'k'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0139</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'L'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u013b</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'L'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u013d</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'L'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u013f</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'L'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0141</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'L'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u013a</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'l'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u013c</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'l'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u013e</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'l'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0140</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'l'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0142</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'l'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0143</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'N'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0145</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'N'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0147</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'N'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u014a</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'N'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0144</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'n'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0146</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'n'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0148</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'n'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u014b</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'n'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u014c</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'O'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u014e</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'O'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0150</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'O'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u014d</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'o'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u014f</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'o'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0151</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'o'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0154</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'R'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0156</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'R'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0158</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'R'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0155</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'r'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0157</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'r'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0159</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'r'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u015a</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'S'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u015c</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'S'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u015e</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'S'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0160</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'S'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u015b</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'s'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u015d</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'s'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u015f</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'s'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0161</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'s'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0162</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'T'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0164</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'T'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0166</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'T'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0163</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'t'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0165</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'t'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0167</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'t'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0168</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'U'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u016a</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'U'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u016c</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'U'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u016e</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'U'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0170</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'U'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0172</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'U'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0169</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'u'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u016b</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'u'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u016d</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'u'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u016f</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'u'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0171</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'u'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0173</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'u'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0174</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'W'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0175</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'w'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0176</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'Y'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u0177</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'y'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u0178</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'Y'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0179</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'Z'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u017b</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'Z'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u017d</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'Z'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u017a</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'z'</span><span class="s2">,  </span><span class="s3">'</span><span class="s0">\u017c</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'z'</span><span class="s2">, </span><span
+    class="s3">'</span><span class="s0">\u017e</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'z'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0132</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'IJ'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0133</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'ij'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0152</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">'Oe'</span><span class="s2">, </span><span class="s3">'</span><span class="s0">\u0153</span><span
+    class="s3">'</span><span class="s2">: </span><span class="s3">'oe'</span><span class="s2">,</span>
+  <span class="s3">'</span><span class="s0">\u0149</span><span class="s3">'</span><span class="s2">: </span><span
+    class="s3">&quot;'n&quot;</span><span class="s2">, </span><span class="s3">'</span><span
+    class="s0">\u017f</span><span class="s3">'</span><span class="s2">: </span><span class="s3">'s'</span>
+<span class="s2">};</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Used by `_.deburr` to convert Latin-1 Supplement and Latin Extended-A</span>
+ <span class="s4">* letters to basic Latin letters.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@private</span>
+ <span class="s4">* </span><span class="s6">@param </span><span
+    class="s4">{string} letter The matched letter to deburr.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span
+    class="s4">{string} Returns the deburred letter.</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">deburrLetter </span><span class="s2">= </span><span class="s1">basePropertyOf</span><span
+    class="s2">(</span><span class="s1">deburredLetters</span><span class="s2">);</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">deburrLetter</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

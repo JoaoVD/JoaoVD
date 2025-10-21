@@ -1,0 +1,1373 @@
+<html>
+<head>
+  <title>dns.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          dns.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:dns` module enables name resolution. For example, use it to look up IP</span>
+ <span class="s0">* addresses of host names.</span>
+ <span class="s0">*</span>
+ <span class="s0">* Although named for the [Domain Name System (DNS)](https://en.wikipedia.org/wiki/Domain_Name_System), it does not always use the</span>
+ <span class="s0">* DNS protocol for lookups. {</span><span class="s1">@link </span><span class="s0">lookup} uses the operating system</span>
+ <span class="s0">* facilities to perform name resolution. It may not need to perform any network</span>
+ <span class="s0">* communication. To perform name resolution the way other applications on the same</span>
+ <span class="s0">* system do, use {</span><span class="s1">@link </span><span class="s0">lookup}.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import dns from 'node:dns';</span>
+ <span class="s0">*</span>
+ <span class="s0">* dns.lookup('example.org', (err, address, family) =&gt; {</span>
+ <span class="s0">*   console.log('address: %j family: IPv%s', address, family);</span>
+ <span class="s0">* });</span>
+ <span class="s0">* // address: &quot;93.184.216.34&quot; family: IPv4</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* All other functions in the `node:dns` module connect to an actual DNS server to</span>
+ <span class="s0">* perform name resolution. They will always use the network to perform DNS</span>
+ <span class="s0">* queries. These functions do not use the same set of configuration files used by {</span><span
+    class="s1">@link </span><span class="s0">lookup} (e.g. `/etc/hosts`). Use these functions to always perform</span>
+ <span class="s0">* DNS queries, bypassing other name-resolution facilities.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import dns from 'node:dns';</span>
+ <span class="s0">*</span>
+ <span class="s0">* dns.resolve4('archive.org', (err, addresses) =&gt; {</span>
+ <span class="s0">*   if (err) throw err;</span>
+ <span class="s0">*</span>
+ <span class="s0">*   console.log(`addresses: ${JSON.stringify(addresses)}`);</span>
+ <span class="s0">*</span>
+ <span class="s0">*   addresses.forEach((a) =&gt; {</span>
+ <span class="s0">*     dns.reverse(a, (err, hostnames) =&gt; {</span>
+ <span class="s0">*       if (err) {</span>
+ <span class="s0">*         throw err;</span>
+ <span class="s0">*       }</span>
+ <span class="s0">*       console.log(`reverse for ${a}: ${JSON.stringify(hostnames)}`);</span>
+ <span class="s0">*     });</span>
+ <span class="s0">*   });</span>
+ <span class="s0">* });</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* See the [Implementation considerations section](https://nodejs.org/docs/latest-v24.x/api/dns.html#implementation-considerations) for more information.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/dns.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;dns&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">dnsPromises from </span><span
+    class="s3">&quot;node:dns/promises&quot;</span><span class="s4">;</span>
+    <span class="s6">// Supported getaddrinfo flags.</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Limits returned address types to the types of non-loopback addresses configured on the system. For example, IPv4 addresses are</span>
+     <span class="s0">* only returned if the current system has at least one IPv4 address configured.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export const </span><span class="s2">ADDRCONFIG</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* If the IPv6 family was specified, but no IPv6 addresses were found, then return IPv4 mapped IPv6 addresses. It is not supported</span>
+     <span class="s0">* on some operating systems (e.g. FreeBSD 10.1).</span>
+     <span class="s0">*/</span>
+    <span class="s5">export const </span><span class="s2">V4MAPPED</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* If `dns.V4MAPPED` is specified, return resolved IPv6 addresses as</span>
+     <span class="s0">* well as IPv4 mapped IPv6 addresses.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export const </span><span class="s2">ALL</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s5">export interface </span><span class="s2">LookupOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The record family. Must be `4`, `6`, or `0`. For backward compatibility reasons, `'IPv4'` and `'IPv6'` are interpreted</span>
+         <span class="s0">* as `4` and `6` respectively. The value 0 indicates that either an IPv4 or IPv6 address is returned. If the value `0` is used</span>
+         <span class="s0">* with `{ all: true } (see below)`, both IPv4 and IPv6 addresses are returned.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">family</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s3">&quot;IPv4&quot; </span><span class="s4">| </span><span class="s3">&quot;IPv6&quot; </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* One or more [supported `getaddrinfo`](https://nodejs.org/docs/latest-v24.x/api/dns.html#supported-getaddrinfo-flags) flags. Multiple flags may be</span>
+         <span class="s0">* passed by bitwise `OR`ing their values.</span>
+         <span class="s0">*/</span>
+        <span class="s2">hints</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When `true`, the callback returns all resolved addresses in an array. Otherwise, returns a single address.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">all</span><span class="s4">?: </span><span class="s2">boolean </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When `verbatim`, the resolved addresses are return unsorted. When `ipv4first`, the resolved addresses are sorted</span>
+         <span class="s0">* by placing IPv4 addresses before IPv6 addresses. When `ipv6first`, the resolved addresses are sorted by placing IPv6</span>
+         <span class="s0">* addresses before IPv4 addresses. Default value is configurable using</span>
+         <span class="s0">* {</span><span class="s1">@link </span><span class="s0">setDefaultResultOrder} or [`--dns-result-order`](https://nodejs.org/docs/latest-v24.x/api/cli.html#--dns-result-orderorder).</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">`verbatim` (addresses are not reordered)</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.1.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">order</span><span class="s4">?: </span><span class="s3">&quot;ipv4first&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;ipv6first&quot; </span><span class="s4">| </span><span class="s3">&quot;verbatim&quot; </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When `true`, the callback receives IPv4 and IPv6 addresses in the order the DNS resolver returned them. When `false`, IPv4</span>
+         <span class="s0">* addresses are placed before IPv6 addresses. This option will be deprecated in favor of `order`. When both are specified,</span>
+         <span class="s0">* `order` has higher precedence. New code should only use `order`. Default value is configurable using {</span><span
+    class="s1">@link </span><span class="s0">setDefaultResultOrder}</span>
+         <span class="s0">* </span><span class="s1">@default </span><span
+    class="s0">true (addresses are not reordered)</span>
+         <span class="s0">* </span><span class="s1">@deprecated </span><span class="s0">Please use `order` option</span>
+         <span class="s0">*/</span>
+        <span class="s2">verbatim</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">LookupOneOptions </span><span
+    class="s5">extends </span><span class="s2">LookupOptions </span><span class="s4">{</span>
+        <span class="s2">all</span><span class="s4">?: </span><span class="s5">false </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">LookupAllOptions </span><span
+    class="s5">extends </span><span class="s2">LookupOptions </span><span class="s4">{</span>
+        <span class="s2">all</span><span class="s4">: </span><span class="s5">true</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">LookupAddress </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A string representation of an IPv4 or IPv6 address.</span>
+         <span class="s0">*/</span>
+        <span class="s2">address</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `4` or `6`, denoting the family of `address`, or `0` if the address is not an IPv4 or IPv6 address. `0` is a likely indicator of a</span>
+         <span class="s0">* bug in the name resolution service used by the operating system.</span>
+         <span class="s0">*/</span>
+        <span class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Resolves a host name (e.g. `'nodejs.org'`) into the first found A (IPv4) or</span>
+     <span class="s0">* AAAA (IPv6) record. All `option` properties are optional. If `options` is an</span>
+     <span class="s0">* integer, then it must be `4` or `6` – if `options` is `0` or not provided, then</span>
+     <span class="s0">* IPv4 and IPv6 addresses are both returned if found.</span>
+     <span class="s0">*</span>
+     <span class="s0">* With the `all` option set to `true`, the arguments for `callback` change to `(err, addresses)`, with `addresses` being an array of objects with the</span>
+     <span class="s0">* properties `address` and `family`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* On error, `err` is an `Error` object, where `err.code` is the error code.</span>
+     <span class="s0">* Keep in mind that `err.code` will be set to `'ENOTFOUND'` not only when</span>
+     <span class="s0">* the host name does not exist but also when the lookup fails in other ways</span>
+     <span class="s0">* such as no available file descriptors.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `dns.lookup()` does not necessarily have anything to do with the DNS protocol.</span>
+     <span class="s0">* The implementation uses an operating system facility that can associate names</span>
+     <span class="s0">* with addresses and vice versa. This implementation can have subtle but</span>
+     <span class="s0">* important consequences on the behavior of any Node.js program. Please take some</span>
+     <span class="s0">* time to consult the [Implementation considerations section](https://nodejs.org/docs/latest-v24.x/api/dns.html#implementation-considerations)</span>
+     <span class="s0">* before using `dns.lookup()`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Example usage:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import dns from 'node:dns';</span>
+     <span class="s0">* const options = {</span>
+     <span class="s0">*   family: 6,</span>
+     <span class="s0">*   hints: dns.ADDRCONFIG | dns.V4MAPPED,</span>
+     <span class="s0">* };</span>
+     <span class="s0">* dns.lookup('example.com', options, (err, address, family) =&gt;</span>
+     <span class="s0">*   console.log('address: %j family: IPv%s', address, family));</span>
+     <span class="s0">* // address: &quot;2606:2800:220:1:248:1893:25c8:1946&quot; family: IPv6</span>
+     <span class="s0">*</span>
+     <span class="s0">* // When options.all is true, the result will be an Array.</span>
+     <span class="s0">* options.all = true;</span>
+     <span class="s0">* dns.lookup('example.com', options, (err, addresses) =&gt;</span>
+     <span class="s0">*   console.log('addresses: %j', addresses));</span>
+     <span class="s0">* // addresses: [{&quot;address&quot;:&quot;2606:2800:220:1:248:1893:25c8:1946&quot;,&quot;family&quot;:6}]</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If this method is invoked as its [util.promisify()](https://nodejs.org/docs/latest-v24.x/api/util.html#utilpromisifyoriginal) ed</span>
+     <span class="s0">* version, and `all` is not set to `true`, it returns a `Promise` for an `Object` with `address` and `family` properties.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">lookup</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">lookup</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">LookupOneOptions</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">lookup</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">LookupAllOptions</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">LookupAddress</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">lookup</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">LookupOptions</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">LookupAddress</span><span class="s4">[], </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">lookup</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">family</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace lookup </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">LookupAllOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">LookupAddress</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">LookupOneOptions </span><span class="s4">| </span><span
+    class="s2">number</span><span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s2">LookupAddress</span><span class="s4">&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">LookupOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">LookupAddress </span><span
+    class="s4">| </span><span class="s2">LookupAddress</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Resolves the given `address` and `port` into a host name and service using</span>
+     <span class="s0">* the operating system's underlying `getnameinfo` implementation.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `address` is not a valid IP address, a `TypeError` will be thrown.</span>
+     <span
+       class="s0">* The `port` will be coerced to a number. If it is not a legal port, a `TypeError` will be thrown.</span>
+     <span class="s0">*</span>
+     <span class="s0">* On an error, `err` is an [`Error`](https://nodejs.org/docs/latest-v24.x/api/errors.html#class-error) object,</span>
+     <span class="s0">* where `err.code` is the error code.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import dns from 'node:dns';</span>
+     <span class="s0">* dns.lookupService('127.0.0.1', 22, (err, hostname, service) =&gt; {</span>
+     <span class="s0">*   console.log(hostname, service);</span>
+     <span class="s0">*   // Prints: localhost ssh</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If this method is invoked as its [util.promisify()](https://nodejs.org/docs/latest-v24.x/api/util.html#utilpromisifyoriginal) ed</span>
+     <span class="s0">* version, it returns a `Promise` for an `Object` with `hostname` and `service` properties.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.14</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">lookupService</span><span class="s4">(</span>
+        <span class="s2">address</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">service</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace lookupService </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">address</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;{</span>
+            <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s2">service</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">ResolveOptions </span><span class="s4">{</span>
+        <span class="s2">ttl</span><span class="s4">: </span><span class="s2">boolean</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">ResolveWithTtlOptions </span><span
+    class="s5">extends </span><span class="s2">ResolveOptions </span><span class="s4">{</span>
+        <span class="s2">ttl</span><span class="s4">: </span><span class="s5">true</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">RecordWithTtl </span><span class="s4">{</span>
+        <span class="s2">address</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">ttl</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">Use `AnyARecord` or `AnyAaaaRecord` instead. */</span>
+    <span class="s5">export </span><span class="s2">type AnyRecordWithTtl </span><span class="s4">= </span><span
+    class="s2">AnyARecord </span><span class="s4">| </span><span class="s2">AnyAaaaRecord</span><span
+    class="s4">;</span>
+    <span class="s5">export interface </span><span class="s2">AnyARecord </span><span class="s5">extends </span><span
+    class="s2">RecordWithTtl </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;A&quot;</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyAaaaRecord </span><span class="s5">extends </span><span
+    class="s2">RecordWithTtl </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;AAAA&quot;</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">CaaRecord </span><span class="s4">{</span>
+        <span class="s2">critical</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">issue</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">issuewild</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">iodef</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">contactemail</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">contactphone</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyCaaRecord </span><span class="s5">extends </span><span
+    class="s2">CaaRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;CAA&quot;</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">MxRecord </span><span class="s4">{</span>
+        <span class="s2">priority</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">exchange</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyMxRecord </span><span class="s5">extends </span><span
+    class="s2">MxRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;MX&quot;</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">NaptrRecord </span><span class="s4">{</span>
+        <span class="s2">flags</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">service</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">regexp</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">replacement</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">order</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">preference</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyNaptrRecord </span><span
+    class="s5">extends </span><span class="s2">NaptrRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;NAPTR&quot;</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">SoaRecord </span><span class="s4">{</span>
+        <span class="s2">nsname</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">hostmaster</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">serial</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">refresh</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">retry</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">expire</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">minttl</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnySoaRecord </span><span class="s5">extends </span><span
+    class="s2">SoaRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;SOA&quot;</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">SrvRecord </span><span class="s4">{</span>
+        <span class="s2">priority</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">weight</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">name</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnySrvRecord </span><span class="s5">extends </span><span
+    class="s2">SrvRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;SRV&quot;</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">TlsaRecord </span><span class="s4">{</span>
+        <span class="s2">certUsage</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">selector</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s2">match</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">data</span><span class="s4">: </span><span class="s2">ArrayBuffer</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyTlsaRecord </span><span class="s5">extends </span><span
+    class="s2">TlsaRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;TLSA&quot;</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyTxtRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;TXT&quot;</span><span
+    class="s4">;</span>
+        <span class="s2">entries</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">[];</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyNsRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;NS&quot;</span><span
+    class="s4">;</span>
+        <span class="s2">value</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyPtrRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;PTR&quot;</span><span
+    class="s4">;</span>
+        <span class="s2">value</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export interface </span><span class="s2">AnyCnameRecord </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s3">&quot;CNAME&quot;</span><span class="s4">;</span>
+        <span class="s2">value</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export </span><span class="s2">type AnyRecord </span><span class="s4">=</span>
+        <span class="s4">| </span><span class="s2">AnyARecord</span>
+        <span class="s4">| </span><span class="s2">AnyAaaaRecord</span>
+        <span class="s4">| </span><span class="s2">AnyCaaRecord</span>
+        <span class="s4">| </span><span class="s2">AnyCnameRecord</span>
+        <span class="s4">| </span><span class="s2">AnyMxRecord</span>
+        <span class="s4">| </span><span class="s2">AnyNaptrRecord</span>
+        <span class="s4">| </span><span class="s2">AnyNsRecord</span>
+        <span class="s4">| </span><span class="s2">AnyPtrRecord</span>
+        <span class="s4">| </span><span class="s2">AnySoaRecord</span>
+        <span class="s4">| </span><span class="s2">AnySrvRecord</span>
+        <span class="s4">| </span><span class="s2">AnyTlsaRecord</span>
+        <span class="s4">| </span><span class="s2">AnyTxtRecord</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve a host name (e.g. `'nodejs.org'`) into an array</span>
+     <span class="s0">* of the resource records. The `callback` function has arguments `(err, records)`. When successful, `records` will be an array of resource</span>
+     <span class="s0">* records. The type and structure of individual results varies based on `rrtype`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* &lt;omitted&gt;</span>
+     <span class="s0">*</span>
+     <span class="s0">* On error, `err` is an [`Error`](https://nodejs.org/docs/latest-v24.x/api/errors.html#class-error) object,</span>
+     <span class="s0">* where `err.code` is one of the `DNS error codes`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.27</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">hostname Host name to resolve.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">[rrtype='A'] Resource record type.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;A&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;AAAA&quot; </span><span class="s4">| </span><span class="s3">&quot;CNAME&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;NS&quot; </span><span class="s4">| </span><span class="s3">&quot;PTR&quot;</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;ANY&quot;</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">AnyRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;CAA&quot;</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">CaaRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;MX&quot;</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">MxRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;NAPTR&quot;</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">NaptrRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;SOA&quot;</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">SoaRecord</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;SRV&quot;</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">SrvRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;TLSA&quot;</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">TlsaRecord</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s3">&quot;TXT&quot;</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[][]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">rrtype</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span>
+            <span class="s2">err</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ErrnoException </span><span class="s4">| </span><span class="s5">null</span><span class="s4">,</span>
+            <span class="s2">addresses</span><span class="s4">:</span>
+                <span class="s4">| </span><span class="s2">string</span><span class="s4">[]</span>
+                <span class="s4">| </span><span class="s2">CaaRecord</span><span class="s4">[]</span>
+                <span class="s4">| </span><span class="s2">MxRecord</span><span class="s4">[]</span>
+                <span class="s4">| </span><span class="s2">NaptrRecord</span><span class="s4">[]</span>
+                <span class="s4">| </span><span class="s2">SoaRecord</span>
+                <span class="s4">| </span><span class="s2">SrvRecord</span><span class="s4">[]</span>
+                <span class="s4">| </span><span class="s2">TlsaRecord</span><span class="s4">[]</span>
+                <span class="s4">| </span><span class="s2">string</span><span class="s4">[][]</span>
+                <span class="s4">| </span><span class="s2">AnyRecord</span><span class="s4">[],</span>
+        <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolve </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">?: </span><span class="s3">&quot;A&quot; </span><span class="s4">| </span><span class="s3">&quot;AAAA&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;CNAME&quot; </span><span class="s4">| </span><span class="s3">&quot;NS&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;PTR&quot;</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">string</span><span class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">: </span><span class="s3">&quot;ANY&quot;</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">AnyRecord</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">: </span><span class="s3">&quot;CAA&quot;</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">CaaRecord</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">: </span><span class="s3">&quot;MX&quot;</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">MxRecord</span><span class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">: </span><span class="s3">&quot;NAPTR&quot;</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">NaptrRecord</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">: </span><span class="s3">&quot;SOA&quot;</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">SoaRecord</span><span class="s4">&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">: </span><span class="s3">&quot;SRV&quot;</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">SrvRecord</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">: </span><span class="s3">&quot;TLSA&quot;</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">TlsaRecord</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">rrtype</span><span
+    class="s4">: </span><span class="s3">&quot;TXT&quot;</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">string</span><span class="s4">[][]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">rrtype</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span>
+            <span class="s4">| </span><span class="s2">string</span><span class="s4">[]</span>
+            <span class="s4">| </span><span class="s2">CaaRecord</span><span class="s4">[]</span>
+            <span class="s4">| </span><span class="s2">MxRecord</span><span class="s4">[]</span>
+            <span class="s4">| </span><span class="s2">NaptrRecord</span><span class="s4">[]</span>
+            <span class="s4">| </span><span class="s2">SoaRecord</span>
+            <span class="s4">| </span><span class="s2">SrvRecord</span><span class="s4">[]</span>
+            <span class="s4">| </span><span class="s2">TlsaRecord</span><span class="s4">[]</span>
+            <span class="s4">| </span><span class="s2">string</span><span class="s4">[][]</span>
+            <span class="s4">| </span><span class="s2">AnyRecord</span><span class="s4">[]</span>
+        <span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve a IPv4 addresses (`A` records) for the `hostname`. The `addresses` argument passed to the `callback` function</span>
+     <span class="s0">* will contain an array of IPv4 addresses (e.g.`['74.125.79.104', '74.125.79.105', '74.125.79.106']`).</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.16</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">hostname Host name to resolve.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolve4</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve4</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">ResolveWithTtlOptions</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">RecordWithTtl</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve4</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">ResolveOptions</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[] | </span><span class="s2">RecordWithTtl</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolve4 </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">ResolveWithTtlOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">RecordWithTtl</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ResolveOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">string</span><span
+    class="s4">[] | </span><span class="s2">RecordWithTtl</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve IPv6 addresses (`AAAA` records) for the `hostname`. The `addresses` argument passed to the `callback` function</span>
+     <span class="s0">* will contain an array of IPv6 addresses.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.16</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">hostname Host name to resolve.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolve6</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve6</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">ResolveWithTtlOptions</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">RecordWithTtl</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">resolve6</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">ResolveOptions</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[] | </span><span class="s2">RecordWithTtl</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolve6 </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">ResolveWithTtlOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">RecordWithTtl</span><span
+    class="s4">[]&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ResolveOptions</span><span class="s4">): </span><span
+    class="s2">Promise</span><span class="s4">&lt;</span><span class="s2">string</span><span
+    class="s4">[] | </span><span class="s2">RecordWithTtl</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve `CNAME` records for the `hostname`. The `addresses` argument passed to the `callback` function</span>
+     <span class="s0">* will contain an array of canonical name records available for the `hostname` (e.g. `['bar.example.com']`).</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.2</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveCname</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveCname </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve `CAA` records for the `hostname`. The `addresses` argument passed to the `callback` function</span>
+     <span class="s0">* will contain an array of certification authority authorization records</span>
+     <span class="s0">* available for the `hostname` (e.g. `[{critical: 0, iodef: 'mailto:pki@example.com'}, {critical: 128, issue: 'pki.example.com'}]`).</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0, v14.17.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveCaa</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">records</span><span
+    class="s4">: </span><span class="s2">CaaRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveCaa </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">CaaRecord</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve mail exchange records (`MX` records) for the `hostname`. The `addresses` argument passed to the `callback` function will</span>
+     <span class="s0">* contain an array of objects containing both a `priority` and `exchange` property (e.g. `[{priority: 10, exchange: 'mx.example.com'}, ...]`).</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.27</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveMx</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">MxRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveMx </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">MxRecord</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve regular expression-based records (`NAPTR` records) for the `hostname`. The `addresses` argument passed to the `callback` function will contain an array of</span>
+     <span class="s0">* objects with the following properties:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * `flags`</span>
+     <span class="s0">* * `service`</span>
+     <span class="s0">* * `regexp`</span>
+     <span class="s0">* * `replacement`</span>
+     <span class="s0">* * `order`</span>
+     <span class="s0">* * `preference`</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* {</span>
+     <span class="s0">*   flags: 's',</span>
+     <span class="s0">*   service: 'SIP+D2U',</span>
+     <span class="s0">*   regexp: '',</span>
+     <span class="s0">*   replacement: '_sip._udp.example.com',</span>
+     <span class="s0">*   order: 30,</span>
+     <span class="s0">*   preference: 100</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.12</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveNaptr</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">NaptrRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveNaptr </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">NaptrRecord</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve name server records (`NS` records) for the `hostname`. The `addresses` argument passed to the `callback` function will</span>
+     <span class="s0">* contain an array of name server records available for `hostname` (e.g. `['ns1.example.com', 'ns2.example.com']`).</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveNs</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveNs </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve pointer records (`PTR` records) for the `hostname`. The `addresses` argument passed to the `callback` function will</span>
+     <span class="s0">* be an array of strings containing the reply records.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v6.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolvePtr</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolvePtr </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve a start of authority record (`SOA` record) for</span>
+     <span class="s0">* the `hostname`. The `address` argument passed to the `callback` function will</span>
+     <span class="s0">* be an object with the following properties:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * `nsname`</span>
+     <span class="s0">* * `hostmaster`</span>
+     <span class="s0">* * `serial`</span>
+     <span class="s0">* * `refresh`</span>
+     <span class="s0">* * `retry`</span>
+     <span class="s0">* * `expire`</span>
+     <span class="s0">* * `minttl`</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* {</span>
+     <span class="s0">*   nsname: 'ns.example.com',</span>
+     <span class="s0">*   hostmaster: 'root.example.com',</span>
+     <span class="s0">*   serial: 2013101809,</span>
+     <span class="s0">*   refresh: 10000,</span>
+     <span class="s0">*   retry: 2400,</span>
+     <span class="s0">*   expire: 604800,</span>
+     <span class="s0">*   minttl: 3600</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.10</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveSoa</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">: </span><span class="s2">SoaRecord</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveSoa </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">SoaRecord</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve service records (`SRV` records) for the `hostname`. The `addresses` argument passed to the `callback` function will</span>
+     <span class="s0">* be an array of objects with the following properties:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * `priority`</span>
+     <span class="s0">* * `weight`</span>
+     <span class="s0">* * `port`</span>
+     <span class="s0">* * `name`</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* {</span>
+     <span class="s0">*   priority: 10,</span>
+     <span class="s0">*   weight: 5,</span>
+     <span class="s0">*   port: 21223,</span>
+     <span class="s0">*   name: 'service.example.com'</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.27</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveSrv</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">SrvRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveSrv </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">SrvRecord</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve certificate associations (`TLSA` records) for</span>
+     <span class="s0">* the `hostname`. The `records` argument passed to the `callback` function is an</span>
+     <span class="s0">* array of objects with these properties:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * `certUsage`</span>
+     <span class="s0">* * `selector`</span>
+     <span class="s0">* * `match`</span>
+     <span class="s0">* * `data`</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* {</span>
+     <span class="s0">*   certUsage: 3,</span>
+     <span class="s0">*   selector: 1,</span>
+     <span class="s0">*   match: 1,</span>
+     <span class="s0">*   data: [ArrayBuffer]</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v23.9.0, v22.15.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveTlsa</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">TlsaRecord</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveTlsa </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">TlsaRecord</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve text queries (`TXT` records) for the `hostname`. The `records` argument passed to the `callback` function is a</span>
+     <span class="s0">* two-dimensional array of the text records available for `hostname` (e.g.`[ ['v=spf1 ip4:0.0.0.0 ', '~all' ] ]`). Each sub-array contains TXT chunks of</span>
+     <span class="s0">* one record. Depending on the use case, these could be either joined together or</span>
+     <span class="s0">* treated separately.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.27</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveTxt</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[][]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveTxt </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">[][]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Uses the DNS protocol to resolve all records (also known as `ANY` or `*` query).</span>
+     <span class="s0">* The `ret` argument passed to the `callback` function will be an array containing</span>
+     <span class="s0">* various types of records. Each object has a property `type` that indicates the</span>
+     <span class="s0">* type of the current record. And depending on the `type`, additional properties</span>
+     <span class="s0">* will be present on the object:</span>
+     <span class="s0">*</span>
+     <span class="s0">* &lt;omitted&gt;</span>
+     <span class="s0">*</span>
+     <span class="s0">* Here is an example of the `ret` object passed to the callback:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* [ { type: 'A', address: '127.0.0.1', ttl: 299 },</span>
+     <span class="s0">*   { type: 'CNAME', value: 'example.com' },</span>
+     <span class="s0">*   { type: 'MX', exchange: 'alt4.aspmx.l.example.com', priority: 50 },</span>
+     <span class="s0">*   { type: 'NS', value: 'ns1.example.com' },</span>
+     <span class="s0">*   { type: 'TXT', entries: [ 'v=spf1 include:_spf.example.com ~all' ] },</span>
+     <span class="s0">*   { type: 'SOA',</span>
+     <span class="s0">*     nsname: 'ns1.example.com',</span>
+     <span class="s0">*     hostmaster: 'admin.example.com',</span>
+     <span class="s0">*     serial: 156696742,</span>
+     <span class="s0">*     refresh: 900,</span>
+     <span class="s0">*     retry: 900,</span>
+     <span class="s0">*     expire: 1800,</span>
+     <span class="s0">*     minttl: 60 } ]</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* DNS server operators may choose not to respond to `ANY` queries. It may be better to call individual methods like {</span><span
+    class="s1">@link </span><span class="s0">resolve4}, {</span><span class="s1">@link </span><span class="s0">resolveMx}, and so on. For more details, see</span>
+     <span class="s0">* [RFC 8482](https://tools.ietf.org/html/rfc8482).</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">resolveAny</span><span class="s4">(</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">addresses</span><span
+    class="s4">: </span><span class="s2">AnyRecord</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">namespace resolveAny </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">hostname</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">AnyRecord</span><span class="s4">[]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Performs a reverse DNS query that resolves an IPv4 or IPv6 address to an</span>
+     <span class="s0">* array of host names.</span>
+     <span class="s0">*</span>
+     <span class="s0">* On error, `err` is an [`Error`](https://nodejs.org/docs/latest-v24.x/api/errors.html#class-error) object, where `err.code` is</span>
+     <span
+       class="s0">* one of the [DNS error codes](https://nodejs.org/docs/latest-v24.x/api/dns.html#error-codes).</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.16</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">reverse</span><span class="s4">(</span>
+        <span class="s2">ip</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">hostnames</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">[]) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Get the default value for `order` in {</span><span class="s1">@link </span><span class="s0">lookup} and [`dnsPromises.lookup()`](https://nodejs.org/docs/latest-v24.x/api/dns.html#dnspromiseslookuphostname-options).</span>
+     <span class="s0">* The value could be:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * `ipv4first`: for `order` defaulting to `ipv4first`.</span>
+     <span class="s0">* * `ipv6first`: for `order` defaulting to `ipv6first`.</span>
+     <span class="s0">* * `verbatim`: for `order` defaulting to `verbatim`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.17.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">getDefaultResultOrder</span><span
+    class="s4">(): </span><span class="s3">&quot;ipv4first&quot; </span><span class="s4">| </span><span class="s3">&quot;ipv6first&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;verbatim&quot;</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Sets the IP address and port of servers to be used when performing DNS</span>
+     <span class="s0">* resolution. The `servers` argument is an array of [RFC 5952](https://tools.ietf.org/html/rfc5952#section-6) formatted</span>
+     <span class="s0">* addresses. If the port is the IANA default DNS port (53) it can be omitted.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* dns.setServers([</span>
+     <span class="s0">*   '4.4.4.4',</span>
+     <span class="s0">*   '[2001:4860:4860::8888]',</span>
+     <span class="s0">*   '4.4.4.4:1053',</span>
+     <span class="s0">*   '[2001:4860:4860::8888]:1053',</span>
+     <span class="s0">* ]);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* An error will be thrown if an invalid address is provided.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `dns.setServers()` method must not be called while a DNS query is in</span>
+     <span class="s0">* progress.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The {</span><span class="s1">@link </span><span
+    class="s0">setServers} method affects only {</span><span class="s1">@link </span><span class="s0">resolve}, `dns.resolve*()` and {</span><span
+    class="s1">@link </span><span class="s0">reverse} (and specifically _not_ {</span><span
+    class="s1">@link </span><span class="s0">lookup}).</span>
+     <span class="s0">*</span>
+     <span class="s0">* This method works much like [resolve.conf](https://man7.org/linux/man-pages/man5/resolv.conf.5.html).</span>
+     <span class="s0">* That is, if attempting to resolve with the first server provided results in a `NOTFOUND` error, the `resolve()` method will _not_ attempt to resolve with</span>
+     <span class="s0">* subsequent servers provided. Fallback DNS servers will only be used if the</span>
+     <span class="s0">* earlier ones time out or result in some other error.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.3</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">servers array of [RFC 5952](https://datatracker.ietf.org/doc/html/rfc5952#section-6) formatted addresses</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">setServers</span><span class="s4">(</span><span class="s2">servers</span><span
+    class="s4">: </span><span class="s2">readonly string</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns an array of IP address strings, formatted according to [RFC 5952](https://tools.ietf.org/html/rfc5952#section-6),</span>
+     <span class="s0">* that are currently configured for DNS resolution. A string will include a port</span>
+     <span class="s0">* section if a custom port is used.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* [</span>
+     <span class="s0">*   '4.4.4.4',</span>
+     <span class="s0">*   '2001:4860:4860::8888',</span>
+     <span class="s0">*   '4.4.4.4:1053',</span>
+     <span class="s0">*   '[2001:4860:4860::8888]:1053',</span>
+     <span class="s0">* ]</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.3</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">getServers</span><span class="s4">(): </span><span
+    class="s2">string</span><span class="s4">[];</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Set the default value of `order` in {</span><span class="s1">@link </span><span class="s0">lookup} and [`dnsPromises.lookup()`](https://nodejs.org/docs/latest-v24.x/api/dns.html#dnspromiseslookuphostname-options).</span>
+     <span class="s0">* The value could be:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * `ipv4first`: sets default `order` to `ipv4first`.</span>
+     <span class="s0">* * `ipv6first`: sets default `order` to `ipv6first`.</span>
+     <span class="s0">* * `verbatim`: sets default `order` to `verbatim`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The default is `verbatim` and {</span><span class="s1">@link </span><span class="s0">setDefaultResultOrder} have higher</span>
+     <span class="s0">* priority than [`--dns-result-order`](https://nodejs.org/docs/latest-v24.x/api/cli.html#--dns-result-orderorder). When using</span>
+     <span class="s0">* [worker threads](https://nodejs.org/docs/latest-v24.x/api/worker_threads.html), {</span><span
+    class="s1">@link </span><span class="s0">setDefaultResultOrder} from the main</span>
+     <span class="s0">* thread won't affect the default dns orders in workers.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v16.4.0, v14.18.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">order must be `'ipv4first'`, `'ipv6first'` or `'verbatim'`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">setDefaultResultOrder</span><span class="s4">(</span><span
+    class="s2">order</span><span class="s4">: </span><span class="s3">&quot;ipv4first&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;ipv6first&quot; </span><span class="s4">| </span><span class="s3">&quot;verbatim&quot;</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s6">// Error codes</span>
+    <span class="s5">export const </span><span class="s2">NODATA</span><span class="s4">: </span><span class="s3">&quot;ENODATA&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">FORMERR</span><span class="s4">: </span><span class="s3">&quot;EFORMERR&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">SERVFAIL</span><span class="s4">: </span><span class="s3">&quot;ESERVFAIL&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">NOTFOUND</span><span class="s4">: </span><span class="s3">&quot;ENOTFOUND&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">NOTIMP</span><span class="s4">: </span><span class="s3">&quot;ENOTIMP&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">REFUSED</span><span class="s4">: </span><span class="s3">&quot;EREFUSED&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">BADQUERY</span><span class="s4">: </span><span class="s3">&quot;EBADQUERY&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">BADNAME</span><span class="s4">: </span><span class="s3">&quot;EBADNAME&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">BADFAMILY</span><span class="s4">: </span><span class="s3">&quot;EBADFAMILY&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">BADRESP</span><span class="s4">: </span><span class="s3">&quot;EBADRESP&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">CONNREFUSED</span><span class="s4">: </span><span class="s3">&quot;ECONNREFUSED&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">TIMEOUT</span><span class="s4">: </span><span class="s3">&quot;ETIMEOUT&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">EOF</span><span class="s4">: </span><span class="s3">&quot;EOF&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">FILE</span><span class="s4">: </span><span class="s3">&quot;EFILE&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">NOMEM</span><span class="s4">: </span><span class="s3">&quot;ENOMEM&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">DESTRUCTION</span><span class="s4">: </span><span class="s3">&quot;EDESTRUCTION&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">BADSTR</span><span class="s4">: </span><span class="s3">&quot;EBADSTR&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">BADFLAGS</span><span class="s4">: </span><span class="s3">&quot;EBADFLAGS&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">NONAME</span><span class="s4">: </span><span class="s3">&quot;ENONAME&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">BADHINTS</span><span class="s4">: </span><span class="s3">&quot;EBADHINTS&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">NOTINITIALIZED</span><span class="s4">: </span><span
+    class="s3">&quot;ENOTINITIALIZED&quot;</span><span class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">LOADIPHLPAPI</span><span class="s4">: </span><span class="s3">&quot;ELOADIPHLPAPI&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">ADDRGETNETWORKPARAMS</span><span class="s4">: </span><span
+    class="s3">&quot;EADDRGETNETWORKPARAMS&quot;</span><span class="s4">;</span>
+    <span class="s5">export const </span><span class="s2">CANCELLED</span><span class="s4">: </span><span class="s3">&quot;ECANCELLED&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export interface </span><span class="s2">ResolverOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Query timeout in milliseconds, or `-1` to use the default timeout.</span>
+         <span class="s0">*/</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* The number of tries the resolver will try contacting each name server before giving up.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">4</span>
+         <span class="s0">*/</span>
+        <span class="s2">tries</span><span class="s4">?: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The max retry timeout, in milliseconds.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxTimeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* An independent resolver for DNS requests.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Creating a new resolver uses the default server settings. Setting</span>
+     <span class="s0">* the servers used for a resolver using [`resolver.setServers()`](https://nodejs.org/docs/latest-v24.x/api/dns.html#dnssetserversservers) does not affect</span>
+     <span class="s0">* other resolvers:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { Resolver } from 'node:dns';</span>
+     <span class="s0">* const resolver = new Resolver();</span>
+     <span class="s0">* resolver.setServers(['4.4.4.4']);</span>
+     <span class="s0">*</span>
+     <span class="s0">* // This request will use the server at 4.4.4.4, independent of global settings.</span>
+     <span class="s0">* resolver.resolve4('example.org', (err, addresses) =&gt; {</span>
+     <span class="s0">*   // ...</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following methods from the `node:dns` module are available:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * `resolver.getServers()`</span>
+     <span class="s0">* * `resolver.resolve()`</span>
+     <span class="s0">* * `resolver.resolve4()`</span>
+     <span class="s0">* * `resolver.resolve6()`</span>
+     <span class="s0">* * `resolver.resolveAny()`</span>
+     <span class="s0">* * `resolver.resolveCaa()`</span>
+     <span class="s0">* * `resolver.resolveCname()`</span>
+     <span class="s0">* * `resolver.resolveMx()`</span>
+     <span class="s0">* * `resolver.resolveNaptr()`</span>
+     <span class="s0">* * `resolver.resolveNs()`</span>
+     <span class="s0">* * `resolver.resolvePtr()`</span>
+     <span class="s0">* * `resolver.resolveSoa()`</span>
+     <span class="s0">* * `resolver.resolveSrv()`</span>
+     <span class="s0">* * `resolver.resolveTxt()`</span>
+     <span class="s0">* * `resolver.reverse()`</span>
+     <span class="s0">* * `resolver.setServers()`</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.3.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">export class </span><span class="s2">Resolver </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ResolverOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Cancel all outstanding DNS queries made by this resolver. The corresponding</span>
+         <span class="s0">* callbacks will be called with an error with code `ECANCELLED`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.3.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">cancel</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">getServers</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">getServers</span><span
+    class="s4">;</span>
+        <span class="s2">resolve</span><span class="s4">: </span><span class="s5">typeof </span><span
+    class="s2">resolve</span><span class="s4">;</span>
+        <span class="s2">resolve4</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolve4</span><span
+    class="s4">;</span>
+        <span class="s2">resolve6</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolve6</span><span
+    class="s4">;</span>
+        <span class="s2">resolveAny</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveAny</span><span
+    class="s4">;</span>
+        <span class="s2">resolveCaa</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveCaa</span><span
+    class="s4">;</span>
+        <span class="s2">resolveCname</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveCname</span><span
+    class="s4">;</span>
+        <span class="s2">resolveMx</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveMx</span><span
+    class="s4">;</span>
+        <span class="s2">resolveNaptr</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveNaptr</span><span
+    class="s4">;</span>
+        <span class="s2">resolveNs</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveNs</span><span
+    class="s4">;</span>
+        <span class="s2">resolvePtr</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolvePtr</span><span
+    class="s4">;</span>
+        <span class="s2">resolveSoa</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveSoa</span><span
+    class="s4">;</span>
+        <span class="s2">resolveSrv</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveSrv</span><span
+    class="s4">;</span>
+        <span class="s2">resolveTlsa</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveTlsa</span><span
+    class="s4">;</span>
+        <span class="s2">resolveTxt</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">resolveTxt</span><span
+    class="s4">;</span>
+        <span class="s2">reverse</span><span class="s4">: </span><span class="s5">typeof </span><span
+    class="s2">reverse</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The resolver instance will send its requests from the specified IP address.</span>
+         <span class="s0">* This allows programs to specify outbound interfaces when used on multi-homed</span>
+         <span class="s0">* systems.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If a v4 or v6 address is not specified, it is set to the default and the</span>
+         <span class="s0">* operating system will choose a local address automatically.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The resolver will use the v4 local address when making requests to IPv4 DNS</span>
+         <span class="s0">* servers, and the v6 local address when making requests to IPv6 DNS servers.</span>
+         <span class="s0">* The `rrtype` of resolution requests has no impact on the local address used.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[ipv4='0.0.0.0'] A string representation of an IPv4 address.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[ipv6='::0'] A string representation of an IPv6 address.</span>
+         <span class="s0">*/</span>
+        <span class="s2">setLocalAddress</span><span class="s4">(</span><span class="s2">ipv4</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">ipv6</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">setServers</span><span class="s4">: </span><span class="s5">typeof </span><span class="s2">setServers</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export </span><span class="s4">{ </span><span class="s2">dnsPromises </span><span
+    class="s4">as </span><span class="s2">promises </span><span class="s4">};</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:dns&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;dns&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

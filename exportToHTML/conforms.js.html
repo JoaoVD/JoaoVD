@@ -1,0 +1,93 @@
+<html>
+<head>
+  <title>conforms.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          conforms.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseClone </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseClone'</span><span class="s2">),</span>
+    <span class="s1">baseConforms </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseConforms'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to compose bitmasks for cloning. */</span>
+<span class="s0">var </span><span class="s1">CLONE_DEEP_FLAG </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a function that invokes the predicate properties of `source` with</span>
+ <span class="s4">* the corresponding property values of a given object, returning `true` if</span>
+ <span class="s4">* all predicates return truthy, else `false`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** The created function is equivalent to `_.conformsTo` with</span>
+ <span class="s4">* `source` partially applied.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">4.0.0</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">Util</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Object} source The object of property predicates to conform to.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span
+    class="s4">{Function} Returns the new spec function.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var objects = [</span>
+ <span class="s4">*   { 'a': 2, 'b': 1 },</span>
+ <span class="s4">*   { 'a': 1, 'b': 2 }</span>
+ <span class="s4">* ];</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.filter(objects, _.conforms({ 'b': function(n) { return n &gt; 1; } }));</span>
+ <span class="s4">* // =&gt; [{ 'a': 1, 'b': 2 }]</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">conforms</span><span class="s2">(</span><span class="s1">source</span><span
+    class="s2">) {</span>
+  <span class="s0">return </span><span class="s1">baseConforms</span><span class="s2">(</span><span
+    class="s1">baseClone</span><span class="s2">(</span><span class="s1">source</span><span class="s2">, </span><span
+    class="s1">CLONE_DEEP_FLAG</span><span class="s2">));</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">conforms</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<html>
+<head>
+  <title>omit.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          omit.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">arrayMap </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_arrayMap'</span><span class="s2">),</span>
+    <span class="s1">baseClone </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_baseClone'</span><span class="s2">),</span>
+    <span class="s1">baseUnset </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_baseUnset'</span><span class="s2">),</span>
+    <span class="s1">castPath </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_castPath'</span><span class="s2">),</span>
+    <span class="s1">copyObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_copyObject'</span><span class="s2">),</span>
+    <span class="s1">customOmitClone </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_customOmitClone'</span><span class="s2">),</span>
+    <span class="s1">flatRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_flatRest'</span><span class="s2">),</span>
+    <span class="s1">getAllKeysIn </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_getAllKeysIn'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to compose bitmasks for cloning. */</span>
+<span class="s0">var </span><span class="s1">CLONE_DEEP_FLAG </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">,</span>
+    <span class="s1">CLONE_FLAT_FLAG </span><span class="s2">= </span><span class="s5">2</span><span class="s2">,</span>
+    <span class="s1">CLONE_SYMBOLS_FLAG </span><span class="s2">= </span><span class="s5">4</span><span
+    class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* The opposite of `_.pick`; this method creates an object composed of the</span>
+ <span class="s4">* own and inherited enumerable property paths of `object` that are not omitted.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This method is considerably slower than `_.pick`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">Object</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Object} object The source object.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{...(string|string[])} [paths] The property paths to omit.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{Object} Returns the new object.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var object = { 'a': 1, 'b': '2', 'c': 3 };</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.omit(object, ['a', 'c']);</span>
+ <span class="s4">* // =&gt; { 'b': '2' }</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">omit </span><span class="s2">= </span><span class="s1">flatRest</span><span
+    class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">, </span><span class="s1">paths</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">result </span><span class="s2">= {};</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">object </span><span class="s2">== </span><span
+    class="s0">null</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">isDeep </span><span class="s2">= </span><span
+    class="s0">false</span><span class="s2">;</span>
+  <span class="s1">paths </span><span class="s2">= </span><span class="s1">arrayMap</span><span class="s2">(</span><span
+    class="s1">paths</span><span class="s2">, </span><span class="s0">function</span><span class="s2">(</span><span
+    class="s1">path</span><span class="s2">) {</span>
+    <span class="s1">path </span><span class="s2">= </span><span class="s1">castPath</span><span
+    class="s2">(</span><span class="s1">path</span><span class="s2">, </span><span class="s1">object</span><span
+    class="s2">);</span>
+    <span class="s1">isDeep </span><span class="s2">|| (</span><span class="s1">isDeep </span><span class="s2">= </span><span
+    class="s1">path</span><span class="s2">.</span><span class="s1">length </span><span class="s2">&gt; </span><span
+    class="s5">1</span><span class="s2">);</span>
+    <span class="s0">return </span><span class="s1">path</span><span class="s2">;</span>
+  <span class="s2">});</span>
+  <span class="s1">copyObject</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">, </span><span class="s1">getAllKeysIn</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">), </span><span class="s1">result</span><span class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isDeep</span><span class="s2">) {</span>
+    <span class="s1">result </span><span class="s2">= </span><span class="s1">baseClone</span><span
+    class="s2">(</span><span class="s1">result</span><span class="s2">, </span><span
+    class="s1">CLONE_DEEP_FLAG </span><span class="s2">| </span><span class="s1">CLONE_FLAT_FLAG </span><span
+    class="s2">| </span><span class="s1">CLONE_SYMBOLS_FLAG</span><span class="s2">, </span><span class="s1">customOmitClone</span><span
+    class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">length </span><span class="s2">= </span><span
+    class="s1">paths</span><span class="s2">.</span><span class="s1">length</span><span class="s2">;</span>
+  <span class="s0">while </span><span class="s2">(</span><span class="s1">length</span><span class="s2">--) {</span>
+    <span class="s1">baseUnset</span><span class="s2">(</span><span class="s1">result</span><span
+    class="s2">, </span><span class="s1">paths</span><span class="s2">[</span><span class="s1">length</span><span
+    class="s2">]);</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">omit</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

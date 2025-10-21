@@ -1,0 +1,1304 @@
+<html>
+<head>
+  <title>url.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          url.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:url` module provides utilities for URL resolution and parsing. It can</span>
+ <span class="s0">* be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import url from 'node:url';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/url.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;url&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Blob </span><span
+    class="s4">as </span><span class="s2">NodeBlob </span><span class="s4">} </span><span class="s2">from </span><span
+    class="s3">&quot;node:buffer&quot;</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">ClientRequestArgs </span><span class="s4">} </span><span
+    class="s2">from </span><span class="s3">&quot;node:http&quot;</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">ParsedUrlQuery</span><span
+    class="s4">, </span><span class="s2">ParsedUrlQueryInput </span><span class="s4">} </span><span
+    class="s2">from </span><span class="s3">&quot;node:querystring&quot;</span><span class="s4">;</span>
+    <span class="s6">// Input to `url.format`</span>
+    <span class="s5">interface </span><span class="s2">UrlObject </span><span class="s4">{</span>
+        <span class="s2">auth</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">hash</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">host</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">hostname</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">href</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">pathname</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">protocol</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">search</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">slashes</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">port</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">query</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span
+    class="s2">ParsedUrlQueryInput </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s6">// Output of `url.parse`</span>
+    <span class="s5">interface </span><span class="s2">Url </span><span class="s4">{</span>
+        <span class="s2">auth</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">hash</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">host</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">href</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">path</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">pathname</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">protocol</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">search</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">slashes</span><span class="s4">: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">query</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">ParsedUrlQuery</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">UrlWithParsedQuery </span><span class="s5">extends </span><span
+    class="s2">Url </span><span class="s4">{</span>
+        <span class="s2">query</span><span class="s4">: </span><span class="s2">ParsedUrlQuery</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">UrlWithStringQuery </span><span class="s5">extends </span><span
+    class="s2">Url </span><span class="s4">{</span>
+        <span class="s2">query</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">FileUrlToPathOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `true` if the `path` should be return as a windows filepath, `false` for posix, and `undefined` for the system default.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">undefined</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.1.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">windows</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">PathToFileUrlOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `true` if the `path` should be return as a windows filepath, `false` for posix, and `undefined` for the system default.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">undefined</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.1.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">windows</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `url.parse()` method takes a URL string, parses it, and returns a URL</span>
+     <span class="s0">* object.</span>
+     <span class="s0">*</span>
+     <span class="s0">* A `TypeError` is thrown if `urlString` is not a string.</span>
+     <span class="s0">*</span>
+     <span class="s0">* A `URIError` is thrown if the `auth` property is present but cannot be decoded.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `url.parse()` uses a lenient, non-standard algorithm for parsing URL</span>
+     <span class="s0">* strings. It is prone to security issues such as [host name spoofing](https://hackerone.com/reports/678487) and incorrect handling of usernames and passwords. Do not use with untrusted</span>
+     <span
+       class="s0">* input. CVEs are not issued for `url.parse()` vulnerabilities. Use the `WHATWG URL` API instead.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.25</span>
+     <span class="s0">* </span><span class="s1">@deprecated </span><span
+    class="s0">Use the WHATWG URL API instead.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">urlString The URL string to parse.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">[parseQueryString=false] If `true`, the `query` property will always be set to an object returned by the {</span><span
+    class="s1">@link </span><span
+    class="s0">querystring} module's `parse()` method. If `false`, the `query` property</span>
+     <span class="s0">* on the returned URL object will be an unparsed, undecoded string.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">[slashesDenoteHost=false] If `true`, the first token after the literal string `//` and preceding the next `/` will be interpreted as the `host`. For instance, given `//foo/bar`, the</span>
+     <span class="s0">* result would be `{host: 'foo', pathname: '/bar'}` rather than `{pathname: '//foo/bar'}`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">parse</span><span class="s4">(</span><span
+    class="s2">urlString</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">UrlWithStringQuery</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">parse</span><span class="s4">(</span>
+        <span class="s2">urlString</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+        <span class="s2">parseQueryString</span><span class="s4">: </span><span class="s5">false </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">,</span>
+        <span class="s2">slashesDenoteHost</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">UrlWithStringQuery</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">parse</span><span class="s4">(</span><span
+    class="s2">urlString</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">parseQueryString</span><span class="s4">: </span><span class="s5">true</span><span
+    class="s4">, </span><span class="s2">slashesDenoteHost</span><span class="s4">?: </span><span
+    class="s2">boolean</span><span class="s4">): </span><span class="s2">UrlWithParsedQuery</span><span
+    class="s4">;</span>
+    <span class="s5">function </span><span class="s2">parse</span><span class="s4">(</span><span
+    class="s2">urlString</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">parseQueryString</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">, </span><span class="s2">slashesDenoteHost</span><span class="s4">?: </span><span
+    class="s2">boolean</span><span class="s4">): </span><span class="s2">Url</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `url.format()` method returns a formatted URL string derived from `urlObject`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import url from 'node:url';</span>
+     <span class="s0">* url.format({</span>
+     <span class="s0">*   protocol: 'https',</span>
+     <span class="s0">*   hostname: 'example.com',</span>
+     <span class="s0">*   pathname: '/some/path',</span>
+     <span class="s0">*   query: {</span>
+     <span class="s0">*     page: 1,</span>
+     <span class="s0">*     format: 'json',</span>
+     <span class="s0">*   },</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* // =&gt; 'https://example.com/some/path?page=1&amp;#x26;format=json'</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `urlObject` is not an object or a string, `url.format()` will throw a `TypeError`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The formatting process operates as follows:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * A new empty string `result` is created.</span>
+     <span class="s0">* * If `urlObject.protocol` is a string, it is appended as-is to `result`.</span>
+     <span class="s0">* * Otherwise, if `urlObject.protocol` is not `undefined` and is not a string, an `Error` is thrown.</span>
+     <span class="s0">* * For all string values of `urlObject.protocol` that _do not end_ with an ASCII</span>
+     <span class="s0">* colon (`:`) character, the literal string `:` will be appended to `result`.</span>
+     <span class="s0">* * If either of the following conditions is true, then the literal string `//` will be appended to `result`:</span>
+     <span class="s0">*    * `urlObject.slashes` property is true;</span>
+     <span class="s0">*    * `urlObject.protocol` begins with `http`, `https`, `ftp`, `gopher`, or `file`;</span>
+     <span class="s0">* * If the value of the `urlObject.auth` property is truthy, and either `urlObject.host` or `urlObject.hostname` are not `undefined`, the value of `urlObject.auth` will be coerced into a string</span>
+     <span class="s0">* and appended to `result` followed by the literal string `@`.</span>
+     <span class="s0">* * If the `urlObject.host` property is `undefined` then:</span>
+     <span class="s0">*    * If the `urlObject.hostname` is a string, it is appended to `result`.</span>
+     <span class="s0">*    * Otherwise, if `urlObject.hostname` is not `undefined` and is not a string,</span>
+     <span class="s0">*    an `Error` is thrown.</span>
+     <span class="s0">*    * If the `urlObject.port` property value is truthy, and `urlObject.hostname` is not `undefined`:</span>
+     <span class="s0">*          * The literal string `:` is appended to `result`, and</span>
+     <span class="s0">*          * The value of `urlObject.port` is coerced to a string and appended to `result`.</span>
+     <span class="s0">* * Otherwise, if the `urlObject.host` property value is truthy, the value of `urlObject.host` is coerced to a string and appended to `result`.</span>
+     <span class="s0">* * If the `urlObject.pathname` property is a string that is not an empty string:</span>
+     <span class="s0">*    * If the `urlObject.pathname` _does not start_ with an ASCII forward slash</span>
+     <span class="s0">*    (`/`), then the literal string `'/'` is appended to `result`.</span>
+     <span class="s0">*    * The value of `urlObject.pathname` is appended to `result`.</span>
+     <span class="s0">* * Otherwise, if `urlObject.pathname` is not `undefined` and is not a string, an `Error` is thrown.</span>
+     <span class="s0">* * If the `urlObject.search` property is `undefined` and if the `urlObject.query`property is an `Object`, the literal string `?` is appended to `result` followed by the output of calling the</span>
+     <span class="s0">* `querystring` module's `stringify()` method passing the value of `urlObject.query`.</span>
+     <span class="s0">* * Otherwise, if `urlObject.search` is a string:</span>
+     <span class="s0">*    * If the value of `urlObject.search` _does not start_ with the ASCII question</span>
+     <span class="s0">*    mark (`?`) character, the literal string `?` is appended to `result`.</span>
+     <span class="s0">*    * The value of `urlObject.search` is appended to `result`.</span>
+     <span
+       class="s0">* * Otherwise, if `urlObject.search` is not `undefined` and is not a string, an `Error` is thrown.</span>
+     <span class="s0">* * If the `urlObject.hash` property is a string:</span>
+     <span class="s0">*    * If the value of `urlObject.hash` _does not start_ with the ASCII hash (`#`)</span>
+     <span class="s0">*    character, the literal string `#` is appended to `result`.</span>
+     <span class="s0">*    * The value of `urlObject.hash` is appended to `result`.</span>
+     <span class="s0">* * Otherwise, if the `urlObject.hash` property is not `undefined` and is not a</span>
+     <span class="s0">* string, an `Error` is thrown.</span>
+     <span class="s0">* * `result` is returned.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.25</span>
+     <span class="s0">* </span><span class="s1">@legacy </span><span class="s0">Use the WHATWG URL API instead.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">urlObject A URL object (as returned by `url.parse()` or constructed otherwise). If a string, it is converted to an object by passing it to `url.parse()`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">format</span><span class="s4">(</span><span
+    class="s2">urlObject</span><span class="s4">: </span><span class="s2">URL</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">URLFormatOptions</span><span
+    class="s4">): </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `url.format()` method returns a formatted URL string derived from `urlObject`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import url from 'node:url';</span>
+     <span class="s0">* url.format({</span>
+     <span class="s0">*   protocol: 'https',</span>
+     <span class="s0">*   hostname: 'example.com',</span>
+     <span class="s0">*   pathname: '/some/path',</span>
+     <span class="s0">*   query: {</span>
+     <span class="s0">*     page: 1,</span>
+     <span class="s0">*     format: 'json',</span>
+     <span class="s0">*   },</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* // =&gt; 'https://example.com/some/path?page=1&amp;#x26;format=json'</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `urlObject` is not an object or a string, `url.format()` will throw a `TypeError`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The formatting process operates as follows:</span>
+     <span class="s0">*</span>
+     <span class="s0">* * A new empty string `result` is created.</span>
+     <span class="s0">* * If `urlObject.protocol` is a string, it is appended as-is to `result`.</span>
+     <span class="s0">* * Otherwise, if `urlObject.protocol` is not `undefined` and is not a string, an `Error` is thrown.</span>
+     <span class="s0">* * For all string values of `urlObject.protocol` that _do not end_ with an ASCII</span>
+     <span class="s0">* colon (`:`) character, the literal string `:` will be appended to `result`.</span>
+     <span class="s0">* * If either of the following conditions is true, then the literal string `//` will be appended to `result`:</span>
+     <span class="s0">*    * `urlObject.slashes` property is true;</span>
+     <span class="s0">*    * `urlObject.protocol` begins with `http`, `https`, `ftp`, `gopher`, or `file`;</span>
+     <span class="s0">* * If the value of the `urlObject.auth` property is truthy, and either `urlObject.host` or `urlObject.hostname` are not `undefined`, the value of `urlObject.auth` will be coerced into a string</span>
+     <span class="s0">* and appended to `result` followed by the literal string `@`.</span>
+     <span class="s0">* * If the `urlObject.host` property is `undefined` then:</span>
+     <span class="s0">*    * If the `urlObject.hostname` is a string, it is appended to `result`.</span>
+     <span class="s0">*    * Otherwise, if `urlObject.hostname` is not `undefined` and is not a string,</span>
+     <span class="s0">*    an `Error` is thrown.</span>
+     <span class="s0">*    * If the `urlObject.port` property value is truthy, and `urlObject.hostname` is not `undefined`:</span>
+     <span class="s0">*          * The literal string `:` is appended to `result`, and</span>
+     <span class="s0">*          * The value of `urlObject.port` is coerced to a string and appended to `result`.</span>
+     <span class="s0">* * Otherwise, if the `urlObject.host` property value is truthy, the value of `urlObject.host` is coerced to a string and appended to `result`.</span>
+     <span class="s0">* * If the `urlObject.pathname` property is a string that is not an empty string:</span>
+     <span class="s0">*    * If the `urlObject.pathname` _does not start_ with an ASCII forward slash</span>
+     <span class="s0">*    (`/`), then the literal string `'/'` is appended to `result`.</span>
+     <span class="s0">*    * The value of `urlObject.pathname` is appended to `result`.</span>
+     <span class="s0">* * Otherwise, if `urlObject.pathname` is not `undefined` and is not a string, an `Error` is thrown.</span>
+     <span class="s0">* * If the `urlObject.search` property is `undefined` and if the `urlObject.query`property is an `Object`, the literal string `?` is appended to `result` followed by the output of calling the</span>
+     <span class="s0">* `querystring` module's `stringify()` method passing the value of `urlObject.query`.</span>
+     <span class="s0">* * Otherwise, if `urlObject.search` is a string:</span>
+     <span class="s0">*    * If the value of `urlObject.search` _does not start_ with the ASCII question</span>
+     <span class="s0">*    mark (`?`) character, the literal string `?` is appended to `result`.</span>
+     <span class="s0">*    * The value of `urlObject.search` is appended to `result`.</span>
+     <span
+       class="s0">* * Otherwise, if `urlObject.search` is not `undefined` and is not a string, an `Error` is thrown.</span>
+     <span class="s0">* * If the `urlObject.hash` property is a string:</span>
+     <span class="s0">*    * If the value of `urlObject.hash` _does not start_ with the ASCII hash (`#`)</span>
+     <span class="s0">*    character, the literal string `#` is appended to `result`.</span>
+     <span class="s0">*    * The value of `urlObject.hash` is appended to `result`.</span>
+     <span class="s0">* * Otherwise, if the `urlObject.hash` property is not `undefined` and is not a</span>
+     <span class="s0">* string, an `Error` is thrown.</span>
+     <span class="s0">* * `result` is returned.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.25</span>
+     <span class="s0">* </span><span class="s1">@legacy </span><span class="s0">Use the WHATWG URL API instead.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">urlObject A URL object (as returned by `url.parse()` or constructed otherwise). If a string, it is converted to an object by passing it to `url.parse()`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">format</span><span class="s4">(</span><span
+    class="s2">urlObject</span><span class="s4">: </span><span class="s2">UrlObject </span><span
+    class="s4">| </span><span class="s2">string</span><span class="s4">): </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `url.resolve()` method resolves a target URL relative to a base URL in a</span>
+     <span class="s0">* manner similar to that of a web browser resolving an anchor tag.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import url from 'node:url';</span>
+     <span class="s0">* url.resolve('/one/two/three', 'four');         // '/one/two/four'</span>
+     <span class="s0">* url.resolve('http://example.com/', '/one');    // 'http://example.com/one'</span>
+     <span class="s0">* url.resolve('http://example.com/one', '/two'); // 'http://example.com/two'</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* To achieve the same result using the WHATWG URL API:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* function resolve(from, to) {</span>
+     <span class="s0">*   const resolvedUrl = new URL(to, new URL(from, 'resolve://'));</span>
+     <span class="s0">*   if (resolvedUrl.protocol === 'resolve:') {</span>
+     <span class="s0">*     // `from` is a relative URL.</span>
+     <span class="s0">*     const { pathname, search, hash } = resolvedUrl;</span>
+     <span class="s0">*     return pathname + search + hash;</span>
+     <span class="s0">*   }</span>
+     <span class="s0">*   return resolvedUrl.toString();</span>
+     <span class="s0">* }</span>
+     <span class="s0">*</span>
+     <span class="s0">* resolve('/one/two/three', 'four');         // '/one/two/four'</span>
+     <span class="s0">* resolve('http://example.com/', '/one');    // 'http://example.com/one'</span>
+     <span class="s0">* resolve('http://example.com/one', '/two'); // 'http://example.com/two'</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.25</span>
+     <span class="s0">* </span><span class="s1">@legacy </span><span class="s0">Use the WHATWG URL API instead.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">from The base URL to use if `to` is a relative URL.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">to The target URL to resolve.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">resolve</span><span class="s4">(</span><span
+    class="s2">from</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">to</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">string</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns the [Punycode](https://tools.ietf.org/html/rfc5891#section-4.4) ASCII serialization of the `domain`. If `domain` is an</span>
+     <span class="s0">* invalid domain, the empty string is returned.</span>
+     <span class="s0">*</span>
+     <span class="s0">* It performs the inverse operation to {</span><span class="s1">@link </span><span class="s0">domainToUnicode}.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import url from 'node:url';</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log(url.domainToASCII('español.com'));</span>
+     <span class="s0">* // Prints xn--espaol-zwa.com</span>
+     <span class="s0">* console.log(url.domainToASCII('中文.com'));</span>
+     <span class="s0">* // Prints xn--fiq228c.com</span>
+     <span class="s0">* console.log(url.domainToASCII('xn--iñvalid.com'));</span>
+     <span class="s0">* // Prints an empty string</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v7.4.0, v6.13.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">domainToASCII</span><span class="s4">(</span><span class="s2">domain</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Returns the Unicode serialization of the `domain`. If `domain` is an invalid</span>
+     <span class="s0">* domain, the empty string is returned.</span>
+     <span class="s0">*</span>
+     <span class="s0">* It performs the inverse operation to {</span><span class="s1">@link </span><span class="s0">domainToASCII}.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import url from 'node:url';</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log(url.domainToUnicode('xn--espaol-zwa.com'));</span>
+     <span class="s0">* // Prints español.com</span>
+     <span class="s0">* console.log(url.domainToUnicode('xn--fiq228c.com'));</span>
+     <span class="s0">* // Prints 中文.com</span>
+     <span class="s0">* console.log(url.domainToUnicode('xn--iñvalid.com'));</span>
+     <span class="s0">* // Prints an empty string</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v7.4.0, v6.13.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">domainToUnicode</span><span class="s4">(</span><span class="s2">domain</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This function ensures the correct decodings of percent-encoded characters as</span>
+     <span class="s0">* well as ensuring a cross-platform valid absolute path string.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { fileURLToPath } from 'node:url';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const __filename = fileURLToPath(import.meta.url);</span>
+     <span class="s0">*</span>
+     <span class="s0">* new URL('file:///C:/path/').pathname;      // Incorrect: /C:/path/</span>
+     <span class="s0">* fileURLToPath('file:///C:/path/');         // Correct:   C:\path\ (Windows)</span>
+     <span class="s0">*</span>
+     <span class="s0">* new URL('file://nas/foo.txt').pathname;    // Incorrect: /foo.txt</span>
+     <span class="s0">* fileURLToPath('file://nas/foo.txt');       // Correct:   \\nas\foo.txt (Windows)</span>
+     <span class="s0">*</span>
+     <span class="s0">* new URL('file:///你好.txt').pathname;      // Incorrect: /%E4%BD%A0%E5%A5%BD.txt</span>
+     <span class="s0">* fileURLToPath('file:///你好.txt');         // Correct:   /你好.txt (POSIX)</span>
+     <span class="s0">*</span>
+     <span class="s0">* new URL('file:///hello world').pathname;   // Incorrect: /hello%20world</span>
+     <span class="s0">* fileURLToPath('file:///hello world');      // Correct:   /hello world (POSIX)</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.12.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">url The file URL string or URL object to convert to a path.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The fully-resolved platform-specific Node.js file path.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">fileURLToPath</span><span class="s4">(</span><span
+    class="s2">url</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">URL</span><span class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">FileUrlToPathOptions</span><span class="s4">): </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Like `url.fileURLToPath(...)` except that instead of returning a string</span>
+     <span class="s0">* representation of the path, a `Buffer` is returned. This conversion is</span>
+     <span class="s0">* helpful when the input URL contains percent-encoded segments that are</span>
+     <span class="s0">* not valid UTF-8 / Unicode sequences.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.3.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">url The file URL string or URL object to convert to a path.</span>
+     <span class="s0">* </span><span class="s1">@returns </span><span class="s0">The fully-resolved platform-specific Node.js file path</span>
+     <span class="s0">* as a `Buffer`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">fileURLToPathBuffer</span><span class="s4">(</span><span
+    class="s2">url</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">URL</span><span class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">FileUrlToPathOptions</span><span class="s4">): </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This function ensures that `path` is resolved absolutely, and that the URL</span>
+     <span class="s0">* control characters are correctly encoded when converting into a File URL.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { pathToFileURL } from 'node:url';</span>
+     <span class="s0">*</span>
+     <span class="s0">* new URL('/foo#1', 'file:');           // Incorrect: file:///foo#1</span>
+     <span class="s0">* pathToFileURL('/foo#1');              // Correct:   file:///foo%231 (POSIX)</span>
+     <span class="s0">*</span>
+     <span class="s0">* new URL('/some/path%.c', 'file:');    // Incorrect: file:///some/path%.c</span>
+     <span class="s0">* pathToFileURL('/some/path%.c');       // Correct:   file:///some/path%25.c (POSIX)</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.12.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">path The path to convert to a File URL.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The file URL object.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">pathToFileURL</span><span class="s4">(</span><span
+    class="s2">path</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">PathToFileUrlOptions</span><span
+    class="s4">): </span><span class="s2">URL</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This utility function converts a URL object into an ordinary options object as</span>
+     <span class="s0">* expected by the `http.request()` and `https.request()` APIs.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { urlToHttpOptions } from 'node:url';</span>
+     <span class="s0">* const myURL = new URL('https://a:b@測試?abc#foo');</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log(urlToHttpOptions(myURL));</span>
+     <span class="s0">* /*</span>
+     <span class="s0">* {</span>
+     <span class="s0">*   protocol: 'https:',</span>
+     <span class="s0">*   hostname: 'xn--g6w251d',</span>
+     <span class="s0">*   hash: '#foo',</span>
+     <span class="s0">*   search: '?abc',</span>
+     <span class="s0">*   pathname: '/',</span>
+     <span class="s0">*   path: '/?abc',</span>
+     <span class="s0">*   href: 'https://a:b@xn--g6w251d/?abc#foo',</span>
+     <span class="s0">*   auth: 'a:b'</span>
+     <span class="s0">* }</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.7.0, v14.18.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">url The `WHATWG URL` object to convert to an options object.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">Options object</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">urlToHttpOptions</span><span class="s4">(</span><span class="s2">url</span><span
+    class="s4">: </span><span class="s2">URL</span><span class="s4">): </span><span
+    class="s2">ClientRequestArgs</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">URLFormatOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `true` if the serialized URL string should include the username and password, `false` otherwise.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">auth</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `true` if the serialized URL string should include the fragment, `false` otherwise.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">fragment</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* `true` if the serialized URL string should include the search query, `false` otherwise.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">search</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `true` if Unicode characters appearing in the host component of the URL string should be encoded directly as opposed to</span>
+         <span class="s0">* being Punycode encoded.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">unicode</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Browser-compatible `URL` class, implemented by following the WHATWG URL</span>
+     <span class="s0">* Standard. [Examples of parsed URLs](https://url.spec.whatwg.org/#example-url-parsing) may be found in the Standard itself.</span>
+     <span class="s0">* The `URL` class is also available on the global object.</span>
+     <span class="s0">*</span>
+     <span class="s0">* In accordance with browser conventions, all properties of `URL` objects</span>
+     <span class="s0">* are implemented as getters and setters on the class prototype, rather than as</span>
+     <span class="s0">* data properties on the object itself. Thus, unlike `legacy urlObject`s,</span>
+     <span class="s0">* using the `delete` keyword on any properties of `URL` objects (e.g. `delete myURL.protocol`, `delete myURL.pathname`, etc) has no effect but will still</span>
+     <span class="s0">* return `true`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v7.0.0, v6.13.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">URL </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Creates a `'blob:nodedata:...'` URL string that represents the given `Blob` object and can be used to retrieve the `Blob` later.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import {</span>
+         <span class="s0">*   Blob,</span>
+         <span class="s0">*   resolveObjectURL,</span>
+         <span class="s0">* } from 'node:buffer';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const blob = new Blob(['hello']);</span>
+         <span class="s0">* const id = URL.createObjectURL(blob);</span>
+         <span class="s0">*</span>
+         <span class="s0">* // later...</span>
+         <span class="s0">*</span>
+         <span class="s0">* const otherBlob = resolveObjectURL(id);</span>
+         <span class="s0">* console.log(otherBlob.size);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The data stored by the registered `Blob` will be retained in memory until `URL.revokeObjectURL()` is called to remove it.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `Blob` objects are registered within the current thread. If using Worker</span>
+         <span class="s0">* Threads, `Blob` objects registered within one Worker will not be available</span>
+         <span class="s0">* to other workers or the main thread.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v16.7.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">createObjectURL</span><span class="s4">(</span><span class="s2">blob</span><span
+    class="s4">: </span><span class="s2">NodeBlob</span><span class="s4">): </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Removes the stored `Blob` identified by the given ID. Attempting to revoke a</span>
+         <span class="s0">* ID that isn't registered will silently fail.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v16.7.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">id A `'blob:nodedata:...` URL string returned by a prior call to `URL.createObjectURL()`.</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">revokeObjectURL</span><span class="s4">(</span><span class="s2">id</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Checks if an `input` relative to the `base` can be parsed to a `URL`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const isValid = URL.canParse('/foo', 'https://example.org/'); // true</span>
+         <span class="s0">*</span>
+         <span class="s0">* const isNotValid = URL.canParse('/foo'); // false</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">input The absolute or relative input URL to parse. If `input` is relative, then `base` is required. If `input` is absolute, the `base` is ignored. If `input` is not a string, it is</span>
+         <span class="s0">* `converted to a string` first.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">base The base URL to resolve against if the `input` is not absolute. If `base` is not a string, it is `converted to a string` first.</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">canParse</span><span class="s4">(</span><span
+    class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">base</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Parses a string as a URL. If `base` is provided, it will be used as the base</span>
+         <span class="s0">* URL for the purpose of resolving non-absolute `input` URLs. Returns `null`</span>
+         <span class="s0">* if the parameters can't be resolved to a valid URL.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.1.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">input The absolute or relative input URL to parse. If `input`</span>
+         <span class="s0">* is relative, then `base` is required. If `input` is absolute, the `base`</span>
+         <span class="s0">* is ignored. If `input` is not a string, it is [converted to a string](https://tc39.es/ecma262/#sec-tostring) first.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">base The base URL to resolve against if the `input` is not</span>
+         <span class="s0">* absolute. If `base` is not a string, it is [converted to a string](https://tc39.es/ecma262/#sec-tostring) first.</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">parse</span><span class="s4">(</span><span
+    class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">base</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">URL </span><span class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">input</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| { </span><span class="s2">toString</span><span
+    class="s4">: () =&gt; </span><span class="s2">string </span><span class="s4">}, </span><span
+    class="s2">base</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">URL</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the fragment portion of the URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org/foo#bar');</span>
+         <span class="s0">* console.log(myURL.hash);</span>
+         <span class="s0">* // Prints #bar</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.hash = 'baz';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.org/foo#baz</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Invalid URL characters included in the value assigned to the `hash` property</span>
+         <span class="s0">* are `percent-encoded`. The selection of which characters to</span>
+         <span class="s0">* percent-encode may vary somewhat from what the {</span><span class="s1">@link </span><span
+    class="s0">parse} and {</span><span class="s1">@link </span><span class="s0">format} methods would produce.</span>
+         <span class="s0">*/</span>
+        <span class="s2">hash</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the host portion of the URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org:81/foo');</span>
+         <span class="s0">* console.log(myURL.host);</span>
+         <span class="s0">* // Prints example.org:81</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.host = 'example.com:82';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.com:82/foo</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Invalid host values assigned to the `host` property are ignored.</span>
+         <span class="s0">*/</span>
+        <span class="s2">host</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the host name portion of the URL. The key difference between`url.host` and `url.hostname` is that `url.hostname` does _not_ include the</span>
+         <span class="s0">* port.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org:81/foo');</span>
+         <span class="s0">* console.log(myURL.hostname);</span>
+         <span class="s0">* // Prints example.org</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Setting the hostname does not change the port</span>
+         <span class="s0">* myURL.hostname = 'example.com';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.com:81/foo</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Use myURL.host to change the hostname and port</span>
+         <span class="s0">* myURL.host = 'example.org:82';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.org:82/foo</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Invalid host name values assigned to the `hostname` property are ignored.</span>
+         <span class="s0">*/</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the serialized URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org/foo');</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.org/foo</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.href = 'https://example.com/bar';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.com/bar</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Getting the value of the `href` property is equivalent to calling {</span><span class="s1">@link </span><span
+    class="s0">toString}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Setting the value of this property to a new value is equivalent to creating a</span>
+         <span class="s0">* new `URL` object using `new URL(value)`. Each of the `URL` object's properties will be modified.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the value assigned to the `href` property is not a valid URL, a `TypeError` will be thrown.</span>
+         <span class="s0">*/</span>
+        <span class="s2">href</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets the read-only serialization of the URL's origin.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org/foo/bar?baz');</span>
+         <span class="s0">* console.log(myURL.origin);</span>
+         <span class="s0">* // Prints https://example.org</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const idnURL = new URL('https://測試');</span>
+         <span class="s0">* console.log(idnURL.origin);</span>
+         <span class="s0">* // Prints https://xn--g6w251d</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(idnURL.hostname);</span>
+         <span class="s0">* // Prints xn--g6w251d</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly origin</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the password portion of the URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://abc:xyz@example.com');</span>
+         <span class="s0">* console.log(myURL.password);</span>
+         <span class="s0">* // Prints xyz</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.password = '123';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://abc:123@example.com/</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Invalid URL characters included in the value assigned to the `password` property</span>
+         <span class="s0">* are `percent-encoded`. The selection of which characters to</span>
+         <span class="s0">* percent-encode may vary somewhat from what the {</span><span class="s1">@link </span><span
+    class="s0">parse} and {</span><span class="s1">@link </span><span class="s0">format} methods would produce.</span>
+         <span class="s0">*/</span>
+        <span class="s2">password</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the path portion of the URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org/abc/xyz?123');</span>
+         <span class="s0">* console.log(myURL.pathname);</span>
+         <span class="s0">* // Prints /abc/xyz</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.pathname = '/abcdef';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.org/abcdef?123</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Invalid URL characters included in the value assigned to the `pathname` property are `percent-encoded`. The selection of which characters</span>
+         <span class="s0">* to percent-encode may vary somewhat from what the {</span><span
+    class="s1">@link </span><span class="s0">parse} and {</span><span class="s1">@link </span><span class="s0">format} methods would produce.</span>
+         <span class="s0">*/</span>
+        <span class="s2">pathname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the port portion of the URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The port value may be a number or a string containing a number in the range `0` to `65535` (inclusive). Setting the value to the default port of the `URL` objects given `protocol` will</span>
+         <span class="s0">* result in the `port` value becoming</span>
+         <span class="s0">* the empty string (`''`).</span>
+         <span class="s0">*</span>
+         <span class="s0">* The port value can be an empty string in which case the port depends on</span>
+         <span class="s0">* the protocol/scheme:</span>
+         <span class="s0">*</span>
+         <span class="s0">* &lt;omitted&gt;</span>
+         <span class="s0">*</span>
+         <span class="s0">* Upon assigning a value to the port, the value will first be converted to a</span>
+         <span class="s0">* string using `.toString()`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If that string is invalid but it begins with a number, the leading number is</span>
+         <span class="s0">* assigned to `port`.</span>
+         <span class="s0">* If the number lies outside the range denoted above, it is ignored.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org:8888');</span>
+         <span class="s0">* console.log(myURL.port);</span>
+         <span class="s0">* // Prints 8888</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Default ports are automatically transformed to the empty string</span>
+         <span class="s0">* // (HTTPS protocol's default port is 443)</span>
+         <span class="s0">* myURL.port = '443';</span>
+         <span class="s0">* console.log(myURL.port);</span>
+         <span class="s0">* // Prints the empty string</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.org/</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.port = 1234;</span>
+         <span class="s0">* console.log(myURL.port);</span>
+         <span class="s0">* // Prints 1234</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.org:1234/</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Completely invalid port strings are ignored</span>
+         <span class="s0">* myURL.port = 'abcd';</span>
+         <span class="s0">* console.log(myURL.port);</span>
+         <span class="s0">* // Prints 1234</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Leading numbers are treated as a port number</span>
+         <span class="s0">* myURL.port = '5678abcd';</span>
+         <span class="s0">* console.log(myURL.port);</span>
+         <span class="s0">* // Prints 5678</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Non-integers are truncated</span>
+         <span class="s0">* myURL.port = 1234.5678;</span>
+         <span class="s0">* console.log(myURL.port);</span>
+         <span class="s0">* // Prints 1234</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Out-of-range numbers which are not represented in scientific notation</span>
+         <span class="s0">* // will be ignored.</span>
+         <span class="s0">* myURL.port = 1e10; // 10000000000, will be range-checked as described below</span>
+         <span class="s0">* console.log(myURL.port);</span>
+         <span class="s0">* // Prints 1234</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Numbers which contain a decimal point,</span>
+         <span class="s0">* such as floating-point numbers or numbers in scientific notation,</span>
+         <span class="s0">* are not an exception to this rule.</span>
+         <span class="s0">* Leading numbers up to the decimal point will be set as the URL's port,</span>
+         <span class="s0">* assuming they are valid:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* myURL.port = 4.567e21;</span>
+         <span class="s0">* console.log(myURL.port);</span>
+         <span class="s0">* // Prints 4 (because it is the leading number in the string '4.567e21')</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*/</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the protocol portion of the URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org');</span>
+         <span class="s0">* console.log(myURL.protocol);</span>
+         <span class="s0">* // Prints https:</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.protocol = 'ftp';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints ftp://example.org/</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Invalid URL protocol values assigned to the `protocol` property are ignored.</span>
+         <span class="s0">*/</span>
+        <span class="s2">protocol</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the serialized query portion of the URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org/abc?123');</span>
+         <span class="s0">* console.log(myURL.search);</span>
+         <span class="s0">* // Prints ?123</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.search = 'abc=xyz';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://example.org/abc?abc=xyz</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Any invalid URL characters appearing in the value assigned the `search` property will be `percent-encoded`. The selection of which</span>
+         <span class="s0">* characters to percent-encode may vary somewhat from what the {</span><span
+    class="s1">@link </span><span class="s0">parse} and {</span><span class="s1">@link </span><span class="s0">format} methods would produce.</span>
+         <span class="s0">*/</span>
+        <span class="s2">search</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets the `URLSearchParams` object representing the query parameters of the</span>
+         <span class="s0">* URL. This property is read-only but the `URLSearchParams` object it provides</span>
+         <span class="s0">* can be used to mutate the URL instance; to replace the entirety of query</span>
+         <span class="s0">* parameters of the URL, use the {</span><span class="s1">@link </span><span class="s0">search} setter. See `URLSearchParams` documentation for details.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Use care when using `.searchParams` to modify the `URL` because,</span>
+         <span class="s0">* per the WHATWG specification, the `URLSearchParams` object uses</span>
+         <span class="s0">* different rules to determine which characters to percent-encode. For</span>
+         <span class="s0">* instance, the `URL` object will not percent encode the ASCII tilde (`~`)</span>
+         <span class="s0">* character, while `URLSearchParams` will always encode it:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org/abc?foo=~bar');</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(myURL.search);  // prints ?foo=~bar</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Modify the URL via searchParams...</span>
+         <span class="s0">* myURL.searchParams.sort();</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(myURL.search);  // prints ?foo=%7Ebar</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly searchParams</span><span class="s4">: </span><span
+    class="s2">URLSearchParams</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Gets and sets the username portion of the URL.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://abc:xyz@example.com');</span>
+         <span class="s0">* console.log(myURL.username);</span>
+         <span class="s0">* // Prints abc</span>
+         <span class="s0">*</span>
+         <span class="s0">* myURL.username = '123';</span>
+         <span class="s0">* console.log(myURL.href);</span>
+         <span class="s0">* // Prints https://123:xyz@example.com/</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Any invalid URL characters appearing in the value assigned the `username` property will be `percent-encoded`. The selection of which</span>
+         <span class="s0">* characters to percent-encode may vary somewhat from what the {</span><span
+    class="s1">@link </span><span class="s0">parse} and {</span><span class="s1">@link </span><span class="s0">format} methods would produce.</span>
+         <span class="s0">*/</span>
+        <span class="s2">username</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `toString()` method on the `URL` object returns the serialized URL. The</span>
+         <span class="s0">* value returned is equivalent to that of {</span><span class="s1">@link </span><span
+    class="s0">href} and {</span><span class="s1">@link </span><span class="s0">toJSON}.</span>
+         <span class="s0">*/</span>
+        <span class="s2">toString</span><span class="s4">(): </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `toJSON()` method on the `URL` object returns the serialized URL. The</span>
+         <span class="s0">* value returned is equivalent to that of {</span><span class="s1">@link </span><span
+    class="s0">href} and {</span><span class="s1">@link </span><span class="s0">toString}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method is automatically called when an `URL` object is serialized</span>
+         <span class="s0">* with [`JSON.stringify()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify).</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURLs = [</span>
+         <span class="s0">*   new URL('https://www.example.com'),</span>
+         <span class="s0">*   new URL('https://test.example.org'),</span>
+         <span class="s0">* ];</span>
+         <span class="s0">* console.log(JSON.stringify(myURLs));</span>
+         <span
+           class="s0">* // Prints [&quot;https://www.example.com/&quot;,&quot;https://test.example.org/&quot;]</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*/</span>
+        <span class="s2">toJSON</span><span class="s4">(): </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">URLPatternComponentResult </span><span class="s4">{</span>
+        <span class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">groups</span><span class="s4">: </span><span class="s2">Record</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">, </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">URLPatternInit </span><span class="s4">{</span>
+        <span class="s2">protocol</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">username</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">password</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">hostname</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">port</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">pathname</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">search</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">hash</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">baseURL</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">URLPatternOptions </span><span class="s4">{</span>
+        <span class="s2">ignoreCase</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">URLPatternResult </span><span class="s4">{</span>
+        <span class="s2">inputs</span><span class="s4">: (</span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">URLPatternInit</span><span class="s4">)[];</span>
+        <span class="s2">protocol</span><span class="s4">: </span><span class="s2">URLPatternComponentResult</span><span
+    class="s4">;</span>
+        <span class="s2">username</span><span class="s4">: </span><span class="s2">URLPatternComponentResult</span><span
+    class="s4">;</span>
+        <span class="s2">password</span><span class="s4">: </span><span class="s2">URLPatternComponentResult</span><span
+    class="s4">;</span>
+        <span class="s2">hostname</span><span class="s4">: </span><span class="s2">URLPatternComponentResult</span><span
+    class="s4">;</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">URLPatternComponentResult</span><span
+    class="s4">;</span>
+        <span class="s2">pathname</span><span class="s4">: </span><span class="s2">URLPatternComponentResult</span><span
+    class="s4">;</span>
+        <span class="s2">search</span><span class="s4">: </span><span class="s2">URLPatternComponentResult</span><span
+    class="s4">;</span>
+        <span class="s2">hash</span><span class="s4">: </span><span class="s2">URLPatternComponentResult</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v23.8.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">URLPattern </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">input</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">URLPatternInit</span><span class="s4">, </span><span class="s2">baseURL</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">URLPatternOptions</span><span class="s4">);</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">input</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">URLPatternInit</span><span
+    class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">URLPatternOptions</span><span class="s4">);</span>
+        <span class="s2">exec</span><span class="s4">(</span><span class="s2">input</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">URLPatternInit</span><span
+    class="s4">, </span><span class="s2">baseURL</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">): </span><span class="s2">URLPatternResult </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">;</span>
+        <span class="s2">readonly hasRegExpGroups</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">readonly hash</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">readonly hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">readonly password</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">readonly pathname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">readonly port</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">readonly protocol</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s2">readonly search</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">test</span><span class="s4">(</span><span class="s2">input</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">URLPatternInit</span><span
+    class="s4">, </span><span class="s2">baseURL</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">readonly username</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">URLSearchParamsIterator</span><span class="s4">&lt;</span><span
+    class="s2">T</span><span class="s4">&gt; </span><span class="s5">extends </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Iterator</span><span class="s4">&lt;</span><span class="s2">T</span><span
+    class="s4">, </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">BuiltinIteratorReturn</span><span class="s4">, </span><span class="s2">unknown</span><span class="s4">&gt; {</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span class="s2">iterator</span><span
+    class="s4">](): </span><span class="s2">URLSearchParamsIterator</span><span class="s4">&lt;</span><span
+    class="s2">T</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `URLSearchParams` API provides read and write access to the query of a `URL`. The `URLSearchParams` class can also be used standalone with one of the</span>
+     <span class="s0">* four following constructors.</span>
+     <span class="s0">* The `URLSearchParams` class is also available on the global object.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The WHATWG `URLSearchParams` interface and the `querystring` module have</span>
+     <span class="s0">* similar purpose, but the purpose of the `querystring` module is more</span>
+     <span class="s0">* general, as it allows the customization of delimiter characters (`&amp;#x26;` and `=`).</span>
+     <span class="s0">* On the other hand, this API is designed purely for URL query strings.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const myURL = new URL('https://example.org/?abc=123');</span>
+     <span class="s0">* console.log(myURL.searchParams.get('abc'));</span>
+     <span class="s0">* // Prints 123</span>
+     <span class="s0">*</span>
+     <span class="s0">* myURL.searchParams.append('abc', 'xyz');</span>
+     <span class="s0">* console.log(myURL.href);</span>
+     <span class="s0">* // Prints https://example.org/?abc=123&amp;#x26;abc=xyz</span>
+     <span class="s0">*</span>
+     <span class="s0">* myURL.searchParams.delete('abc');</span>
+     <span class="s0">* myURL.searchParams.set('a', 'b');</span>
+     <span class="s0">* console.log(myURL.href);</span>
+     <span class="s0">* // Prints https://example.org/?a=b</span>
+     <span class="s0">*</span>
+     <span class="s0">* const newSearchParams = new URLSearchParams(myURL.searchParams);</span>
+     <span class="s0">* // The above is equivalent to</span>
+     <span class="s0">* // const newSearchParams = new URLSearchParams(myURL.search);</span>
+     <span class="s0">*</span>
+     <span class="s0">* newSearchParams.append('a', 'c');</span>
+     <span class="s0">* console.log(myURL.href);</span>
+     <span class="s0">* // Prints https://example.org/?a=b</span>
+     <span class="s0">* console.log(newSearchParams.toString());</span>
+     <span class="s0">* // Prints a=b&amp;#x26;a=c</span>
+     <span class="s0">*</span>
+     <span class="s0">* // newSearchParams.toString() is implicitly called</span>
+     <span class="s0">* myURL.search = newSearchParams;</span>
+     <span class="s0">* console.log(myURL.href);</span>
+     <span class="s0">* // Prints https://example.org/?a=b&amp;#x26;a=c</span>
+     <span class="s0">* newSearchParams.delete('a');</span>
+     <span class="s0">* console.log(myURL.href);</span>
+     <span class="s0">* // Prints https://example.org/?a=b&amp;#x26;a=c</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v7.5.0, v6.13.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">URLSearchParams </span><span class="s5">implements </span><span
+    class="s2">Iterable</span><span class="s4">&lt;[</span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">string</span><span class="s4">]&gt; {</span>
+        <span class="s2">constructor</span><span class="s4">(</span>
+            <span class="s2">init</span><span class="s4">?:</span>
+                <span class="s4">| </span><span class="s2">URLSearchParams</span>
+                <span class="s4">| </span><span class="s2">string</span>
+                <span class="s4">| </span><span class="s2">Record</span><span class="s4">&lt;</span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">string </span><span class="s4">| </span><span class="s2">readonly string</span><span
+    class="s4">[]&gt;</span>
+                <span class="s4">| </span><span class="s2">Iterable</span><span class="s4">&lt;[</span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">string</span><span class="s4">]&gt;</span>
+                <span class="s4">| </span><span class="s2">ReadonlyArray</span><span class="s4">&lt;[</span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">string</span><span class="s4">]&gt;,</span>
+        <span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Append a new name-value pair to the query string.</span>
+         <span class="s0">*/</span>
+        <span class="s2">append</span><span class="s4">(</span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `value` is provided, removes all name-value pairs</span>
+         <span class="s0">* where name is `name` and value is `value`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `value` is not provided, removes all name-value pairs whose name is `name`.</span>
+         <span class="s0">*/</span>
+        <span class="s5">delete</span><span class="s4">(</span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">value</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an ES6 `Iterator` over each of the name-value pairs in the query.</span>
+         <span class="s0">* Each item of the iterator is a JavaScript `Array`. The first item of the `Array` is the `name`, the second item of the `Array` is the `value`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Alias for `urlSearchParams[Symbol.iterator]()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">entries</span><span class="s4">(): </span><span class="s2">URLSearchParamsIterator</span><span
+    class="s4">&lt;[</span><span class="s2">string</span><span class="s4">, </span><span class="s2">string</span><span
+    class="s4">]&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Iterates over each name-value pair in the query and invokes the given function.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const myURL = new URL('https://example.org/?a=b&amp;#x26;c=d');</span>
+         <span class="s0">* myURL.searchParams.forEach((value, name, searchParams) =&gt; {</span>
+         <span class="s0">*   console.log(name, value, myURL.searchParams === searchParams);</span>
+         <span class="s0">* });</span>
+         <span class="s0">* // Prints:</span>
+         <span class="s0">* //   a b true</span>
+         <span class="s0">* //   c d true</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">fn Invoked for each name-value pair in the query</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">thisArg To be used as `this` value for when `fn` is called</span>
+         <span class="s0">*/</span>
+        <span class="s2">forEach</span><span class="s4">&lt;</span><span class="s2">TThis </span><span
+    class="s4">= </span><span class="s5">this</span><span class="s4">&gt;(</span>
+            <span class="s2">fn</span><span class="s4">: (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">TThis</span><span class="s4">, </span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">searchParams</span><span class="s4">: </span><span class="s2">URLSearchParams</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+            <span class="s2">thisArg</span><span class="s4">?: </span><span class="s2">TThis</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the value of the first name-value pair whose name is `name`. If there</span>
+         <span class="s0">* are no such pairs, `null` is returned.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">or `null` if there is no name-value pair with the given `name`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">get</span><span class="s4">(</span><span class="s2">name</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">): </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the values of all name-value pairs whose name is `name`. If there are</span>
+         <span class="s0">* no such pairs, an empty array is returned.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getAll</span><span class="s4">(</span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s2">string</span><span
+    class="s4">[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Checks if the `URLSearchParams` object contains key-value pair(s) based on `name` and an optional `value` argument.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `value` is provided, returns `true` when name-value pair with</span>
+         <span class="s0">* same `name` and `value` exists.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `value` is not provided, returns `true` if there is at least one name-value</span>
+         <span class="s0">* pair whose name is `name`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">has</span><span class="s4">(</span><span class="s2">name</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">value</span><span class="s4">?: </span><span
+    class="s2">string</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an ES6 `Iterator` over the names of each name-value pair.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const params = new URLSearchParams('foo=bar&amp;#x26;foo=baz');</span>
+         <span class="s0">* for (const name of params.keys()) {</span>
+         <span class="s0">*   console.log(name);</span>
+         <span class="s0">* }</span>
+         <span class="s0">* // Prints:</span>
+         <span class="s0">* //   foo</span>
+         <span class="s0">* //   foo</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*/</span>
+        <span class="s2">keys</span><span class="s4">(): </span><span class="s2">URLSearchParamsIterator</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sets the value in the `URLSearchParams` object associated with `name` to `value`. If there are any pre-existing name-value pairs whose names are `name`,</span>
+         <span class="s0">* set the first such pair's value to `value` and remove all others. If not,</span>
+         <span class="s0">* append the name-value pair to the query string.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const params = new URLSearchParams();</span>
+         <span class="s0">* params.append('foo', 'bar');</span>
+         <span class="s0">* params.append('foo', 'baz');</span>
+         <span class="s0">* params.append('abc', 'def');</span>
+         <span class="s0">* console.log(params.toString());</span>
+         <span class="s0">* // Prints foo=bar&amp;#x26;foo=baz&amp;#x26;abc=def</span>
+         <span class="s0">*</span>
+         <span class="s0">* params.set('foo', 'def');</span>
+         <span class="s0">* params.set('xyz', 'opq');</span>
+         <span class="s0">* console.log(params.toString());</span>
+         <span class="s0">* // Prints foo=def&amp;#x26;abc=def&amp;#x26;xyz=opq</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*/</span>
+        <span class="s2">set</span><span class="s4">(</span><span class="s2">name</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">value</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The total number of parameter entries.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.8.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly size</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sort all existing name-value pairs in-place by their names. Sorting is done</span>
+         <span class="s0">* with a [stable sorting algorithm](https://en.wikipedia.org/wiki/Sorting_algorithm#Stability), so relative order between name-value pairs</span>
+         <span class="s0">* with the same name is preserved.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method can be used, in particular, to increase cache hits.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span
+           class="s0">* const params = new URLSearchParams('query[]=abc&amp;#x26;type=search&amp;#x26;query[]=123');</span>
+         <span class="s0">* params.sort();</span>
+         <span class="s0">* console.log(params.toString());</span>
+         <span class="s0">* // Prints query%5B%5D=abc&amp;#x26;query%5B%5D=123&amp;#x26;type=search</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v7.7.0, v6.13.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">sort</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the search parameters serialized as a string, with characters</span>
+         <span class="s0">* percent-encoded where necessary.</span>
+         <span class="s0">*/</span>
+        <span class="s2">toString</span><span class="s4">(): </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an ES6 `Iterator` over the values of each name-value pair.</span>
+         <span class="s0">*/</span>
+        <span class="s2">values</span><span class="s4">(): </span><span class="s2">URLSearchParamsIterator</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">&gt;;</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span class="s2">iterator</span><span
+    class="s4">](): </span><span class="s2">URLSearchParamsIterator</span><span class="s4">&lt;[</span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">string</span><span class="s4">]&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">import </span><span class="s4">{</span>
+        <span class="s2">URL </span><span class="s4">as </span><span class="s2">_URL</span><span class="s4">,</span>
+        <span class="s2">URLPattern </span><span class="s4">as </span><span class="s2">_URLPattern</span><span
+    class="s4">,</span>
+        <span class="s2">URLPatternInit </span><span class="s4">as </span><span class="s2">_URLPatternInit</span><span
+    class="s4">,</span>
+        <span class="s2">URLPatternResult </span><span class="s4">as </span><span
+    class="s2">_URLPatternResult</span><span class="s4">,</span>
+        <span class="s2">URLSearchParams </span><span class="s4">as </span><span class="s2">_URLSearchParams</span><span
+    class="s4">,</span>
+    <span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;url&quot;</span><span
+    class="s4">;</span>
+    <span class="s2">global </span><span class="s4">{</span>
+        <span class="s5">interface </span><span class="s2">URL </span><span class="s5">extends </span><span class="s2">_URL </span><span
+    class="s4">{}</span>
+        <span class="s5">var </span><span class="s2">URL</span><span class="s4">: </span><span class="s5">typeof </span><span
+    class="s2">globalThis </span><span class="s5">extends </span><span class="s4">{</span>
+            <span class="s2">onmessage</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">;</span>
+            <span class="s2">URL</span><span class="s4">: </span><span class="s2">infer T</span><span
+    class="s4">;</span>
+        <span class="s4">} ? </span><span class="s2">T</span>
+            <span class="s4">: </span><span class="s5">typeof </span><span class="s2">_URL</span><span
+    class="s4">;</span>
+        <span class="s5">interface </span><span class="s2">URLSearchParams </span><span class="s5">extends </span><span
+    class="s2">_URLSearchParams </span><span class="s4">{}</span>
+        <span class="s5">var </span><span class="s2">URLSearchParams</span><span class="s4">: </span><span class="s5">typeof </span><span
+    class="s2">globalThis </span><span class="s5">extends </span><span class="s4">{</span>
+            <span class="s2">onmessage</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">;</span>
+            <span class="s2">URLSearchParams</span><span class="s4">: </span><span class="s2">infer T</span><span
+    class="s4">;</span>
+        <span class="s4">} ? </span><span class="s2">T</span>
+            <span class="s4">: </span><span class="s5">typeof </span><span class="s2">_URLSearchParams</span><span
+    class="s4">;</span>
+        <span class="s5">interface </span><span class="s2">URLPatternInit </span><span class="s5">extends </span><span
+    class="s2">_URLPatternInit </span><span class="s4">{}</span>
+        <span class="s5">interface </span><span class="s2">URLPatternResult </span><span class="s5">extends </span><span
+    class="s2">_URLPatternResult </span><span class="s4">{}</span>
+        <span class="s5">interface </span><span class="s2">URLPattern </span><span class="s5">extends </span><span
+    class="s2">_URLPattern </span><span class="s4">{}</span>
+        <span class="s5">var </span><span class="s2">URLPattern</span><span class="s4">: </span><span
+    class="s5">typeof </span><span class="s2">_URLPattern</span><span class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:url&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;url&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<html>
+<head>
+  <title>flake.nix</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          flake.nix</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">{</span>
+  <span class="s0">inputs = {</span>
+    <span class="s0">utils.url = &quot;github:numtide/flake-utils&quot;;</span>
+  <span class="s0">};</span>
+
+  <span class="s0">outputs = { self, nixpkgs, utils }:</span>
+    <span class="s0">utils.lib.eachDefaultSystem (system:</span>
+      <span class="s0">let</span>
+        <span class="s0">pkgs = nixpkgs.legacyPackages.&quot;${system}&quot;;</span>
+      <span class="s0">in rec {</span>
+       <span class="s0">devShell = pkgs.mkShell {</span>
+          <span class="s0">nativeBuildInputs = with pkgs; [</span>
+            <span class="s0">yarn</span>
+            <span class="s0">nodejs-14_x</span>
+            <span class="s0">nodePackages.typescript-language-server</span>
+            <span class="s0">nodePackages.eslint</span>
+          <span class="s0">];</span>
+        <span class="s0">};</span>
+      <span class="s0">});</span>
+<span class="s0">}</span>
+</pre>
+</body>
+</html>

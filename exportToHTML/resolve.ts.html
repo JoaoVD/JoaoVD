@@ -1,0 +1,354 @@
+<html>
+<head>
+  <title>resolve.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          resolve.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+  class="s1">AnySchema</span><span class="s2">, </span><span class="s1">AnySchemaObject</span><span class="s2">, </span><span
+  class="s1">UriResolver</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../types&quot;</span>
+<span class="s0">import </span><span class="s1">type Ajv from </span><span class="s3">&quot;../ajv&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">URIComponent</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;fast-uri&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">eachItem</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;./util&quot;</span>
+<span class="s0">import </span><span class="s2">* as </span><span class="s1">equal from </span><span class="s3">&quot;fast-deep-equal&quot;</span>
+<span class="s0">import </span><span class="s2">* as </span><span class="s1">traverse from </span><span class="s3">&quot;json-schema-traverse&quot;</span>
+
+<span class="s4">// the hash of local references inside the schema (created by getSchemaRefs), used for inline resolution</span>
+<span class="s0">export </span><span class="s1">type LocalRefs </span><span class="s2">= {[</span><span
+    class="s1">Ref </span><span class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">AnySchemaObject</span><span class="s2">}</span>
+
+<span class="s4">// TODO refactor to use keyword definitions</span>
+<span class="s0">const </span><span class="s1">SIMPLE_INLINED </span><span class="s2">= </span><span
+    class="s0">new </span><span class="s1">Set</span><span class="s2">([</span>
+  <span class="s3">&quot;type&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;format&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;pattern&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;maxLength&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;minLength&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;maxProperties&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;minProperties&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;maxItems&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;minItems&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;maximum&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;minimum&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;uniqueItems&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;multipleOf&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;required&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;enum&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;const&quot;</span><span class="s2">,</span>
+<span class="s2">])</span>
+
+<span class="s0">export function </span><span class="s1">inlineRef</span><span class="s2">(</span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">AnySchema</span><span class="s2">, </span><span class="s1">limit</span><span
+    class="s2">: </span><span class="s1">boolean </span><span class="s2">| </span><span class="s1">number </span><span
+    class="s2">= </span><span class="s0">true</span><span class="s2">): </span><span class="s1">boolean </span><span
+    class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schema </span><span class="s2">== </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">) </span><span class="s0">return true</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">limit </span><span class="s2">=== </span><span
+    class="s0">true</span><span class="s2">) </span><span class="s0">return </span><span class="s2">!</span><span
+    class="s1">hasRef</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">limit</span><span class="s2">) </span><span
+    class="s0">return false</span>
+  <span class="s0">return </span><span class="s1">countKeys</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">) &lt;= </span><span class="s1">limit</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">REF_KEYWORDS </span><span class="s2">= </span><span
+    class="s0">new </span><span class="s1">Set</span><span class="s2">([</span>
+  <span class="s3">&quot;$ref&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;$recursiveRef&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;$recursiveAnchor&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;$dynamicRef&quot;</span><span class="s2">,</span>
+  <span class="s3">&quot;$dynamicAnchor&quot;</span><span class="s2">,</span>
+<span class="s2">])</span>
+
+<span class="s0">function </span><span class="s1">hasRef</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchemaObject</span><span class="s2">): </span><span
+    class="s1">boolean </span><span class="s2">{</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">schema</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">REF_KEYWORDS</span><span
+    class="s2">.</span><span class="s1">has</span><span class="s2">(</span><span class="s1">key</span><span class="s2">)) </span><span
+    class="s0">return true</span>
+    <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s1">schema</span><span class="s2">[</span><span class="s1">key</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">) &amp;&amp; </span><span class="s1">sch</span><span class="s2">.</span><span class="s1">some</span><span
+    class="s2">(</span><span class="s1">hasRef</span><span class="s2">)) </span><span class="s0">return true</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">sch </span><span
+    class="s2">== </span><span class="s3">&quot;object&quot; </span><span class="s2">&amp;&amp; </span><span class="s1">hasRef</span><span
+    class="s2">(</span><span class="s1">sch</span><span class="s2">)) </span><span class="s0">return true</span>
+  <span class="s2">}</span>
+  <span class="s0">return false</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">countKeys</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">: </span><span class="s1">AnySchemaObject</span><span class="s2">): </span><span
+    class="s1">number </span><span class="s2">{</span>
+  <span class="s0">let </span><span class="s1">count </span><span class="s2">= </span><span class="s5">0</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">schema</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">key </span><span class="s2">=== </span><span
+    class="s3">&quot;$ref&quot;</span><span class="s2">) </span><span class="s0">return </span><span
+    class="s1">Infinity</span>
+    <span class="s1">count</span><span class="s2">++</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">SIMPLE_INLINED</span><span
+    class="s2">.</span><span class="s1">has</span><span class="s2">(</span><span class="s1">key</span><span class="s2">)) </span><span
+    class="s0">continue</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schema</span><span class="s2">[</span><span class="s1">key</span><span class="s2">] == </span><span
+    class="s3">&quot;object&quot;</span><span class="s2">) {</span>
+      <span class="s1">eachItem</span><span class="s2">(</span><span class="s1">schema</span><span
+    class="s2">[</span><span class="s1">key</span><span class="s2">], (</span><span class="s1">sch</span><span
+    class="s2">) =&gt; (</span><span class="s1">count </span><span class="s2">+= </span><span
+    class="s1">countKeys</span><span class="s2">(</span><span class="s1">sch</span><span class="s2">)))</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">count </span><span class="s2">=== </span><span
+    class="s1">Infinity</span><span class="s2">) </span><span class="s0">return </span><span class="s1">Infinity</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">count</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">getFullPath</span><span class="s2">(</span><span class="s1">resolver</span><span
+    class="s2">: </span><span class="s1">UriResolver</span><span class="s2">, </span><span class="s1">id </span><span
+    class="s2">= </span><span class="s3">&quot;&quot;</span><span class="s2">, </span><span
+    class="s1">normalize</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">): </span><span class="s1">string </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">normalize </span><span
+    class="s2">!== </span><span class="s0">false</span><span class="s2">) </span><span class="s1">id </span><span
+    class="s2">= </span><span class="s1">normalizeId</span><span class="s2">(</span><span class="s1">id</span><span
+    class="s2">)</span>
+  <span class="s0">const </span><span class="s1">p </span><span class="s2">= </span><span
+    class="s1">resolver</span><span class="s2">.</span><span class="s1">parse</span><span class="s2">(</span><span
+    class="s1">id</span><span class="s2">)</span>
+  <span class="s0">return </span><span class="s1">_getFullPath</span><span class="s2">(</span><span
+    class="s1">resolver</span><span class="s2">, </span><span class="s1">p</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">_getFullPath</span><span class="s2">(</span><span class="s1">resolver</span><span
+    class="s2">: </span><span class="s1">UriResolver</span><span class="s2">, </span><span class="s1">p</span><span
+    class="s2">: </span><span class="s1">URIComponent</span><span class="s2">): </span><span
+    class="s1">string </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">serialized </span><span class="s2">= </span><span
+    class="s1">resolver</span><span class="s2">.</span><span class="s1">serialize</span><span class="s2">(</span><span
+    class="s1">p</span><span class="s2">)</span>
+  <span class="s0">return </span><span class="s1">serialized</span><span class="s2">.</span><span
+    class="s1">split</span><span class="s2">(</span><span class="s3">&quot;#&quot;</span><span class="s2">)[</span><span
+    class="s5">0</span><span class="s2">] + </span><span class="s3">&quot;#&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">TRAILING_SLASH_HASH </span><span class="s2">= </span><span class="s6">/#\/?$/</span>
+<span class="s0">export function </span><span class="s1">normalizeId</span><span class="s2">(</span><span
+    class="s1">id</span><span class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">undefined</span><span class="s2">): </span><span class="s1">string </span><span class="s2">{</span>
+  <span class="s0">return </span><span class="s1">id </span><span class="s2">? </span><span class="s1">id</span><span
+    class="s2">.</span><span class="s1">replace</span><span class="s2">(</span><span
+    class="s1">TRAILING_SLASH_HASH</span><span class="s2">, </span><span class="s3">&quot;&quot;</span><span class="s2">) : </span><span
+    class="s3">&quot;&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">resolveUrl</span><span class="s2">(</span><span class="s1">resolver</span><span
+    class="s2">: </span><span class="s1">UriResolver</span><span class="s2">, </span><span class="s1">baseId</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">id</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">string </span><span
+    class="s2">{</span>
+  <span class="s1">id </span><span class="s2">= </span><span class="s1">normalizeId</span><span class="s2">(</span><span
+    class="s1">id</span><span class="s2">)</span>
+  <span class="s0">return </span><span class="s1">resolver</span><span class="s2">.</span><span
+    class="s1">resolve</span><span class="s2">(</span><span class="s1">baseId</span><span class="s2">, </span><span
+    class="s1">id</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">ANCHOR </span><span class="s2">= </span><span class="s6">/^[a-z_][-a-z0-9._]*$/i</span>
+
+<span class="s0">export function </span><span class="s1">getSchemaRefs</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">: </span><span class="s1">Ajv</span><span class="s2">, </span><span class="s1">schema</span><span
+    class="s2">: </span><span class="s1">AnySchema</span><span class="s2">, </span><span class="s1">baseId</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">LocalRefs </span><span
+    class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schema </span><span class="s2">== </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">) </span><span class="s0">return </span><span class="s2">{}</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">schemaId</span><span class="s2">, </span><span
+    class="s1">uriResolver</span><span class="s2">} = </span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">opts</span>
+  <span class="s0">const </span><span class="s1">schId </span><span class="s2">= </span><span
+    class="s1">normalizeId</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">[</span><span
+    class="s1">schemaId</span><span class="s2">] || </span><span class="s1">baseId</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">baseIds</span><span class="s2">: {[</span><span
+    class="s1">JsonPtr </span><span class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">string</span><span class="s2">} = {</span><span class="s3">&quot;&quot;</span><span
+    class="s2">: </span><span class="s1">schId</span><span class="s2">}</span>
+  <span class="s0">const </span><span class="s1">pathPrefix </span><span class="s2">= </span><span class="s1">getFullPath</span><span
+    class="s2">(</span><span class="s1">uriResolver</span><span class="s2">, </span><span class="s1">schId</span><span
+    class="s2">, </span><span class="s0">false</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">localRefs</span><span class="s2">: </span><span
+    class="s1">LocalRefs </span><span class="s2">= {}</span>
+  <span class="s0">const </span><span class="s1">schemaRefs</span><span class="s2">: </span><span
+    class="s1">Set</span><span class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt; = </span><span
+    class="s0">new </span><span class="s1">Set</span><span class="s2">()</span>
+
+  <span class="s1">traverse</span><span class="s2">(</span><span class="s1">schema</span><span
+    class="s2">, {</span><span class="s1">allKeys</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">}, (</span><span class="s1">sch</span><span class="s2">, </span><span class="s1">jsonPtr</span><span
+    class="s2">, </span><span class="s1">_</span><span class="s2">, </span><span class="s1">parentJsonPtr</span><span
+    class="s2">) =&gt; {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">parentJsonPtr </span><span
+    class="s2">=== </span><span class="s1">undefined</span><span class="s2">) </span><span class="s0">return</span>
+    <span class="s0">const </span><span class="s1">fullPath </span><span class="s2">= </span><span
+    class="s1">pathPrefix </span><span class="s2">+ </span><span class="s1">jsonPtr</span>
+    <span class="s0">let </span><span class="s1">innerBaseId </span><span class="s2">= </span><span
+    class="s1">baseIds</span><span class="s2">[</span><span class="s1">parentJsonPtr</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">sch</span><span
+    class="s2">[</span><span class="s1">schemaId</span><span class="s2">] == </span><span
+    class="s3">&quot;string&quot;</span><span class="s2">) </span><span class="s1">innerBaseId </span><span
+    class="s2">= </span><span class="s1">addRef</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">sch</span><span
+    class="s2">[</span><span class="s1">schemaId</span><span class="s2">])</span>
+    <span class="s1">addAnchor</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">, </span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">$anchor</span><span class="s2">)</span>
+    <span class="s1">addAnchor</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">, </span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">$dynamicAnchor</span><span class="s2">)</span>
+    <span class="s1">baseIds</span><span class="s2">[</span><span class="s1">jsonPtr</span><span
+    class="s2">] = </span><span class="s1">innerBaseId</span>
+
+    <span class="s0">function </span><span class="s1">addRef</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">: </span><span class="s1">Ajv</span><span class="s2">, </span><span class="s1">ref</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">string </span><span
+    class="s2">{</span>
+      <span class="s4">// eslint-disable-next-line @typescript-eslint/unbound-method</span>
+      <span class="s0">const </span><span class="s1">_resolve </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">uriResolver</span><span class="s2">.</span><span class="s1">resolve</span>
+      <span class="s1">ref </span><span class="s2">= </span><span class="s1">normalizeId</span><span class="s2">(</span><span
+    class="s1">innerBaseId </span><span class="s2">? </span><span class="s1">_resolve</span><span
+    class="s2">(</span><span class="s1">innerBaseId</span><span class="s2">, </span><span class="s1">ref</span><span
+    class="s2">) : </span><span class="s1">ref</span><span class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">schemaRefs</span><span
+    class="s2">.</span><span class="s1">has</span><span class="s2">(</span><span class="s1">ref</span><span class="s2">)) </span><span
+    class="s0">throw </span><span class="s1">ambiguos</span><span class="s2">(</span><span class="s1">ref</span><span
+    class="s2">)</span>
+      <span class="s1">schemaRefs</span><span class="s2">.</span><span class="s1">add</span><span
+    class="s2">(</span><span class="s1">ref</span><span class="s2">)</span>
+      <span class="s0">let </span><span class="s1">schOrRef </span><span class="s2">= </span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">refs</span><span class="s2">[</span><span
+    class="s1">ref</span><span class="s2">]</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schOrRef </span><span class="s2">== </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">) </span><span class="s1">schOrRef </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">refs</span><span class="s2">[</span><span class="s1">schOrRef</span><span
+    class="s2">]</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">schOrRef </span><span class="s2">== </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">) {</span>
+        <span class="s1">checkAmbiguosRef</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">, </span><span class="s1">schOrRef</span><span class="s2">.</span><span class="s1">schema</span><span
+    class="s2">, </span><span class="s1">ref</span><span class="s2">)</span>
+      <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span
+    class="s1">ref </span><span class="s2">!== </span><span class="s1">normalizeId</span><span class="s2">(</span><span
+    class="s1">fullPath</span><span class="s2">)) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">ref</span><span class="s2">[</span><span
+    class="s5">0</span><span class="s2">] === </span><span class="s3">&quot;#&quot;</span><span class="s2">) {</span>
+          <span class="s1">checkAmbiguosRef</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">, </span><span class="s1">localRefs</span><span class="s2">[</span><span class="s1">ref</span><span
+    class="s2">], </span><span class="s1">ref</span><span class="s2">)</span>
+          <span class="s1">localRefs</span><span class="s2">[</span><span class="s1">ref</span><span
+    class="s2">] = </span><span class="s1">sch</span>
+        <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+          <span class="s0">this</span><span class="s2">.</span><span class="s1">refs</span><span
+    class="s2">[</span><span class="s1">ref</span><span class="s2">] = </span><span class="s1">fullPath</span>
+        <span class="s2">}</span>
+      <span class="s2">}</span>
+      <span class="s0">return </span><span class="s1">ref</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">addAnchor</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">Ajv</span><span class="s2">, </span><span
+    class="s1">anchor</span><span class="s2">: </span><span class="s1">unknown</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">anchor </span><span
+    class="s2">== </span><span class="s3">&quot;string&quot;</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(!</span><span class="s1">ANCHOR</span><span
+    class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s1">anchor</span><span
+    class="s2">)) </span><span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">`invalid anchor &quot;</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">anchor</span><span class="s2">}</span><span class="s3">&quot;`</span><span class="s2">)</span>
+        <span class="s1">addRef</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s3">`#</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">anchor</span><span class="s2">}</span><span class="s3">`</span><span class="s2">)</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+  <span class="s2">})</span>
+
+  <span class="s0">return </span><span class="s1">localRefs</span>
+
+  <span class="s0">function </span><span class="s1">checkAmbiguosRef</span><span class="s2">(</span><span class="s1">sch1</span><span
+    class="s2">: </span><span class="s1">AnySchema</span><span class="s2">, </span><span class="s1">sch2</span><span
+    class="s2">: </span><span class="s1">AnySchema </span><span class="s2">| </span><span
+    class="s1">undefined</span><span class="s2">, </span><span class="s1">ref</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">sch2 </span><span class="s2">!== </span><span
+    class="s1">undefined </span><span class="s2">&amp;&amp; !</span><span class="s1">equal</span><span
+    class="s2">(</span><span class="s1">sch1</span><span class="s2">, </span><span class="s1">sch2</span><span
+    class="s2">)) </span><span class="s0">throw </span><span class="s1">ambiguos</span><span class="s2">(</span><span
+    class="s1">ref</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">ambiguos</span><span class="s2">(</span><span
+    class="s1">ref</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">Error </span><span class="s2">{</span>
+    <span class="s0">return new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`reference &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">ref</span><span class="s2">}</span><span class="s3">&quot; resolves to more than one schema`</span><span
+    class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

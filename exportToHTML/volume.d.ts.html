@@ -1,0 +1,1158 @@
+<html>
+<head>
+  <title>volume.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          volume.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">FanOutUnsubscribe </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'thingies/lib/fanout'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">Link</span><span class="s2">, </span><span
+    class="s1">Superblock </span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">'../core'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">Stats from </span><span class="s3">'./Stats'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">Dirent from </span><span class="s3">'./Dirent'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">StatFs from </span><span class="s3">'./StatFs'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">Buffer </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'../vendor/node/internal/buffer'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">TSetTimeout </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../setTimeoutUnref'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">Writable </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../vendor/node/stream'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">constants </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../constants'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">EventEmitter </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'../vendor/node/events'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">TDataOut </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../encoding'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">* as </span><span class="s1">misc from </span><span class="s3">'./types/misc'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">* as </span><span class="s1">opts from </span><span class="s3">'./types/options'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">FsCallbackApi</span><span class="s2">, </span><span
+    class="s1">WritevCallback </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'./types/FsCallbackApi'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">ToTreeOptions </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../print'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">symlink </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'./types/misc'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">FsPromisesApi</span><span class="s2">, </span><span class="s1">FsSynchronousApi </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./types'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">Dir </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'./Dir'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">DirectoryJSON</span><span class="s2">, </span><span
+    class="s1">NestedDirectoryJSON </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../core/json'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">TFileId </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'../core/types'</span><span class="s2">;</span>
+<span class="s0">export interface </span><span class="s1">IError </span><span class="s0">extends </span><span
+    class="s1">Error </span><span class="s2">{</span>
+    <span class="s1">code</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">type TData </span><span class="s2">= </span><span
+    class="s1">TDataOut </span><span class="s2">| </span><span class="s1">ArrayBufferView </span><span
+    class="s2">| </span><span class="s1">DataView</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TFlags </span><span class="s2">= </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TMode </span><span class="s2">= </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TTime </span><span class="s2">= </span><span
+    class="s1">number </span><span class="s2">| </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">Date</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TFlagsCopy </span><span class="s2">= </span><span
+    class="s0">typeof </span><span class="s1">constants</span><span class="s2">.</span><span
+    class="s1">COPYFILE_EXCL </span><span class="s2">| </span><span class="s0">typeof </span><span
+    class="s1">constants</span><span class="s2">.</span><span class="s1">COPYFILE_FICLONE </span><span
+    class="s2">| </span><span class="s0">typeof </span><span class="s1">constants</span><span class="s2">.</span><span
+    class="s1">COPYFILE_FICLONE_FORCE</span><span class="s2">;</span>
+<span class="s0">export interface </span><span class="s1">IAppendFileOptions </span><span
+    class="s0">extends </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">IFileOptions </span><span
+    class="s2">{</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IWatchFileOptions </span><span class="s2">{</span>
+    <span class="s1">persistent</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">interval</span><span class="s2">?: </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IWatchOptions </span><span class="s0">extends </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IOptions </span><span class="s2">{</span>
+    <span class="s1">persistent</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">recursive</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">function </span><span class="s1">pathToSteps</span><span
+    class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span class="s1">PathLike</span><span
+    class="s2">): </span><span class="s1">string</span><span class="s2">[];</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">function </span><span class="s1">dataToStr</span><span
+    class="s2">(</span><span class="s1">data</span><span class="s2">: </span><span class="s1">TData</span><span
+    class="s2">, </span><span class="s1">encoding</span><span class="s2">?: </span><span
+    class="s1">BufferEncoding</span><span class="s2">): </span><span class="s1">string</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">function </span><span class="s1">toUnixTimestamp</span><span
+    class="s2">(</span><span class="s1">time</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">): </span><span class="s1">any</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* `Volume` represents a file system.</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">Volume </span><span class="s0">implements </span><span class="s1">FsCallbackApi</span><span
+    class="s2">, </span><span class="s1">FsSynchronousApi </span><span class="s2">{</span>
+    <span class="s1">readonly _core</span><span class="s2">: </span><span class="s1">Superblock</span><span
+    class="s2">;</span>
+    <span class="s0">static </span><span class="s1">readonly fromJSON</span><span class="s2">: (</span><span class="s1">json</span><span
+    class="s2">: </span><span class="s1">DirectoryJSON</span><span class="s2">, </span><span class="s1">cwd</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">) =&gt; </span><span
+    class="s1">Volume</span><span class="s2">;</span>
+    <span class="s0">static </span><span class="s1">readonly fromNestedJSON</span><span class="s2">: (</span><span
+    class="s1">json</span><span class="s2">: </span><span class="s1">NestedDirectoryJSON</span><span
+    class="s2">, </span><span class="s1">cwd</span><span class="s2">?: </span><span class="s1">string</span><span
+    class="s2">) =&gt; </span><span class="s1">Volume</span><span class="s2">;</span>
+    <span class="s1">StatWatcher</span><span class="s2">: </span><span class="s0">new </span><span
+    class="s2">() =&gt; </span><span class="s1">StatWatcher</span><span class="s2">;</span>
+    <span class="s1">ReadStream</span><span class="s2">: </span><span class="s0">new </span><span
+    class="s2">(</span><span class="s1">...args</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">[]) =&gt; </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">IReadStream</span><span
+    class="s2">;</span>
+    <span class="s1">WriteStream</span><span class="s2">: </span><span class="s0">new </span><span
+    class="s2">(</span><span class="s1">...args</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">[]) =&gt; </span><span class="s1">IWriteStream</span><span class="s2">;</span>
+    <span class="s1">FSWatcher</span><span class="s2">: </span><span class="s0">new </span><span
+    class="s2">() =&gt; </span><span class="s1">FSWatcher</span><span class="s2">;</span>
+    <span class="s1">realpath</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">TDataOut</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IRealpathOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s1">TDataOut</span><span class="s2">&gt;): </span><span
+    class="s0">void</span><span class="s2">;</span>
+        <span class="s1">native</span><span class="s2">: {</span>
+            <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">TDataOut</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+            <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IRealpathOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s1">TDataOut</span><span class="s2">&gt;): </span><span
+    class="s0">void</span><span class="s2">;</span>
+        <span class="s2">};</span>
+    <span class="s2">};</span>
+    <span class="s1">realpathSync</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IRealpathOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">): </span><span class="s1">TDataOut</span><span
+    class="s2">;</span>
+        <span class="s1">native</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IRealpathOptions </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">) =&gt; </span><span class="s1">TDataOut</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">promisesApi</span><span class="s2">;</span>
+    <span class="s1">get promises</span><span class="s2">(): </span><span class="s1">FsPromisesApi</span><span
+    class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">_core</span><span class="s2">?: </span><span
+    class="s1">Superblock</span><span class="s2">);</span>
+    <span class="s0">private </span><span class="s1">wrapAsync</span><span class="s2">;</span>
+    <span class="s1">toTree</span><span class="s2">(</span><span class="s1">opts</span><span class="s2">?: </span><span
+    class="s1">ToTreeOptions</span><span class="s2">): </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">reset</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">toJSON</span><span class="s2">(</span><span class="s1">paths</span><span class="s2">?: </span><span
+    class="s1">PathLike </span><span class="s2">| </span><span class="s1">PathLike</span><span
+    class="s2">[], </span><span class="s1">json</span><span class="s2">?: {}, </span><span
+    class="s1">isRelative</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">, </span><span class="s1">asBuffer</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">): </span><span class="s1">DirectoryJSON</span><span class="s2">&lt;</span><span
+    class="s1">string </span><span class="s2">| </span><span class="s0">null</span><span class="s2">&gt;;</span>
+    <span class="s1">fromJSON</span><span class="s2">(</span><span class="s1">json</span><span class="s2">: </span><span
+    class="s1">DirectoryJSON</span><span class="s2">, </span><span class="s1">cwd</span><span class="s2">?: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">fromNestedJSON</span><span class="s2">(</span><span class="s1">json</span><span
+    class="s2">: </span><span class="s1">NestedDirectoryJSON</span><span class="s2">, </span><span class="s1">cwd</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">mountSync</span><span class="s2">(</span><span class="s1">mountpoint</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">json</span><span
+    class="s2">: </span><span class="s1">DirectoryJSON</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">openSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">flags</span><span
+    class="s2">: </span><span class="s1">TFlags</span><span class="s2">, </span><span class="s1">mode</span><span
+    class="s2">?: </span><span class="s1">TMode</span><span class="s2">) =&gt; </span><span
+    class="s1">number</span><span class="s2">;</span>
+    <span class="s1">open</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">flags</span><span class="s2">: </span><span
+    class="s1">TFlags</span><span class="s2">, </span><span class="s5">/* ... */ </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s1">number</span><span class="s2">&gt;): </span><span class="s0">void</span><span
+    class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">flags</span><span class="s2">: </span><span
+    class="s1">TFlags</span><span class="s2">, </span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">TMode</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">closeSync</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">close</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">readSync</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">buffer</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">ArrayBufferView </span><span
+    class="s2">| </span><span class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span
+    class="s2">: </span><span class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">) =&gt; </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">read</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">buffer</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">ArrayBufferView </span><span
+    class="s2">| </span><span class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span
+    class="s2">: </span><span class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span class="s1">err</span><span
+    class="s2">?: </span><span class="s1">Error </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">, </span><span class="s1">bytesRead</span><span class="s2">?: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffer</span><span class="s2">?: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">ArrayBufferView </span><span class="s2">| </span><span
+    class="s1">DataView</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">readv</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffers</span><span class="s2">: </span><span class="s1">ArrayBufferView</span><span
+    class="s2">[], </span><span class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span
+    class="s2">.</span><span class="s1">TCallback2</span><span class="s2">&lt;</span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">ArrayBufferView</span><span class="s2">[]&gt;): </span><span
+    class="s0">void</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffers</span><span class="s2">: </span><span class="s1">ArrayBufferView</span><span
+    class="s2">[], </span><span class="s1">position</span><span class="s2">: </span><span class="s1">number </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback2</span><span
+    class="s2">&lt;</span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">ArrayBufferView</span><span class="s2">[]&gt;): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">readvSync</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">buffers</span><span
+    class="s2">: </span><span class="s1">ArrayBufferView</span><span class="s2">[], </span><span
+    class="s1">position</span><span class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">) =&gt; </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _readfile</span><span class="s2">;</span>
+    <span class="s1">readFileSync</span><span class="s2">: (</span><span class="s1">file</span><span
+    class="s2">: </span><span class="s1">TFileId</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IReadFileOptions </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">) =&gt; </span><span class="s1">TDataOut</span><span class="s2">;</span>
+    <span class="s1">readFile</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">TDataOut</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IReadFileOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s1">TDataOut</span><span class="s2">&gt;): </span><span
+    class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">_write</span><span class="s2">;</span>
+    <span class="s1">writeSync</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">ArrayBufferView </span><span class="s2">| </span><span
+    class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span class="s2">?: </span><span
+    class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span class="s2">): </span><span
+    class="s1">number</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">str</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">position</span><span class="s2">?: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">encoding</span><span class="s2">?: </span><span
+    class="s1">BufferEncoding</span><span class="s2">): </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">write</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">ArrayBufferView </span><span class="s2">| </span><span
+    class="s1">DataView</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span
+    class="s1">...args</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">[]) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s1">any</span><span
+    class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">ArrayBufferView </span><span class="s2">| </span><span
+    class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span
+    class="s1">...args</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">[]) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s1">any</span><span
+    class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">ArrayBufferView </span><span class="s2">| </span><span
+    class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span
+    class="s1">...args</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">[]) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s1">any</span><span
+    class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">ArrayBufferView </span><span class="s2">| </span><span
+    class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span
+    class="s1">...args</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">[]) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s1">any</span><span
+    class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">str</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span class="s0">void</span><span
+    class="s2">): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">str</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">position</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span class="s0">void</span><span
+    class="s2">): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">str</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">position</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">encoding</span><span class="s2">: </span><span class="s1">BufferEncoding</span><span
+    class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span class="s0">void</span><span
+    class="s2">): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">writevBase</span><span class="s2">;</span>
+    <span class="s1">writev</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffers</span><span class="s2">: </span><span class="s1">ArrayBufferView</span><span
+    class="s2">[], </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">WritevCallback</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">buffers</span><span class="s2">: </span><span class="s1">ArrayBufferView</span><span
+    class="s2">[], </span><span class="s1">position</span><span class="s2">: </span><span class="s1">number </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">WritevCallback</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">writevSync</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">buffers</span><span
+    class="s2">: </span><span class="s1">ArrayBufferView</span><span class="s2">[], </span><span
+    class="s1">position</span><span class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">) =&gt; </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">writeFileSync</span><span class="s2">: (</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IWriteFileOptions</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">writeFile</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">TData</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IWriteFileOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">_copyFile</span><span class="s2">;</span>
+    <span class="s1">copyFileSync</span><span class="s2">: (</span><span class="s1">src</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">dest</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">flags</span><span class="s2">?: </span><span
+    class="s1">TFlagsCopy</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">copyFile</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">src</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">dest</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">src</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">dest</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">flags</span><span class="s2">: </span><span
+    class="s1">TFlagsCopy</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span
+    class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _cp</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">isSrcSubdir</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">cpFileSync</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">cpDirSync</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">cpSymlinkSync</span><span class="s2">;</span>
+    <span class="s1">linkSync</span><span class="s2">: (</span><span class="s1">existingPath</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">newPath</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">link</span><span class="s2">: (</span><span class="s1">existingPath</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">newPath</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">unlinkSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">unlink</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* `type` argument works only on Windows.</span>
+     <span class="s4">* </span><span class="s6">@param </span><span class="s4">target</span>
+     <span class="s4">* </span><span class="s6">@param </span><span class="s4">path</span>
+     <span class="s4">* </span><span class="s6">@param </span><span class="s4">type</span>
+     <span class="s4">*/</span>
+    <span class="s1">symlinkSync</span><span class="s2">: (</span><span class="s1">target</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">type</span><span
+    class="s2">?: </span><span class="s1">symlink</span><span class="s2">.</span><span class="s1">Type</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">symlink</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">target</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">target</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">type</span><span class="s2">: </span><span
+    class="s1">symlink</span><span class="s2">.</span><span class="s1">Type</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _lstat</span><span class="s2">;</span>
+    <span class="s1">lstatSync</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+            <span class="s1">throwIfNoEntry</span><span class="s2">?: </span><span class="s0">true </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">;</span>
+        <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+            <span class="s1">bigint</span><span class="s2">: </span><span class="s0">false</span><span
+    class="s2">;</span>
+            <span class="s1">throwIfNoEntry</span><span class="s2">?: </span><span class="s0">true </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">;</span>
+        <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+            <span class="s1">bigint</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">;</span>
+            <span class="s1">throwIfNoEntry</span><span class="s2">?: </span><span class="s0">true </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">;</span>
+        <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">bigint</span><span class="s2">&gt;;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+            <span class="s1">throwIfNoEntry</span><span class="s2">: </span><span class="s0">false</span><span
+    class="s2">;</span>
+        <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt; | </span><span class="s1">undefined</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+            <span class="s1">bigint</span><span class="s2">: </span><span class="s0">false</span><span
+    class="s2">;</span>
+            <span class="s1">throwIfNoEntry</span><span class="s2">: </span><span class="s0">false</span><span
+    class="s2">;</span>
+        <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt; | </span><span class="s1">undefined</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+            <span class="s1">bigint</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">;</span>
+            <span class="s1">throwIfNoEntry</span><span class="s2">: </span><span class="s0">false</span><span
+    class="s2">;</span>
+        <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">bigint</span><span class="s2">&gt; | </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">lstat</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">Stats</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">lstat</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IStatOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s1">Stats</span><span
+    class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_stat</span><span class="s2">;</span>
+    <span class="s1">statSync</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;;</span>
+    <span class="s1">statSync</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+        <span class="s1">throwIfNoEntry</span><span class="s2">?: </span><span class="s0">true</span><span
+    class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;;</span>
+    <span class="s1">statSync</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+        <span class="s1">throwIfNoEntry</span><span class="s2">: </span><span class="s0">false</span><span
+    class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt; | </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s1">statSync</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+        <span class="s1">bigint</span><span class="s2">: </span><span class="s0">false</span><span class="s2">;</span>
+        <span class="s1">throwIfNoEntry</span><span class="s2">?: </span><span class="s0">true</span><span
+    class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;;</span>
+    <span class="s1">statSync</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+        <span class="s1">bigint</span><span class="s2">: </span><span class="s0">true</span><span class="s2">;</span>
+        <span class="s1">throwIfNoEntry</span><span class="s2">?: </span><span class="s0">true</span><span
+    class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">bigint</span><span class="s2">&gt;;</span>
+    <span class="s1">statSync</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+        <span class="s1">bigint</span><span class="s2">: </span><span class="s0">false</span><span class="s2">;</span>
+        <span class="s1">throwIfNoEntry</span><span class="s2">: </span><span class="s0">false</span><span
+    class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt; | </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s1">statSync</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+        <span class="s1">bigint</span><span class="s2">: </span><span class="s0">true</span><span class="s2">;</span>
+        <span class="s1">throwIfNoEntry</span><span class="s2">: </span><span class="s0">false</span><span
+    class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">bigint</span><span class="s2">&gt; | </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s1">stat</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">Stats</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">stat</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IStatOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s1">Stats</span><span
+    class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">fstatBase</span><span class="s2">;</span>
+    <span class="s1">fstatSync</span><span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;;</span>
+    <span class="s1">fstatSync</span><span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+        <span class="s1">bigint</span><span class="s2">: </span><span class="s0">false</span><span class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;;</span>
+    <span class="s1">fstatSync</span><span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: {</span>
+        <span class="s1">bigint</span><span class="s2">: </span><span class="s0">true</span><span class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">Stats</span><span class="s2">&lt;</span><span
+    class="s1">bigint</span><span class="s2">&gt;;</span>
+    <span class="s1">fstat</span><span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">Stats</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">fstat</span><span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IFStatOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s1">Stats</span><span
+    class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">renameSync</span><span class="s2">: (</span><span class="s1">oldPath</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">newPath</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">rename</span><span class="s2">: (</span><span class="s1">oldPath</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">newPath</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_exists</span><span class="s2">;</span>
+    <span class="s1">existsSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">) =&gt; </span><span
+    class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">exists</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: (</span><span
+    class="s1">exists</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_access</span><span class="s2">;</span>
+    <span class="s1">accessSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">access</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">appendFileSync</span><span class="s2">: (</span><span class="s1">id</span><span
+    class="s2">: </span><span class="s1">TFileId</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">: </span><span class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">IAppendFileOptions </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">appendFile</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">TData</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">IAppendFileOptions </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span
+    class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _readdir</span><span class="s2">;</span>
+    <span class="s1">readdirSync</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IReaddirOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">) =&gt; </span><span
+    class="s1">TDataOut</span><span class="s2">[] | </span><span class="s1">Dirent</span><span class="s2">[];</span>
+    <span class="s1">readdir</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">TDataOut</span><span class="s2">[] | </span><span class="s1">Dirent</span><span
+    class="s2">[]&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IReaddirOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s1">TDataOut</span><span class="s2">[] | </span><span
+    class="s1">Dirent</span><span class="s2">[]&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _readlink</span><span class="s2">;</span>
+    <span class="s1">readlinkSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">IOptions</span><span
+    class="s2">) =&gt; </span><span class="s1">TDataOut</span><span class="s2">;</span>
+    <span class="s1">readlink</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">TDataOut</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s1">TDataOut</span><span
+    class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _fsync</span><span class="s2">;</span>
+    <span class="s1">fsyncSync</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">fsync</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _fdatasync</span><span class="s2">;</span>
+    <span class="s1">fdatasyncSync</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">fdatasync</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _ftruncate</span><span class="s2">;</span>
+    <span class="s1">ftruncateSync</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">len</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">ftruncate</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span
+    class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">len</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span
+    class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _truncate</span><span class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* `id` should be a file descriptor or a path. `id` as file descriptor will</span>
+     <span class="s4">* not be supported soon.</span>
+     <span class="s4">*/</span>
+    <span class="s1">truncateSync</span><span class="s2">: (</span><span class="s1">id</span><span
+    class="s2">: </span><span class="s1">TFileId</span><span class="s2">, </span><span class="s1">len</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">truncate</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">id</span><span class="s2">: </span><span
+    class="s1">TFileId</span><span class="s2">, </span><span class="s1">len</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _futimes</span><span class="s2">;</span>
+    <span class="s1">futimesSync</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">atime</span><span
+    class="s2">: </span><span class="s1">TTime</span><span class="s2">, </span><span class="s1">mtime</span><span
+    class="s2">: </span><span class="s1">TTime</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">futimes</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">atime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">, </span><span class="s1">mtime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _utimes</span><span class="s2">;</span>
+    <span class="s1">utimesSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">atime</span><span
+    class="s2">: </span><span class="s1">TTime</span><span class="s2">, </span><span class="s1">mtime</span><span
+    class="s2">: </span><span class="s1">TTime</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">utimes</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">atime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">, </span><span class="s1">mtime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">lutimesSync</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">atime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">, </span><span class="s1">mtime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">lutimes</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">atime</span><span
+    class="s2">: </span><span class="s1">TTime</span><span class="s2">, </span><span class="s1">mtime</span><span
+    class="s2">: </span><span class="s1">TTime</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">mkdirSync</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IMkdirOptions </span><span class="s2">&amp; {</span>
+            <span class="s1">recursive</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">;</span>
+        <span class="s2">}): </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">undefined</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">TMode </span><span class="s2">| (</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IMkdirOptions </span><span class="s2">&amp; {</span>
+            <span class="s1">recursive</span><span class="s2">?: </span><span class="s0">false</span><span
+    class="s2">;</span>
+        <span class="s2">})): </span><span class="s0">void</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">TMode </span><span class="s2">| </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IMkdirOptions</span><span class="s2">): </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">mkdir</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">TMode </span><span class="s2">| (</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IMkdirOptions </span><span class="s2">&amp; {</span>
+            <span class="s1">recursive</span><span class="s2">?: </span><span class="s0">false</span><span
+    class="s2">;</span>
+        <span class="s2">}), </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IMkdirOptions </span><span class="s2">&amp; {</span>
+            <span class="s1">recursive</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">;</span>
+        <span class="s2">}, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">TMode </span><span class="s2">| </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IMkdirOptions</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt;): </span><span class="s1">any</span><span
+    class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _mkdtemp</span><span class="s2">;</span>
+    <span class="s1">mkdtempSync</span><span class="s2">: (</span><span class="s1">prefix</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">IOptions</span><span
+    class="s2">) =&gt; </span><span class="s1">TDataOut</span><span class="s2">;</span>
+    <span class="s1">mkdtemp</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">prefix</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">prefix</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt;): </span><span
+    class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">rmdirSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">IRmdirOptions</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">rmdir</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IRmdirOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">rmSync</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IRmOptions</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">rm</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IRmOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">readonly _fchmod</span><span class="s2">;</span>
+    <span class="s1">fchmodSync</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">mode</span><span
+    class="s2">: </span><span class="s1">TMode</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">fchmod</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">TMode</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _chmod</span><span class="s2">;</span>
+    <span class="s1">chmodSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span
+    class="s2">: </span><span class="s1">TMode</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">chmod</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">TMode</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _lchmod</span><span class="s2">;</span>
+    <span class="s1">lchmodSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span
+    class="s2">: </span><span class="s1">TMode</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">lchmod</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">TMode</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _fchown</span><span class="s2">;</span>
+    <span class="s1">fchownSync</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">uid</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">fchown</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">uid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _chown</span><span class="s2">;</span>
+    <span class="s1">chownSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">uid</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">chown</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">uid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _lchown</span><span class="s2">;</span>
+    <span class="s1">lchownSync</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">uid</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">lchown</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">uid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">statWatchers</span><span class="s2">;</span>
+    <span class="s1">watchFile</span><span class="s2">(</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">listener</span><span
+    class="s2">: (</span><span class="s1">curr</span><span class="s2">: </span><span class="s1">Stats</span><span
+    class="s2">, </span><span class="s1">prev</span><span class="s2">: </span><span class="s1">Stats</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s1">StatWatcher</span><span
+    class="s2">;</span>
+    <span class="s1">watchFile</span><span class="s2">(</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">: </span><span class="s1">IWatchFileOptions</span><span class="s2">, </span><span
+    class="s1">listener</span><span class="s2">: (</span><span class="s1">curr</span><span class="s2">: </span><span
+    class="s1">Stats</span><span class="s2">, </span><span class="s1">prev</span><span class="s2">: </span><span
+    class="s1">Stats</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span
+    class="s1">StatWatcher</span><span class="s2">;</span>
+    <span class="s1">unwatchFile</span><span class="s2">(</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">listener</span><span
+    class="s2">?: (</span><span class="s1">curr</span><span class="s2">: </span><span class="s1">Stats</span><span
+    class="s2">, </span><span class="s1">prev</span><span class="s2">: </span><span class="s1">Stats</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">createReadStream</span><span class="s2">(</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">PathLike</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">IReadStreamOptions </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">IReadStream</span><span class="s2">;</span>
+    <span class="s1">createWriteStream</span><span class="s2">(</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IWriteStreamOptions </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">IWriteStream</span><span class="s2">;</span>
+    <span class="s1">watch</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">IWatchOptions </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">listener</span><span class="s2">?: (</span><span
+    class="s1">eventType</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">filename</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span
+    class="s1">FSWatcher</span><span class="s2">;</span>
+    <span class="s1">cpSync</span><span class="s2">: (</span><span class="s1">src</span><span class="s2">: </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">URL</span><span class="s2">, </span><span
+    class="s1">dest</span><span class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">URL</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">ICpOptions</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">cp</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">src</span><span class="s2">: </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">URL</span><span class="s2">, </span><span
+    class="s1">dest</span><span class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">URL</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">src</span><span class="s2">: </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">URL</span><span class="s2">, </span><span
+    class="s1">dest</span><span class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">URL</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">ICpOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s0">private </span><span class="s1">_statfs</span><span class="s2">;</span>
+    <span class="s1">statfsSync</span><span class="s2">(</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">): </span><span class="s1">StatFs</span><span
+    class="s2">&lt;</span><span class="s1">number</span><span class="s2">&gt;;</span>
+    <span class="s1">statfsSync</span><span class="s2">(</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">: {</span>
+        <span class="s1">bigint</span><span class="s2">: </span><span class="s0">false</span><span class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">StatFs</span><span class="s2">&lt;</span><span class="s1">number</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">statfsSync</span><span class="s2">(</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">: {</span>
+        <span class="s1">bigint</span><span class="s2">: </span><span class="s0">true</span><span class="s2">;</span>
+    <span class="s2">}): </span><span class="s1">StatFs</span><span class="s2">&lt;</span><span class="s1">bigint</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">statfs</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">StatFs</span><span class="s2">&gt;): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">statfs</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IStafsOptions</span><span class="s2">, </span><span
+    class="s1">callback</span><span class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span
+    class="s1">TCallback</span><span class="s2">&lt;</span><span class="s1">StatFs</span><span class="s2">&gt;): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">openAsBlob</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">IOpenAsBlobOptions</span><span
+    class="s2">) =&gt; </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">Blob</span><span class="s2">&gt;;</span>
+    <span class="s1">glob</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span class="s2">[</span><span
+    class="s3">'glob'</span><span class="s2">];</span>
+    <span class="s1">globSync</span><span class="s2">: </span><span class="s1">FsSynchronousApi</span><span
+    class="s2">[</span><span class="s3">'globSync'</span><span class="s2">];</span>
+    <span class="s0">private </span><span class="s1">readonly _globSync</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _opendir</span><span class="s2">;</span>
+    <span class="s1">opendirSync</span><span class="s2">: (</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IOpendirOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">) =&gt; </span><span class="s1">Dir</span><span
+    class="s2">;</span>
+    <span class="s1">opendir</span><span class="s2">: {</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">callback</span><span class="s2">: </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span class="s2">&lt;</span><span
+    class="s1">Dir</span><span class="s2">&gt;): </span><span class="s1">any</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IOpendirOptions </span><span
+    class="s2">| </span><span class="s1">string</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TCallback</span><span
+    class="s2">&lt;</span><span class="s1">Dir</span><span class="s2">&gt;): </span><span class="s1">any</span><span
+    class="s2">;</span>
+    <span class="s2">};</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">StatWatcher </span><span
+    class="s0">extends </span><span class="s1">EventEmitter </span><span class="s2">{</span>
+    <span class="s1">vol</span><span class="s2">: </span><span class="s1">Volume</span><span class="s2">;</span>
+    <span class="s1">filename</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">interval</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">timeoutRef</span><span class="s2">?: </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s1">setTimeout</span><span class="s2">: </span><span class="s1">TSetTimeout</span><span
+    class="s2">;</span>
+    <span class="s1">prev</span><span class="s2">: </span><span class="s1">Stats</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">vol</span><span
+    class="s2">: </span><span class="s1">Volume</span><span class="s2">);</span>
+    <span class="s0">private </span><span class="s1">loop</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">hasChanged</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">onInterval</span><span class="s2">;</span>
+    <span class="s1">start</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">persistent</span><span class="s2">?: </span><span
+    class="s1">boolean</span><span class="s2">, </span><span class="s1">interval</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">stop</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IWriteStream </span><span class="s0">extends </span><span
+    class="s1">Writable </span><span class="s2">{</span>
+    <span class="s1">bytesWritten</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">pending</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s0">new </span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">options</span><span class="s2">: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IWriteStreamOptions</span><span
+    class="s2">): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s1">open</span><span class="s2">(): </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s1">close</span><span class="s2">(): </span><span class="s1">any</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">FSWatcher </span><span class="s0">extends </span><span class="s1">EventEmitter </span><span
+    class="s2">{</span>
+    <span class="s1">_vol</span><span class="s2">: </span><span class="s1">Volume</span><span class="s2">;</span>
+    <span class="s1">_filename</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">_steps</span><span class="s2">: </span><span class="s1">string</span><span class="s2">[];</span>
+    <span class="s1">_filenameEncoded</span><span class="s2">: </span><span class="s1">TDataOut</span><span
+    class="s2">;</span>
+    <span class="s1">_recursive</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">_encoding</span><span class="s2">: </span><span class="s1">BufferEncoding</span><span
+    class="s2">;</span>
+    <span class="s1">_link</span><span class="s2">: </span><span class="s1">Link</span><span class="s2">;</span>
+    <span class="s1">_timer</span><span class="s2">: </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_listenerRemovers</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">vol</span><span
+    class="s2">: </span><span class="s1">Volume</span><span class="s2">);</span>
+    <span class="s0">private </span><span class="s1">_getName</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_onParentChild</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_emit</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_persist</span><span class="s2">;</span>
+    <span class="s1">start</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">persistent</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">, </span><span class="s1">recursive</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">, </span><span class="s1">encoding</span><span
+    class="s2">?: </span><span class="s1">BufferEncoding</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">_parentChangesUnsub</span><span class="s2">: </span><span
+    class="s1">FanOutUnsubscribe</span><span class="s2">;</span>
+    <span class="s1">close</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

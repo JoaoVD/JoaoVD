@@ -1,0 +1,327 @@
+<html>
+<head>
+  <title>debounce.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          debounce.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">isObject </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./isObject'</span><span class="s2">),</span>
+    <span class="s1">now </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./now'</span><span class="s2">),</span>
+    <span class="s1">toNumber </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./toNumber'</span><span class="s2">);</span>
+
+<span class="s4">/** Error message constants. */</span>
+<span class="s0">var </span><span class="s1">FUNC_ERROR_TEXT </span><span class="s2">= </span><span class="s3">'Expected a function'</span><span
+    class="s2">;</span>
+
+<span class="s5">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMax </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">max</span><span class="s2">,</span>
+    <span class="s1">nativeMin </span><span class="s2">= </span><span class="s1">Math</span><span
+    class="s2">.</span><span class="s1">min</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a debounced function that delays invoking `func` until after `wait`</span>
+ <span class="s4">* milliseconds have elapsed since the last time the debounced function was</span>
+ <span class="s4">* invoked. The debounced function comes with a `cancel` method to cancel</span>
+ <span class="s4">* delayed `func` invocations and a `flush` method to immediately invoke them.</span>
+ <span class="s4">* Provide `options` to indicate whether `func` should be invoked on the</span>
+ <span class="s4">* leading and/or trailing edge of the `wait` timeout. The `func` is invoked</span>
+ <span class="s4">* with the last arguments provided to the debounced function. Subsequent</span>
+ <span class="s4">* calls to the debounced function return the result of the last `func`</span>
+ <span class="s4">* invocation.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** If `leading` and `trailing` options are `true`, `func` is</span>
+ <span class="s4">* invoked on the trailing edge of the timeout only if the debounced function</span>
+ <span class="s4">* is invoked more than once during the `wait` timeout.</span>
+ <span class="s4">*</span>
+ <span class="s4">* If `wait` is `0` and `leading` is `false`, `func` invocation is deferred</span>
+ <span class="s4">* until to the next tick, similar to `setTimeout` with a timeout of `0`.</span>
+ <span class="s4">*</span>
+ <span
+   class="s4">* See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)</span>
+ <span class="s4">* for details over the differences between `_.debounce` and `_.throttle`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">Function</span>
+ <span class="s4">* </span><span class="s6">@param </span><span
+    class="s4">{Function} func The function to debounce.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{number} [wait=0] The number of milliseconds to delay.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span
+    class="s4">{Object} [options={}] The options object.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{boolean} [options.leading=false]</span>
+ <span class="s4">*  Specify invoking on the leading edge of the timeout.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{number} [options.maxWait]</span>
+ <span class="s4">*  The maximum time `func` is allowed to be delayed before it's invoked.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{boolean} [options.trailing=true]</span>
+ <span class="s4">*  Specify invoking on the trailing edge of the timeout.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{Function} Returns the new debounced function.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Avoid costly calculations while the window size is in flux.</span>
+ <span class="s4">* jQuery(window).on('resize', _.debounce(calculateLayout, 150));</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Invoke `sendMail` when clicked, debouncing subsequent calls.</span>
+ <span class="s4">* jQuery(element).on('click', _.debounce(sendMail, 300, {</span>
+ <span class="s4">*   'leading': true,</span>
+ <span class="s4">*   'trailing': false</span>
+ <span class="s4">* }));</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Ensure `batchLog` is invoked once after 1 second of debounced calls.</span>
+ <span class="s4">* var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });</span>
+ <span class="s4">* var source = new EventSource('/stream');</span>
+ <span class="s4">* jQuery(source).on('message', debounced);</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Cancel the trailing debounced invocation.</span>
+ <span class="s4">* jQuery(window).on('popstate', debounced.cancel);</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">debounce</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">wait</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">lastArgs</span><span class="s2">,</span>
+      <span class="s1">lastThis</span><span class="s2">,</span>
+      <span class="s1">maxWait</span><span class="s2">,</span>
+      <span class="s1">result</span><span class="s2">,</span>
+      <span class="s1">timerId</span><span class="s2">,</span>
+      <span class="s1">lastCallTime</span><span class="s2">,</span>
+      <span class="s1">lastInvokeTime </span><span class="s2">= </span><span class="s7">0</span><span
+    class="s2">,</span>
+      <span class="s1">leading </span><span class="s2">= </span><span class="s0">false</span><span class="s2">,</span>
+      <span class="s1">maxing </span><span class="s2">= </span><span class="s0">false</span><span class="s2">,</span>
+      <span class="s1">trailing </span><span class="s2">= </span><span class="s0">true</span><span class="s2">;</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">func </span><span
+    class="s2">!= </span><span class="s3">'function'</span><span class="s2">) {</span>
+    <span class="s0">throw new </span><span class="s1">TypeError</span><span class="s2">(</span><span class="s1">FUNC_ERROR_TEXT</span><span
+    class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s1">wait </span><span class="s2">= </span><span class="s1">toNumber</span><span class="s2">(</span><span
+    class="s1">wait</span><span class="s2">) || </span><span class="s7">0</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isObject</span><span class="s2">(</span><span
+    class="s1">options</span><span class="s2">)) {</span>
+    <span class="s1">leading </span><span class="s2">= !!</span><span class="s1">options</span><span class="s2">.</span><span
+    class="s1">leading</span><span class="s2">;</span>
+    <span class="s1">maxing </span><span class="s2">= </span><span class="s3">'maxWait' </span><span
+    class="s0">in </span><span class="s1">options</span><span class="s2">;</span>
+    <span class="s1">maxWait </span><span class="s2">= </span><span class="s1">maxing </span><span
+    class="s2">? </span><span class="s1">nativeMax</span><span class="s2">(</span><span class="s1">toNumber</span><span
+    class="s2">(</span><span class="s1">options</span><span class="s2">.</span><span class="s1">maxWait</span><span
+    class="s2">) || </span><span class="s7">0</span><span class="s2">, </span><span class="s1">wait</span><span
+    class="s2">) : </span><span class="s1">maxWait</span><span class="s2">;</span>
+    <span class="s1">trailing </span><span class="s2">= </span><span class="s3">'trailing' </span><span
+    class="s0">in </span><span class="s1">options </span><span class="s2">? !!</span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">trailing </span><span class="s2">: </span><span
+    class="s1">trailing</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">invokeFunc</span><span class="s2">(</span><span
+    class="s1">time</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">args </span><span class="s2">= </span><span
+    class="s1">lastArgs</span><span class="s2">,</span>
+        <span class="s1">thisArg </span><span class="s2">= </span><span class="s1">lastThis</span><span
+    class="s2">;</span>
+
+    <span class="s1">lastArgs </span><span class="s2">= </span><span class="s1">lastThis </span><span
+    class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s1">lastInvokeTime </span><span class="s2">= </span><span class="s1">time</span><span
+    class="s2">;</span>
+    <span class="s1">result </span><span class="s2">= </span><span class="s1">func</span><span class="s2">.</span><span
+    class="s1">apply</span><span class="s2">(</span><span class="s1">thisArg</span><span class="s2">, </span><span
+    class="s1">args</span><span class="s2">);</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">leadingEdge</span><span class="s2">(</span><span
+    class="s1">time</span><span class="s2">) {</span>
+    <span class="s5">// Reset any `maxWait` timer.</span>
+    <span class="s1">lastInvokeTime </span><span class="s2">= </span><span class="s1">time</span><span
+    class="s2">;</span>
+    <span class="s5">// Start the timer for the trailing edge.</span>
+    <span class="s1">timerId </span><span class="s2">= </span><span class="s1">setTimeout</span><span
+    class="s2">(</span><span class="s1">timerExpired</span><span class="s2">, </span><span class="s1">wait</span><span
+    class="s2">);</span>
+    <span class="s5">// Invoke the leading edge.</span>
+    <span class="s0">return </span><span class="s1">leading </span><span class="s2">? </span><span
+    class="s1">invokeFunc</span><span class="s2">(</span><span class="s1">time</span><span class="s2">) : </span><span
+    class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">remainingWait</span><span class="s2">(</span><span
+    class="s1">time</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">timeSinceLastCall </span><span class="s2">= </span><span class="s1">time </span><span
+    class="s2">- </span><span class="s1">lastCallTime</span><span class="s2">,</span>
+        <span class="s1">timeSinceLastInvoke </span><span class="s2">= </span><span class="s1">time </span><span
+    class="s2">- </span><span class="s1">lastInvokeTime</span><span class="s2">,</span>
+        <span class="s1">timeWaiting </span><span class="s2">= </span><span class="s1">wait </span><span
+    class="s2">- </span><span class="s1">timeSinceLastCall</span><span class="s2">;</span>
+
+    <span class="s0">return </span><span class="s1">maxing</span>
+      <span class="s2">? </span><span class="s1">nativeMin</span><span class="s2">(</span><span
+    class="s1">timeWaiting</span><span class="s2">, </span><span class="s1">maxWait </span><span
+    class="s2">- </span><span class="s1">timeSinceLastInvoke</span><span class="s2">)</span>
+      <span class="s2">: </span><span class="s1">timeWaiting</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">shouldInvoke</span><span class="s2">(</span><span
+    class="s1">time</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">timeSinceLastCall </span><span class="s2">= </span><span class="s1">time </span><span
+    class="s2">- </span><span class="s1">lastCallTime</span><span class="s2">,</span>
+        <span class="s1">timeSinceLastInvoke </span><span class="s2">= </span><span class="s1">time </span><span
+    class="s2">- </span><span class="s1">lastInvokeTime</span><span class="s2">;</span>
+
+    <span class="s5">// Either this is the first call, activity has stopped and we're at the</span>
+    <span class="s5">// trailing edge, the system time has gone backwards and we're treating</span>
+    <span class="s5">// it as the trailing edge, or we've hit the `maxWait` limit.</span>
+    <span class="s0">return </span><span class="s2">(</span><span class="s1">lastCallTime </span><span
+    class="s2">=== </span><span class="s1">undefined </span><span class="s2">|| (</span><span class="s1">timeSinceLastCall </span><span
+    class="s2">&gt;= </span><span class="s1">wait</span><span class="s2">) ||</span>
+      <span class="s2">(</span><span class="s1">timeSinceLastCall </span><span class="s2">&lt; </span><span
+    class="s7">0</span><span class="s2">) || (</span><span class="s1">maxing </span><span
+    class="s2">&amp;&amp; </span><span class="s1">timeSinceLastInvoke </span><span class="s2">&gt;= </span><span
+    class="s1">maxWait</span><span class="s2">));</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">timerExpired</span><span class="s2">() {</span>
+    <span class="s0">var </span><span class="s1">time </span><span class="s2">= </span><span class="s1">now</span><span
+    class="s2">();</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">shouldInvoke</span><span
+    class="s2">(</span><span class="s1">time</span><span class="s2">)) {</span>
+      <span class="s0">return </span><span class="s1">trailingEdge</span><span class="s2">(</span><span
+    class="s1">time</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s5">// Restart the timer.</span>
+    <span class="s1">timerId </span><span class="s2">= </span><span class="s1">setTimeout</span><span
+    class="s2">(</span><span class="s1">timerExpired</span><span class="s2">, </span><span
+    class="s1">remainingWait</span><span class="s2">(</span><span class="s1">time</span><span class="s2">));</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">trailingEdge</span><span class="s2">(</span><span
+    class="s1">time</span><span class="s2">) {</span>
+    <span class="s1">timerId </span><span class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+
+    <span class="s5">// Only invoke if we have `lastArgs` which means `func` has been</span>
+    <span class="s5">// debounced at least once.</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">trailing </span><span
+    class="s2">&amp;&amp; </span><span class="s1">lastArgs</span><span class="s2">) {</span>
+      <span class="s0">return </span><span class="s1">invokeFunc</span><span class="s2">(</span><span
+    class="s1">time</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s1">lastArgs </span><span class="s2">= </span><span class="s1">lastThis </span><span
+    class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">cancel</span><span class="s2">() {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">timerId </span><span
+    class="s2">!== </span><span class="s1">undefined</span><span class="s2">) {</span>
+      <span class="s1">clearTimeout</span><span class="s2">(</span><span class="s1">timerId</span><span
+    class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s1">lastInvokeTime </span><span class="s2">= </span><span class="s7">0</span><span class="s2">;</span>
+    <span class="s1">lastArgs </span><span class="s2">= </span><span class="s1">lastCallTime </span><span
+    class="s2">= </span><span class="s1">lastThis </span><span class="s2">= </span><span class="s1">timerId </span><span
+    class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">flush</span><span class="s2">() {</span>
+    <span class="s0">return </span><span class="s1">timerId </span><span class="s2">=== </span><span class="s1">undefined </span><span
+    class="s2">? </span><span class="s1">result </span><span class="s2">: </span><span
+    class="s1">trailingEdge</span><span class="s2">(</span><span class="s1">now</span><span class="s2">());</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">debounced</span><span class="s2">() {</span>
+    <span class="s0">var </span><span class="s1">time </span><span class="s2">= </span><span class="s1">now</span><span
+    class="s2">(),</span>
+        <span class="s1">isInvoking </span><span class="s2">= </span><span class="s1">shouldInvoke</span><span
+    class="s2">(</span><span class="s1">time</span><span class="s2">);</span>
+
+    <span class="s1">lastArgs </span><span class="s2">= </span><span class="s1">arguments</span><span
+    class="s2">;</span>
+    <span class="s1">lastThis </span><span class="s2">= </span><span class="s0">this</span><span class="s2">;</span>
+    <span class="s1">lastCallTime </span><span class="s2">= </span><span class="s1">time</span><span class="s2">;</span>
+
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">isInvoking</span><span class="s2">) {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">timerId </span><span
+    class="s2">=== </span><span class="s1">undefined</span><span class="s2">) {</span>
+        <span class="s0">return </span><span class="s1">leadingEdge</span><span class="s2">(</span><span class="s1">lastCallTime</span><span
+    class="s2">);</span>
+      <span class="s2">}</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">maxing</span><span class="s2">) {</span>
+        <span class="s5">// Handle invocations in a tight loop.</span>
+        <span class="s1">clearTimeout</span><span class="s2">(</span><span class="s1">timerId</span><span
+    class="s2">);</span>
+        <span class="s1">timerId </span><span class="s2">= </span><span class="s1">setTimeout</span><span
+    class="s2">(</span><span class="s1">timerExpired</span><span class="s2">, </span><span class="s1">wait</span><span
+    class="s2">);</span>
+        <span class="s0">return </span><span class="s1">invokeFunc</span><span class="s2">(</span><span class="s1">lastCallTime</span><span
+    class="s2">);</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">timerId </span><span
+    class="s2">=== </span><span class="s1">undefined</span><span class="s2">) {</span>
+      <span class="s1">timerId </span><span class="s2">= </span><span class="s1">setTimeout</span><span
+    class="s2">(</span><span class="s1">timerExpired</span><span class="s2">, </span><span class="s1">wait</span><span
+    class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s1">debounced</span><span class="s2">.</span><span class="s1">cancel </span><span
+    class="s2">= </span><span class="s1">cancel</span><span class="s2">;</span>
+  <span class="s1">debounced</span><span class="s2">.</span><span class="s1">flush </span><span
+    class="s2">= </span><span class="s1">flush</span><span class="s2">;</span>
+  <span class="s0">return </span><span class="s1">debounced</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">debounce</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

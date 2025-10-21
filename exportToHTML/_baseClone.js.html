@@ -1,0 +1,356 @@
+<html>
+<head>
+  <title>_baseClone.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _baseClone.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">Stack </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_Stack'</span><span class="s2">),</span>
+    <span class="s1">arrayEach </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_arrayEach'</span><span class="s2">),</span>
+    <span class="s1">assignValue </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_assignValue'</span><span class="s2">),</span>
+    <span class="s1">baseAssign </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseAssign'</span><span class="s2">),</span>
+    <span class="s1">baseAssignIn </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseAssignIn'</span><span class="s2">),</span>
+    <span class="s1">cloneBuffer </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_cloneBuffer'</span><span class="s2">),</span>
+    <span class="s1">copyArray </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_copyArray'</span><span class="s2">),</span>
+    <span class="s1">copySymbols </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_copySymbols'</span><span class="s2">),</span>
+    <span class="s1">copySymbolsIn </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_copySymbolsIn'</span><span class="s2">),</span>
+    <span class="s1">getAllKeys </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_getAllKeys'</span><span class="s2">),</span>
+    <span class="s1">getAllKeysIn </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_getAllKeysIn'</span><span class="s2">),</span>
+    <span class="s1">getTag </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_getTag'</span><span class="s2">),</span>
+    <span class="s1">initCloneArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_initCloneArray'</span><span class="s2">),</span>
+    <span class="s1">initCloneByTag </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_initCloneByTag'</span><span class="s2">),</span>
+    <span class="s1">initCloneObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_initCloneObject'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">),</span>
+    <span class="s1">isBuffer </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isBuffer'</span><span class="s2">),</span>
+    <span class="s1">isMap </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isMap'</span><span class="s2">),</span>
+    <span class="s1">isObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isObject'</span><span class="s2">),</span>
+    <span class="s1">isSet </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isSet'</span><span class="s2">),</span>
+    <span class="s1">keys </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./keys'</span><span class="s2">),</span>
+    <span class="s1">keysIn </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./keysIn'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to compose bitmasks for cloning. */</span>
+<span class="s0">var </span><span class="s1">CLONE_DEEP_FLAG </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">,</span>
+    <span class="s1">CLONE_FLAT_FLAG </span><span class="s2">= </span><span class="s5">2</span><span class="s2">,</span>
+    <span class="s1">CLONE_SYMBOLS_FLAG </span><span class="s2">= </span><span class="s5">4</span><span
+    class="s2">;</span>
+
+<span class="s4">/** `Object#toString` result references. */</span>
+<span class="s0">var </span><span class="s1">argsTag </span><span class="s2">= </span><span class="s3">'[object Arguments]'</span><span
+    class="s2">,</span>
+    <span class="s1">arrayTag </span><span class="s2">= </span><span class="s3">'[object Array]'</span><span class="s2">,</span>
+    <span class="s1">boolTag </span><span class="s2">= </span><span class="s3">'[object Boolean]'</span><span
+    class="s2">,</span>
+    <span class="s1">dateTag </span><span class="s2">= </span><span class="s3">'[object Date]'</span><span
+    class="s2">,</span>
+    <span class="s1">errorTag </span><span class="s2">= </span><span class="s3">'[object Error]'</span><span class="s2">,</span>
+    <span class="s1">funcTag </span><span class="s2">= </span><span class="s3">'[object Function]'</span><span
+    class="s2">,</span>
+    <span class="s1">genTag </span><span class="s2">= </span><span class="s3">'[object GeneratorFunction]'</span><span
+    class="s2">,</span>
+    <span class="s1">mapTag </span><span class="s2">= </span><span class="s3">'[object Map]'</span><span
+    class="s2">,</span>
+    <span class="s1">numberTag </span><span class="s2">= </span><span class="s3">'[object Number]'</span><span
+    class="s2">,</span>
+    <span class="s1">objectTag </span><span class="s2">= </span><span class="s3">'[object Object]'</span><span
+    class="s2">,</span>
+    <span class="s1">regexpTag </span><span class="s2">= </span><span class="s3">'[object RegExp]'</span><span
+    class="s2">,</span>
+    <span class="s1">setTag </span><span class="s2">= </span><span class="s3">'[object Set]'</span><span
+    class="s2">,</span>
+    <span class="s1">stringTag </span><span class="s2">= </span><span class="s3">'[object String]'</span><span
+    class="s2">,</span>
+    <span class="s1">symbolTag </span><span class="s2">= </span><span class="s3">'[object Symbol]'</span><span
+    class="s2">,</span>
+    <span class="s1">weakMapTag </span><span class="s2">= </span><span class="s3">'[object WeakMap]'</span><span
+    class="s2">;</span>
+
+<span class="s0">var </span><span class="s1">arrayBufferTag </span><span class="s2">= </span><span class="s3">'[object ArrayBuffer]'</span><span
+    class="s2">,</span>
+    <span class="s1">dataViewTag </span><span class="s2">= </span><span class="s3">'[object DataView]'</span><span
+    class="s2">,</span>
+    <span class="s1">float32Tag </span><span class="s2">= </span><span class="s3">'[object Float32Array]'</span><span
+    class="s2">,</span>
+    <span class="s1">float64Tag </span><span class="s2">= </span><span class="s3">'[object Float64Array]'</span><span
+    class="s2">,</span>
+    <span class="s1">int8Tag </span><span class="s2">= </span><span class="s3">'[object Int8Array]'</span><span
+    class="s2">,</span>
+    <span class="s1">int16Tag </span><span class="s2">= </span><span class="s3">'[object Int16Array]'</span><span
+    class="s2">,</span>
+    <span class="s1">int32Tag </span><span class="s2">= </span><span class="s3">'[object Int32Array]'</span><span
+    class="s2">,</span>
+    <span class="s1">uint8Tag </span><span class="s2">= </span><span class="s3">'[object Uint8Array]'</span><span
+    class="s2">,</span>
+    <span class="s1">uint8ClampedTag </span><span class="s2">= </span><span
+    class="s3">'[object Uint8ClampedArray]'</span><span class="s2">,</span>
+    <span class="s1">uint16Tag </span><span class="s2">= </span><span class="s3">'[object Uint16Array]'</span><span
+    class="s2">,</span>
+    <span class="s1">uint32Tag </span><span class="s2">= </span><span class="s3">'[object Uint32Array]'</span><span
+    class="s2">;</span>
+
+<span class="s4">/** Used to identify `toStringTag` values supported by `_.clone`. */</span>
+<span class="s0">var </span><span class="s1">cloneableTags </span><span class="s2">= {};</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">argsTag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">arrayTag</span><span
+    class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">arrayBufferTag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">dataViewTag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">boolTag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">dateTag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">float32Tag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">float64Tag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">int8Tag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">int16Tag</span><span
+    class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">int32Tag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">mapTag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">numberTag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">objectTag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">regexpTag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">setTag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">stringTag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">symbolTag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">uint8Tag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">uint8ClampedTag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">uint16Tag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">uint32Tag</span><span class="s2">] = </span><span class="s0">true</span><span class="s2">;</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">errorTag</span><span
+    class="s2">] = </span><span class="s1">cloneableTags</span><span class="s2">[</span><span
+    class="s1">funcTag</span><span class="s2">] =</span>
+<span class="s1">cloneableTags</span><span class="s2">[</span><span class="s1">weakMapTag</span><span
+    class="s2">] = </span><span class="s0">false</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* The base implementation of `_.clone` and `_.cloneDeep` which tracks</span>
+ <span class="s4">* traversed objects.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@private</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{*} value The value to clone.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{boolean} bitmask The bitmask flags.</span>
+ <span class="s4">*  1 - Deep clone</span>
+ <span class="s4">*  2 - Flatten inherited properties</span>
+ <span class="s4">*  4 - Clone symbols</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Function} [customizer] The function to customize cloning.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{string} [key] The key of `value`.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Object} [object] The parent object of `value`.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Object} [stack] Tracks traversed objects and their clone counterparts.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{*} Returns the cloned value.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">baseClone</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">, </span><span class="s1">bitmask</span><span class="s2">, </span><span class="s1">customizer</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span class="s1">object</span><span
+    class="s2">, </span><span class="s1">stack</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">result</span><span class="s2">,</span>
+      <span class="s1">isDeep </span><span class="s2">= </span><span class="s1">bitmask </span><span
+    class="s2">&amp; </span><span class="s1">CLONE_DEEP_FLAG</span><span class="s2">,</span>
+      <span class="s1">isFlat </span><span class="s2">= </span><span class="s1">bitmask </span><span
+    class="s2">&amp; </span><span class="s1">CLONE_FLAT_FLAG</span><span class="s2">,</span>
+      <span class="s1">isFull </span><span class="s2">= </span><span class="s1">bitmask </span><span
+    class="s2">&amp; </span><span class="s1">CLONE_SYMBOLS_FLAG</span><span class="s2">;</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">customizer</span><span class="s2">) {</span>
+    <span class="s1">result </span><span class="s2">= </span><span class="s1">object </span><span
+    class="s2">? </span><span class="s1">customizer</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span class="s1">object</span><span
+    class="s2">, </span><span class="s1">stack</span><span class="s2">) : </span><span class="s1">customizer</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">result </span><span class="s2">!== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">isObject</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">)) {</span>
+    <span class="s0">return </span><span class="s1">value</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">isArr </span><span class="s2">= </span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">value</span><span class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isArr</span><span class="s2">) {</span>
+    <span class="s1">result </span><span class="s2">= </span><span class="s1">initCloneArray</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">);</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">isDeep</span><span class="s2">) {</span>
+      <span class="s0">return </span><span class="s1">copyArray</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">, </span><span class="s1">result</span><span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s0">var </span><span class="s1">tag </span><span class="s2">= </span><span
+    class="s1">getTag</span><span class="s2">(</span><span class="s1">value</span><span class="s2">),</span>
+        <span class="s1">isFunc </span><span class="s2">= </span><span class="s1">tag </span><span class="s2">== </span><span
+    class="s1">funcTag </span><span class="s2">|| </span><span class="s1">tag </span><span class="s2">== </span><span
+    class="s1">genTag</span><span class="s2">;</span>
+
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">isBuffer</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">)) {</span>
+      <span class="s0">return </span><span class="s1">cloneBuffer</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">, </span><span class="s1">isDeep</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">tag </span><span class="s2">== </span><span
+    class="s1">objectTag </span><span class="s2">|| </span><span class="s1">tag </span><span class="s2">== </span><span
+    class="s1">argsTag </span><span class="s2">|| (</span><span class="s1">isFunc </span><span
+    class="s2">&amp;&amp; !</span><span class="s1">object</span><span class="s2">)) {</span>
+      <span class="s1">result </span><span class="s2">= (</span><span class="s1">isFlat </span><span
+    class="s2">|| </span><span class="s1">isFunc</span><span class="s2">) ? {} : </span><span
+    class="s1">initCloneObject</span><span class="s2">(</span><span class="s1">value</span><span class="s2">);</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">isDeep</span><span class="s2">) {</span>
+        <span class="s0">return </span><span class="s1">isFlat</span>
+          <span class="s2">? </span><span class="s1">copySymbolsIn</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">, </span><span class="s1">baseAssignIn</span><span class="s2">(</span><span
+    class="s1">result</span><span class="s2">, </span><span class="s1">value</span><span class="s2">))</span>
+          <span class="s2">: </span><span class="s1">copySymbols</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">, </span><span class="s1">baseAssign</span><span class="s2">(</span><span
+    class="s1">result</span><span class="s2">, </span><span class="s1">value</span><span class="s2">));</span>
+      <span class="s2">}</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">cloneableTags</span><span
+    class="s2">[</span><span class="s1">tag</span><span class="s2">]) {</span>
+        <span class="s0">return </span><span class="s1">object </span><span class="s2">? </span><span
+    class="s1">value </span><span class="s2">: {};</span>
+      <span class="s2">}</span>
+      <span class="s1">result </span><span class="s2">= </span><span class="s1">initCloneByTag</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">, </span><span class="s1">tag</span><span
+    class="s2">, </span><span class="s1">isDeep</span><span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s7">// Check for circular references and return its corresponding clone.</span>
+  <span class="s1">stack </span><span class="s2">|| (</span><span class="s1">stack </span><span
+    class="s2">= </span><span class="s0">new </span><span class="s1">Stack</span><span class="s2">);</span>
+  <span class="s0">var </span><span class="s1">stacked </span><span class="s2">= </span><span
+    class="s1">stack</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">stacked</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">stacked</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s1">stack</span><span class="s2">.</span><span class="s1">set</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">, </span><span class="s1">result</span><span class="s2">);</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isSet</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">)) {</span>
+    <span class="s1">value</span><span class="s2">.</span><span class="s1">forEach</span><span class="s2">(</span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">subValue</span><span class="s2">) {</span>
+      <span class="s1">result</span><span class="s2">.</span><span class="s1">add</span><span class="s2">(</span><span
+    class="s1">baseClone</span><span class="s2">(</span><span class="s1">subValue</span><span class="s2">, </span><span
+    class="s1">bitmask</span><span class="s2">, </span><span class="s1">customizer</span><span class="s2">, </span><span
+    class="s1">subValue</span><span class="s2">, </span><span class="s1">value</span><span class="s2">, </span><span
+    class="s1">stack</span><span class="s2">));</span>
+    <span class="s2">});</span>
+  <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span class="s1">isMap</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">)) {</span>
+    <span class="s1">value</span><span class="s2">.</span><span class="s1">forEach</span><span class="s2">(</span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">subValue</span><span class="s2">, </span><span
+    class="s1">key</span><span class="s2">) {</span>
+      <span class="s1">result</span><span class="s2">.</span><span class="s1">set</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">baseClone</span><span class="s2">(</span><span
+    class="s1">subValue</span><span class="s2">, </span><span class="s1">bitmask</span><span class="s2">, </span><span
+    class="s1">customizer</span><span class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span
+    class="s1">value</span><span class="s2">, </span><span class="s1">stack</span><span class="s2">));</span>
+    <span class="s2">});</span>
+  <span class="s2">}</span>
+
+  <span class="s0">var </span><span class="s1">keysFunc </span><span class="s2">= </span><span class="s1">isFull</span>
+    <span class="s2">? (</span><span class="s1">isFlat </span><span class="s2">? </span><span
+    class="s1">getAllKeysIn </span><span class="s2">: </span><span class="s1">getAllKeys</span><span class="s2">)</span>
+    <span class="s2">: (</span><span class="s1">isFlat </span><span class="s2">? </span><span
+    class="s1">keysIn </span><span class="s2">: </span><span class="s1">keys</span><span class="s2">);</span>
+
+  <span class="s0">var </span><span class="s1">props </span><span class="s2">= </span><span
+    class="s1">isArr </span><span class="s2">? </span><span class="s1">undefined </span><span class="s2">: </span><span
+    class="s1">keysFunc</span><span class="s2">(</span><span class="s1">value</span><span class="s2">);</span>
+  <span class="s1">arrayEach</span><span class="s2">(</span><span class="s1">props </span><span
+    class="s2">|| </span><span class="s1">value</span><span class="s2">, </span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">subValue</span><span class="s2">, </span><span class="s1">key</span><span
+    class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">props</span><span class="s2">) {</span>
+      <span class="s1">key </span><span class="s2">= </span><span class="s1">subValue</span><span class="s2">;</span>
+      <span class="s1">subValue </span><span class="s2">= </span><span class="s1">value</span><span
+    class="s2">[</span><span class="s1">key</span><span class="s2">];</span>
+    <span class="s2">}</span>
+    <span class="s7">// Recursively populate clone (susceptible to call stack limits).</span>
+    <span class="s1">assignValue</span><span class="s2">(</span><span class="s1">result</span><span class="s2">, </span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">baseClone</span><span class="s2">(</span><span
+    class="s1">subValue</span><span class="s2">, </span><span class="s1">bitmask</span><span class="s2">, </span><span
+    class="s1">customizer</span><span class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span
+    class="s1">value</span><span class="s2">, </span><span class="s1">stack</span><span class="s2">));</span>
+  <span class="s2">});</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">baseClone</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

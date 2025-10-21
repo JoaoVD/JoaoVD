@@ -1,0 +1,100 @@
+<html>
+<head>
+  <title>_shortOut.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _shortOut.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/** Used to detect hot functions by number of calls within a span of milliseconds. */</span>
+<span class="s2">var </span><span class="s1">HOT_COUNT </span><span class="s3">= </span><span class="s4">800</span><span
+    class="s3">,</span>
+    <span class="s1">HOT_SPAN </span><span class="s3">= </span><span class="s4">16</span><span class="s3">;</span>
+
+<span class="s5">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s2">var </span><span class="s1">nativeNow </span><span class="s3">= </span><span
+    class="s1">Date</span><span class="s3">.</span><span class="s1">now</span><span class="s3">;</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Creates a function that'll short out and invoke `identity` instead</span>
+ <span class="s0">* of `func` when it's called `HOT_COUNT` or more times in `HOT_SPAN`</span>
+ <span class="s0">* milliseconds.</span>
+ <span class="s0">*</span>
+ <span class="s0">* </span><span class="s6">@private</span>
+ <span class="s0">* </span><span class="s6">@param </span><span
+    class="s0">{Function} func The function to restrict.</span>
+ <span class="s0">* </span><span class="s6">@returns </span><span class="s0">{Function} Returns the new shortable function.</span>
+ <span class="s0">*/</span>
+<span class="s2">function </span><span class="s1">shortOut</span><span class="s3">(</span><span
+    class="s1">func</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">count </span><span class="s3">= </span><span class="s4">0</span><span
+    class="s3">,</span>
+      <span class="s1">lastCalled </span><span class="s3">= </span><span class="s4">0</span><span class="s3">;</span>
+
+  <span class="s2">return function</span><span class="s3">() {</span>
+    <span class="s2">var </span><span class="s1">stamp </span><span class="s3">= </span><span
+    class="s1">nativeNow</span><span class="s3">(),</span>
+        <span class="s1">remaining </span><span class="s3">= </span><span class="s1">HOT_SPAN </span><span class="s3">- (</span><span
+    class="s1">stamp </span><span class="s3">- </span><span class="s1">lastCalled</span><span class="s3">);</span>
+
+    <span class="s1">lastCalled </span><span class="s3">= </span><span class="s1">stamp</span><span class="s3">;</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">remaining </span><span
+    class="s3">&gt; </span><span class="s4">0</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(++</span><span class="s1">count </span><span class="s3">&gt;= </span><span
+    class="s1">HOT_COUNT</span><span class="s3">) {</span>
+        <span class="s2">return </span><span class="s1">arguments</span><span class="s3">[</span><span
+    class="s4">0</span><span class="s3">];</span>
+      <span class="s3">}</span>
+    <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+      <span class="s1">count </span><span class="s3">= </span><span class="s4">0</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s2">return </span><span class="s1">func</span><span class="s3">.</span><span
+    class="s1">apply</span><span class="s3">(</span><span class="s1">undefined</span><span class="s3">, </span><span
+    class="s1">arguments</span><span class="s3">);</span>
+  <span class="s3">};</span>
+<span class="s3">}</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">shortOut</span><span class="s3">;</span>
+</pre>
+</body>
+</html>

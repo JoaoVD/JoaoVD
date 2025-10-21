@@ -1,0 +1,763 @@
+<html>
+<head>
+  <title>repl.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          repl.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:repl` module provides a Read-Eval-Print-Loop (REPL) implementation</span>
+ <span class="s0">* that is available both as a standalone program or includible in other</span>
+ <span class="s0">* applications. It can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import repl from 'node:repl';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/repl.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;repl&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">AsyncCompleter</span><span
+    class="s4">, </span><span class="s2">Completer</span><span class="s4">, </span><span
+    class="s2">Interface </span><span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:readline&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Context </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:vm&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">InspectOptions </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:util&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">ReplOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The input prompt to display.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">&quot;&gt; &quot;</span>
+         <span class="s0">*/</span>
+        <span class="s2">prompt</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `Readable` stream from which REPL input will be read.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">process.stdin</span>
+         <span class="s0">*/</span>
+        <span class="s2">input</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ReadableStream </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `Writable` stream to which REPL output will be written.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">process.stdout</span>
+         <span class="s0">*/</span>
+        <span class="s2">output</span><span class="s4">?: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, specifies that the output should be treated as a TTY terminal, and have</span>
+         <span class="s0">* ANSI/VT100 escape codes written to it.</span>
+         <span class="s0">* Default: checking the value of the `isTTY` property on the output stream upon</span>
+         <span class="s0">* instantiation.</span>
+         <span class="s0">*/</span>
+        <span class="s2">terminal</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The function to be used when evaluating each given line of input.</span>
+         <span
+           class="s0">* **Default:** an async wrapper for the JavaScript `eval()` function. An `eval` function can</span>
+         <span class="s0">* error with `repl.Recoverable` to indicate the input was incomplete and prompt for</span>
+         <span class="s0">* additional lines. See the [custom evaluation functions](https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#custom-evaluation-functions)</span>
+         <span class="s0">* section for more details.</span>
+         <span class="s0">*/</span>
+        <span class="s2">eval</span><span class="s4">?: </span><span class="s2">REPLEval </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Defines if the repl prints output previews or not.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">`true` Always `false` in case `terminal` is falsy.</span>
+         <span class="s0">*/</span>
+        <span class="s2">preview</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, specifies that the default `writer` function should include ANSI color</span>
+         <span class="s0">* styling to REPL output. If a custom `writer` function is provided then this has no</span>
+         <span class="s0">* effect.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">the REPL instance's `terminal` value</span>
+         <span class="s0">*/</span>
+        <span class="s2">useColors</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, specifies that the default evaluation function will use the JavaScript</span>
+         <span class="s0">* `global` as the context as opposed to creating a new separate context for the REPL</span>
+         <span class="s0">* instance. The node CLI REPL sets this value to `true`.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">useGlobal</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, specifies that the default writer will not output the return value of a</span>
+         <span class="s0">* command if it evaluates to `undefined`.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">ignoreUndefined</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* The function to invoke to format the output of each command before writing to `output`.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">a wrapper for `util.inspect`</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#repl_customizing_repl_output</span>
+         <span class="s0">*/</span>
+        <span class="s2">writer</span><span class="s4">?: </span><span class="s2">REPLWriter </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An optional function used for custom Tab auto completion.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/readline.html#readline_use_of_the_completer_function</span>
+         <span class="s0">*/</span>
+        <span class="s2">completer</span><span class="s4">?: </span><span class="s2">Completer </span><span
+    class="s4">| </span><span class="s2">AsyncCompleter </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* A flag that specifies whether the default evaluator executes all JavaScript commands in</span>
+         <span class="s0">* strict mode or default (sloppy) mode.</span>
+         <span class="s0">* Accepted values are:</span>
+         <span class="s0">* - `repl.REPL_MODE_SLOPPY` - evaluates expressions in sloppy mode.</span>
+         <span
+           class="s0">* - `repl.REPL_MODE_STRICT` - evaluates expressions in strict mode. This is equivalent to</span>
+         <span class="s0">*   prefacing every repl statement with `'use strict'`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">replMode</span><span class="s4">?: </span><span class="s5">typeof </span><span class="s2">REPL_MODE_SLOPPY </span><span
+    class="s4">| </span><span class="s5">typeof </span><span class="s2">REPL_MODE_STRICT </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Stop evaluating the current piece of code when `SIGINT` is received, i.e. `Ctrl+C` is</span>
+         <span class="s0">* pressed. This cannot be used together with a custom `eval` function.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">breakEvalOnSigint</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type REPLEval </span><span class="s4">= (</span>
+        <span class="s5">this</span><span class="s4">: </span><span class="s2">REPLServer</span><span
+    class="s4">,</span>
+        <span class="s2">evalCmd</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">context</span><span class="s4">: </span><span class="s2">Context</span><span
+    class="s4">,</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">cb</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span
+    class="s2">result</span><span class="s4">: </span><span class="s2">any</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">,</span>
+    <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s2">type REPLWriter </span><span class="s4">= (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">REPLServer</span><span class="s4">, </span><span class="s2">obj</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">) =&gt; </span><span class="s2">string</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This is the default &quot;writer&quot; value, if none is passed in the REPL options,</span>
+     <span class="s0">* and it can be overridden by custom print functions.</span>
+     <span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">writer</span><span class="s4">: </span><span
+    class="s2">REPLWriter </span><span class="s4">&amp; {</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">InspectOptions</span><span class="s4">;</span>
+    <span class="s4">};</span>
+    <span class="s2">type REPLCommandAction </span><span class="s4">= (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">REPLServer</span><span class="s4">, </span><span class="s2">text</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">REPLCommand </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Help text to be displayed when `.help` is entered.</span>
+         <span class="s0">*/</span>
+        <span class="s2">help</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The function to execute, optionally accepting a single string argument.</span>
+         <span class="s0">*/</span>
+        <span class="s2">action</span><span class="s4">: </span><span class="s2">REPLCommandAction</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">REPLServerSetupHistoryOptions </span><span class="s4">{</span>
+        <span class="s2">filePath</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">size</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">removeHistoryDuplicates</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">onHistoryFileLoaded</span><span class="s4">?: ((</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">repl</span><span class="s4">: </span><span class="s2">REPLServer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">) | </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Instances of `repl.REPLServer` are created using the {</span><span class="s1">@link </span><span
+    class="s0">start} method</span>
+     <span class="s0">* or directly using the JavaScript `new` keyword.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import repl from 'node:repl';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const options = { useColors: true };</span>
+     <span class="s0">*</span>
+     <span class="s0">* const firstInstance = repl.start(options);</span>
+     <span class="s0">* const secondInstance = new repl.REPLServer(options);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.91</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">REPLServer </span><span class="s5">extends </span><span class="s2">Interface </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `vm.Context` provided to the `eval` function to be used for JavaScript</span>
+         <span class="s0">* evaluation.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly context</span><span class="s4">: </span><span class="s2">Context</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@deprecated </span><span class="s0">since v14.3.0 - Use `input` instead.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly inputStream</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ReadableStream</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@deprecated </span><span class="s0">since v14.3.0 - Use `output` instead.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly outputStream</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">WritableStream</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `Readable` stream from which REPL input will be read.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly input</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ReadableStream</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `Writable` stream to which REPL output will be written.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly output</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The commands registered via `replServer.defineCommand()`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly commands</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ReadOnlyDict</span><span class="s4">&lt;</span><span
+    class="s2">REPLCommand</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A value indicating whether the REPL is currently in &quot;editor mode&quot;.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#repl_commands_and_special_keys</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly editorMode</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A value indicating whether the `_` variable has been assigned.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#repl_assignment_of_the_underscore_variable</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly underscoreAssigned</span><span class="s4">: </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* The last evaluation result from the REPL (assigned to the `_` variable inside of the REPL).</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#repl_assignment_of_the_underscore_variable</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly last</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A value indicating whether the `_error` variable has been assigned.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.8.0</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#repl_assignment_of_the_underscore_variable</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly underscoreErrAssigned</span><span class="s4">: </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The last error raised inside the REPL (assigned to the `_error` variable inside of the REPL).</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.8.0</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#repl_assignment_of_the_underscore_variable</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly lastError</span><span class="s4">: </span><span class="s2">any</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specified in the REPL options, this is the function to be used when evaluating each</span>
+         <span class="s0">* given line of input. If not specified in the REPL options, this is an async wrapper</span>
+         <span class="s0">* for the JavaScript `eval()` function.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly eval</span><span class="s4">: </span><span class="s2">REPLEval</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specified in the REPL options, this is a value indicating whether the default</span>
+         <span class="s0">* `writer` function should include ANSI color styling to REPL output.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly useColors</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specified in the REPL options, this is a value indicating whether the default `eval`</span>
+         <span class="s0">* function will use the JavaScript `global` as the context as opposed to creating a new</span>
+         <span class="s0">* separate context for the REPL instance.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly useGlobal</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Specified in the REPL options, this is a value indicating whether the default `writer`</span>
+         <span class="s0">* function should output the result of a command if it evaluates to `undefined`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly ignoreUndefined</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specified in the REPL options, this is the function to invoke to format the output of</span>
+         <span class="s0">* each command before writing to `outputStream`. If not specified in the REPL options,</span>
+         <span class="s0">* this will be a wrapper for `util.inspect`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly writer</span><span class="s4">: </span><span class="s2">REPLWriter</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Specified in the REPL options, this is the function to use for custom Tab auto-completion.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly completer</span><span class="s4">: </span><span class="s2">Completer </span><span
+    class="s4">| </span><span class="s2">AsyncCompleter</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Specified in the REPL options, this is a flag that specifies whether the default `eval`</span>
+         <span
+           class="s0">* function should execute all JavaScript commands in strict mode or default (sloppy) mode.</span>
+         <span class="s0">* Possible values are:</span>
+         <span class="s0">* - `repl.REPL_MODE_SLOPPY` - evaluates expressions in sloppy mode.</span>
+         <span
+           class="s0">* - `repl.REPL_MODE_STRICT` - evaluates expressions in strict mode. This is equivalent to</span>
+         <span class="s0">*    prefacing every repl statement with `'use strict'`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly replMode</span><span class="s4">: </span><span class="s5">typeof </span><span
+    class="s2">REPL_MODE_SLOPPY </span><span class="s4">| </span><span class="s5">typeof </span><span class="s2">REPL_MODE_STRICT</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* NOTE: According to the documentation:</span>
+         <span class="s0">*</span>
+         <span class="s0">* &gt; Instances of `repl.REPLServer` are created using the `repl.start()` method and</span>
+         <span class="s0">* &gt; _should not_ be created directly using the JavaScript `new` keyword.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `REPLServer` cannot be subclassed due to implementation specifics in NodeJS.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#repl_class_replserver</span>
+         <span class="s0">*/</span>
+        <span class="s5">private </span><span class="s2">constructor</span><span class="s4">();</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `replServer.defineCommand()` method is used to add new `.`\-prefixed commands</span>
+         <span class="s0">* to the REPL instance. Such commands are invoked by typing a `.` followed by the `keyword`. The `cmd` is either a `Function` or an `Object` with the following</span>
+         <span class="s0">* properties:</span>
+         <span class="s0">*</span>
+         <span class="s0">* The following example shows two new commands added to the REPL instance:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import repl from 'node:repl';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const replServer = repl.start({ prompt: '&gt; ' });</span>
+         <span class="s0">* replServer.defineCommand('sayhello', {</span>
+         <span class="s0">*   help: 'Say hello',</span>
+         <span class="s0">*   action(name) {</span>
+         <span class="s0">*     this.clearBufferedCommand();</span>
+         <span class="s0">*     console.log(`Hello, ${name}!`);</span>
+         <span class="s0">*     this.displayPrompt();</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* });</span>
+         <span class="s0">* replServer.defineCommand('saybye', function saybye() {</span>
+         <span class="s0">*   console.log('Goodbye!');</span>
+         <span class="s0">*   this.close();</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The new commands can then be used from within the REPL instance:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```console</span>
+         <span class="s0">* &gt; .sayhello Node.js User</span>
+         <span class="s0">* Hello, Node.js User!</span>
+         <span class="s0">* &gt; .saybye</span>
+         <span class="s0">* Goodbye!</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">keyword The command keyword (_without_ a leading `.` character).</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">cmd The function to invoke when the command is processed.</span>
+         <span class="s0">*/</span>
+        <span class="s2">defineCommand</span><span class="s4">(</span><span class="s2">keyword</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">cmd</span><span
+    class="s4">: </span><span class="s2">REPLCommandAction </span><span class="s4">| </span><span
+    class="s2">REPLCommand</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `replServer.displayPrompt()` method readies the REPL instance for input</span>
+         <span class="s0">* from the user, printing the configured `prompt` to a new line in the `output` and resuming the `input` to accept new input.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When multi-line input is being entered, a pipe `'|'` is printed rather than the</span>
+         <span class="s0">* 'prompt'.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When `preserveCursor` is `true`, the cursor placement will not be reset to `0`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `replServer.displayPrompt` method is primarily intended to be called from</span>
+         <span class="s0">* within the action function for commands registered using the `replServer.defineCommand()` method.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.91</span>
+         <span class="s0">*/</span>
+        <span class="s2">displayPrompt</span><span class="s4">(</span><span class="s2">preserveCursor</span><span
+    class="s4">?: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `replServer.clearBufferedCommand()` method clears any command that has been</span>
+         <span class="s0">* buffered but not yet executed. This method is primarily intended to be</span>
+         <span class="s0">* called from within the action function for commands registered using the `replServer.defineCommand()` method.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">clearBufferedCommand</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Initializes a history log file for the REPL instance. When executing the</span>
+         <span class="s0">* Node.js binary and using the command-line REPL, a history file is initialized</span>
+         <span class="s0">* by default. However, this is not the case when creating a REPL</span>
+         <span class="s0">* programmatically. Use this method to initialize a history log file when working</span>
+         <span class="s0">* with REPL instances programmatically.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.10.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">historyPath the path to the history file</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback called when history writes are ready or upon error</span>
+         <span class="s0">*/</span>
+        <span class="s2">setupHistory</span><span class="s4">(</span><span class="s2">historyPath</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">repl</span><span
+    class="s4">: </span><span class="s5">this</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">setupHistory</span><span class="s4">(</span>
+            <span class="s2">historyConfig</span><span class="s4">?: </span><span class="s2">REPLServerSetupHistoryOptions</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">repl</span><span class="s4">: </span><span class="s5">this</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* events.EventEmitter</span>
+         <span class="s0">* 1. close - inherited from `readline.Interface`</span>
+         <span class="s0">* 2. line - inherited from `readline.Interface`</span>
+         <span class="s0">* 3. pause - inherited from `readline.Interface`</span>
+         <span class="s0">* 4. resume - inherited from `readline.Interface`</span>
+         <span class="s0">* 5. SIGCONT - inherited from `readline.Interface`</span>
+         <span class="s0">* 6. SIGINT - inherited from `readline.Interface`</span>
+         <span class="s0">* 7. SIGTSTP - inherited from `readline.Interface`</span>
+         <span class="s0">* 8. exit</span>
+         <span class="s0">* 9. reset</span>
+         <span class="s0">*/</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;reset&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">context</span><span class="s4">: </span><span
+    class="s2">Context</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;reset&quot;</span><span class="s4">, </span><span
+    class="s2">context</span><span class="s4">: </span><span class="s2">Context</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;close&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;line&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;pause&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resume&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;exit&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;reset&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">context</span><span class="s4">: </span><span class="s2">Context</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;reset&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">context</span><span class="s4">: </span><span
+    class="s2">Context</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;reset&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">context</span><span class="s4">: </span><span
+    class="s2">Context</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;reset&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">context</span><span class="s4">: </span><span
+    class="s2">Context</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* A flag passed in the REPL options. Evaluates expressions in sloppy mode.</span>
+     <span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">REPL_MODE_SLOPPY</span><span class="s4">: </span><span class="s2">unique symbol</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* A flag passed in the REPL options. Evaluates expressions in strict mode.</span>
+     <span class="s0">* This is equivalent to prefacing every repl statement with `'use strict'`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">REPL_MODE_STRICT</span><span class="s4">: </span><span class="s2">unique symbol</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `repl.start()` method creates and starts a {</span><span class="s1">@link </span><span
+    class="s0">REPLServer} instance.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `options` is a string, then it specifies the input prompt:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import repl from 'node:repl';</span>
+     <span class="s0">*</span>
+     <span class="s0">* // a Unix style prompt</span>
+     <span class="s0">* repl.start('$ ');</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.91</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">start</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">ReplOptions</span><span class="s4">): </span><span class="s2">REPLServer</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Indicates a recoverable error that a `REPLServer` can use to support multi-line input.</span>
+     <span class="s0">*</span>
+     <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/repl.html#repl_recoverable_errors</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Recoverable </span><span class="s5">extends </span><span class="s2">SyntaxError </span><span
+    class="s4">{</span>
+        <span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">;</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">Error</span><span class="s4">);</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:repl&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;repl&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

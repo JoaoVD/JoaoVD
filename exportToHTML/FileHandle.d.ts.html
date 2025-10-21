@@ -1,0 +1,165 @@
+<html>
+<head>
+  <title>FileHandle.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FileHandle.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">EventEmitter </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'../vendor/node/events'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">* as </span><span
+    class="s1">opts from </span><span class="s3">'./types/options'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">IFileHandle</span><span class="s2">, </span><span class="s1">IReadStream</span><span class="s2">, </span><span
+    class="s1">IWriteStream</span><span class="s2">, </span><span class="s1">IStats</span><span
+    class="s2">, </span><span class="s1">TData</span><span class="s2">, </span><span class="s1">TDataOut</span><span
+    class="s2">, </span><span class="s1">TMode</span><span class="s2">, </span><span class="s1">TTime </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./types/misc'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">FsCallbackApi </span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">'./types'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">FileHandle </span><span class="s0">extends </span><span class="s1">EventEmitter </span><span class="s0">implements </span><span
+    class="s1">IFileHandle </span><span class="s2">{</span>
+    <span class="s0">private </span><span class="s1">fs</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">refs</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">closePromise</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">closeResolve</span><span class="s2">?;</span>
+    <span class="s0">private </span><span class="s1">closeReject</span><span class="s2">?;</span>
+    <span class="s0">private </span><span class="s1">position</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readableWebStreamLocked</span><span class="s2">;</span>
+    <span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">fs</span><span
+    class="s2">: </span><span class="s1">FsCallbackApi</span><span class="s2">, </span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">);</span>
+    <span class="s1">getAsyncId</span><span class="s2">(): </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">appendFile</span><span class="s2">(</span><span class="s1">data</span><span
+    class="s2">: </span><span class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IAppendFileOptions </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">chmod</span><span class="s2">(</span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">TMode</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">chown</span><span class="s2">(</span><span class="s1">uid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">close</span><span class="s2">(): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">datasync</span><span class="s2">(): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">createReadStream</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">: </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">IFileHandleReadStreamOptions</span><span
+    class="s2">): </span><span class="s1">IReadStream</span><span class="s2">;</span>
+    <span class="s1">createWriteStream</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">: </span><span class="s1">opts</span><span class="s2">.</span><span class="s1">IFileHandleWriteStreamOptions</span><span
+    class="s2">): </span><span class="s1">IWriteStream</span><span class="s2">;</span>
+    <span class="s1">readableWebStream</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IReadableWebStreamOptions</span><span class="s2">): </span><span class="s1">ReadableStream</span><span
+    class="s2">;</span>
+    <span class="s1">read</span><span class="s2">(</span><span class="s1">buffer</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">Uint8Array</span><span class="s2">, </span><span
+    class="s1">offset</span><span class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">length</span><span class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">position</span><span class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">TFileHandleReadResult</span><span class="s2">&gt;;</span>
+    <span class="s1">readv</span><span class="s2">(</span><span class="s1">buffers</span><span class="s2">: </span><span
+    class="s1">ArrayBufferView</span><span class="s2">[], </span><span class="s1">position</span><span
+    class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span class="s0">null </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">TFileHandleReadvResult</span><span class="s2">&gt;;</span>
+    <span class="s1">readFile</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IReadFileOptions </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">TDataOut</span><span class="s2">&gt;;</span>
+    <span class="s1">stat</span><span class="s2">(</span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">IFStatOptions</span><span class="s2">): </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">IStats</span><span class="s2">&gt;;</span>
+    <span class="s1">sync</span><span class="s2">(): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">truncate</span><span class="s2">(</span><span class="s1">len</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">utimes</span><span class="s2">(</span><span class="s1">atime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">, </span><span class="s1">mtime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">buffer</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">Uint8Array</span><span class="s2">, </span><span
+    class="s1">offset</span><span class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">length</span><span class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">position</span><span class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">TFileHandleWriteResult</span><span class="s2">&gt;;</span>
+    <span class="s1">writev</span><span class="s2">(</span><span class="s1">buffers</span><span
+    class="s2">: </span><span class="s1">ArrayBufferView</span><span class="s2">[], </span><span
+    class="s1">position</span><span class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s0">null </span><span class="s2">| </span><span class="s1">undefined</span><span class="s2">): </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">TFileHandleWritevResult</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">writeFile</span><span class="s2">(</span><span class="s1">data</span><span
+    class="s2">: </span><span class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IWriteFileOptions</span><span class="s2">): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s0">private </span><span class="s1">ref</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">unref</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">TFileHandleReadResult </span><span class="s2">{</span>
+    <span class="s1">bytesRead</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">Uint8Array</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">TFileHandleWriteResult </span><span class="s2">{</span>
+    <span class="s1">bytesWritten</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">Uint8Array</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">TFileHandleReadvResult </span><span class="s2">{</span>
+    <span class="s1">bytesRead</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">buffers</span><span class="s2">: </span><span class="s1">ArrayBufferView</span><span
+    class="s2">[];</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">TFileHandleWritevResult </span><span class="s2">{</span>
+    <span class="s1">bytesWritten</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">buffers</span><span class="s2">: </span><span class="s1">ArrayBufferView</span><span
+    class="s2">[];</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

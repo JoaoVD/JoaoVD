@@ -1,0 +1,74 @@
+<html>
+<head>
+  <title>SyncMessenger.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #5f826b;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          SyncMessenger.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">export </span><span class="s1">type AsyncCallback </span><span class="s2">= (</span><span
+  class="s1">request</span><span class="s2">: </span><span class="s1">Uint8Array</span><span
+  class="s2">) =&gt; </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+  class="s1">Uint8Array</span><span class="s2">&gt;;</span>
+<span class="s3">/**</span>
+ <span class="s3">* `SyncMessenger` allows to execute asynchronous code synchronously. The</span>
+ <span class="s3">* asynchronous code is executed in a Worker thread, while the main thread is</span>
+ <span class="s3">* blocked until the asynchronous code is finished.</span>
+ <span class="s3">*</span>
+ <span class="s3">* First four 4-byte words is the header, where the first word is used for Atomics</span>
+ <span class="s3">* notifications. The second word is used for spin-locking the main thread until</span>
+ <span class="s3">* the asynchronous code is finished. The third word is used to specify payload</span>
+ <span class="s3">* length. The fourth word is currently unused.</span>
+ <span class="s3">*</span>
+ <span class="s3">* The maximum payload size is the size of the SharedArrayBuffer minus the</span>
+ <span class="s3">* header size.</span>
+ <span class="s3">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">SyncMessenger </span><span
+    class="s2">{</span>
+    <span class="s0">protected </span><span class="s1">readonly sab</span><span class="s2">: </span><span class="s1">SharedArrayBuffer</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly int32</span><span class="s2">: </span><span class="s1">Int32Array</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly uint8</span><span class="s2">: </span><span class="s1">Uint8Array</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly headerSize</span><span class="s2">: </span><span
+    class="s1">any</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly dataSize</span><span class="s2">: </span><span
+    class="s1">any</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">sab</span><span
+    class="s2">: </span><span class="s1">SharedArrayBuffer</span><span class="s2">);</span>
+    <span class="s1">callSync</span><span class="s2">(</span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">Uint8Array</span><span class="s2">): </span><span class="s1">Uint8Array</span><span class="s2">;</span>
+    <span class="s1">serveAsync</span><span class="s2">(</span><span class="s1">callback</span><span
+    class="s2">: </span><span class="s1">AsyncCallback</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

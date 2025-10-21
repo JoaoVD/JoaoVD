@@ -1,0 +1,316 @@
+<html>
+<head>
+  <title>connectExample.md</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #c77dbb;
+      font-style: italic;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          connectExample.md</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0"># </span><span class="s2">socks examples</span>
+
+<span class="s0">## </span><span class="s2">Example for SOCKS </span><span class="s1">'</span><span class="s2">connect' command</span>
+
+<span class="s2">The connect command is the most common use-case for a SOCKS proxy. This establishes a direct connection to a destination host through a proxy server. The destination host only has knowledge of the proxy server connecting to it and does not know about the origin client </span><span
+    class="s1">(</span><span class="s2">you</span><span class="s1">)</span><span class="s2">.</span>
+
+<span class="s1">**</span><span class="s2">Origin Client </span><span class="s1">(</span><span
+    class="s2">you</span><span class="s1">) &lt;</span><span class="s2">-</span><span class="s1">&gt; </span><span
+    class="s2">Proxy Server </span><span class="s1">&lt;</span><span class="s2">-</span><span
+    class="s1">&gt; </span><span class="s2">Destination Server</span><span class="s1">**</span>
+
+<span class="s2">In this example, we are connecting to a web server on port 80, and sending a very basic HTTP request to receive a response. It's worth noting that there are many socks-http-agents that can be used with the node http module </span><span
+    class="s1">(</span><span class="s2">and libraries such as request.js</span><span class="s1">) </span><span
+    class="s2">to make this easier. This HTTP request is used as a simple example.</span>
+
+<span class="s2">The </span><span class="s1">'</span><span class="s2">connect' command can be used via the SocksClient.createConnection</span><span
+    class="s1">() </span><span class="s2">factory function as well as by creating a SocksClient instance and using event handlers.</span>
+
+<span class="s0">### </span><span class="s2">Using createConnection with async/await</span>
+
+<span
+  class="s2">Since SocksClient.createConnection returns a Promise, we can easily use async/await for flow control.</span>
+
+<span class="s0">```</span><span class="s3">typescript</span>
+<span class="s4">import { SocksClient, SocksClientOptions } from 'socks';</span>
+
+<span class="s4">const options: SocksClientOptions = {</span>
+  <span class="s4">proxy: {</span>
+    <span class="s4">host: '104.131.124.203',</span>
+    <span class="s4">port: 1081,</span>
+    <span class="s4">type: 5</span>
+  <span class="s4">},</span>
+
+  <span class="s4">destination: {</span>
+    <span class="s4">host: 'ip-api.com', // host names are supported with SOCKS v4a and SOCKS v5.</span>
+    <span class="s4">port: 80</span>
+  <span class="s4">},</span>
+
+  <span class="s4">command: 'connect'</span>
+<span class="s4">};</span>
+
+<span class="s4">async function start() {</span>
+  <span class="s4">try {</span>
+    <span class="s4">const info = await SocksClient.createConnection(options);</span>
+
+    <span class="s4">console.log(info.socket);</span>
+    <span class="s4">// &lt;Socket ...&gt;  (this is a raw net.Socket that is established to the destination host through the given proxy servers)</span>
+
+    <span class="s4">info.socket.write('GET /json HTTP/1.1\nHost: ip-api.com\n\n');</span>
+    <span class="s4">info.socket.on('data', (data) =&gt; {</span>
+      <span class="s4">console.log(data.toString()); // ip-api.com sees that the last proxy (104.131.124.203) is connected to it and not the origin client (you).</span>
+      <span class="s4">/*</span>
+        <span class="s4">HTTP/1.1 200 OK</span>
+        <span class="s4">Access-Control-Allow-Origin: *</span>
+        <span class="s4">Content-Type: application/json; charset=utf-8</span>
+        <span class="s4">Date: Sun, 24 Dec 2017 03:47:51 GMT</span>
+        <span class="s4">Content-Length: 300</span>
+
+        <span class="s4">{</span>
+          <span class="s4">&quot;as&quot;:&quot;AS14061 Digital Ocean, Inc.&quot;,</span>
+          <span class="s4">&quot;city&quot;:&quot;Clifton&quot;,</span>
+          <span class="s4">&quot;country&quot;:&quot;United States&quot;,</span>
+          <span class="s4">&quot;countryCode&quot;:&quot;US&quot;,</span>
+          <span class="s4">&quot;isp&quot;:&quot;Digital Ocean&quot;,</span>
+          <span class="s4">&quot;lat&quot;:40.8326,</span>
+          <span class="s4">&quot;lon&quot;:-74.1307,</span>
+          <span class="s4">&quot;org&quot;:&quot;Digital Ocean&quot;,</span>
+          <span class="s4">&quot;query&quot;:&quot;104.131.124.203&quot;,</span>
+          <span class="s4">&quot;region&quot;:&quot;NJ&quot;,</span>
+          <span class="s4">&quot;regionName&quot;:&quot;New Jersey&quot;,</span>
+          <span class="s4">&quot;status&quot;:&quot;success&quot;,</span>
+          <span class="s4">&quot;timezone&quot;:&quot;America/New_York&quot;,</span>
+          <span class="s4">&quot;zip&quot;:&quot;07014&quot;</span>
+        <span class="s4">}</span>
+      <span class="s4">*/</span>
+    <span class="s4">});</span>
+  <span class="s4">} catch (err) {</span>
+    <span class="s4">// Handle errors</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s4">start();</span>
+<span class="s0">```</span>
+
+<span class="s0">### </span><span class="s2">Using createConnection with Promises</span>
+
+<span class="s0">```</span><span class="s3">typescript</span>
+<span class="s4">import { SocksClient, SocksClientOptions } from 'socks';</span>
+
+<span class="s4">const options: SocksClientOptions = {</span>
+  <span class="s4">proxy: {</span>
+    <span class="s4">ipaddress: '104.131.124.203',</span>
+    <span class="s4">port: 1081,</span>
+    <span class="s4">type: 5</span>
+  <span class="s4">},</span>
+
+  <span class="s4">destination: {</span>
+    <span class="s4">host: 'ip-api.com', // host names are supported with SOCKS v4a and SOCKS v5.</span>
+    <span class="s4">port: 80</span>
+  <span class="s4">},</span>
+
+  <span class="s4">command: 'connect'</span>
+<span class="s4">};</span>
+
+<span class="s4">SocksClient.createConnection(options)</span>
+<span class="s4">.then(info =&gt; {</span>
+  <span class="s4">console.log(info.socket);</span>
+  <span class="s4">// &lt;Socket ...&gt;  (this is a raw net.Socket that is established to the destination host through the given proxy servers)</span>
+
+  <span class="s4">info.socket.write('GET /json HTTP/1.1\nHost: ip-api.com\n\n');</span>
+  <span class="s4">info.socket.on('data', (data) =&gt; {</span>
+    <span class="s4">console.log(data.toString()); // ip-api.com sees that the last proxy (104.131.124.203) is connected to it and not the origin client (you).</span>
+    <span class="s4">/*</span>
+      <span class="s4">HTTP/1.1 200 OK</span>
+      <span class="s4">Access-Control-Allow-Origin: *</span>
+      <span class="s4">Content-Type: application/json; charset=utf-8</span>
+      <span class="s4">Date: Sun, 24 Dec 2017 03:47:51 GMT</span>
+      <span class="s4">Content-Length: 300</span>
+
+      <span class="s4">{</span>
+        <span class="s4">&quot;as&quot;:&quot;AS14061 Digital Ocean, Inc.&quot;,</span>
+        <span class="s4">&quot;city&quot;:&quot;Clifton&quot;,</span>
+        <span class="s4">&quot;country&quot;:&quot;United States&quot;,</span>
+        <span class="s4">&quot;countryCode&quot;:&quot;US&quot;,</span>
+        <span class="s4">&quot;isp&quot;:&quot;Digital Ocean&quot;,</span>
+        <span class="s4">&quot;lat&quot;:40.8326,</span>
+        <span class="s4">&quot;lon&quot;:-74.1307,</span>
+        <span class="s4">&quot;org&quot;:&quot;Digital Ocean&quot;,</span>
+        <span class="s4">&quot;query&quot;:&quot;104.131.124.203&quot;,</span>
+        <span class="s4">&quot;region&quot;:&quot;NJ&quot;,</span>
+        <span class="s4">&quot;regionName&quot;:&quot;New Jersey&quot;,</span>
+        <span class="s4">&quot;status&quot;:&quot;success&quot;,</span>
+        <span class="s4">&quot;timezone&quot;:&quot;America/New_York&quot;,</span>
+        <span class="s4">&quot;zip&quot;:&quot;07014&quot;</span>
+      <span class="s4">}</span>
+    <span class="s4">*/</span>
+  <span class="s4">});</span>
+<span class="s4">})</span>
+<span class="s4">.catch(err =&gt; {</span>
+  <span class="s4">// handle errors</span>
+<span class="s4">});</span>
+<span class="s0">```</span>
+
+<span class="s0">### </span><span class="s2">Using createConnection with callbacks</span>
+
+<span class="s2">SocksClient.createConnection</span><span class="s1">() </span><span class="s2">optionally accepts a callback function as a second parameter.</span>
+
+<span class="s1">**</span><span class="s2">Note</span><span class="s1">:** </span><span class="s2">If a callback function is provided, a Promise is still returned from the function, but the promise will always resolve regardless of if there was en error. </span><span
+    class="s1">(</span><span class="s2">tldr</span><span class="s1">: </span><span class="s2">Do not mix callbacks and Promises</span><span
+    class="s1">)</span><span class="s2">.</span>
+
+<span class="s0">```</span><span class="s3">typescript</span>
+<span class="s4">import { SocksClient, SocksClientOptions } from 'socks';</span>
+
+<span class="s4">const options: SocksClientOptions = {</span>
+  <span class="s4">proxy: {</span>
+    <span class="s4">ipaddress: '104.131.124.203',</span>
+    <span class="s4">port: 1081,</span>
+    <span class="s4">type: 5</span>
+  <span class="s4">},</span>
+
+  <span class="s4">destination: {</span>
+    <span class="s4">host: 'ip-api.com', // host names are supported with SOCKS v4a and SOCKS v5.</span>
+    <span class="s4">port: 80</span>
+  <span class="s4">},</span>
+
+  <span class="s4">command: 'connect'</span>
+<span class="s4">};</span>
+
+<span class="s4">SocksClient.createConnection(options, (err, info) =&gt; {</span>
+  <span class="s4">if (err) {</span>
+    <span class="s4">// handle errors</span>
+  <span class="s4">} else {</span>
+    <span class="s4">console.log(info.socket);</span>
+    <span class="s4">// &lt;Socket ...&gt;  (this is a raw net.Socket that is established to the destination host through the given proxy servers)</span>
+
+    <span class="s4">info.socket.write('GET /json HTTP/1.1\nHost: ip-api.com\n\n');</span>
+    <span class="s4">info.socket.on('data', (data) =&gt; {</span>
+      <span class="s4">console.log(data.toString()); // ip-api.com sees that the last proxy (104.131.124.203) is connected to it and not the origin client (you).</span>
+      <span class="s4">/*</span>
+        <span class="s4">HTTP/1.1 200 OK</span>
+        <span class="s4">Access-Control-Allow-Origin: *</span>
+        <span class="s4">Content-Type: application/json; charset=utf-8</span>
+        <span class="s4">Date: Sun, 24 Dec 2017 03:47:51 GMT</span>
+        <span class="s4">Content-Length: 300</span>
+
+        <span class="s4">{</span>
+          <span class="s4">&quot;as&quot;:&quot;AS14061 Digital Ocean, Inc.&quot;,</span>
+          <span class="s4">&quot;city&quot;:&quot;Clifton&quot;,</span>
+          <span class="s4">&quot;country&quot;:&quot;United States&quot;,</span>
+          <span class="s4">&quot;countryCode&quot;:&quot;US&quot;,</span>
+          <span class="s4">&quot;isp&quot;:&quot;Digital Ocean&quot;,</span>
+          <span class="s4">&quot;lat&quot;:40.8326,</span>
+          <span class="s4">&quot;lon&quot;:-74.1307,</span>
+          <span class="s4">&quot;org&quot;:&quot;Digital Ocean&quot;,</span>
+          <span class="s4">&quot;query&quot;:&quot;104.131.124.203&quot;,</span>
+          <span class="s4">&quot;region&quot;:&quot;NJ&quot;,</span>
+          <span class="s4">&quot;regionName&quot;:&quot;New Jersey&quot;,</span>
+          <span class="s4">&quot;status&quot;:&quot;success&quot;,</span>
+          <span class="s4">&quot;timezone&quot;:&quot;America/New_York&quot;,</span>
+          <span class="s4">&quot;zip&quot;:&quot;07014&quot;</span>
+        <span class="s4">}</span>
+      <span class="s4">*/</span>
+    <span class="s4">});</span>
+  <span class="s4">}</span>
+<span class="s4">})</span>
+<span class="s0">```</span>
+
+<span class="s0">### </span><span class="s2">Using event handlers</span>
+
+<span
+  class="s2">SocksClient also supports instance creation of a SocksClient. This allows for event based flow control.</span>
+
+<span class="s0">```</span><span class="s3">typescript</span>
+<span class="s4">import { SocksClient, SocksClientOptions } from 'socks';</span>
+
+<span class="s4">const options: SocksClientOptions = {</span>
+  <span class="s4">proxy: {</span>
+    <span class="s4">ipaddress: '104.131.124.203',</span>
+    <span class="s4">port: 1081,</span>
+    <span class="s4">type: 5</span>
+  <span class="s4">},</span>
+
+  <span class="s4">destination: {</span>
+    <span class="s4">host: 'ip-api.com', // host names are supported with SOCKS v4a and SOCKS v5.</span>
+    <span class="s4">port: 80</span>
+  <span class="s4">},</span>
+
+  <span class="s4">command: 'connect'</span>
+<span class="s4">};</span>
+
+<span class="s4">const client = new SocksClient(options);</span>
+
+<span class="s4">client.on('established', (info) =&gt; {</span>
+  <span class="s4">console.log(info.socket);</span>
+  <span class="s4">// &lt;Socket ...&gt;  (this is a raw net.Socket that is established to the destination host through the given proxy servers)</span>
+
+  <span class="s4">info.socket.write('GET /json HTTP/1.1\nHost: ip-api.com\n\n');</span>
+  <span class="s4">info.socket.on('data', (data) =&gt; {</span>
+    <span class="s4">console.log(data.toString()); // ip-api.com sees that the last proxy (104.131.124.203) is connected to it and not the origin client (you).</span>
+    <span class="s4">/*</span>
+      <span class="s4">HTTP/1.1 200 OK</span>
+      <span class="s4">Access-Control-Allow-Origin: *</span>
+      <span class="s4">Content-Type: application/json; charset=utf-8</span>
+      <span class="s4">Date: Sun, 24 Dec 2017 03:47:51 GMT</span>
+      <span class="s4">Content-Length: 300</span>
+
+      <span class="s4">{</span>
+        <span class="s4">&quot;as&quot;:&quot;AS14061 Digital Ocean, Inc.&quot;,</span>
+        <span class="s4">&quot;city&quot;:&quot;Clifton&quot;,</span>
+        <span class="s4">&quot;country&quot;:&quot;United States&quot;,</span>
+        <span class="s4">&quot;countryCode&quot;:&quot;US&quot;,</span>
+        <span class="s4">&quot;isp&quot;:&quot;Digital Ocean&quot;,</span>
+        <span class="s4">&quot;lat&quot;:40.8326,</span>
+        <span class="s4">&quot;lon&quot;:-74.1307,</span>
+        <span class="s4">&quot;org&quot;:&quot;Digital Ocean&quot;,</span>
+        <span class="s4">&quot;query&quot;:&quot;104.131.124.203&quot;,</span>
+        <span class="s4">&quot;region&quot;:&quot;NJ&quot;,</span>
+        <span class="s4">&quot;regionName&quot;:&quot;New Jersey&quot;,</span>
+        <span class="s4">&quot;status&quot;:&quot;success&quot;,</span>
+        <span class="s4">&quot;timezone&quot;:&quot;America/New_York&quot;,</span>
+        <span class="s4">&quot;zip&quot;:&quot;07014&quot;</span>
+      <span class="s4">}</span>
+    <span class="s4">*/</span>
+  <span class="s4">});</span>
+<span class="s4">});</span>
+
+<span class="s4">// Failed to establish proxy connection to destination.</span>
+<span class="s4">client.on('error', () =&gt; {</span>
+  <span class="s4">// Handle errors</span>
+<span class="s4">});</span>
+
+<span class="s4">// Start connection</span>
+<span class="s4">client.connect();</span>
+<span class="s0">```</span></pre>
+</body>
+</html>

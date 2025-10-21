@@ -1,0 +1,92 @@
+<html>
+<head>
+  <title>limitProperties.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          limitProperties.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">KeywordErrorDefinition</span><span class="s2">} </span><span
+  class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">, </span><span class="s1">operators</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">({</span><span class="s1">keyword</span><span
+    class="s2">, </span><span class="s1">schemaCode</span><span class="s2">}) {</span>
+    <span class="s0">const </span><span class="s1">comp </span><span class="s2">= </span><span
+    class="s1">keyword </span><span class="s2">=== </span><span class="s3">&quot;maxProperties&quot; </span><span
+    class="s2">? </span><span class="s3">&quot;more&quot; </span><span class="s2">: </span><span class="s3">&quot;fewer&quot;</span>
+    <span class="s0">return </span><span class="s1">str</span><span class="s3">`must NOT have </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">comp</span><span class="s2">} </span><span class="s3">than </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span class="s2">} </span><span
+    class="s3">properties`</span>
+  <span class="s2">},</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">schemaCode</span><span
+    class="s2">}) =&gt; </span><span class="s1">_</span><span class="s3">`{limit: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span class="s3">}`</span><span
+    class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: [</span><span class="s3">&quot;maxProperties&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;minProperties&quot;</span><span class="s2">],</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;number&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">$data</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">keyword</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s1">schemaCode</span><span
+    class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s0">const </span><span class="s1">op </span><span class="s2">= </span><span
+    class="s1">keyword </span><span class="s2">=== </span><span class="s3">&quot;maxProperties&quot; </span><span
+    class="s2">? </span><span class="s1">operators</span><span class="s2">.</span><span class="s1">GT </span><span
+    class="s2">: </span><span class="s1">operators</span><span class="s2">.</span><span class="s1">LT</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">fail$data</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`Object.keys(</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">}</span><span class="s3">).length </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">op</span><span class="s2">} </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span class="s3">`</span><span
+    class="s2">)</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

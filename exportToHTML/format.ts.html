@@ -1,0 +1,311 @@
+<html>
+<head>
+  <title>format.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          format.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span>
+  <span class="s1">AddedFormat</span><span class="s2">,</span>
+  <span class="s1">FormatValidator</span><span class="s2">,</span>
+  <span class="s1">AsyncFormatValidator</span><span class="s2">,</span>
+  <span class="s1">CodeKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">KeywordErrorDefinition</span><span class="s2">,</span>
+  <span class="s1">ErrorObject</span><span class="s2">,</span>
+<span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">str</span><span class="s2">, </span><span class="s1">nil</span><span class="s2">, </span><span
+    class="s1">or</span><span class="s2">, </span><span class="s1">Code</span><span class="s2">, </span><span
+    class="s1">getProperty</span><span class="s2">, </span><span class="s1">regexpCode</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+
+<span class="s1">type FormatValidate </span><span class="s2">=</span>
+  <span class="s2">| </span><span class="s1">FormatValidator</span><span class="s2">&lt;</span><span
+    class="s1">string</span><span class="s2">&gt;</span>
+  <span class="s2">| </span><span class="s1">FormatValidator</span><span class="s2">&lt;</span><span
+    class="s1">number</span><span class="s2">&gt;</span>
+  <span class="s2">| </span><span class="s1">AsyncFormatValidator</span><span class="s2">&lt;</span><span class="s1">string</span><span
+    class="s2">&gt;</span>
+  <span class="s2">| </span><span class="s1">AsyncFormatValidator</span><span class="s2">&lt;</span><span class="s1">number</span><span
+    class="s2">&gt;</span>
+  <span class="s2">| </span><span class="s1">RegExp</span>
+  <span class="s2">| </span><span class="s1">string</span>
+  <span class="s2">| </span><span class="s0">true</span>
+
+<span class="s0">export </span><span class="s1">type FormatError </span><span class="s2">= </span><span class="s1">ErrorObject</span><span
+    class="s2">&lt;</span><span class="s3">&quot;format&quot;</span><span class="s2">, {</span><span
+    class="s1">format</span><span class="s2">: </span><span class="s1">string</span><span class="s2">}, </span><span
+    class="s1">string </span><span class="s2">| {</span><span class="s1">$data</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">}&gt;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: ({</span><span class="s1">schemaCode</span><span
+    class="s2">}) =&gt; </span><span class="s1">str</span><span class="s3">`must match format &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span
+    class="s3">&quot;`</span><span class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">schemaCode</span><span
+    class="s2">}) =&gt; </span><span class="s1">_</span><span class="s3">`{format: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span class="s3">}`</span><span
+    class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;format&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">type</span><span class="s2">: [</span><span class="s3">&quot;number&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;string&quot;</span><span class="s2">],</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">$data</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">, </span><span class="s1">ruleType</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">$data</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">schemaCode</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">opts</span><span class="s2">, </span><span
+    class="s1">errSchemaPath</span><span class="s2">, </span><span class="s1">schemaEnv</span><span class="s2">, </span><span
+    class="s1">self</span><span class="s2">} = </span><span class="s1">it</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">validateFormats</span><span class="s2">) </span><span class="s0">return</span>
+
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">$data</span><span class="s2">) </span><span
+    class="s1">validate$DataFormat</span><span class="s2">()</span>
+    <span class="s0">else </span><span class="s1">validateFormat</span><span class="s2">()</span>
+
+    <span class="s0">function </span><span class="s1">validate$DataFormat</span><span class="s2">(): </span><span
+    class="s0">void </span><span class="s2">{</span>
+      <span class="s0">const </span><span class="s1">fmts </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">scopeValue</span><span class="s2">(</span><span
+    class="s3">&quot;formats&quot;</span><span class="s2">, {</span>
+        <span class="s1">ref</span><span class="s2">: </span><span class="s1">self</span><span class="s2">.</span><span
+    class="s1">formats</span><span class="s2">,</span>
+        <span class="s1">code</span><span class="s2">: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">code</span><span class="s2">.</span><span class="s1">formats</span><span class="s2">,</span>
+      <span class="s2">})</span>
+      <span class="s0">const </span><span class="s1">fDef </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">const</span><span class="s2">(</span><span
+    class="s3">&quot;fDef&quot;</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">fmts</span><span class="s2">}</span><span
+    class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span
+    class="s2">}</span><span class="s3">]`</span><span class="s2">)</span>
+      <span class="s0">const </span><span class="s1">fType </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;fType&quot;</span><span
+    class="s2">)</span>
+      <span class="s0">const </span><span class="s1">format </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span
+    class="s3">&quot;format&quot;</span><span class="s2">)</span>
+      <span class="s4">// TODO simplify</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span>
+        <span class="s1">_</span><span class="s3">`typeof </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">fDef</span><span class="s2">} </span><span class="s3">== &quot;object&quot; &amp;&amp; !(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">fDef</span><span class="s2">} </span><span class="s3">instanceof RegExp)`</span><span
+    class="s2">,</span>
+        <span class="s2">() =&gt; </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">assign</span><span class="s2">(</span><span class="s1">fType</span><span class="s2">, </span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">fDef</span><span class="s2">}</span><span class="s3">.type || &quot;string&quot;`</span><span class="s2">).</span><span
+    class="s1">assign</span><span class="s2">(</span><span class="s1">format</span><span class="s2">, </span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">fDef</span><span class="s2">}</span><span class="s3">.validate`</span><span class="s2">),</span>
+        <span class="s2">() =&gt; </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">assign</span><span class="s2">(</span><span class="s1">fType</span><span class="s2">, </span><span
+    class="s1">_</span><span class="s3">`&quot;string&quot;`</span><span class="s2">).</span><span
+    class="s1">assign</span><span class="s2">(</span><span class="s1">format</span><span class="s2">, </span><span
+    class="s1">fDef</span><span class="s2">)</span>
+      <span class="s2">)</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">fail$data</span><span
+    class="s2">(</span><span class="s1">or</span><span class="s2">(</span><span class="s1">unknownFmt</span><span
+    class="s2">(), </span><span class="s1">invalidFmt</span><span class="s2">()))</span>
+
+      <span class="s0">function </span><span class="s1">unknownFmt</span><span class="s2">(): </span><span class="s1">Code </span><span
+    class="s2">{</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">strictSchema </span><span class="s2">=== </span><span class="s0">false</span><span
+    class="s2">) </span><span class="s0">return </span><span class="s1">nil</span>
+        <span class="s0">return </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schemaCode</span><span class="s2">} </span><span
+    class="s3">&amp;&amp; !</span><span class="s1">$</span><span class="s2">{</span><span class="s1">format</span><span
+    class="s2">}</span><span class="s3">`</span>
+      <span class="s2">}</span>
+
+      <span class="s0">function </span><span class="s1">invalidFmt</span><span class="s2">(): </span><span class="s1">Code </span><span
+    class="s2">{</span>
+        <span class="s0">const </span><span class="s1">callFormat </span><span class="s2">= </span><span class="s1">schemaEnv</span><span
+    class="s2">.</span><span class="s1">$async</span>
+          <span class="s2">? </span><span class="s1">_</span><span class="s3">`(</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">fDef</span><span class="s2">}</span><span class="s3">.async ? await </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">format</span><span class="s2">}</span><span class="s3">(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">) : </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">format</span><span class="s2">}</span><span class="s3">(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">))`</span>
+          <span class="s2">: </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">format</span><span class="s2">}</span><span class="s3">(</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">)`</span>
+        <span class="s0">const </span><span class="s1">validData </span><span class="s2">= </span><span
+    class="s1">_</span><span class="s3">`(typeof </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">format</span><span class="s2">} </span><span class="s3">== &quot;function&quot; ? </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">callFormat</span><span class="s2">} </span><span
+    class="s3">: </span><span class="s1">$</span><span class="s2">{</span><span class="s1">format</span><span
+    class="s2">}</span><span class="s3">.test(</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s3">))`</span>
+        <span class="s0">return </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">format</span><span class="s2">} </span><span class="s3">&amp;&amp; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">format</span><span class="s2">} </span><span
+    class="s3">!== true &amp;&amp; </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">fType</span><span class="s2">} </span><span class="s3">=== </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">ruleType</span><span class="s2">} </span><span
+    class="s3">&amp;&amp; !</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">validData</span><span class="s2">}</span><span class="s3">`</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">validateFormat</span><span class="s2">(): </span><span class="s0">void </span><span
+    class="s2">{</span>
+      <span class="s0">const </span><span class="s1">formatDef</span><span class="s2">: </span><span class="s1">AddedFormat </span><span
+    class="s2">| </span><span class="s1">undefined </span><span class="s2">= </span><span class="s1">self</span><span
+    class="s2">.</span><span class="s1">formats</span><span class="s2">[</span><span class="s1">schema</span><span
+    class="s2">]</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">formatDef</span><span class="s2">) {</span>
+        <span class="s1">unknownFormat</span><span class="s2">()</span>
+        <span class="s0">return</span>
+      <span class="s2">}</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">formatDef </span><span class="s2">=== </span><span
+    class="s0">true</span><span class="s2">) </span><span class="s0">return</span>
+      <span class="s0">const </span><span class="s2">[</span><span class="s1">fmtType</span><span
+    class="s2">, </span><span class="s1">format</span><span class="s2">, </span><span class="s1">fmtRef</span><span
+    class="s2">] = </span><span class="s1">getFormat</span><span class="s2">(</span><span
+    class="s1">formatDef</span><span class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">fmtType </span><span
+    class="s2">=== </span><span class="s1">ruleType</span><span class="s2">) </span><span class="s1">cxt</span><span
+    class="s2">.</span><span class="s1">pass</span><span class="s2">(</span><span class="s1">validCondition</span><span
+    class="s2">())</span>
+
+      <span class="s0">function </span><span class="s1">unknownFormat</span><span class="s2">(): </span><span
+    class="s0">void </span><span class="s2">{</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">strictSchema </span><span class="s2">=== </span><span class="s0">false</span><span class="s2">) {</span>
+          <span class="s1">self</span><span class="s2">.</span><span class="s1">logger</span><span
+    class="s2">.</span><span class="s1">warn</span><span class="s2">(</span><span class="s1">unknownMsg</span><span
+    class="s2">())</span>
+          <span class="s0">return</span>
+        <span class="s2">}</span>
+        <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s1">unknownMsg</span><span
+    class="s2">())</span>
+
+        <span class="s0">function </span><span class="s1">unknownMsg</span><span class="s2">(): </span><span class="s1">string </span><span
+    class="s2">{</span>
+          <span class="s0">return </span><span class="s3">`unknown format &quot;</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schema </span><span class="s2">as </span><span class="s1">string</span><span
+    class="s2">}</span><span class="s3">&quot; ignored in schema at path &quot;</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">errSchemaPath</span><span class="s2">}</span><span class="s3">&quot;`</span>
+        <span class="s2">}</span>
+      <span class="s2">}</span>
+
+      <span class="s0">function </span><span class="s1">getFormat</span><span class="s2">(</span><span
+    class="s1">fmtDef</span><span class="s2">: </span><span class="s1">AddedFormat</span><span
+    class="s2">): [</span><span class="s1">string</span><span class="s2">, </span><span class="s1">FormatValidate</span><span
+    class="s2">, </span><span class="s1">Code</span><span class="s2">] {</span>
+        <span class="s0">const </span><span class="s1">code </span><span class="s2">=</span>
+          <span class="s1">fmtDef </span><span class="s0">instanceof </span><span class="s1">RegExp</span>
+            <span class="s2">? </span><span class="s1">regexpCode</span><span class="s2">(</span><span
+    class="s1">fmtDef</span><span class="s2">)</span>
+            <span class="s2">: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">code</span><span class="s2">.</span><span class="s1">formats</span>
+            <span class="s2">? </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">code</span><span
+    class="s2">.</span><span class="s1">formats</span><span class="s2">}</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">getProperty</span><span class="s2">(</span><span class="s1">schema</span><span
+    class="s2">)}</span><span class="s3">`</span>
+            <span class="s2">: </span><span class="s1">undefined</span>
+        <span class="s0">const </span><span class="s1">fmt </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">scopeValue</span><span class="s2">(</span><span
+    class="s3">&quot;formats&quot;</span><span class="s2">, {</span><span class="s1">key</span><span
+    class="s2">: </span><span class="s1">schema</span><span class="s2">, </span><span class="s1">ref</span><span
+    class="s2">: </span><span class="s1">fmtDef</span><span class="s2">, </span><span class="s1">code</span><span
+    class="s2">})</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">fmtDef </span><span class="s2">== </span><span class="s3">&quot;object&quot; </span><span class="s2">&amp;&amp; !(</span><span
+    class="s1">fmtDef </span><span class="s0">instanceof </span><span class="s1">RegExp</span><span
+    class="s2">)) {</span>
+          <span class="s0">return </span><span class="s2">[</span><span class="s1">fmtDef</span><span
+    class="s2">.</span><span class="s1">type </span><span class="s2">|| </span><span
+    class="s3">&quot;string&quot;</span><span class="s2">, </span><span class="s1">fmtDef</span><span
+    class="s2">.</span><span class="s1">validate</span><span class="s2">, </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">fmt</span><span
+    class="s2">}</span><span class="s3">.validate`</span><span class="s2">]</span>
+        <span class="s2">}</span>
+
+        <span class="s0">return </span><span class="s2">[</span><span class="s3">&quot;string&quot;</span><span
+    class="s2">, </span><span class="s1">fmtDef</span><span class="s2">, </span><span class="s1">fmt</span><span
+    class="s2">]</span>
+      <span class="s2">}</span>
+
+      <span class="s0">function </span><span class="s1">validCondition</span><span class="s2">(): </span><span
+    class="s1">Code </span><span class="s2">{</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">formatDef </span><span class="s2">== </span><span class="s3">&quot;object&quot; </span><span class="s2">&amp;&amp; !(</span><span
+    class="s1">formatDef </span><span class="s0">instanceof </span><span class="s1">RegExp</span><span class="s2">) &amp;&amp; </span><span
+    class="s1">formatDef</span><span class="s2">.</span><span class="s1">async</span><span class="s2">) {</span>
+          <span class="s0">if </span><span class="s2">(!</span><span class="s1">schemaEnv</span><span
+    class="s2">.</span><span class="s1">$async</span><span class="s2">) </span><span class="s0">throw new </span><span
+    class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;async format in sync schema&quot;</span><span
+    class="s2">)</span>
+          <span class="s0">return </span><span class="s1">_</span><span class="s3">`await </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">fmtRef</span><span class="s2">}</span><span class="s3">(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">)`</span>
+        <span class="s2">}</span>
+        <span class="s0">return typeof </span><span class="s1">format </span><span class="s2">== </span><span
+    class="s3">&quot;function&quot; </span><span class="s2">? </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">fmtRef</span><span class="s2">}</span><span
+    class="s3">(</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s3">)` </span><span class="s2">: </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">fmtRef</span><span class="s2">}</span><span
+    class="s3">.test(</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s3">)`</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

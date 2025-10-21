@@ -1,0 +1,95 @@
+<html>
+<head>
+  <title>_baseKeysIn.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _baseKeysIn.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">isObject </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./isObject'</span><span class="s2">),</span>
+    <span class="s1">isPrototype </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_isPrototype'</span><span class="s2">),</span>
+    <span class="s1">nativeKeysIn </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_nativeKeysIn'</span><span class="s2">);</span>
+
+<span class="s4">/** Used for built-in method references. */</span>
+<span class="s0">var </span><span class="s1">objectProto </span><span class="s2">= </span><span class="s1">Object</span><span
+    class="s2">.</span><span class="s1">prototype</span><span class="s2">;</span>
+
+<span class="s4">/** Used to check objects for own properties. */</span>
+<span class="s0">var </span><span class="s1">hasOwnProperty </span><span class="s2">= </span><span class="s1">objectProto</span><span
+    class="s2">.</span><span class="s1">hasOwnProperty</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* The base implementation of `_.keysIn` which doesn't treat sparse arrays as dense.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} object The object to query.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Array} Returns the array of property names.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">baseKeysIn</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">isObject</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">)) {</span>
+    <span class="s0">return </span><span class="s1">nativeKeysIn</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">isProto </span><span class="s2">= </span><span
+    class="s1">isPrototype</span><span class="s2">(</span><span class="s1">object</span><span class="s2">),</span>
+      <span class="s1">result </span><span class="s2">= [];</span>
+
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">var </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">object</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(!(</span><span class="s1">key </span><span class="s2">== </span><span
+    class="s3">'constructor' </span><span class="s2">&amp;&amp; (</span><span class="s1">isProto </span><span
+    class="s2">|| !</span><span class="s1">hasOwnProperty</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s1">object</span><span class="s2">, </span><span
+    class="s1">key</span><span class="s2">)))) {</span>
+      <span class="s1">result</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">baseKeysIn</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

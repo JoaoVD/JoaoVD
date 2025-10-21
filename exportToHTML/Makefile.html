@@ -1,0 +1,103 @@
+<html>
+<head>
+  <title>Makefile</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #7a7e85;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #56a8f5;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #cf8e6d;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          Makefile</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0"># </span><span
+  class="s1">get Makefile directory name: http://stackoverflow.com/a/5982798/376773</span>
+<span class="s0">THIS_MAKEFILE_PATH:=$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))</span>
+<span class="s0">THIS_DIR:=$(shell </span><span class="s3">cd </span><span
+    class="s0">$(dir $(THIS_MAKEFILE_PATH))</span><span class="s3">;pwd</span><span class="s0">)</span>
+
+<span class="s0"># </span><span class="s1">BIN directory</span>
+<span class="s0">BIN := $(THIS_DIR)</span><span class="s2">/node_modules/.bin
+</span>
+<span class="s0"># </span><span class="s1">Path</span>
+<span class="s0">PATH := </span><span class="s2">node_modules/.bin:</span><span class="s0">$(PATH)</span>
+<span class="s0">SHELL := </span><span class="s2">/bin/bash
+</span>
+<span class="s0"># </span><span class="s1">applications</span>
+<span class="s0">NODE ?= $(shell </span><span class="s3">which node</span><span class="s0">)</span>
+<span class="s0">YARN ?= $(shell </span><span class="s3">which yarn</span><span class="s0">)</span>
+<span class="s0">PKG ?= $(if $(YARN),$(YARN),$(NODE) $(shell </span><span class="s3">which npm</span><span
+    class="s0">))</span>
+<span class="s0">BROWSERIFY ?= $(NODE) $(BIN)</span><span class="s2">/browserify
+</span>
+<span class="s4">.FORCE</span><span class="s0">:</span>
+
+<span class="s4">install</span><span class="s0">: </span><span class="s2">node_modules</span>
+
+<span class="s4">node_modules</span><span class="s0">: </span><span class="s2">package.json</span>
+	<span class="s5">@</span><span class="s2">NODE_ENV= </span><span class="s0">$(PKG) </span><span
+    class="s2">install</span>
+	<span class="s5">@</span><span class="s2">touch node_modules</span>
+
+<span class="s4">lint</span><span class="s0">: </span><span class="s2">.FORCE</span>
+	<span class="s2">eslint browser.js debug.js index.js node.js</span>
+
+<span class="s4">test-node</span><span class="s0">: </span><span class="s2">.FORCE</span>
+	<span class="s2">istanbul cover node_modules/mocha/bin/_mocha -- test/**.js</span>
+
+<span class="s4">test-browser</span><span class="s0">: </span><span class="s2">.FORCE</span>
+	<span class="s2">mkdir -p dist</span>
+
+	<span class="s5">@</span><span class="s0">$(BROWSERIFY) </span><span class="s6">\
+		</span><span class="s2">--standalone debug </span><span class="s6">\
+		</span><span class="s2">. &gt; dist/debug.js</span>
+
+	<span class="s2">karma start --single-run</span>
+	<span class="s2">rimraf dist</span>
+
+<span class="s4">test</span><span class="s0">: </span><span class="s2">.FORCE</span>
+	<span class="s2">concurrently </span><span class="s6">\
+		</span><span class="s2">&quot;make test-node&quot; </span><span class="s6">\
+		</span><span class="s2">&quot;make test-browser&quot;</span>
+
+<span class="s4">coveralls</span><span class="s0">:</span>
+	<span class="s2">cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js</span>
+
+<span class="s0">.PHONY: </span><span class="s2">all install clean distclean</span>
+</pre>
+</body>
+</html>

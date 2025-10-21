@@ -1,0 +1,106 @@
+<html>
+<head>
+  <title>_createRange.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _createRange.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseRange </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseRange'</span><span class="s2">),</span>
+    <span class="s1">isIterateeCall </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_isIterateeCall'</span><span class="s2">),</span>
+    <span class="s1">toFinite </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./toFinite'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a `_.range` or `_.rangeRight` function.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{boolean} [fromRight] Specify iterating from right to left.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span
+    class="s4">{Function} Returns the new range function.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">createRange</span><span class="s2">(</span><span
+    class="s1">fromRight</span><span class="s2">) {</span>
+  <span class="s0">return function</span><span class="s2">(</span><span class="s1">start</span><span
+    class="s2">, </span><span class="s1">end</span><span class="s2">, </span><span class="s1">step</span><span
+    class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">step </span><span class="s2">&amp;&amp; </span><span
+    class="s0">typeof </span><span class="s1">step </span><span class="s2">!= </span><span
+    class="s3">'number' </span><span class="s2">&amp;&amp; </span><span class="s1">isIterateeCall</span><span
+    class="s2">(</span><span class="s1">start</span><span class="s2">, </span><span class="s1">end</span><span
+    class="s2">, </span><span class="s1">step</span><span class="s2">)) {</span>
+      <span class="s1">end </span><span class="s2">= </span><span class="s1">step </span><span class="s2">= </span><span
+    class="s1">undefined</span><span class="s2">;</span>
+    <span class="s2">}</span>
+    <span class="s6">// Ensure the sign of `-0` is preserved.</span>
+    <span class="s1">start </span><span class="s2">= </span><span class="s1">toFinite</span><span
+    class="s2">(</span><span class="s1">start</span><span class="s2">);</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">end </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) {</span>
+      <span class="s1">end </span><span class="s2">= </span><span class="s1">start</span><span class="s2">;</span>
+      <span class="s1">start </span><span class="s2">= </span><span class="s7">0</span><span class="s2">;</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">end </span><span class="s2">= </span><span class="s1">toFinite</span><span
+    class="s2">(</span><span class="s1">end</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s1">step </span><span class="s2">= </span><span class="s1">step </span><span
+    class="s2">=== </span><span class="s1">undefined </span><span class="s2">? (</span><span
+    class="s1">start </span><span class="s2">&lt; </span><span class="s1">end </span><span class="s2">? </span><span
+    class="s7">1 </span><span class="s2">: -</span><span class="s7">1</span><span class="s2">) : </span><span
+    class="s1">toFinite</span><span class="s2">(</span><span class="s1">step</span><span class="s2">);</span>
+    <span class="s0">return </span><span class="s1">baseRange</span><span class="s2">(</span><span
+    class="s1">start</span><span class="s2">, </span><span class="s1">end</span><span class="s2">, </span><span
+    class="s1">step</span><span class="s2">, </span><span class="s1">fromRight</span><span class="s2">);</span>
+  <span class="s2">};</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">createRange</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

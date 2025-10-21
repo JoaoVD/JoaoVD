@@ -1,0 +1,208 @@
+<html>
+<head>
+  <title>type.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          type.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">KeywordErrorDefinition</span><span class="s2">} </span><span
+  class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">nil</span><span class="s2">, </span><span class="s1">or</span><span class="s2">, </span><span class="s1">Code</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s1">validTimestamp from </span><span class="s3">&quot;../../runtime/timestamp&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">useFunc</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/util&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">checkMetadata</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./metadata&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">typeErrorMessage</span><span
+    class="s2">, </span><span class="s1">typeErrorParams</span><span class="s2">, </span><span
+    class="s1">_JTDTypeError</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;./error&quot;</span>
+
+<span class="s0">export </span><span class="s1">type JTDTypeError </span><span class="s2">= </span><span class="s1">_JTDTypeError</span><span
+    class="s2">&lt;</span><span class="s3">&quot;type&quot;</span><span class="s2">, </span><span
+    class="s1">JTDType</span><span class="s2">, </span><span class="s1">JTDType</span><span class="s2">&gt;</span>
+
+<span class="s0">export </span><span class="s1">type IntType </span><span class="s2">= </span><span class="s3">&quot;int8&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;uint8&quot; </span><span class="s2">| </span><span class="s3">&quot;int16&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;uint16&quot; </span><span class="s2">| </span><span class="s3">&quot;int32&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;uint32&quot;</span>
+
+<span class="s0">export const </span><span class="s1">intRange</span><span class="s2">: {[</span><span
+    class="s1">T </span><span class="s0">in </span><span class="s1">IntType</span><span class="s2">]: [</span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">number</span><span class="s2">]} = {</span>
+  <span class="s1">int8</span><span class="s2">: [-</span><span class="s4">128</span><span class="s2">, </span><span
+    class="s4">127</span><span class="s2">, </span><span class="s4">3</span><span class="s2">],</span>
+  <span class="s1">uint8</span><span class="s2">: [</span><span class="s4">0</span><span class="s2">, </span><span
+    class="s4">255</span><span class="s2">, </span><span class="s4">3</span><span class="s2">],</span>
+  <span class="s1">int16</span><span class="s2">: [-</span><span class="s4">32768</span><span class="s2">, </span><span
+    class="s4">32767</span><span class="s2">, </span><span class="s4">5</span><span class="s2">],</span>
+  <span class="s1">uint16</span><span class="s2">: [</span><span class="s4">0</span><span class="s2">, </span><span
+    class="s4">65535</span><span class="s2">, </span><span class="s4">5</span><span class="s2">],</span>
+  <span class="s1">int32</span><span class="s2">: [-</span><span class="s4">2147483648</span><span
+    class="s2">, </span><span class="s4">2147483647</span><span class="s2">, </span><span class="s4">10</span><span
+    class="s2">],</span>
+  <span class="s1">uint32</span><span class="s2">: [</span><span class="s4">0</span><span class="s2">, </span><span
+    class="s4">4294967295</span><span class="s2">, </span><span class="s4">10</span><span class="s2">],</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type JTDType </span><span class="s2">= </span><span class="s3">&quot;boolean&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;string&quot; </span><span class="s2">| </span><span class="s3">&quot;timestamp&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;float32&quot; </span><span class="s2">| </span><span class="s3">&quot;float64&quot; </span><span
+    class="s2">| </span><span class="s1">IntType</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: (</span><span class="s1">cxt</span><span
+    class="s2">) =&gt; </span><span class="s1">typeErrorMessage</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">, </span><span class="s1">cxt</span><span class="s2">.</span><span class="s1">schema</span><span
+    class="s2">),</span>
+  <span class="s1">params</span><span class="s2">: (</span><span class="s1">cxt</span><span
+    class="s2">) =&gt; </span><span class="s1">typeErrorParams</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">, </span><span class="s1">cxt</span><span class="s2">.</span><span class="s1">schema</span><span
+    class="s2">),</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">timestampCode</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">): </span><span
+    class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">timestamp</span><span
+    class="s2">, </span><span class="s1">allowDate</span><span class="s2">} = </span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">opts</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">timestamp </span><span
+    class="s2">=== </span><span class="s3">&quot;date&quot;</span><span class="s2">) </span><span
+    class="s0">return </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">instanceof Date `</span>
+  <span class="s0">const </span><span class="s1">vts </span><span class="s2">= </span><span
+    class="s1">useFunc</span><span class="s2">(</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">validTimestamp</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">allowDateArg </span><span class="s2">= </span><span class="s1">allowDate </span><span
+    class="s2">? </span><span class="s1">_</span><span class="s3">`, true` </span><span class="s2">: </span><span
+    class="s1">nil</span>
+  <span class="s0">const </span><span class="s1">validString </span><span class="s2">= </span><span
+    class="s1">_</span><span class="s3">`typeof </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">} </span><span class="s3">== &quot;string&quot; &amp;&amp; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">vts</span><span class="s2">}</span><span
+    class="s3">(</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">allowDateArg</span><span
+    class="s2">}</span><span class="s3">)`</span>
+  <span class="s0">return </span><span class="s1">timestamp </span><span class="s2">=== </span><span class="s3">&quot;string&quot; </span><span
+    class="s2">? </span><span class="s1">validString </span><span class="s2">: </span><span class="s1">or</span><span
+    class="s2">(</span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span
+    class="s3">instanceof Date`</span><span class="s2">, </span><span class="s1">validString</span><span
+    class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;type&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s1">checkMetadata</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">)</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">data</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">parentSchema</span><span
+    class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s0">let </span><span class="s1">cond</span><span class="s2">: </span><span class="s1">Code</span>
+    <span class="s0">switch </span><span class="s2">(</span><span class="s1">schema</span><span class="s2">) {</span>
+      <span class="s0">case </span><span class="s3">&quot;boolean&quot;</span><span class="s2">:</span>
+      <span class="s0">case </span><span class="s3">&quot;string&quot;</span><span class="s2">:</span>
+        <span class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`typeof </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">== </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schema</span><span class="s2">}</span><span class="s3">`</span>
+        <span class="s0">break</span>
+      <span class="s0">case </span><span class="s3">&quot;timestamp&quot;</span><span class="s2">: {</span>
+        <span class="s1">cond </span><span class="s2">= </span><span class="s1">timestampCode</span><span
+    class="s2">(</span><span class="s1">cxt</span><span class="s2">)</span>
+        <span class="s0">break</span>
+      <span class="s2">}</span>
+      <span class="s0">case </span><span class="s3">&quot;float32&quot;</span><span class="s2">:</span>
+      <span class="s0">case </span><span class="s3">&quot;float64&quot;</span><span class="s2">:</span>
+        <span class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`typeof </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">== &quot;number&quot;`</span>
+        <span class="s0">break</span>
+      <span class="s0">default</span><span class="s2">: {</span>
+        <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s1">schema </span><span class="s2">as </span><span class="s1">IntType</span>
+        <span class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`typeof </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">== &quot;number&quot; &amp;&amp; isFinite(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">) &amp;&amp; !(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">% 1)`</span>
+        <span class="s0">if </span><span class="s2">(!</span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">int32range </span><span
+    class="s2">&amp;&amp; (</span><span class="s1">sch </span><span class="s2">=== </span><span class="s3">&quot;int32&quot; </span><span
+    class="s2">|| </span><span class="s1">sch </span><span class="s2">=== </span><span
+    class="s3">&quot;uint32&quot;</span><span class="s2">)) {</span>
+          <span class="s0">if </span><span class="s2">(</span><span class="s1">sch </span><span
+    class="s2">=== </span><span class="s3">&quot;uint32&quot;</span><span class="s2">) </span><span
+    class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">cond</span><span class="s2">} </span><span class="s3">&amp;&amp; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">&gt;= 0`</span>
+        <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+          <span class="s0">const </span><span class="s2">[</span><span class="s1">min</span><span
+    class="s2">, </span><span class="s1">max</span><span class="s2">] = </span><span class="s1">intRange</span><span
+    class="s2">[</span><span class="s1">sch</span><span class="s2">]</span>
+          <span class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">cond</span><span class="s2">} </span><span class="s3">&amp;&amp; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">&gt;= </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">min</span><span class="s2">} </span><span class="s3">&amp;&amp; </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">&lt;= </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">max</span><span class="s2">}</span><span
+    class="s3">`</span>
+        <span class="s2">}</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">pass</span><span class="s2">(</span><span
+    class="s1">parentSchema</span><span class="s2">.</span><span class="s1">nullable </span><span
+    class="s2">? </span><span class="s1">or</span><span class="s2">(</span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">} </span><span class="s3">=== null`</span><span class="s2">, </span><span class="s1">cond</span><span
+    class="s2">) : </span><span class="s1">cond</span><span class="s2">)</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

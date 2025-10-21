@@ -1,0 +1,333 @@
+<html>
+<head>
+  <title>globals.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #cf8e6d;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s4 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          globals.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">declare </span><span class="s1">var </span><span class="s0">global</span><span
+  class="s2">: </span><span class="s1">typeof </span><span class="s0">globalThis</span><span class="s2">;</span>
+
+<span class="s0">declare </span><span class="s1">var </span><span class="s0">process</span><span
+    class="s2">: </span><span class="s0">NodeJS</span><span class="s2">.</span><span class="s0">Process</span><span
+    class="s2">;</span>
+<span class="s0">declare </span><span class="s1">var </span><span class="s0">console</span><span
+    class="s2">: </span><span class="s0">Console</span><span class="s2">;</span>
+
+<span class="s1">interface </span><span class="s0">ErrorConstructor </span><span class="s2">{</span>
+    <span class="s3">/**</span>
+     <span class="s3">* Creates a `.stack` property on `targetObject`, which when accessed returns</span>
+     <span class="s3">* a string representing the location in the code at which</span>
+     <span class="s3">* `Error.captureStackTrace()` was called.</span>
+     <span class="s3">*</span>
+     <span class="s3">* ```js</span>
+     <span class="s3">* const myObject = {};</span>
+     <span class="s3">* Error.captureStackTrace(myObject);</span>
+     <span class="s3">* myObject.stack;  // Similar to `new Error().stack`</span>
+     <span class="s3">* ```</span>
+     <span class="s3">*</span>
+     <span class="s3">* The first line of the trace will be prefixed with</span>
+     <span class="s3">* `${myObject.name}: ${myObject.message}`.</span>
+     <span class="s3">*</span>
+     <span class="s3">* The optional `constructorOpt` argument accepts a function. If given, all frames</span>
+     <span class="s3">* above `constructorOpt`, including `constructorOpt`, will be omitted from the</span>
+     <span class="s3">* generated stack trace.</span>
+     <span class="s3">*</span>
+     <span class="s3">* The `constructorOpt` argument is useful for hiding implementation</span>
+     <span class="s3">* details of error generation from the user. For instance:</span>
+     <span class="s3">*</span>
+     <span class="s3">* ```js</span>
+     <span class="s3">* function a() {</span>
+     <span class="s3">*   b();</span>
+     <span class="s3">* }</span>
+     <span class="s3">*</span>
+     <span class="s3">* function b() {</span>
+     <span class="s3">*   c();</span>
+     <span class="s3">* }</span>
+     <span class="s3">*</span>
+     <span class="s3">* function c() {</span>
+     <span class="s3">*   // Create an error without stack trace to avoid calculating the stack trace twice.</span>
+     <span class="s3">*   const { stackTraceLimit } = Error;</span>
+     <span class="s3">*   Error.stackTraceLimit = 0;</span>
+     <span class="s3">*   const error = new Error();</span>
+     <span class="s3">*   Error.stackTraceLimit = stackTraceLimit;</span>
+     <span class="s3">*</span>
+     <span class="s3">*   // Capture the stack trace above function b</span>
+     <span
+       class="s3">*   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace</span>
+     <span class="s3">*   throw error;</span>
+     <span class="s3">* }</span>
+     <span class="s3">*</span>
+     <span class="s3">* a();</span>
+     <span class="s3">* ```</span>
+     <span class="s3">*/</span>
+    <span class="s0">captureStackTrace</span><span class="s2">(</span><span class="s0">targetObject</span><span
+    class="s2">: </span><span class="s0">object</span><span class="s2">, </span><span
+    class="s0">constructorOpt</span><span class="s2">?: </span><span class="s0">Function</span><span
+    class="s2">): </span><span class="s1">void</span><span class="s2">;</span>
+    <span class="s3">/**</span>
+     <span class="s3">* </span><span class="s4">@see </span><span class="s3">https://v8.dev/docs/stack-trace-api#customizing-stack-traces</span>
+     <span class="s3">*/</span>
+    <span class="s0">prepareStackTrace</span><span class="s2">(</span><span class="s0">err</span><span
+    class="s2">: </span><span class="s0">Error</span><span class="s2">, </span><span class="s0">stackTraces</span><span
+    class="s2">: </span><span class="s0">NodeJS</span><span class="s2">.</span><span class="s0">CallSite</span><span
+    class="s2">[]): </span><span class="s0">any</span><span class="s2">;</span>
+    <span class="s3">/**</span>
+     <span class="s3">* The `Error.stackTraceLimit` property specifies the number of stack frames</span>
+     <span class="s3">* collected by a stack trace (whether generated by `new Error().stack` or</span>
+     <span class="s3">* `Error.captureStackTrace(obj)`).</span>
+     <span class="s3">*</span>
+     <span class="s3">* The default value is `10` but may be set to any valid JavaScript number. Changes</span>
+     <span class="s3">* will affect any stack trace captured _after_ the value has been changed.</span>
+     <span class="s3">*</span>
+     <span class="s3">* If set to a non-number value, or set to a negative number, stack traces will</span>
+     <span class="s3">* not capture any frames.</span>
+     <span class="s3">*/</span>
+    <span class="s0">stackTraceLimit</span><span class="s2">: </span><span class="s0">number</span><span
+    class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s3">/**</span>
+ <span class="s3">* Enable this API with the `--expose-gc` CLI flag.</span>
+ <span class="s3">*/</span>
+<span class="s0">declare </span><span class="s1">var </span><span class="s0">gc</span><span class="s2">: </span><span
+    class="s0">NodeJS</span><span class="s2">.</span><span class="s0">GCFunction </span><span class="s2">| </span><span
+    class="s0">undefined</span><span class="s2">;</span>
+
+<span class="s0">declare namespace NodeJS </span><span class="s2">{</span>
+    <span class="s1">interface </span><span class="s0">CallSite </span><span class="s2">{</span>
+        <span class="s0">getColumnNumber</span><span class="s2">(): </span><span class="s0">number </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getEnclosingColumnNumber</span><span class="s2">(): </span><span class="s0">number </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getEnclosingLineNumber</span><span class="s2">(): </span><span class="s0">number </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getEvalOrigin</span><span class="s2">(): </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s0">undefined</span><span class="s2">;</span>
+        <span class="s0">getFileName</span><span class="s2">(): </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getFunction</span><span class="s2">(): </span><span class="s0">Function </span><span
+    class="s2">| </span><span class="s0">undefined</span><span class="s2">;</span>
+        <span class="s0">getFunctionName</span><span class="s2">(): </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getLineNumber</span><span class="s2">(): </span><span class="s0">number </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getMethodName</span><span class="s2">(): </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getPosition</span><span class="s2">(): </span><span class="s0">number</span><span
+    class="s2">;</span>
+        <span class="s0">getPromiseIndex</span><span class="s2">(): </span><span class="s0">number </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getScriptHash</span><span class="s2">(): </span><span class="s0">string</span><span class="s2">;</span>
+        <span class="s0">getScriptNameOrSourceURL</span><span class="s2">(): </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">getThis</span><span class="s2">(): </span><span class="s0">unknown</span><span
+    class="s2">;</span>
+        <span class="s0">getTypeName</span><span class="s2">(): </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">;</span>
+        <span class="s0">isAsync</span><span class="s2">(): </span><span class="s0">boolean</span><span
+    class="s2">;</span>
+        <span class="s0">isConstructor</span><span class="s2">(): </span><span class="s0">boolean</span><span
+    class="s2">;</span>
+        <span class="s0">isEval</span><span class="s2">(): </span><span class="s0">boolean</span><span
+    class="s2">;</span>
+        <span class="s0">isNative</span><span class="s2">(): </span><span class="s0">boolean</span><span
+    class="s2">;</span>
+        <span class="s0">isPromiseAll</span><span class="s2">(): </span><span class="s0">boolean</span><span class="s2">;</span>
+        <span class="s0">isToplevel</span><span class="s2">(): </span><span class="s0">boolean</span><span
+    class="s2">;</span>
+    <span class="s2">}</span>
+
+    <span class="s1">interface </span><span class="s0">ErrnoException </span><span class="s1">extends </span><span
+    class="s0">Error </span><span class="s2">{</span>
+        <span class="s0">errno</span><span class="s2">?: </span><span class="s0">number </span><span
+    class="s2">| </span><span class="s0">undefined</span><span class="s2">;</span>
+        <span class="s0">code</span><span class="s2">?: </span><span class="s0">string </span><span class="s2">| </span><span
+    class="s0">undefined</span><span class="s2">;</span>
+        <span class="s0">path</span><span class="s2">?: </span><span class="s0">string </span><span class="s2">| </span><span
+    class="s0">undefined</span><span class="s2">;</span>
+        <span class="s0">syscall</span><span class="s2">?: </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s0">undefined</span><span class="s2">;</span>
+    <span class="s2">}</span>
+
+    <span class="s1">interface </span><span class="s0">ReadableStream </span><span class="s1">extends </span><span
+    class="s0">EventEmitter </span><span class="s2">{</span>
+        <span class="s0">readable</span><span class="s2">: </span><span class="s0">boolean</span><span
+    class="s2">;</span>
+        <span class="s0">read</span><span class="s2">(</span><span class="s0">size</span><span
+    class="s2">?: </span><span class="s0">number</span><span class="s2">): </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s0">Buffer</span><span class="s2">;</span>
+        <span class="s0">setEncoding</span><span class="s2">(</span><span class="s0">encoding</span><span
+    class="s2">: </span><span class="s0">BufferEncoding</span><span class="s2">): </span><span
+    class="s1">this</span><span class="s2">;</span>
+        <span class="s0">pause</span><span class="s2">(): </span><span class="s1">this</span><span class="s2">;</span>
+        <span class="s0">resume</span><span class="s2">(): </span><span class="s1">this</span><span class="s2">;</span>
+        <span class="s0">isPaused</span><span class="s2">(): </span><span class="s0">boolean</span><span
+    class="s2">;</span>
+        <span class="s0">pipe</span><span class="s2">&lt;</span><span class="s0">T </span><span
+    class="s1">extends </span><span class="s0">WritableStream</span><span class="s2">&gt;(</span><span class="s0">destination</span><span
+    class="s2">: </span><span class="s0">T</span><span class="s2">, </span><span class="s0">options</span><span
+    class="s2">?: { </span><span class="s0">end</span><span class="s2">?: </span><span class="s0">boolean </span><span
+    class="s2">| </span><span class="s0">undefined </span><span class="s2">}): </span><span class="s0">T</span><span
+    class="s2">;</span>
+        <span class="s0">unpipe</span><span class="s2">(</span><span class="s0">destination</span><span
+    class="s2">?: </span><span class="s0">WritableStream</span><span class="s2">): </span><span
+    class="s1">this</span><span class="s2">;</span>
+        <span class="s0">unshift</span><span class="s2">(</span><span class="s0">chunk</span><span
+    class="s2">: </span><span class="s0">string </span><span class="s2">| </span><span class="s0">Uint8Array</span><span
+    class="s2">, </span><span class="s0">encoding</span><span class="s2">?: </span><span
+    class="s0">BufferEncoding</span><span class="s2">): </span><span class="s1">void</span><span class="s2">;</span>
+        <span class="s0">wrap</span><span class="s2">(</span><span class="s0">oldStream</span><span class="s2">: </span><span
+    class="s0">ReadableStream</span><span class="s2">): </span><span class="s1">this</span><span class="s2">;</span>
+        <span class="s2">[</span><span class="s0">Symbol</span><span class="s2">.</span><span
+    class="s0">asyncIterator</span><span class="s2">](): </span><span class="s0">AsyncIterableIterator</span><span
+    class="s2">&lt;</span><span class="s0">string </span><span class="s2">| </span><span class="s0">Buffer</span><span
+    class="s2">&gt;;</span>
+    <span class="s2">}</span>
+
+    <span class="s1">interface </span><span class="s0">WritableStream </span><span class="s1">extends </span><span
+    class="s0">EventEmitter </span><span class="s2">{</span>
+        <span class="s0">writable</span><span class="s2">: </span><span class="s0">boolean</span><span
+    class="s2">;</span>
+        <span class="s0">write</span><span class="s2">(</span><span class="s0">buffer</span><span
+    class="s2">: </span><span class="s0">Uint8Array </span><span class="s2">| </span><span class="s0">string</span><span
+    class="s2">, </span><span class="s0">cb</span><span class="s2">?: (</span><span class="s0">err</span><span
+    class="s2">?: </span><span class="s0">Error </span><span class="s2">| </span><span class="s1">null</span><span
+    class="s2">) =&gt; </span><span class="s1">void</span><span class="s2">): </span><span
+    class="s0">boolean</span><span class="s2">;</span>
+        <span class="s0">write</span><span class="s2">(</span><span class="s0">str</span><span class="s2">: </span><span
+    class="s0">string</span><span class="s2">, </span><span class="s0">encoding</span><span class="s2">?: </span><span
+    class="s0">BufferEncoding</span><span class="s2">, </span><span class="s0">cb</span><span
+    class="s2">?: (</span><span class="s0">err</span><span class="s2">?: </span><span class="s0">Error </span><span
+    class="s2">| </span><span class="s1">null</span><span class="s2">) =&gt; </span><span class="s1">void</span><span
+    class="s2">): </span><span class="s0">boolean</span><span class="s2">;</span>
+        <span class="s0">end</span><span class="s2">(</span><span class="s0">cb</span><span
+    class="s2">?: () =&gt; </span><span class="s1">void</span><span class="s2">): </span><span
+    class="s1">this</span><span class="s2">;</span>
+        <span class="s0">end</span><span class="s2">(</span><span class="s0">data</span><span class="s2">: </span><span
+    class="s0">string </span><span class="s2">| </span><span class="s0">Uint8Array</span><span class="s2">, </span><span
+    class="s0">cb</span><span class="s2">?: () =&gt; </span><span class="s1">void</span><span class="s2">): </span><span
+    class="s1">this</span><span class="s2">;</span>
+        <span class="s0">end</span><span class="s2">(</span><span class="s0">str</span><span class="s2">: </span><span
+    class="s0">string</span><span class="s2">, </span><span class="s0">encoding</span><span class="s2">?: </span><span
+    class="s0">BufferEncoding</span><span class="s2">, </span><span class="s0">cb</span><span
+    class="s2">?: () =&gt; </span><span class="s1">void</span><span class="s2">): </span><span
+    class="s1">this</span><span class="s2">;</span>
+    <span class="s2">}</span>
+
+    <span class="s1">interface </span><span class="s0">ReadWriteStream </span><span class="s1">extends </span><span
+    class="s0">ReadableStream</span><span class="s2">, </span><span class="s0">WritableStream </span><span
+    class="s2">{}</span>
+
+    <span class="s1">interface </span><span class="s0">RefCounted </span><span class="s2">{</span>
+        <span class="s0">ref</span><span class="s2">(): </span><span class="s1">this</span><span class="s2">;</span>
+        <span class="s0">unref</span><span class="s2">(): </span><span class="s1">this</span><span class="s2">;</span>
+    <span class="s2">}</span>
+
+    <span class="s1">interface </span><span class="s0">Dict</span><span class="s2">&lt;</span><span
+    class="s0">T</span><span class="s2">&gt; {</span>
+        <span class="s2">[</span><span class="s0">key</span><span class="s2">: </span><span
+    class="s0">string</span><span class="s2">]: </span><span class="s0">T </span><span class="s2">| </span><span
+    class="s0">undefined</span><span class="s2">;</span>
+    <span class="s2">}</span>
+
+    <span class="s1">interface </span><span class="s0">ReadOnlyDict</span><span class="s2">&lt;</span><span
+    class="s0">T</span><span class="s2">&gt; {</span>
+        <span class="s0">readonly </span><span class="s2">[</span><span class="s0">key</span><span
+    class="s2">: </span><span class="s0">string</span><span class="s2">]: </span><span class="s0">T </span><span
+    class="s2">| </span><span class="s0">undefined</span><span class="s2">;</span>
+    <span class="s2">}</span>
+
+    <span class="s1">interface </span><span class="s0">GCFunction </span><span class="s2">{</span>
+        <span class="s2">(</span><span class="s0">minor</span><span class="s2">?: </span><span class="s0">boolean</span><span
+    class="s2">): </span><span class="s1">void</span><span class="s2">;</span>
+        <span class="s2">(</span><span class="s0">options</span><span class="s2">: </span><span class="s0">NodeJS</span><span
+    class="s2">.</span><span class="s0">GCOptions </span><span class="s2">&amp; { </span><span
+    class="s0">execution</span><span class="s2">: </span><span class="s5">&quot;async&quot; </span><span
+    class="s2">}): </span><span class="s0">Promise</span><span class="s2">&lt;</span><span class="s1">void</span><span
+    class="s2">&gt;;</span>
+        <span class="s2">(</span><span class="s0">options</span><span class="s2">: </span><span class="s0">NodeJS</span><span
+    class="s2">.</span><span class="s0">GCOptions</span><span class="s2">): </span><span class="s1">void</span><span
+    class="s2">;</span>
+    <span class="s2">}</span>
+
+    <span class="s1">interface </span><span class="s0">GCOptions </span><span class="s2">{</span>
+        <span class="s0">execution</span><span class="s2">?: </span><span class="s5">&quot;sync&quot; </span><span
+    class="s2">| </span><span class="s5">&quot;async&quot; </span><span class="s2">| </span><span
+    class="s0">undefined</span><span class="s2">;</span>
+        <span class="s0">flavor</span><span class="s2">?: </span><span class="s5">&quot;regular&quot; </span><span
+    class="s2">| </span><span class="s5">&quot;last-resort&quot; </span><span class="s2">| </span><span class="s0">undefined</span><span
+    class="s2">;</span>
+        <span class="s0">type</span><span class="s2">?: </span><span class="s5">&quot;major-snapshot&quot; </span><span
+    class="s2">| </span><span class="s5">&quot;major&quot; </span><span class="s2">| </span><span class="s5">&quot;minor&quot; </span><span
+    class="s2">| </span><span class="s0">undefined</span><span class="s2">;</span>
+        <span class="s0">filename</span><span class="s2">?: </span><span class="s0">string </span><span
+    class="s2">| </span><span class="s0">undefined</span><span class="s2">;</span>
+    <span class="s2">}</span>
+
+    <span class="s3">/** An iterable iterator returned by the Node.js API. */</span>
+    <span class="s1">interface </span><span class="s0">Iterator</span><span class="s2">&lt;</span><span
+    class="s0">T</span><span class="s2">, </span><span class="s0">TReturn </span><span class="s2">= </span><span
+    class="s0">undefined</span><span class="s2">, </span><span class="s0">TNext </span><span class="s2">= </span><span
+    class="s0">any</span><span class="s2">&gt; </span><span class="s1">extends </span><span
+    class="s0">IteratorObject</span><span class="s2">&lt;</span><span class="s0">T</span><span class="s2">, </span><span
+    class="s0">TReturn</span><span class="s2">, </span><span class="s0">TNext</span><span class="s2">&gt; {</span>
+        <span class="s2">[</span><span class="s0">Symbol</span><span class="s2">.</span><span class="s0">iterator</span><span
+    class="s2">](): </span><span class="s0">NodeJS</span><span class="s2">.</span><span class="s0">Iterator</span><span
+    class="s2">&lt;</span><span class="s0">T</span><span class="s2">, </span><span class="s0">TReturn</span><span
+    class="s2">, </span><span class="s0">TNext</span><span class="s2">&gt;;</span>
+    <span class="s2">}</span>
+
+    <span class="s3">/** An async iterable iterator returned by the Node.js API. */</span>
+    <span class="s1">interface </span><span class="s0">AsyncIterator</span><span class="s2">&lt;</span><span class="s0">T</span><span
+    class="s2">, </span><span class="s0">TReturn </span><span class="s2">= </span><span class="s0">undefined</span><span
+    class="s2">, </span><span class="s0">TNext </span><span class="s2">= </span><span class="s0">any</span><span
+    class="s2">&gt; </span><span class="s1">extends </span><span class="s0">AsyncIteratorObject</span><span class="s2">&lt;</span><span
+    class="s0">T</span><span class="s2">, </span><span class="s0">TReturn</span><span class="s2">, </span><span
+    class="s0">TNext</span><span class="s2">&gt; {</span>
+        <span class="s2">[</span><span class="s0">Symbol</span><span class="s2">.</span><span
+    class="s0">asyncIterator</span><span class="s2">](): </span><span class="s0">NodeJS</span><span
+    class="s2">.</span><span class="s0">AsyncIterator</span><span class="s2">&lt;</span><span class="s0">T</span><span
+    class="s2">, </span><span class="s0">TReturn</span><span class="s2">, </span><span class="s0">TNext</span><span
+    class="s2">&gt;;</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

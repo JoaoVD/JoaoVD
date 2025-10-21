@@ -1,0 +1,597 @@
+<html>
+<head>
+  <title>console.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          console.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:console` module provides a simple debugging console that is similar to</span>
+ <span class="s0">* the JavaScript console mechanism provided by web browsers.</span>
+ <span class="s0">*</span>
+ <span class="s0">* The module exports two specific components:</span>
+ <span class="s0">*</span>
+ <span class="s0">* * A `Console` class with methods such as `console.log()`, `console.error()`, and `console.warn()` that can be used to write to any Node.js stream.</span>
+ <span class="s0">* * A global `console` instance configured to write to [`process.stdout`](https://nodejs.org/docs/latest-v24.x/api/process.html#processstdout) and</span>
+ <span class="s0">* [`process.stderr`](https://nodejs.org/docs/latest-v24.x/api/process.html#processstderr). The global `console` can be used without importing the `node:console` module.</span>
+ <span class="s0">*</span>
+ <span class="s0">* _**Warning**_: The global console object's methods are neither consistently</span>
+ <span class="s0">* synchronous like the browser APIs they resemble, nor are they consistently</span>
+ <span class="s0">* asynchronous like all other Node.js streams. See the [`note on process I/O`](https://nodejs.org/docs/latest-v24.x/api/process.html#a-note-on-process-io) for</span>
+ <span class="s0">* more information.</span>
+ <span class="s0">*</span>
+ <span class="s0">* Example using the global `console`:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* console.log('hello world');</span>
+ <span class="s0">* // Prints: hello world, to stdout</span>
+ <span class="s0">* console.log('hello %s', 'world');</span>
+ <span class="s0">* // Prints: hello world, to stdout</span>
+ <span class="s0">* console.error(new Error('Whoops, something bad happened'));</span>
+ <span class="s0">* // Prints error message and stack trace to stderr:</span>
+ <span class="s0">* //   Error: Whoops, something bad happened</span>
+ <span class="s0">* //     at [eval]:5:15</span>
+ <span class="s0">* //     at Script.runInThisContext (node:vm:132:18)</span>
+ <span class="s0">* //     at Object.runInThisContext (node:vm:309:38)</span>
+ <span class="s0">* //     at node:internal/process/execution:77:19</span>
+ <span class="s0">* //     at [eval]-wrapper:6:22</span>
+ <span class="s0">* //     at evalScript (node:internal/process/execution:76:60)</span>
+ <span class="s0">* //     at node:internal/main/eval_string:23:3</span>
+ <span class="s0">*</span>
+ <span class="s0">* const name = 'Will Robinson';</span>
+ <span class="s0">* console.warn(`Danger ${name}! Danger!`);</span>
+ <span class="s0">* // Prints: Danger Will Robinson! Danger!, to stderr</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* Example using the `Console` class:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* const out = getStreamSomehow();</span>
+ <span class="s0">* const err = getStreamSomehow();</span>
+ <span class="s0">* const myConsole = new console.Console(out, err);</span>
+ <span class="s0">*</span>
+ <span class="s0">* myConsole.log('hello world');</span>
+ <span class="s0">* // Prints: hello world, to out</span>
+ <span class="s0">* myConsole.log('hello %s', 'world');</span>
+ <span class="s0">* // Prints: hello world, to out</span>
+ <span class="s0">* myConsole.error(new Error('Whoops, something bad happened'));</span>
+ <span class="s0">* // Prints: [Error: Whoops, something bad happened], to err</span>
+ <span class="s0">*</span>
+ <span class="s0">* const name = 'Will Robinson';</span>
+ <span class="s0">* myConsole.warn(`Danger ${name}! Danger!`);</span>
+ <span class="s0">* // Prints: Danger Will Robinson! Danger!, to err</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/console.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;console&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s2">console </span><span class="s4">= </span><span
+    class="s2">require</span><span class="s4">(</span><span class="s3">&quot;node:console&quot;</span><span class="s4">);</span>
+    <span class="s5">export </span><span class="s4">= </span><span class="s2">console</span><span class="s4">;</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:console&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">InspectOptions </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:util&quot;</span><span
+    class="s4">;</span>
+    <span class="s2">global </span><span class="s4">{</span>
+        <span
+          class="s6">// This needs to be global to avoid TS2403 in case lib.dom.d.ts is present in the same build</span>
+        <span class="s5">interface </span><span class="s2">Console </span><span class="s4">{</span>
+            <span class="s2">Console</span><span class="s4">: </span><span class="s2">console</span><span
+    class="s4">.</span><span class="s2">ConsoleConstructor</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* `console.assert()` writes a message if `value` is [falsy](https://developer.mozilla.org/en-US/docs/Glossary/Falsy) or omitted. It only</span>
+             <span class="s0">* writes a message and does not otherwise affect execution. The output always</span>
+             <span
+               class="s0">* starts with `&quot;Assertion failed&quot;`. If provided, `message` is formatted using</span>
+             <span class="s0">* [`util.format()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilformatformat-args).</span>
+             <span class="s0">*</span>
+             <span class="s0">* If `value` is [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy), nothing happens.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* console.assert(true, 'does nothing');</span>
+             <span class="s0">*</span>
+             <span class="s0">* console.assert(false, 'Whoops %s work', 'didn\'t');</span>
+             <span class="s0">* // Assertion failed: Whoops didn't work</span>
+             <span class="s0">*</span>
+             <span class="s0">* console.assert();</span>
+             <span class="s0">* // Assertion failed</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.101</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">value The value tested for being truthy.</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">message All arguments besides `value` are used as error message.</span>
+             <span class="s0">*/</span>
+            <span class="s2">assert</span><span class="s4">(</span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">, </span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">...optionalParams</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* When `stdout` is a TTY, calling `console.clear()` will attempt to clear the</span>
+             <span class="s0">* TTY. When `stdout` is not a TTY, this method does nothing.</span>
+             <span class="s0">*</span>
+             <span class="s0">* The specific operation of `console.clear()` can vary across operating systems</span>
+             <span class="s0">* and terminal types. For most Linux operating systems, `console.clear()` operates similarly to the `clear` shell command. On Windows, `console.clear()` will clear only the output in the</span>
+             <span class="s0">* current terminal viewport for the Node.js</span>
+             <span class="s0">* binary.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.3.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">clear</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Maintains an internal counter specific to `label` and outputs to `stdout` the</span>
+             <span class="s0">* number of times `console.count()` has been called with the given `label`.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* &gt; console.count()</span>
+             <span class="s0">* default: 1</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt; console.count('default')</span>
+             <span class="s0">* default: 2</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt; console.count('abc')</span>
+             <span class="s0">* abc: 1</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt; console.count('xyz')</span>
+             <span class="s0">* xyz: 1</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt; console.count('abc')</span>
+             <span class="s0">* abc: 2</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt; console.count()</span>
+             <span class="s0">* default: 3</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt;</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.3.0</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">[label='default'] The display label for the counter.</span>
+             <span class="s0">*/</span>
+            <span class="s2">count</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Resets the internal counter specific to `label`.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* &gt; console.count('abc');</span>
+             <span class="s0">* abc: 1</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt; console.countReset('abc');</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt; console.count('abc');</span>
+             <span class="s0">* abc: 1</span>
+             <span class="s0">* undefined</span>
+             <span class="s0">* &gt;</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.3.0</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">[label='default'] The display label for the counter.</span>
+             <span class="s0">*/</span>
+            <span class="s2">countReset</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* The `console.debug()` function is an alias for {</span><span
+    class="s1">@link </span><span class="s0">log}.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">debug</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">, </span><span
+    class="s2">...optionalParams</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Uses [`util.inspect()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilinspectobject-options) on `obj` and prints the resulting string to `stdout`.</span>
+             <span class="s0">* This function bypasses any custom `inspect()` function defined on `obj`.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.101</span>
+             <span class="s0">*/</span>
+            <span class="s2">dir</span><span class="s4">(</span><span class="s2">obj</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">InspectOptions</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* This method calls `console.log()` passing it the arguments received.</span>
+             <span class="s0">* This method does not produce any XML formatting.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">dirxml</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Prints to `stderr` with newline. Multiple arguments can be passed, with the</span>
+             <span class="s0">* first used as the primary message and all additional used as substitution</span>
+             <span
+               class="s0">* values similar to [`printf(3)`](http://man7.org/linux/man-pages/man3/printf.3.html)</span>
+             <span class="s0">* (the arguments are all passed to [`util.format()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilformatformat-args)).</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* const code = 5;</span>
+             <span class="s0">* console.error('error #%d', code);</span>
+             <span class="s0">* // Prints: error #5, to stderr</span>
+             <span class="s0">* console.error('error', code);</span>
+             <span class="s0">* // Prints: error 5, to stderr</span>
+             <span class="s0">* ```</span>
+             <span class="s0">*</span>
+             <span class="s0">* If formatting elements (e.g. `%d`) are not found in the first string then</span>
+             <span class="s0">* [`util.inspect()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilinspectobject-options) is called on each argument and the</span>
+             <span class="s0">* resulting string values are concatenated. See [`util.format()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilformatformat-args)</span>
+             <span class="s0">* for more information.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.100</span>
+             <span class="s0">*/</span>
+            <span class="s2">error</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">, </span><span
+    class="s2">...optionalParams</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span
+               class="s0">* Increases indentation of subsequent lines by spaces for `groupIndentation` length.</span>
+             <span class="s0">*</span>
+             <span class="s0">* If one or more `label`s are provided, those are printed first without the</span>
+             <span class="s0">* additional indentation.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.5.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">group</span><span class="s4">(</span><span class="s2">...label</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* An alias for {</span><span class="s1">@link </span><span class="s0">group}.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.5.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">groupCollapsed</span><span class="s4">(</span><span class="s2">...label</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span
+               class="s0">* Decreases indentation of subsequent lines by spaces for `groupIndentation` length.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.5.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">groupEnd</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* The `console.info()` function is an alias for {</span><span
+    class="s1">@link </span><span class="s0">log}.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.100</span>
+             <span class="s0">*/</span>
+            <span class="s2">info</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">, </span><span
+    class="s2">...optionalParams</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Prints to `stdout` with newline. Multiple arguments can be passed, with the</span>
+             <span class="s0">* first used as the primary message and all additional used as substitution</span>
+             <span
+               class="s0">* values similar to [`printf(3)`](http://man7.org/linux/man-pages/man3/printf.3.html)</span>
+             <span class="s0">* (the arguments are all passed to [`util.format()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilformatformat-args)).</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* const count = 5;</span>
+             <span class="s0">* console.log('count: %d', count);</span>
+             <span class="s0">* // Prints: count: 5, to stdout</span>
+             <span class="s0">* console.log('count:', count);</span>
+             <span class="s0">* // Prints: count: 5, to stdout</span>
+             <span class="s0">* ```</span>
+             <span class="s0">*</span>
+             <span class="s0">* See [`util.format()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilformatformat-args) for more information.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.100</span>
+             <span class="s0">*/</span>
+            <span class="s2">log</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">, </span><span
+    class="s2">...optionalParams</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Try to construct a table with the columns of the properties of `tabularData` (or use `properties`) and rows of `tabularData` and log it. Falls back to just</span>
+             <span class="s0">* logging the argument if it can't be parsed as tabular.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* // These can't be parsed as tabular data</span>
+             <span class="s0">* console.table(Symbol());</span>
+             <span class="s0">* // Symbol()</span>
+             <span class="s0">*</span>
+             <span class="s0">* console.table(undefined);</span>
+             <span class="s0">* // undefined</span>
+             <span class="s0">*</span>
+             <span class="s0">* console.table([{ a: 1, b: 'Y' }, { a: 'Z', b: 2 }]);</span>
+             <span class="s0">* // ┌─────────┬─────┬─────┐</span>
+             <span class="s0">* // │ (index) │  a  │  b  │</span>
+             <span class="s0">* // ├─────────┼─────┼─────┤</span>
+             <span class="s0">* // │    0    │  1  │ 'Y' │</span>
+             <span class="s0">* // │    1    │ 'Z' │  2  │</span>
+             <span class="s0">* // └─────────┴─────┴─────┘</span>
+             <span class="s0">*</span>
+             <span class="s0">* console.table([{ a: 1, b: 'Y' }, { a: 'Z', b: 2 }], ['a']);</span>
+             <span class="s0">* // ┌─────────┬─────┐</span>
+             <span class="s0">* // │ (index) │  a  │</span>
+             <span class="s0">* // ├─────────┼─────┤</span>
+             <span class="s0">* // │    0    │  1  │</span>
+             <span class="s0">* // │    1    │ 'Z' │</span>
+             <span class="s0">* // └─────────┴─────┘</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.0.0</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">properties Alternate properties for constructing the table.</span>
+             <span class="s0">*/</span>
+            <span class="s2">table</span><span class="s4">(</span><span class="s2">tabularData</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">, </span><span class="s2">properties</span><span
+    class="s4">?: </span><span class="s2">readonly string</span><span class="s4">[]): </span><span
+    class="s5">void</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Starts a timer that can be used to compute the duration of an operation. Timers</span>
+             <span class="s0">* are identified by a unique `label`. Use the same `label` when calling {</span><span
+    class="s1">@link </span><span class="s0">timeEnd} to stop the timer and output the elapsed time in</span>
+             <span class="s0">* suitable time units to `stdout`. For example, if the elapsed</span>
+             <span class="s0">* time is 3869ms, `console.timeEnd()` displays &quot;3.869s&quot;.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.104</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">[label='default']</span>
+             <span class="s0">*/</span>
+            <span class="s2">time</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Stops a timer that was previously started by calling {</span><span
+    class="s1">@link </span><span class="s0">time} and</span>
+             <span class="s0">* prints the result to `stdout`:</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* console.time('bunch-of-stuff');</span>
+             <span class="s0">* // Do a bunch of stuff.</span>
+             <span class="s0">* console.timeEnd('bunch-of-stuff');</span>
+             <span class="s0">* // Prints: bunch-of-stuff: 225.438ms</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.104</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">[label='default']</span>
+             <span class="s0">*/</span>
+            <span class="s2">timeEnd</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* For a timer that was previously started by calling {</span><span
+    class="s1">@link </span><span class="s0">time}, prints</span>
+             <span class="s0">* the elapsed time and other `data` arguments to `stdout`:</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* console.time('process');</span>
+             <span class="s0">* const value = expensiveProcess1(); // Returns 42</span>
+             <span class="s0">* console.timeLog('process', value);</span>
+             <span class="s0">* // Prints &quot;process: 365.227ms 42&quot;.</span>
+             <span class="s0">* doExpensiveProcess2(value);</span>
+             <span class="s0">* console.timeEnd('process');</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.7.0</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">[label='default']</span>
+             <span class="s0">*/</span>
+            <span class="s2">timeLog</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Prints to `stderr` the string `'Trace: '`, followed by the [`util.format()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilformatformat-args)</span>
+             <span class="s0">* formatted message and stack trace to the current position in the code.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* console.trace('Show me');</span>
+             <span class="s0">* // Prints: (stack trace will vary based on where trace is called)</span>
+             <span class="s0">* //  Trace: Show me</span>
+             <span class="s0">* //    at repl:2:9</span>
+             <span class="s0">* //    at REPLServer.defaultEval (repl.js:248:27)</span>
+             <span class="s0">* //    at bound (domain.js:287:14)</span>
+             <span class="s0">* //    at REPLServer.runBound [as eval] (domain.js:300:12)</span>
+             <span class="s0">* //    at REPLServer.&lt;anonymous&gt; (repl.js:412:12)</span>
+             <span class="s0">* //    at emitOne (events.js:82:20)</span>
+             <span class="s0">* //    at REPLServer.emit (events.js:169:7)</span>
+             <span class="s0">* //    at REPLServer.Interface._onLine (readline.js:210:10)</span>
+             <span class="s0">* //    at REPLServer.Interface._line (readline.js:549:8)</span>
+             <span class="s0">* //    at REPLServer.Interface._ttyWrite (readline.js:826:14)</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.104</span>
+             <span class="s0">*/</span>
+            <span class="s2">trace</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">, </span><span
+    class="s2">...optionalParams</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* The `console.warn()` function is an alias for {</span><span
+    class="s1">@link </span><span class="s0">error}.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.100</span>
+             <span class="s0">*/</span>
+            <span class="s2">warn</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">, </span><span
+    class="s2">...optionalParams</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+            <span class="s6">// --- Inspector mode only ---</span>
+            <span class="s0">/**</span>
+             <span class="s0">* This method does not display anything unless used in the inspector. The `console.profile()`</span>
+             <span class="s0">* method starts a JavaScript CPU profile with an optional label until {</span><span
+    class="s1">@link </span><span class="s0">profileEnd}</span>
+             <span class="s0">* is called. The profile is then added to the Profile panel of the inspector.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* console.profile('MyLabel');</span>
+             <span class="s0">* // Some code</span>
+             <span class="s0">* console.profileEnd('MyLabel');</span>
+             <span class="s0">* // Adds the profile 'MyLabel' to the Profiles panel of the inspector.</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">profile</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span
+               class="s0">* This method does not display anything unless used in the inspector. Stops the current</span>
+             <span
+               class="s0">* JavaScript CPU profiling session if one has been started and prints the report to the</span>
+             <span class="s0">* Profiles panel of the inspector. See {</span><span class="s1">@link </span><span
+    class="s0">profile} for an example.</span>
+             <span class="s0">*</span>
+             <span
+               class="s0">* If this method is called without a label, the most recently started profile is stopped.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">profileEnd</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* This method does not display anything unless used in the inspector. The `console.timeStamp()`</span>
+             <span
+               class="s0">* method adds an event with the label `'label'` to the Timeline panel of the inspector.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.0.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">timeStamp</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s4">}</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `console` module provides a simple debugging console that is similar to the</span>
+         <span class="s0">* JavaScript console mechanism provided by web browsers.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The module exports two specific components:</span>
+         <span class="s0">*</span>
+         <span class="s0">* * A `Console` class with methods such as `console.log()`, `console.error()` and `console.warn()` that can be used to write to any Node.js stream.</span>
+         <span class="s0">* * A global `console` instance configured to write to [`process.stdout`](https://nodejs.org/docs/latest-v24.x/api/process.html#processstdout) and</span>
+         <span class="s0">* [`process.stderr`](https://nodejs.org/docs/latest-v24.x/api/process.html#processstderr). The global `console` can be used without importing the `node:console` module.</span>
+         <span class="s0">*</span>
+         <span class="s0">* _**Warning**_: The global console object's methods are neither consistently</span>
+         <span class="s0">* synchronous like the browser APIs they resemble, nor are they consistently</span>
+         <span class="s0">* asynchronous like all other Node.js streams. See the [`note on process I/O`](https://nodejs.org/docs/latest-v24.x/api/process.html#a-note-on-process-io) for</span>
+         <span class="s0">* more information.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example using the global `console`:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* console.log('hello world');</span>
+         <span class="s0">* // Prints: hello world, to stdout</span>
+         <span class="s0">* console.log('hello %s', 'world');</span>
+         <span class="s0">* // Prints: hello world, to stdout</span>
+         <span class="s0">* console.error(new Error('Whoops, something bad happened'));</span>
+         <span class="s0">* // Prints error message and stack trace to stderr:</span>
+         <span class="s0">* //   Error: Whoops, something bad happened</span>
+         <span class="s0">* //     at [eval]:5:15</span>
+         <span class="s0">* //     at Script.runInThisContext (node:vm:132:18)</span>
+         <span class="s0">* //     at Object.runInThisContext (node:vm:309:38)</span>
+         <span class="s0">* //     at node:internal/process/execution:77:19</span>
+         <span class="s0">* //     at [eval]-wrapper:6:22</span>
+         <span class="s0">* //     at evalScript (node:internal/process/execution:76:60)</span>
+         <span class="s0">* //     at node:internal/main/eval_string:23:3</span>
+         <span class="s0">*</span>
+         <span class="s0">* const name = 'Will Robinson';</span>
+         <span class="s0">* console.warn(`Danger ${name}! Danger!`);</span>
+         <span class="s0">* // Prints: Danger Will Robinson! Danger!, to stderr</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example using the `Console` class:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const out = getStreamSomehow();</span>
+         <span class="s0">* const err = getStreamSomehow();</span>
+         <span class="s0">* const myConsole = new console.Console(out, err);</span>
+         <span class="s0">*</span>
+         <span class="s0">* myConsole.log('hello world');</span>
+         <span class="s0">* // Prints: hello world, to out</span>
+         <span class="s0">* myConsole.log('hello %s', 'world');</span>
+         <span class="s0">* // Prints: hello world, to out</span>
+         <span class="s0">* myConsole.error(new Error('Whoops, something bad happened'));</span>
+         <span class="s0">* // Prints: [Error: Whoops, something bad happened], to err</span>
+         <span class="s0">*</span>
+         <span class="s0">* const name = 'Will Robinson';</span>
+         <span class="s0">* myConsole.warn(`Danger ${name}! Danger!`);</span>
+         <span class="s0">* // Prints: Danger Will Robinson! Danger!, to err</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/console.js)</span>
+         <span class="s0">*/</span>
+        <span class="s2">namespace console </span><span class="s4">{</span>
+            <span class="s5">interface </span><span class="s2">ConsoleConstructorOptions </span><span
+    class="s4">{</span>
+                <span class="s2">stdout</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">WritableStream</span><span class="s4">;</span>
+                <span class="s2">stderr</span><span class="s4">?: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Ignore errors when writing to the underlying streams.</span>
+                 <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+                 <span class="s0">*/</span>
+                <span class="s2">ignoreErrors</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Set color support for this `Console` instance. Setting to true enables coloring while inspecting</span>
+                 <span class="s0">* values. Setting to `false` disables coloring while inspecting values. Setting to `'auto'` makes color</span>
+                 <span class="s0">* support depend on the value of the `isTTY` property and the value returned by `getColorDepth()` on the</span>
+                 <span class="s0">* respective stream. This option can not be used, if `inspectOptions.colors` is set as well.</span>
+                 <span class="s0">* </span><span class="s1">@default </span><span class="s0">auto</span>
+                 <span class="s0">*/</span>
+                <span class="s2">colorMode</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s3">&quot;auto&quot; </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Specifies options that are passed along to</span>
+                 <span class="s0">* [`util.inspect()`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilinspectobject-options).</span>
+                 <span class="s0">*/</span>
+                <span class="s2">inspectOptions</span><span class="s4">?: </span><span class="s2">InspectOptions </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+                <span class="s0">/**</span>
+                 <span class="s0">* Set group indentation.</span>
+                 <span class="s0">* </span><span class="s1">@default </span><span class="s0">2</span>
+                 <span class="s0">*/</span>
+                <span class="s2">groupIndentation</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+            <span class="s4">}</span>
+            <span class="s5">interface </span><span class="s2">ConsoleConstructor </span><span class="s4">{</span>
+                <span class="s2">prototype</span><span class="s4">: </span><span class="s2">Console</span><span
+    class="s4">;</span>
+                <span class="s5">new</span><span class="s4">(</span><span class="s2">stdout</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">, </span><span class="s2">stderr</span><span
+    class="s4">?: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">, </span><span class="s2">ignoreErrors</span><span
+    class="s4">?: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s2">Console</span><span
+    class="s4">;</span>
+                <span class="s5">new</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">ConsoleConstructorOptions</span><span class="s4">): </span><span class="s2">Console</span><span
+    class="s4">;</span>
+            <span class="s4">}</span>
+        <span class="s4">}</span>
+        <span class="s5">var </span><span class="s2">console</span><span class="s4">: </span><span
+    class="s2">Console</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">export </span><span class="s4">= </span><span class="s2">globalThis</span><span class="s4">.</span><span
+    class="s2">console</span><span class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

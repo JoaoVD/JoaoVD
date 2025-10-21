@@ -1,0 +1,915 @@
+<html>
+<head>
+  <title>dgram.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          dgram.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:dgram` module provides an implementation of UDP datagram sockets.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import dgram from 'node:dgram';</span>
+ <span class="s0">*</span>
+ <span class="s0">* const server = dgram.createSocket('udp4');</span>
+ <span class="s0">*</span>
+ <span class="s0">* server.on('error', (err) =&gt; {</span>
+ <span class="s0">*   console.error(`server error:\n${err.stack}`);</span>
+ <span class="s0">*   server.close();</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* server.on('message', (msg, rinfo) =&gt; {</span>
+ <span class="s0">*   console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* server.on('listening', () =&gt; {</span>
+ <span class="s0">*   const address = server.address();</span>
+ <span class="s0">*   console.log(`server listening ${address.address}:${address.port}`);</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* server.bind(41234);</span>
+ <span class="s0">* // Prints: server listening 0.0.0.0:41234</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/dgram.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;dgram&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">AddressInfo</span><span
+    class="s4">, </span><span class="s2">BlockList </span><span class="s4">} </span><span class="s2">from </span><span
+    class="s3">&quot;node:net&quot;</span><span class="s4">;</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">dns from </span><span class="s3">&quot;node:dns&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Abortable</span><span class="s4">, </span><span
+    class="s2">EventEmitter </span><span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:events&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">RemoteInfo </span><span class="s4">{</span>
+        <span class="s2">address</span><span class="s4">: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">family</span><span class="s4">: </span><span class="s3">&quot;IPv4&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;IPv6&quot;</span><span class="s4">;</span>
+        <span class="s2">port</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">size</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">BindOptions </span><span class="s4">{</span>
+        <span class="s2">port</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">address</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">exclusive</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">fd</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type SocketType </span><span class="s4">= </span><span class="s3">&quot;udp4&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;udp6&quot;</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">SocketOptions </span><span class="s5">extends </span><span
+    class="s2">Abortable </span><span class="s4">{</span>
+        <span class="s2">type</span><span class="s4">: </span><span class="s2">SocketType</span><span
+    class="s4">;</span>
+        <span class="s2">reuseAddr</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">reusePort</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">ipv6Only</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">recvBufferSize</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">sendBufferSize</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">lookup</span><span class="s4">?:</span>
+            <span class="s4">| ((</span>
+                <span class="s2">hostname</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+                <span class="s2">options</span><span class="s4">: </span><span class="s2">dns</span><span
+    class="s4">.</span><span class="s2">LookupOneOptions</span><span class="s4">,</span>
+                <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ErrnoException </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">address</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">family</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+            <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">)</span>
+            <span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">receiveBlockList</span><span class="s4">?: </span><span class="s2">BlockList </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">sendBlockList</span><span class="s4">?: </span><span class="s2">BlockList </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates a `dgram.Socket` object. Once the socket is created, calling `socket.bind()` will instruct the socket to begin listening for datagram</span>
+     <span class="s0">* messages. When `address` and `port` are not passed to `socket.bind()` the</span>
+     <span class="s0">* method will bind the socket to the &quot;all interfaces&quot; address on a random port</span>
+     <span class="s0">* (it does the right thing for both `udp4` and `udp6` sockets). The bound address</span>
+     <span class="s0">* and port can be retrieved using `socket.address().address` and `socket.address().port`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the `signal` option is enabled, calling `.abort()` on the corresponding `AbortController` is similar to calling `.close()` on the socket:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const controller = new AbortController();</span>
+     <span class="s0">* const { signal } = controller;</span>
+     <span class="s0">* const server = dgram.createSocket({ type: 'udp4', signal });</span>
+     <span class="s0">* server.on('message', (msg, rinfo) =&gt; {</span>
+     <span class="s0">*   console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* // Later, when you want to close the server.</span>
+     <span class="s0">* controller.abort();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.13</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">options Available options are:</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Attached as a listener for `'message'` events. Optional.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createSocket</span><span class="s4">(</span><span
+    class="s2">type</span><span class="s4">: </span><span class="s2">SocketType</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">?: (</span><span class="s2">msg</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">rinfo</span><span class="s4">: </span><span
+    class="s2">RemoteInfo</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s2">Socket</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">createSocket</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">SocketOptions</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">?: (</span><span class="s2">msg</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">rinfo</span><span class="s4">: </span><span
+    class="s2">RemoteInfo</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s2">Socket</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Encapsulates the datagram functionality.</span>
+     <span class="s0">*</span>
+     <span class="s0">* New instances of `dgram.Socket` are created using {</span><span class="s1">@link </span><span
+    class="s0">createSocket}.</span>
+     <span class="s0">* The `new` keyword is not to be used to create `dgram.Socket` instances.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.99</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Socket </span><span class="s5">extends </span><span class="s2">EventEmitter </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Tells the kernel to join a multicast group at the given `multicastAddress` and `multicastInterface` using the `IP_ADD_MEMBERSHIP` socket option. If the `multicastInterface` argument is not</span>
+         <span class="s0">* specified, the operating system will choose</span>
+         <span class="s0">* one interface and will add membership to it. To add membership to every</span>
+         <span class="s0">* available interface, call `addMembership` multiple times, once per interface.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When called on an unbound socket, this method will implicitly bind to a random</span>
+         <span class="s0">* port, listening on all interfaces.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When sharing a UDP socket across multiple `cluster` workers, the`socket.addMembership()` function must be called only once or an`EADDRINUSE` error will occur:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import cluster from 'node:cluster';</span>
+         <span class="s0">* import dgram from 'node:dgram';</span>
+         <span class="s0">*</span>
+         <span class="s0">* if (cluster.isPrimary) {</span>
+         <span class="s0">*   cluster.fork(); // Works ok.</span>
+         <span class="s0">*   cluster.fork(); // Fails with EADDRINUSE.</span>
+         <span class="s0">* } else {</span>
+         <span class="s0">*   const s = dgram.createSocket('udp4');</span>
+         <span class="s0">*   s.bind(1234, () =&gt; {</span>
+         <span class="s0">*     s.addMembership('224.0.0.114');</span>
+         <span class="s0">*   });</span>
+         <span class="s0">* }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.9</span>
+         <span class="s0">*/</span>
+        <span class="s2">addMembership</span><span class="s4">(</span><span class="s2">multicastAddress</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">multicastInterface</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an object containing the address information for a socket.</span>
+         <span class="s0">* For UDP sockets, this object will contain `address`, `family`, and `port` properties.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `EBADF` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.99</span>
+         <span class="s0">*/</span>
+        <span class="s2">address</span><span class="s4">(): </span><span class="s2">AddressInfo</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* For UDP sockets, causes the `dgram.Socket` to listen for datagram</span>
+         <span class="s0">* messages on a named `port` and optional `address`. If `port` is not</span>
+         <span class="s0">* specified or is `0`, the operating system will attempt to bind to a</span>
+         <span class="s0">* random port. If `address` is not specified, the operating system will</span>
+         <span class="s0">* attempt to listen on all addresses. Once binding is complete, a `'listening'` event is emitted and the optional `callback` function is</span>
+         <span class="s0">* called.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Specifying both a `'listening'` event listener and passing a `callback` to the `socket.bind()` method is not harmful but not very</span>
+         <span class="s0">* useful.</span>
+         <span class="s0">*</span>
+         <span class="s0">* A bound datagram socket keeps the Node.js process running to receive</span>
+         <span class="s0">* datagram messages.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If binding fails, an `'error'` event is generated. In rare case (e.g.</span>
+         <span class="s0">* attempting to bind with a closed socket), an `Error` may be thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example of a UDP server listening on port 41234:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import dgram from 'node:dgram';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const server = dgram.createSocket('udp4');</span>
+         <span class="s0">*</span>
+         <span class="s0">* server.on('error', (err) =&gt; {</span>
+         <span class="s0">*   console.error(`server error:\n${err.stack}`);</span>
+         <span class="s0">*   server.close();</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* server.on('message', (msg, rinfo) =&gt; {</span>
+         <span class="s0">*   console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* server.on('listening', () =&gt; {</span>
+         <span class="s0">*   const address = server.address();</span>
+         <span class="s0">*   console.log(`server listening ${address.address}:${address.port}`);</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* server.bind(41234);</span>
+         <span class="s0">* // Prints: server listening 0.0.0.0:41234</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.99</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback with no parameters. Called when binding is complete.</span>
+         <span class="s0">*/</span>
+        <span class="s2">bind</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">bind</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">bind</span><span class="s4">(</span><span class="s2">callback</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">bind</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">BindOptions</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">?: () =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Close the underlying socket and stop listening for data on it. If a callback is</span>
+         <span class="s0">* provided, it is added as a listener for the `'close'` event.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.99</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Called when the socket has been closed.</span>
+         <span class="s0">*/</span>
+        <span class="s2">close</span><span class="s4">(</span><span class="s2">callback</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Associates the `dgram.Socket` to a remote address and port. Every</span>
+         <span class="s0">* message sent by this handle is automatically sent to that destination. Also,</span>
+         <span class="s0">* the socket will only receive messages from that remote peer.</span>
+         <span class="s0">* Trying to call `connect()` on an already connected socket will result</span>
+         <span class="s0">* in an `ERR_SOCKET_DGRAM_IS_CONNECTED` exception. If `address` is not</span>
+         <span class="s0">* provided, `'127.0.0.1'` (for `udp4` sockets) or `'::1'` (for `udp6` sockets)</span>
+         <span class="s0">* will be used by default. Once the connection is complete, a `'connect'` event</span>
+         <span class="s0">* is emitted and the optional `callback` function is called. In case of failure,</span>
+         <span class="s0">* the `callback` is called or, failing this, an `'error'` event is emitted.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.0.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Called when the connection is completed or on error.</span>
+         <span class="s0">*/</span>
+        <span class="s2">connect</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">address</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s2">connect</span><span class="s4">(</span><span class="s2">port</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A synchronous function that disassociates a connected `dgram.Socket` from</span>
+         <span class="s0">* its remote address. Trying to call `disconnect()` on an unbound or already</span>
+         <span class="s0">* disconnected socket will result in an `ERR_SOCKET_DGRAM_NOT_CONNECTED` exception.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">disconnect</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Instructs the kernel to leave a multicast group at `multicastAddress` using the `IP_DROP_MEMBERSHIP` socket option. This method is automatically called by the</span>
+         <span class="s0">* kernel when the socket is closed or the process terminates, so most apps will</span>
+         <span class="s0">* never have reason to call this.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `multicastInterface` is not specified, the operating system will attempt to</span>
+         <span class="s0">* drop membership on all valid interfaces.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.9</span>
+         <span class="s0">*/</span>
+        <span class="s2">dropMembership</span><span class="s4">(</span><span class="s2">multicastAddress</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">multicastInterface</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method throws `ERR_SOCKET_BUFFER_SIZE` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.7.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">the `SO_RCVBUF` socket receive buffer size in bytes.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getRecvBufferSize</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This method throws `ERR_SOCKET_BUFFER_SIZE` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.7.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">the `SO_SNDBUF` socket send buffer size in bytes.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getSendBufferSize</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.8.0, v16.19.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span
+    class="s0">Number of bytes queued for sending.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getSendQueueSize</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.8.0, v16.19.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">Number of send requests currently in the queue awaiting to be processed.</span>
+         <span class="s0">*/</span>
+        <span class="s2">getSendQueueCount</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* By default, binding a socket will cause it to block the Node.js process from</span>
+         <span class="s0">* exiting as long as the socket is open. The `socket.unref()` method can be used</span>
+         <span class="s0">* to exclude the socket from the reference counting that keeps the Node.js</span>
+         <span class="s0">* process active. The `socket.ref()` method adds the socket back to the reference</span>
+         <span class="s0">* counting and restores the default behavior.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Calling `socket.ref()` multiples times will have no additional effect.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `socket.ref()` method returns a reference to the socket so calls can be</span>
+         <span class="s0">* chained.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+         <span class="s0">*/</span>
+        <span class="s2">ref</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns an object containing the `address`, `family`, and `port` of the remote</span>
+         <span class="s0">* endpoint. This method throws an `ERR_SOCKET_DGRAM_NOT_CONNECTED` exception</span>
+         <span class="s0">* if the socket is not connected.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">remoteAddress</span><span class="s4">(): </span><span class="s2">AddressInfo</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Broadcasts a datagram on the socket.</span>
+         <span class="s0">* For connectionless sockets, the destination `port` and `address` must be</span>
+         <span class="s0">* specified. Connected sockets, on the other hand, will use their associated</span>
+         <span class="s0">* remote endpoint, so the `port` and `address` arguments must not be set.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `msg` argument contains the message to be sent.</span>
+         <span class="s0">* Depending on its type, different behavior can apply. If `msg` is a `Buffer`,</span>
+         <span class="s0">* any `TypedArray` or a `DataView`,</span>
+         <span class="s0">* the `offset` and `length` specify the offset within the `Buffer` where the</span>
+         <span class="s0">* message begins and the number of bytes in the message, respectively.</span>
+         <span class="s0">* If `msg` is a `String`, then it is automatically converted to a `Buffer` with `'utf8'` encoding. With messages that</span>
+         <span class="s0">* contain multi-byte characters, `offset` and `length` will be calculated with</span>
+         <span class="s0">* respect to `byte length` and not the character position.</span>
+         <span class="s0">* If `msg` is an array, `offset` and `length` must not be specified.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `address` argument is a string. If the value of `address` is a host name,</span>
+         <span class="s0">* DNS will be used to resolve the address of the host. If `address` is not</span>
+         <span class="s0">* provided or otherwise nullish, `'127.0.0.1'` (for `udp4` sockets) or `'::1'` (for `udp6` sockets) will be used by default.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the socket has not been previously bound with a call to `bind`, the socket</span>
+         <span
+           class="s0">* is assigned a random port number and is bound to the &quot;all interfaces&quot; address</span>
+         <span class="s0">* (`'0.0.0.0'` for `udp4` sockets, `'::0'` for `udp6` sockets.)</span>
+         <span class="s0">*</span>
+         <span class="s0">* An optional `callback` function may be specified to as a way of reporting</span>
+         <span class="s0">* DNS errors or for determining when it is safe to reuse the `buf` object.</span>
+         <span class="s0">* DNS lookups delay the time to send for at least one tick of the</span>
+         <span class="s0">* Node.js event loop.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The only way to know for sure that the datagram has been sent is by using a `callback`. If an error occurs and a `callback` is given, the error will be</span>
+         <span class="s0">* passed as the first argument to the `callback`. If a `callback` is not given,</span>
+         <span class="s0">* the error is emitted as an `'error'` event on the `socket` object.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Offset and length are optional but both _must_ be set if either are used.</span>
+         <span class="s0">* They are supported only when the first argument is a `Buffer`, a `TypedArray`,</span>
+         <span class="s0">* or a `DataView`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `ERR_SOCKET_BAD_PORT` if called on an unbound socket.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example of sending a UDP packet to a port on `localhost`;</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import dgram from 'node:dgram';</span>
+         <span class="s0">* import { Buffer } from 'node:buffer';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const message = Buffer.from('Some bytes');</span>
+         <span class="s0">* const client = dgram.createSocket('udp4');</span>
+         <span class="s0">* client.send(message, 41234, 'localhost', (err) =&gt; {</span>
+         <span class="s0">*   client.close();</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example of sending a UDP packet composed of multiple buffers to a port on`127.0.0.1`;</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import dgram from 'node:dgram';</span>
+         <span class="s0">* import { Buffer } from 'node:buffer';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const buf1 = Buffer.from('Some ');</span>
+         <span class="s0">* const buf2 = Buffer.from('bytes');</span>
+         <span class="s0">* const client = dgram.createSocket('udp4');</span>
+         <span class="s0">* client.send([buf1, buf2], 41234, (err) =&gt; {</span>
+         <span class="s0">*   client.close();</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Sending multiple buffers might be faster or slower depending on the</span>
+         <span class="s0">* application and operating system. Run benchmarks to</span>
+         <span class="s0">* determine the optimal strategy on a case-by-case basis. Generally speaking,</span>
+         <span class="s0">* however, sending multiple buffers is faster.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example of sending a UDP packet using a socket connected to a port on `localhost`:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import dgram from 'node:dgram';</span>
+         <span class="s0">* import { Buffer } from 'node:buffer';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const message = Buffer.from('Some bytes');</span>
+         <span class="s0">* const client = dgram.createSocket('udp4');</span>
+         <span class="s0">* client.connect(41234, 'localhost', (err) =&gt; {</span>
+         <span class="s0">*   client.send(message, (err) =&gt; {</span>
+         <span class="s0">*     client.close();</span>
+         <span class="s0">*   });</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.99</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">msg Message to be sent.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">offset Offset in the buffer where the message starts.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">length Number of bytes in the message.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">port Destination port.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">address Destination host name or IP address.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Called when the message has been sent.</span>
+         <span class="s0">*/</span>
+        <span class="s2">send</span><span class="s4">(</span>
+            <span class="s2">msg</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView </span><span class="s4">| </span><span class="s2">readonly any</span><span
+    class="s4">[],</span>
+            <span class="s2">port</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">address</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">bytes</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">send</span><span class="s4">(</span>
+            <span class="s2">msg</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView </span><span class="s4">| </span><span class="s2">readonly any</span><span
+    class="s4">[],</span>
+            <span class="s2">port</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">bytes</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">send</span><span class="s4">(</span>
+            <span class="s2">msg</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView </span><span class="s4">| </span><span class="s2">readonly any</span><span
+    class="s4">[],</span>
+            <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">bytes</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">send</span><span class="s4">(</span>
+            <span class="s2">msg</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView</span><span class="s4">,</span>
+            <span class="s2">offset</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">length</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">port</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">address</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">bytes</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">send</span><span class="s4">(</span>
+            <span class="s2">msg</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView</span><span class="s4">,</span>
+            <span class="s2">offset</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">length</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">port</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">bytes</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">send</span><span class="s4">(</span>
+            <span class="s2">msg</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView</span><span class="s4">,</span>
+            <span class="s2">offset</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">length</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">bytes</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sets or clears the `SO_BROADCAST` socket option. When set to `true`, UDP</span>
+         <span class="s0">* packets may be sent to a local interface's broadcast address.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `EBADF` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.6.9</span>
+         <span class="s0">*/</span>
+        <span class="s2">setBroadcast</span><span class="s4">(</span><span class="s2">flag</span><span
+    class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* _All references to scope in this section are referring to [IPv6 Zone Indices](https://en.wikipedia.org/wiki/IPv6_address#Scoped_literal_IPv6_addresses), which are defined by [RFC</span>
+         <span class="s0">* 4007](https://tools.ietf.org/html/rfc4007). In string form, an IP_</span>
+         <span class="s0">* _with a scope index is written as `'IP%scope'` where scope is an interface name_</span>
+         <span class="s0">* _or interface number._</span>
+         <span class="s0">*</span>
+         <span class="s0">* Sets the default outgoing multicast interface of the socket to a chosen</span>
+         <span class="s0">* interface or back to system interface selection. The `multicastInterface` must</span>
+         <span class="s0">* be a valid string representation of an IP from the socket's family.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For IPv4 sockets, this should be the IP configured for the desired physical</span>
+         <span class="s0">* interface. All packets sent to multicast on the socket will be sent on the</span>
+         <span class="s0">* interface determined by the most recent successful use of this call.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For IPv6 sockets, `multicastInterface` should include a scope to indicate the</span>
+         <span class="s0">* interface as in the examples that follow. In IPv6, individual `send` calls can</span>
+         <span class="s0">* also use explicit scope in addresses, so only packets sent to a multicast</span>
+         <span class="s0">* address without specifying an explicit scope are affected by the most recent</span>
+         <span class="s0">* successful use of this call.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `EBADF` if called on an unbound socket.</span>
+         <span class="s0">*</span>
+         <span class="s0">* #### Example: IPv6 outgoing multicast interface</span>
+         <span class="s0">*</span>
+         <span class="s0">* On most systems, where scope format uses the interface name:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const socket = dgram.createSocket('udp6');</span>
+         <span class="s0">*</span>
+         <span class="s0">* socket.bind(1234, () =&gt; {</span>
+         <span class="s0">*   socket.setMulticastInterface('::%eth1');</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* On Windows, where scope format uses an interface number:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const socket = dgram.createSocket('udp6');</span>
+         <span class="s0">*</span>
+         <span class="s0">* socket.bind(1234, () =&gt; {</span>
+         <span class="s0">*   socket.setMulticastInterface('::%2');</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* #### Example: IPv4 outgoing multicast interface</span>
+         <span class="s0">*</span>
+         <span class="s0">* All systems use an IP of the host on the desired physical interface:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const socket = dgram.createSocket('udp4');</span>
+         <span class="s0">*</span>
+         <span class="s0">* socket.bind(1234, () =&gt; {</span>
+         <span class="s0">*   socket.setMulticastInterface('10.0.0.2');</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">setMulticastInterface</span><span class="s4">(</span><span class="s2">multicastInterface</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sets or clears the `IP_MULTICAST_LOOP` socket option. When set to `true`,</span>
+         <span class="s0">* multicast packets will also be received on the local interface.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `EBADF` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.8</span>
+         <span class="s0">*/</span>
+        <span class="s2">setMulticastLoopback</span><span class="s4">(</span><span class="s2">flag</span><span
+    class="s4">: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sets the `IP_MULTICAST_TTL` socket option. While TTL generally stands for</span>
+         <span class="s0">* &quot;Time to Live&quot;, in this context it specifies the number of IP hops that a</span>
+         <span class="s0">* packet is allowed to travel through, specifically for multicast traffic. Each</span>
+         <span class="s0">* router or gateway that forwards a packet decrements the TTL. If the TTL is</span>
+         <span class="s0">* decremented to 0 by a router, it will not be forwarded.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `ttl` argument may be between 0 and 255\. The default on most systems is `1`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `EBADF` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.8</span>
+         <span class="s0">*/</span>
+        <span class="s2">setMulticastTTL</span><span class="s4">(</span><span class="s2">ttl</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sets the `SO_RCVBUF` socket option. Sets the maximum socket receive buffer</span>
+         <span class="s0">* in bytes.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `ERR_SOCKET_BUFFER_SIZE` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.7.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">setRecvBufferSize</span><span class="s4">(</span><span class="s2">size</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Sets the `SO_SNDBUF` socket option. Sets the maximum socket send buffer</span>
+         <span class="s0">* in bytes.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `ERR_SOCKET_BUFFER_SIZE` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.7.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">setSendBufferSize</span><span class="s4">(</span><span class="s2">size</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Sets the `IP_TTL` socket option. While TTL generally stands for &quot;Time to Live&quot;,</span>
+         <span class="s0">* in this context it specifies the number of IP hops that a packet is allowed to</span>
+         <span class="s0">* travel through. Each router or gateway that forwards a packet decrements the</span>
+         <span class="s0">* TTL. If the TTL is decremented to 0 by a router, it will not be forwarded.</span>
+         <span class="s0">* Changing TTL values is typically done for network probes or when multicasting.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `ttl` argument may be between 1 and 255\. The default on most systems</span>
+         <span class="s0">* is 64.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method throws `EBADF` if called on an unbound socket.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.101</span>
+         <span class="s0">*/</span>
+        <span class="s2">setTTL</span><span class="s4">(</span><span class="s2">ttl</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* By default, binding a socket will cause it to block the Node.js process from</span>
+         <span class="s0">* exiting as long as the socket is open. The `socket.unref()` method can be used</span>
+         <span class="s0">* to exclude the socket from the reference counting that keeps the Node.js</span>
+         <span class="s0">* process active, allowing the process to exit even if the socket is still</span>
+         <span class="s0">* listening.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Calling `socket.unref()` multiple times will have no additional effect.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `socket.unref()` method returns a reference to the socket so calls can be</span>
+         <span class="s0">* chained.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.9.1</span>
+         <span class="s0">*/</span>
+        <span class="s2">unref</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Tells the kernel to join a source-specific multicast channel at the given `sourceAddress` and `groupAddress`, using the `multicastInterface` with the `IP_ADD_SOURCE_MEMBERSHIP` socket</span>
+         <span class="s0">* option. If the `multicastInterface` argument</span>
+         <span class="s0">* is not specified, the operating system will choose one interface and will add</span>
+         <span class="s0">* membership to it. To add membership to every available interface, call `socket.addSourceSpecificMembership()` multiple times, once per interface.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When called on an unbound socket, this method will implicitly bind to a random</span>
+         <span class="s0">* port, listening on all interfaces.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.1.0, v12.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">addSourceSpecificMembership</span><span class="s4">(</span><span
+    class="s2">sourceAddress</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">groupAddress</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">multicastInterface</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Instructs the kernel to leave a source-specific multicast channel at the given `sourceAddress` and `groupAddress` using the `IP_DROP_SOURCE_MEMBERSHIP` socket option. This method is</span>
+         <span class="s0">* automatically called by the kernel when the</span>
+         <span class="s0">* socket is closed or the process terminates, so most apps will never have</span>
+         <span class="s0">* reason to call this.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `multicastInterface` is not specified, the operating system will attempt to</span>
+         <span class="s0">* drop membership on all valid interfaces.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.1.0, v12.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">dropSourceSpecificMembership</span><span class="s4">(</span><span
+    class="s2">sourceAddress</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">groupAddress</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">multicastInterface</span><span
+    class="s4">?: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* events.EventEmitter</span>
+         <span class="s0">* 1. close</span>
+         <span class="s0">* 2. connect</span>
+         <span class="s0">* 3. error</span>
+         <span class="s0">* 4. listening</span>
+         <span class="s0">* 5. message</span>
+         <span class="s0">*/</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">msg</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">rinfo</span><span class="s4">: </span><span
+    class="s2">RemoteInfo</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span class="s2">msg</span><span
+    class="s4">: </span><span class="s2">Buffer</span><span class="s4">, </span><span class="s2">rinfo</span><span
+    class="s4">: </span><span class="s2">RemoteInfo</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;close&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;connect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;error&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;listening&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;message&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">msg</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">, </span><span class="s2">rinfo</span><span class="s4">: </span><span class="s2">RemoteInfo</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">msg</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">rinfo</span><span class="s4">: </span><span
+    class="s2">RemoteInfo</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">msg</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">rinfo</span><span class="s4">: </span><span
+    class="s2">RemoteInfo</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;connect&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;listening&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">msg</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">rinfo</span><span class="s4">: </span><span
+    class="s2">RemoteInfo</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Calls `socket.close()` and returns a promise that fulfills when the socket has closed.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">asyncDispose</span><span class="s4">](): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s5">void</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:dgram&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;dgram&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

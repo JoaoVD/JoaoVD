@@ -1,0 +1,1138 @@
+<html>
+<head>
+  <title>write-entry.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #42c3d4;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          write-entry.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">Minipass </span><span
+    class="s3">} = </span><span class="s1">require</span><span class="s3">(</span><span
+    class="s0">'minipass'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">Pax </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'./pax.js'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">Header </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./header.js'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">fs </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'fs'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">path </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'path'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">normPath </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'./normalize-windows-path.js'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">stripSlash </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./strip-trailing-slashes.js'</span><span
+    class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">prefixPath </span><span class="s3">= (</span><span class="s1">path</span><span
+    class="s3">, </span><span class="s1">prefix</span><span class="s3">) =&gt; {</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">prefix</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">normPath</span><span class="s3">(</span><span class="s1">path</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+  <span class="s1">path </span><span class="s3">= </span><span class="s1">normPath</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">).</span><span class="s1">replace</span><span class="s3">(</span><span
+    class="s4">/^\.(\/|$)/</span><span class="s3">, </span><span class="s0">''</span><span class="s3">)</span>
+  <span class="s2">return </span><span class="s1">stripSlash</span><span class="s3">(</span><span
+    class="s1">prefix</span><span class="s3">) + </span><span class="s0">'/' </span><span class="s3">+ </span><span
+    class="s1">path</span>
+<span class="s3">}</span>
+
+<span class="s2">const </span><span class="s1">maxReadSize </span><span class="s3">= </span><span
+    class="s5">16 </span><span class="s3">* </span><span class="s5">1024 </span><span class="s3">* </span><span
+    class="s5">1024</span>
+<span class="s2">const </span><span class="s1">PROCESS </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'process'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">FILE </span><span class="s3">= </span><span class="s1">Symbol</span><span
+    class="s3">(</span><span class="s0">'file'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">DIRECTORY </span><span class="s3">= </span><span class="s1">Symbol</span><span
+    class="s3">(</span><span class="s0">'directory'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">SYMLINK </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'symlink'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">HARDLINK </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'hardlink'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">HEADER </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'header'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">READ </span><span class="s3">= </span><span class="s1">Symbol</span><span
+    class="s3">(</span><span class="s0">'read'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">LSTAT </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'lstat'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ONLSTAT </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'onlstat'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ONREAD </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'onread'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ONREADLINK </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'onreadlink'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">OPENFILE </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'openfile'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ONOPENFILE </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'onopenfile'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">CLOSE </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'close'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">MODE </span><span class="s3">= </span><span class="s1">Symbol</span><span
+    class="s3">(</span><span class="s0">'mode'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">AWAITDRAIN </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'awaitDrain'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ONDRAIN </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'ondrain'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">PREFIX </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'prefix'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">HAD_ERROR </span><span class="s3">= </span><span class="s1">Symbol</span><span
+    class="s3">(</span><span class="s0">'hadError'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">warner </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./warn-mixin.js'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">winchars </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'./winchars.js'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">stripAbsolutePath </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'./strip-absolute-path.js'</span><span class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">modeFix </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./mode-fix.js'</span><span class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">WriteEntry </span><span class="s3">= </span><span
+    class="s1">warner</span><span class="s3">(</span><span class="s2">class </span><span
+    class="s1">WriteEntry </span><span class="s2">extends </span><span class="s1">Minipass </span><span
+    class="s3">{</span>
+  <span class="s1">constructor </span><span class="s3">(</span><span class="s1">p</span><span class="s3">, </span><span
+    class="s1">opt</span><span class="s3">) {</span>
+    <span class="s1">opt </span><span class="s3">= </span><span class="s1">opt </span><span class="s3">|| {}</span>
+    <span class="s2">super</span><span class="s3">(</span><span class="s1">opt</span><span class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">p </span><span
+    class="s3">!== </span><span class="s0">'string'</span><span class="s3">) {</span>
+      <span class="s2">throw new </span><span class="s1">TypeError</span><span class="s3">(</span><span class="s0">'path is required'</span><span
+    class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s1">normPath</span><span class="s3">(</span><span class="s1">p</span><span class="s3">)</span>
+    <span class="s6">// suppress atime, ctime, uid, gid, uname, gname</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">portable </span><span
+    class="s3">= !!</span><span class="s1">opt</span><span class="s3">.</span><span class="s1">portable</span>
+    <span class="s6">// until node has builtin pwnam functions, this'll have to do</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">myuid </span><span class="s3">= </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">getuid </span><span class="s3">&amp;&amp; </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">getuid</span><span class="s3">() || </span><span
+    class="s5">0</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">myuser </span><span class="s3">= </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">env</span><span class="s3">.</span><span
+    class="s1">USER </span><span class="s3">|| </span><span class="s0">''</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">maxReadSize </span><span
+    class="s3">= </span><span class="s1">opt</span><span class="s3">.</span><span class="s1">maxReadSize </span><span
+    class="s3">|| </span><span class="s1">maxReadSize</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">linkCache </span><span
+    class="s3">= </span><span class="s1">opt</span><span class="s3">.</span><span class="s1">linkCache </span><span
+    class="s3">|| </span><span class="s2">new </span><span class="s1">Map</span><span class="s3">()</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">statCache </span><span
+    class="s3">= </span><span class="s1">opt</span><span class="s3">.</span><span class="s1">statCache </span><span
+    class="s3">|| </span><span class="s2">new </span><span class="s1">Map</span><span class="s3">()</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">preservePaths </span><span
+    class="s3">= !!</span><span class="s1">opt</span><span class="s3">.</span><span class="s1">preservePaths</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">cwd </span><span class="s3">= </span><span
+    class="s1">normPath</span><span class="s3">(</span><span class="s1">opt</span><span class="s3">.</span><span
+    class="s1">cwd </span><span class="s3">|| </span><span class="s1">process</span><span class="s3">.</span><span
+    class="s1">cwd</span><span class="s3">())</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">strict </span><span
+    class="s3">= !!</span><span class="s1">opt</span><span class="s3">.</span><span class="s1">strict</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">noPax </span><span class="s3">= !!</span><span
+    class="s1">opt</span><span class="s3">.</span><span class="s1">noPax</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">noMtime </span><span
+    class="s3">= !!</span><span class="s1">opt</span><span class="s3">.</span><span class="s1">noMtime</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">mtime </span><span class="s3">= </span><span
+    class="s1">opt</span><span class="s3">.</span><span class="s1">mtime </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">prefix </span><span class="s3">= </span><span
+    class="s1">opt</span><span class="s3">.</span><span class="s1">prefix </span><span class="s3">? </span><span
+    class="s1">normPath</span><span class="s3">(</span><span class="s1">opt</span><span class="s3">.</span><span
+    class="s1">prefix</span><span class="s3">) : </span><span class="s2">null</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">fd </span><span class="s3">= </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockLen </span><span
+    class="s3">= </span><span class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain </span><span
+    class="s3">= </span><span class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">buf </span><span class="s3">= </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">offset </span><span class="s3">= </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">length </span><span class="s3">= </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">pos </span><span class="s3">= </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">remain </span><span class="s3">= </span><span
+    class="s2">null</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">opt</span><span
+    class="s3">.</span><span class="s1">onwarn </span><span class="s3">=== </span><span
+    class="s0">'function'</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'warn'</span><span class="s3">, </span><span class="s1">opt</span><span class="s3">.</span><span
+    class="s1">onwarn</span><span class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s2">let </span><span class="s1">pathWarn </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">preservePaths</span><span class="s3">) {</span>
+      <span class="s2">const </span><span class="s3">[</span><span class="s1">root</span><span class="s3">, </span><span
+    class="s1">stripped</span><span class="s3">] = </span><span class="s1">stripAbsolutePath</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">path</span><span
+    class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">root</span><span class="s3">) {</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span
+    class="s3">= </span><span class="s1">stripped</span>
+        <span class="s1">pathWarn </span><span class="s3">= </span><span class="s1">root</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">win32 </span><span class="s3">= !!</span><span
+    class="s1">opt</span><span class="s3">.</span><span class="s1">win32 </span><span class="s3">|| </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">platform </span><span class="s3">=== </span><span
+    class="s0">'win32'</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">win32</span><span class="s3">) {</span>
+      <span class="s6">// force the \ to / normalization, since we might not *actually*</span>
+      <span class="s6">// be on windows, but want \ to be considered a path separator.</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s1">winchars</span><span class="s3">.</span><span class="s1">decode</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">path</span><span class="s3">.</span><span
+    class="s1">replace</span><span class="s3">(</span><span class="s4">/\\/g</span><span class="s3">, </span><span
+    class="s0">'/'</span><span class="s3">))</span>
+      <span class="s1">p </span><span class="s3">= </span><span class="s1">p</span><span class="s3">.</span><span
+    class="s1">replace</span><span class="s3">(</span><span class="s4">/\\/g</span><span class="s3">, </span><span
+    class="s0">'/'</span><span class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">absolute </span><span
+    class="s3">= </span><span class="s1">normPath</span><span class="s3">(</span><span class="s1">opt</span><span
+    class="s3">.</span><span class="s1">absolute </span><span class="s3">|| </span><span class="s1">path</span><span
+    class="s3">.</span><span class="s1">resolve</span><span class="s3">(</span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">cwd</span><span class="s3">, </span><span class="s1">p</span><span
+    class="s3">))</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">path </span><span class="s3">=== </span><span class="s0">''</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s0">'./'</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">pathWarn</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">warn</span><span class="s3">(</span><span
+    class="s0">'TAR_ENTRY_INFO'</span><span class="s3">, </span><span class="s0">`stripping </span><span
+    class="s1">$</span><span class="s3">{</span><span class="s1">pathWarn</span><span class="s3">} </span><span
+    class="s0">from absolute path`</span><span class="s3">, {</span>
+        <span class="s1">entry</span><span class="s3">: </span><span class="s2">this</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s1">pathWarn </span><span
+    class="s3">+ </span><span class="s2">this</span><span class="s3">.</span><span class="s1">path</span><span
+    class="s3">,</span>
+      <span class="s3">})</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">statCache</span><span class="s3">.</span><span class="s1">has</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span class="s3">)) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">ONLSTAT</span><span
+    class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span class="s1">statCache</span><span
+    class="s3">.</span><span class="s1">get</span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">absolute</span><span class="s3">))</span>
+    <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">LSTAT</span><span class="s3">]()</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s1">emit </span><span class="s3">(</span><span class="s1">ev</span><span class="s3">, </span><span
+    class="s1">...data</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">ev </span><span class="s3">=== </span><span
+    class="s0">'error'</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">HAD_ERROR</span><span class="s3">] = </span><span
+    class="s2">true</span>
+    <span class="s3">}</span>
+    <span class="s2">return super</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s1">ev</span><span class="s3">, </span><span class="s1">...data</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">LSTAT</span><span class="s3">] () {</span>
+    <span class="s1">fs</span><span class="s3">.</span><span class="s1">lstat</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span class="s3">, (</span><span
+    class="s1">er</span><span class="s3">, </span><span class="s1">stat</span><span class="s3">) =&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">) {</span>
+        <span class="s2">return this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span
+    class="s3">)</span>
+      <span class="s3">}</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">ONLSTAT</span><span
+    class="s3">](</span><span class="s1">stat</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">ONLSTAT</span><span class="s3">] (</span><span class="s1">stat</span><span
+    class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">statCache</span><span class="s3">.</span><span
+    class="s1">set</span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span
+    class="s3">, </span><span class="s1">stat</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">stat </span><span class="s3">= </span><span
+    class="s1">stat</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">isFile</span><span class="s3">()) {</span>
+      <span class="s1">stat</span><span class="s3">.</span><span class="s1">size </span><span class="s3">= </span><span
+    class="s5">0</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">type </span><span class="s3">= </span><span
+    class="s1">getType</span><span class="s3">(</span><span class="s1">stat</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'stat'</span><span class="s3">, </span><span class="s1">stat</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">PROCESS</span><span class="s3">]()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">PROCESS</span><span class="s3">] () {</span>
+    <span class="s2">switch </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">) {</span>
+      <span class="s2">case </span><span class="s0">'File'</span><span class="s3">: </span><span
+    class="s2">return this</span><span class="s3">[</span><span class="s1">FILE</span><span class="s3">]()</span>
+      <span class="s2">case </span><span class="s0">'Directory'</span><span class="s3">: </span><span class="s2">return this</span><span
+    class="s3">[</span><span class="s1">DIRECTORY</span><span class="s3">]()</span>
+      <span class="s2">case </span><span class="s0">'SymbolicLink'</span><span class="s3">: </span><span class="s2">return this</span><span
+    class="s3">[</span><span class="s1">SYMLINK</span><span class="s3">]()</span>
+      <span class="s6">// unsupported types are ignored.</span>
+      <span class="s2">default</span><span class="s3">: </span><span class="s2">return this</span><span
+    class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">MODE</span><span class="s3">] (</span><span class="s1">mode</span><span
+    class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">modeFix</span><span class="s3">(</span><span
+    class="s1">mode</span><span class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">type </span><span class="s3">=== </span><span class="s0">'Directory'</span><span
+    class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span class="s1">portable</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">PREFIX</span><span class="s3">] (</span><span class="s1">path</span><span
+    class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">prefixPath</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">prefix</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">HEADER</span><span class="s3">] () {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">type </span><span class="s3">=== </span><span class="s0">'Directory' </span><span
+    class="s3">&amp;&amp; </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">noMtime </span><span
+    class="s3">= </span><span class="s2">true</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">header </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Header</span><span class="s3">({</span>
+      <span class="s1">path</span><span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">PREFIX</span><span class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">path</span><span class="s3">),</span>
+      <span class="s6">// only apply the prefix to hard links.</span>
+      <span class="s1">linkpath</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">type </span><span class="s3">=== </span><span class="s0">'Link' </span><span
+    class="s3">? </span><span class="s2">this</span><span class="s3">[</span><span class="s1">PREFIX</span><span
+    class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath</span><span
+    class="s3">)</span>
+      <span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">linkpath</span><span class="s3">,</span>
+      <span class="s6">// only the permissions and setuid/setgid/sticky bitflags</span>
+      <span class="s6">// not the higher-order bits that specify file type</span>
+      <span class="s1">mode</span><span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">MODE</span><span class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">stat</span><span class="s3">.</span><span class="s1">mode</span><span class="s3">),</span>
+      <span class="s1">uid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">uid</span><span class="s3">,</span>
+      <span class="s1">gid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">gid</span><span class="s3">,</span>
+      <span class="s1">size</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">stat</span><span class="s3">.</span><span class="s1">size</span><span class="s3">,</span>
+      <span class="s1">mtime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">noMtime </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">mtime </span><span class="s3">|| </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">mtime</span><span class="s3">,</span>
+      <span class="s1">type</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">,</span>
+      <span class="s1">uname</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">:</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">uid </span><span class="s3">=== </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">myuid </span><span class="s3">? </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">myuser </span><span class="s3">: </span><span class="s0">''</span><span class="s3">,</span>
+      <span class="s1">atime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">atime</span><span class="s3">,</span>
+      <span class="s1">ctime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">ctime</span><span class="s3">,</span>
+    <span class="s3">})</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">encode</span><span
+    class="s3">() &amp;&amp; !</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">noPax</span><span class="s3">) {</span>
+      <span class="s2">super</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s2">new </span><span class="s1">Pax</span><span class="s3">({</span>
+        <span class="s1">atime</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">header</span><span
+    class="s3">.</span><span class="s1">atime</span><span class="s3">,</span>
+        <span class="s1">ctime</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">header</span><span
+    class="s3">.</span><span class="s1">ctime</span><span class="s3">,</span>
+        <span class="s1">gid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">header</span><span class="s3">.</span><span
+    class="s1">gid</span><span class="s3">,</span>
+        <span class="s1">mtime</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">noMtime </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">mtime </span><span
+    class="s3">|| </span><span class="s2">this</span><span class="s3">.</span><span class="s1">header</span><span
+    class="s3">.</span><span class="s1">mtime</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">PREFIX</span><span class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">path</span><span class="s3">),</span>
+        <span class="s1">linkpath</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">type </span><span class="s3">=== </span><span class="s0">'Link' </span><span
+    class="s3">? </span><span class="s2">this</span><span class="s3">[</span><span class="s1">PREFIX</span><span
+    class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath</span><span
+    class="s3">)</span>
+        <span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">linkpath</span><span class="s3">,</span>
+        <span class="s1">size</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">size</span><span class="s3">,</span>
+        <span class="s1">uid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">header</span><span class="s3">.</span><span
+    class="s1">uid</span><span class="s3">,</span>
+        <span class="s1">uname</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">header</span><span
+    class="s3">.</span><span class="s1">uname</span><span class="s3">,</span>
+        <span class="s1">dev</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">dev</span><span class="s3">,</span>
+        <span class="s1">ino</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">ino</span><span class="s3">,</span>
+        <span class="s1">nlink</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span
+    class="s3">.</span><span class="s1">nlink</span><span class="s3">,</span>
+      <span class="s3">}).</span><span class="s1">encode</span><span class="s3">())</span>
+    <span class="s3">}</span>
+    <span class="s2">super</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">header</span><span class="s3">.</span><span
+    class="s1">block</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">DIRECTORY</span><span class="s3">] () {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">path</span><span class="s3">.</span><span class="s1">slice</span><span class="s3">(-</span><span
+    class="s5">1</span><span class="s3">) !== </span><span class="s0">'/'</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span class="s3">+= </span><span
+    class="s0">'/'</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">size </span><span class="s3">= </span><span class="s5">0</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">HEADER</span><span class="s3">]()</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">SYMLINK</span><span class="s3">] () {</span>
+    <span class="s1">fs</span><span class="s3">.</span><span class="s1">readlink</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span class="s3">, (</span><span
+    class="s1">er</span><span class="s3">, </span><span class="s1">linkpath</span><span class="s3">) =&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">) {</span>
+        <span class="s2">return this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span
+    class="s3">)</span>
+      <span class="s3">}</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">ONREADLINK</span><span
+    class="s3">](</span><span class="s1">linkpath</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">ONREADLINK</span><span class="s3">] (</span><span class="s1">linkpath</span><span
+    class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath </span><span
+    class="s3">= </span><span class="s1">normPath</span><span class="s3">(</span><span class="s1">linkpath</span><span
+    class="s3">)</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">HEADER</span><span class="s3">]()</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">HARDLINK</span><span class="s3">] (</span><span
+    class="s1">linkpath</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">type </span><span class="s3">= </span><span
+    class="s0">'Link'</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath </span><span
+    class="s3">= </span><span class="s1">normPath</span><span class="s3">(</span><span class="s1">path</span><span
+    class="s3">.</span><span class="s1">relative</span><span class="s3">(</span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">cwd</span><span class="s3">, </span><span class="s1">linkpath</span><span
+    class="s3">))</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">size </span><span class="s3">= </span><span class="s5">0</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">HEADER</span><span class="s3">]()</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">FILE</span><span class="s3">] () {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">stat</span><span class="s3">.</span><span class="s1">nlink </span><span class="s3">&gt; </span><span
+    class="s5">1</span><span class="s3">) {</span>
+      <span class="s2">const </span><span class="s1">linkKey </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">dev </span><span class="s3">+ </span><span class="s0">':' </span><span class="s3">+ </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">ino</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">linkCache</span><span class="s3">.</span><span class="s1">has</span><span class="s3">(</span><span
+    class="s1">linkKey</span><span class="s3">)) {</span>
+        <span class="s2">const </span><span class="s1">linkpath </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">linkCache</span><span class="s3">.</span><span
+    class="s1">get</span><span class="s3">(</span><span class="s1">linkKey</span><span class="s3">)</span>
+        <span class="s2">if </span><span class="s3">(</span><span class="s1">linkpath</span><span
+    class="s3">.</span><span class="s1">indexOf</span><span class="s3">(</span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">cwd</span><span class="s3">) === </span><span class="s5">0</span><span
+    class="s3">) {</span>
+          <span class="s2">return this</span><span class="s3">[</span><span class="s1">HARDLINK</span><span class="s3">](</span><span
+    class="s1">linkpath</span><span class="s3">)</span>
+        <span class="s3">}</span>
+      <span class="s3">}</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">linkCache</span><span
+    class="s3">.</span><span class="s1">set</span><span class="s3">(</span><span class="s1">linkKey</span><span
+    class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span
+    class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">HEADER</span><span class="s3">]()</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">stat</span><span class="s3">.</span><span class="s1">size </span><span class="s3">=== </span><span
+    class="s5">0</span><span class="s3">) {</span>
+      <span class="s2">return this</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">OPENFILE</span><span class="s3">]()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">OPENFILE</span><span class="s3">] () {</span>
+    <span class="s1">fs</span><span class="s3">.</span><span class="s1">open</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span class="s3">, </span><span
+    class="s0">'r'</span><span class="s3">, (</span><span class="s1">er</span><span class="s3">, </span><span
+    class="s1">fd</span><span class="s3">) =&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">) {</span>
+        <span class="s2">return this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span
+    class="s3">)</span>
+      <span class="s3">}</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">ONOPENFILE</span><span
+    class="s3">](</span><span class="s1">fd</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">ONOPENFILE</span><span class="s3">] (</span><span class="s1">fd</span><span
+    class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">fd </span><span class="s3">= </span><span
+    class="s1">fd</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">HAD_ERROR</span><span class="s3">]) {</span>
+      <span class="s2">return this</span><span class="s3">[</span><span class="s1">CLOSE</span><span
+    class="s3">]()</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockLen </span><span
+    class="s3">= </span><span class="s5">512 </span><span class="s3">* </span><span class="s1">Math</span><span
+    class="s3">.</span><span class="s1">ceil</span><span class="s3">(</span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span class="s1">size </span><span
+    class="s3">/ </span><span class="s5">512</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain </span><span
+    class="s3">= </span><span class="s2">this</span><span class="s3">.</span><span class="s1">blockLen</span>
+    <span class="s2">const </span><span class="s1">bufLen </span><span class="s3">= </span><span
+    class="s1">Math</span><span class="s3">.</span><span class="s1">min</span><span class="s3">(</span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">blockLen</span><span class="s3">, </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">maxReadSize</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">buf </span><span class="s3">= </span><span
+    class="s1">Buffer</span><span class="s3">.</span><span class="s1">allocUnsafe</span><span class="s3">(</span><span
+    class="s1">bufLen</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">offset </span><span class="s3">= </span><span
+    class="s5">0</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">pos </span><span class="s3">= </span><span
+    class="s5">0</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">remain </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">size</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">length </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">buf</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">READ</span><span class="s3">]()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">READ</span><span class="s3">] () {</span>
+    <span class="s2">const </span><span class="s3">{ </span><span class="s1">fd</span><span class="s3">, </span><span
+    class="s1">buf</span><span class="s3">, </span><span class="s1">offset</span><span class="s3">, </span><span
+    class="s1">length</span><span class="s3">, </span><span class="s1">pos </span><span class="s3">} = </span><span
+    class="s2">this</span>
+    <span class="s1">fs</span><span class="s3">.</span><span class="s1">read</span><span class="s3">(</span><span
+    class="s1">fd</span><span class="s3">, </span><span class="s1">buf</span><span class="s3">, </span><span class="s1">offset</span><span
+    class="s3">, </span><span class="s1">length</span><span class="s3">, </span><span class="s1">pos</span><span
+    class="s3">, (</span><span class="s1">er</span><span class="s3">, </span><span class="s1">bytesRead</span><span
+    class="s3">) =&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">) {</span>
+        <span class="s6">// ignoring the error from close(2) is a bad practice, but at</span>
+        <span class="s6">// this point we already have an error, don't need another one</span>
+        <span class="s2">return this</span><span class="s3">[</span><span class="s1">CLOSE</span><span class="s3">](() =&gt; </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span class="s3">))</span>
+      <span class="s3">}</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">ONREAD</span><span class="s3">](</span><span
+    class="s1">bytesRead</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">CLOSE</span><span class="s3">] (</span><span class="s1">cb</span><span
+    class="s3">) {</span>
+    <span class="s1">fs</span><span class="s3">.</span><span class="s1">close</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">fd</span><span class="s3">, </span><span class="s1">cb</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">ONREAD</span><span class="s3">] (</span><span
+    class="s1">bytesRead</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">bytesRead </span><span class="s3">&lt;= </span><span
+    class="s5">0 </span><span class="s3">&amp;&amp; </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">remain </span><span class="s3">&gt; </span><span class="s5">0</span><span class="s3">) {</span>
+      <span class="s2">const </span><span class="s1">er </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Error</span><span class="s3">(</span><span class="s0">'encountered unexpected EOF'</span><span
+    class="s3">)</span>
+      <span class="s1">er</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span>
+      <span class="s1">er</span><span class="s3">.</span><span class="s1">syscall </span><span class="s3">= </span><span
+    class="s0">'read'</span>
+      <span class="s1">er</span><span class="s3">.</span><span class="s1">code </span><span class="s3">= </span><span
+    class="s0">'EOF'</span>
+      <span class="s2">return this</span><span class="s3">[</span><span class="s1">CLOSE</span><span class="s3">](() =&gt; </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span class="s3">))</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">bytesRead </span><span
+    class="s3">&gt; </span><span class="s2">this</span><span class="s3">.</span><span class="s1">remain</span><span
+    class="s3">) {</span>
+      <span class="s2">const </span><span class="s1">er </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Error</span><span class="s3">(</span><span class="s0">'did not encounter expected EOF'</span><span
+    class="s3">)</span>
+      <span class="s1">er</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span>
+      <span class="s1">er</span><span class="s3">.</span><span class="s1">syscall </span><span class="s3">= </span><span
+    class="s0">'read'</span>
+      <span class="s1">er</span><span class="s3">.</span><span class="s1">code </span><span class="s3">= </span><span
+    class="s0">'EOF'</span>
+      <span class="s2">return this</span><span class="s3">[</span><span class="s1">CLOSE</span><span class="s3">](() =&gt; </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span class="s3">))</span>
+    <span class="s3">}</span>
+
+    <span class="s6">// null out the rest of the buffer, if we could fit the block padding</span>
+    <span class="s6">// at the end of this loop, we've incremented bytesRead and this.remain</span>
+    <span class="s6">// to be incremented up to the blockRemain level, as if we had expected</span>
+    <span class="s6">// to get a null-padded file, and read it until the end.  then we will</span>
+    <span class="s6">// decrement both remain and blockRemain by bytesRead, and know that we</span>
+    <span class="s6">// reached the expected EOF, without any null buffer to append.</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">bytesRead </span><span
+    class="s3">=== </span><span class="s2">this</span><span class="s3">.</span><span class="s1">remain</span><span
+    class="s3">) {</span>
+      <span class="s2">for </span><span class="s3">(</span><span class="s2">let </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s1">bytesRead</span><span class="s3">; </span><span class="s1">i </span><span
+    class="s3">&lt; </span><span class="s2">this</span><span class="s3">.</span><span class="s1">length </span><span
+    class="s3">&amp;&amp; </span><span class="s1">bytesRead </span><span class="s3">&lt; </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain</span><span class="s3">; </span><span
+    class="s1">i</span><span class="s3">++) {</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">buf</span><span class="s3">[</span><span
+    class="s1">i </span><span class="s3">+ </span><span class="s2">this</span><span class="s3">.</span><span class="s1">offset</span><span
+    class="s3">] = </span><span class="s5">0</span>
+        <span class="s1">bytesRead</span><span class="s3">++</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">remain</span><span class="s3">++</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s2">const </span><span class="s1">writeBuf </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">offset </span><span class="s3">=== </span><span
+    class="s5">0 </span><span class="s3">&amp;&amp; </span><span class="s1">bytesRead </span><span
+    class="s3">=== </span><span class="s2">this</span><span class="s3">.</span><span class="s1">buf</span><span
+    class="s3">.</span><span class="s1">length </span><span class="s3">?</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">buf </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">buf</span><span class="s3">.</span><span class="s1">slice</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">offset</span><span
+    class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span class="s1">offset </span><span
+    class="s3">+ </span><span class="s1">bytesRead</span><span class="s3">)</span>
+
+    <span class="s2">const </span><span class="s1">flushed </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span class="s1">writeBuf</span><span
+    class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">flushed</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">AWAITDRAIN</span><span
+    class="s3">](() =&gt; </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ONDRAIN</span><span class="s3">]())</span>
+    <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">ONDRAIN</span><span class="s3">]()</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">AWAITDRAIN</span><span class="s3">] (</span><span class="s1">cb</span><span
+    class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s0">'drain'</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">write </span><span class="s3">(</span><span class="s1">writeBuf</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">blockRemain </span><span class="s3">&lt; </span><span class="s1">writeBuf</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">) {</span>
+      <span class="s2">const </span><span class="s1">er </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Error</span><span class="s3">(</span><span class="s0">'writing more data than expected'</span><span
+    class="s3">)</span>
+      <span class="s1">er</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span>
+      <span class="s2">return this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span
+    class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">remain </span><span class="s3">-= </span><span
+    class="s1">writeBuf</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain </span><span class="s3">-= </span><span
+    class="s1">writeBuf</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">pos </span><span class="s3">+= </span><span
+    class="s1">writeBuf</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">offset </span><span class="s3">+= </span><span
+    class="s1">writeBuf</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">return super</span><span class="s3">.</span><span class="s1">write</span><span
+    class="s3">(</span><span class="s1">writeBuf</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">ONDRAIN</span><span class="s3">] () {</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">remain</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">blockRemain</span><span class="s3">) {</span>
+        <span class="s2">super</span><span class="s3">.</span><span class="s1">write</span><span
+    class="s3">(</span><span class="s1">Buffer</span><span class="s3">.</span><span class="s1">alloc</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain</span><span
+    class="s3">))</span>
+      <span class="s3">}</span>
+      <span class="s2">return this</span><span class="s3">[</span><span class="s1">CLOSE</span><span
+    class="s3">](</span><span class="s1">er </span><span class="s3">=&gt; </span><span class="s1">er </span><span
+    class="s3">? </span><span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span
+    class="s3">) : </span><span class="s2">this</span><span class="s3">.</span><span class="s1">end</span><span
+    class="s3">())</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">offset </span><span class="s3">&gt;= </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">) {</span>
+      <span class="s6">// if we only have a smaller bit left to read, alloc a smaller buffer</span>
+      <span class="s6">// otherwise, keep it the same length it was before.</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">buf </span><span class="s3">= </span><span
+    class="s1">Buffer</span><span class="s3">.</span><span class="s1">allocUnsafe</span><span class="s3">(</span><span
+    class="s1">Math</span><span class="s3">.</span><span class="s1">min</span><span class="s3">(</span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">blockRemain</span><span class="s3">, </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">buf</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">))</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">offset </span><span
+    class="s3">= </span><span class="s5">0</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">length </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">buf</span><span class="s3">.</span><span class="s1">length </span><span
+    class="s3">- </span><span class="s2">this</span><span class="s3">.</span><span class="s1">offset</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">READ</span><span class="s3">]()</span>
+  <span class="s3">}</span>
+<span class="s3">})</span>
+
+<span class="s2">class </span><span class="s1">WriteEntrySync </span><span class="s2">extends </span><span class="s1">WriteEntry </span><span
+    class="s3">{</span>
+  <span class="s3">[</span><span class="s1">LSTAT</span><span class="s3">] () {</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">ONLSTAT</span><span class="s3">](</span><span
+    class="s1">fs</span><span class="s3">.</span><span class="s1">lstatSync</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span class="s3">))</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">SYMLINK</span><span class="s3">] () {</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">ONREADLINK</span><span
+    class="s3">](</span><span class="s1">fs</span><span class="s3">.</span><span class="s1">readlinkSync</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span
+    class="s3">))</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">OPENFILE</span><span class="s3">] () {</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">ONOPENFILE</span><span
+    class="s3">](</span><span class="s1">fs</span><span class="s3">.</span><span class="s1">openSync</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">absolute</span><span
+    class="s3">, </span><span class="s0">'r'</span><span class="s3">))</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">READ</span><span class="s3">] () {</span>
+    <span class="s2">let </span><span class="s1">threw </span><span class="s3">= </span><span class="s2">true</span>
+    <span class="s2">try </span><span class="s3">{</span>
+      <span class="s2">const </span><span class="s3">{ </span><span class="s1">fd</span><span class="s3">, </span><span
+    class="s1">buf</span><span class="s3">, </span><span class="s1">offset</span><span class="s3">, </span><span
+    class="s1">length</span><span class="s3">, </span><span class="s1">pos </span><span class="s3">} = </span><span
+    class="s2">this</span>
+      <span class="s2">const </span><span class="s1">bytesRead </span><span class="s3">= </span><span
+    class="s1">fs</span><span class="s3">.</span><span class="s1">readSync</span><span class="s3">(</span><span
+    class="s1">fd</span><span class="s3">, </span><span class="s1">buf</span><span class="s3">, </span><span class="s1">offset</span><span
+    class="s3">, </span><span class="s1">length</span><span class="s3">, </span><span class="s1">pos</span><span
+    class="s3">)</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">ONREAD</span><span class="s3">](</span><span
+    class="s1">bytesRead</span><span class="s3">)</span>
+      <span class="s1">threw </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s3">} </span><span class="s2">finally </span><span class="s3">{</span>
+      <span class="s6">// ignoring the error from close(2) is a bad practice, but at</span>
+      <span class="s6">// this point we already have an error, don't need another one</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">threw</span><span class="s3">) {</span>
+        <span class="s2">try </span><span class="s3">{</span>
+          <span class="s2">this</span><span class="s3">[</span><span class="s1">CLOSE</span><span class="s3">](() =&gt; {})</span>
+        <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">er</span><span
+    class="s3">) {}</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">AWAITDRAIN</span><span class="s3">] (</span><span class="s1">cb</span><span
+    class="s3">) {</span>
+    <span class="s1">cb</span><span class="s3">()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">CLOSE</span><span class="s3">] (</span><span class="s1">cb</span><span
+    class="s3">) {</span>
+    <span class="s1">fs</span><span class="s3">.</span><span class="s1">closeSync</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">fd</span><span class="s3">)</span>
+    <span class="s1">cb</span><span class="s3">()</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">const </span><span class="s1">WriteEntryTar </span><span class="s3">= </span><span
+    class="s1">warner</span><span class="s3">(</span><span class="s2">class </span><span
+    class="s1">WriteEntryTar </span><span class="s2">extends </span><span class="s1">Minipass </span><span
+    class="s3">{</span>
+  <span class="s1">constructor </span><span class="s3">(</span><span class="s1">readEntry</span><span
+    class="s3">, </span><span class="s1">opt</span><span class="s3">) {</span>
+    <span class="s1">opt </span><span class="s3">= </span><span class="s1">opt </span><span class="s3">|| {}</span>
+    <span class="s2">super</span><span class="s3">(</span><span class="s1">opt</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">preservePaths </span><span
+    class="s3">= !!</span><span class="s1">opt</span><span class="s3">.</span><span class="s1">preservePaths</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">portable </span><span
+    class="s3">= !!</span><span class="s1">opt</span><span class="s3">.</span><span class="s1">portable</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">strict </span><span
+    class="s3">= !!</span><span class="s1">opt</span><span class="s3">.</span><span class="s1">strict</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">noPax </span><span class="s3">= !!</span><span
+    class="s1">opt</span><span class="s3">.</span><span class="s1">noPax</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">noMtime </span><span
+    class="s3">= !!</span><span class="s1">opt</span><span class="s3">.</span><span class="s1">noMtime</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">readEntry </span><span
+    class="s3">= </span><span class="s1">readEntry</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">type </span><span class="s3">= </span><span
+    class="s1">readEntry</span><span class="s3">.</span><span class="s1">type</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">type </span><span class="s3">=== </span><span class="s0">'Directory' </span><span
+    class="s3">&amp;&amp; </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">noMtime </span><span
+    class="s3">= </span><span class="s2">true</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">prefix </span><span class="s3">= </span><span
+    class="s1">opt</span><span class="s3">.</span><span class="s1">prefix </span><span class="s3">|| </span><span
+    class="s2">null</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s1">normPath</span><span class="s3">(</span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">path</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">mode </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">MODE</span><span class="s3">](</span><span
+    class="s1">readEntry</span><span class="s3">.</span><span class="s1">mode</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">uid </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span
+    class="s2">null </span><span class="s3">: </span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">uid</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">gid </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span
+    class="s2">null </span><span class="s3">: </span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">gid</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">uname </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span
+    class="s2">null </span><span class="s3">: </span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">uname</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">gname </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span
+    class="s2">null </span><span class="s3">: </span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">gname</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">size </span><span class="s3">= </span><span
+    class="s1">readEntry</span><span class="s3">.</span><span class="s1">size</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">mtime </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">noMtime </span><span class="s3">? </span><span
+    class="s2">null </span><span class="s3">: </span><span class="s1">opt</span><span class="s3">.</span><span
+    class="s1">mtime </span><span class="s3">|| </span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">mtime</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">atime </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span
+    class="s2">null </span><span class="s3">: </span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">atime</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">ctime </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span
+    class="s2">null </span><span class="s3">: </span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">ctime</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath </span><span
+    class="s3">= </span><span class="s1">normPath</span><span class="s3">(</span><span class="s1">readEntry</span><span
+    class="s3">.</span><span class="s1">linkpath</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">opt</span><span
+    class="s3">.</span><span class="s1">onwarn </span><span class="s3">=== </span><span
+    class="s0">'function'</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'warn'</span><span class="s3">, </span><span class="s1">opt</span><span class="s3">.</span><span
+    class="s1">onwarn</span><span class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s2">let </span><span class="s1">pathWarn </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">preservePaths</span><span class="s3">) {</span>
+      <span class="s2">const </span><span class="s3">[</span><span class="s1">root</span><span class="s3">, </span><span
+    class="s1">stripped</span><span class="s3">] = </span><span class="s1">stripAbsolutePath</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">path</span><span
+    class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">root</span><span class="s3">) {</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span
+    class="s3">= </span><span class="s1">stripped</span>
+        <span class="s1">pathWarn </span><span class="s3">= </span><span class="s1">root</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">remain </span><span class="s3">= </span><span
+    class="s1">readEntry</span><span class="s3">.</span><span class="s1">size</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain </span><span
+    class="s3">= </span><span class="s1">readEntry</span><span class="s3">.</span><span class="s1">startBlockSize</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">header </span><span class="s3">= </span><span
+    class="s2">new </span><span class="s1">Header</span><span class="s3">({</span>
+      <span class="s1">path</span><span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">PREFIX</span><span class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">path</span><span class="s3">),</span>
+      <span class="s1">linkpath</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">type </span><span class="s3">=== </span><span class="s0">'Link' </span><span
+    class="s3">? </span><span class="s2">this</span><span class="s3">[</span><span class="s1">PREFIX</span><span
+    class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath</span><span
+    class="s3">)</span>
+      <span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">linkpath</span><span class="s3">,</span>
+      <span class="s6">// only the permissions and setuid/setgid/sticky bitflags</span>
+      <span class="s6">// not the higher-order bits that specify file type</span>
+      <span class="s1">mode</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">mode</span><span class="s3">,</span>
+      <span class="s1">uid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">uid</span><span class="s3">,</span>
+      <span class="s1">gid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">gid</span><span class="s3">,</span>
+      <span class="s1">size</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">size</span><span class="s3">,</span>
+      <span class="s1">mtime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">noMtime </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">mtime</span><span class="s3">,</span>
+      <span class="s1">type</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">type</span><span class="s3">,</span>
+      <span class="s1">uname</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">uname</span><span class="s3">,</span>
+      <span class="s1">atime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">atime</span><span class="s3">,</span>
+      <span class="s1">ctime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">ctime</span><span class="s3">,</span>
+    <span class="s3">})</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">pathWarn</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">warn</span><span class="s3">(</span><span
+    class="s0">'TAR_ENTRY_INFO'</span><span class="s3">, </span><span class="s0">`stripping </span><span
+    class="s1">$</span><span class="s3">{</span><span class="s1">pathWarn</span><span class="s3">} </span><span
+    class="s0">from absolute path`</span><span class="s3">, {</span>
+        <span class="s1">entry</span><span class="s3">: </span><span class="s2">this</span><span class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s1">pathWarn </span><span
+    class="s3">+ </span><span class="s2">this</span><span class="s3">.</span><span class="s1">path</span><span
+    class="s3">,</span>
+      <span class="s3">})</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">header</span><span class="s3">.</span><span class="s1">encode</span><span
+    class="s3">() &amp;&amp; !</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">noPax</span><span class="s3">) {</span>
+      <span class="s2">super</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s2">new </span><span class="s1">Pax</span><span class="s3">({</span>
+        <span class="s1">atime</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">atime</span><span
+    class="s3">,</span>
+        <span class="s1">ctime</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">ctime</span><span
+    class="s3">,</span>
+        <span class="s1">gid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">gid</span><span class="s3">,</span>
+        <span class="s1">mtime</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">noMtime </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">mtime</span><span
+    class="s3">,</span>
+        <span class="s1">path</span><span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">PREFIX</span><span class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">path</span><span class="s3">),</span>
+        <span class="s1">linkpath</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">type </span><span class="s3">=== </span><span class="s0">'Link' </span><span
+    class="s3">? </span><span class="s2">this</span><span class="s3">[</span><span class="s1">PREFIX</span><span
+    class="s3">](</span><span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath</span><span
+    class="s3">)</span>
+        <span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">linkpath</span><span class="s3">,</span>
+        <span class="s1">size</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">size</span><span class="s3">,</span>
+        <span class="s1">uid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">uid</span><span class="s3">,</span>
+        <span class="s1">uname</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">uname</span><span
+    class="s3">,</span>
+        <span class="s1">dev</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">dev</span><span class="s3">,</span>
+        <span class="s1">ino</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span class="s3">: </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">readEntry</span><span class="s3">.</span><span
+    class="s1">ino</span><span class="s3">,</span>
+        <span class="s1">nlink</span><span class="s3">: </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">portable </span><span class="s3">? </span><span class="s2">null </span><span
+    class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span class="s1">readEntry</span><span
+    class="s3">.</span><span class="s1">nlink</span><span class="s3">,</span>
+      <span class="s3">}).</span><span class="s1">encode</span><span class="s3">())</span>
+    <span class="s3">}</span>
+
+    <span class="s2">super</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">header</span><span class="s3">.</span><span
+    class="s1">block</span><span class="s3">)</span>
+    <span class="s1">readEntry</span><span class="s3">.</span><span class="s1">pipe</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">PREFIX</span><span class="s3">] (</span><span class="s1">path</span><span
+    class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">prefixPath</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">prefix</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">MODE</span><span class="s3">] (</span><span class="s1">mode</span><span
+    class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">modeFix</span><span class="s3">(</span><span
+    class="s1">mode</span><span class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">type </span><span class="s3">=== </span><span class="s0">'Directory'</span><span
+    class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span class="s1">portable</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">write </span><span class="s3">(</span><span class="s1">data</span><span class="s3">) {</span>
+    <span class="s2">const </span><span class="s1">writeLen </span><span class="s3">= </span><span
+    class="s1">data</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">writeLen </span><span
+    class="s3">&gt; </span><span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain</span><span
+    class="s3">) {</span>
+      <span class="s2">throw new </span><span class="s1">Error</span><span class="s3">(</span><span class="s0">'writing more to entry than is appropriate'</span><span
+    class="s3">)</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain </span><span class="s3">-= </span><span
+    class="s1">writeLen</span>
+    <span class="s2">return super</span><span class="s3">.</span><span class="s1">write</span><span
+    class="s3">(</span><span class="s1">data</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">end </span><span class="s3">() {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">blockRemain</span><span class="s3">) {</span>
+      <span class="s2">super</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s1">Buffer</span><span class="s3">.</span><span class="s1">alloc</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">blockRemain</span><span class="s3">))</span>
+    <span class="s3">}</span>
+    <span class="s2">return super</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+  <span class="s3">}</span>
+<span class="s3">})</span>
+
+<span class="s1">WriteEntry</span><span class="s3">.</span><span class="s1">Sync </span><span class="s3">= </span><span
+    class="s1">WriteEntrySync</span>
+<span class="s1">WriteEntry</span><span class="s3">.</span><span class="s1">Tar </span><span class="s3">= </span><span
+    class="s1">WriteEntryTar</span>
+
+<span class="s2">const </span><span class="s1">getType </span><span class="s3">= </span><span
+    class="s1">stat </span><span class="s3">=&gt;</span>
+  <span class="s1">stat</span><span class="s3">.</span><span class="s1">isFile</span><span class="s3">() ? </span><span
+    class="s0">'File'</span>
+  <span class="s3">: </span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">isDirectory</span><span class="s3">() ? </span><span class="s0">'Directory'</span>
+  <span class="s3">: </span><span class="s1">stat</span><span class="s3">.</span><span
+    class="s1">isSymbolicLink</span><span class="s3">() ? </span><span class="s0">'SymbolicLink'</span>
+  <span class="s3">: </span><span class="s0">'Unsupported'</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">WriteEntry</span>
+</pre>
+</body>
+</html>

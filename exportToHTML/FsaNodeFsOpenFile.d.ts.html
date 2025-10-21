@@ -1,0 +1,85 @@
+<html>
+<head>
+  <title>FsaNodeFsOpenFile.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsaNodeFsOpenFile.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">* as </span><span
+  class="s1">fsa from </span><span class="s3">'../fsa/types'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">* as </span><span
+    class="s1">misc from </span><span class="s3">'../node/types/misc'</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* Represents an open file. Stores additional metadata about the open file, such</span>
+ <span class="s4">* as the seek position.</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">FsaNodeFsOpenFile </span><span
+    class="s2">{</span>
+    <span class="s1">readonly fd</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">readonly createMode</span><span class="s2">: </span><span class="s1">misc</span><span
+    class="s2">.</span><span class="s1">TMode</span><span class="s2">;</span>
+    <span class="s1">readonly flags</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">readonly file</span><span class="s2">: </span><span class="s1">fsa</span><span
+    class="s2">.</span><span class="s1">IFileSystemFileHandle</span><span class="s2">;</span>
+    <span class="s1">readonly filename</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">seek</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* This influences the behavior of the next write operation. On the first</span>
+     <span class="s4">* write we want to overwrite the file or keep the existing data, depending</span>
+     <span class="s4">* with which flags the file was opened. On subsequent writes we want to</span>
+     <span class="s4">* append to the file.</span>
+     <span class="s4">*/</span>
+    <span class="s0">protected </span><span class="s1">keepExistingData</span><span class="s2">: </span><span
+    class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">createMode</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TMode</span><span
+    class="s2">, </span><span class="s1">flags</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">file</span><span class="s2">: </span><span class="s1">fsa</span><span
+    class="s2">.</span><span class="s1">IFileSystemFileHandle</span><span class="s2">, </span><span
+    class="s1">filename</span><span class="s2">: </span><span class="s1">string</span><span class="s2">);</span>
+    <span class="s1">close</span><span class="s2">(): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">data</span><span class="s2">: </span><span
+    class="s1">ArrayBufferView</span><span class="s2">, </span><span class="s1">seek</span><span
+    class="s2">: </span><span class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s0">void</span><span
+    class="s2">&gt;;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<html>
+<head>
+  <title>misc.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          misc.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+  class="s1">PathLike </span><span class="s2">as </span><span class="s1">NodePathLike</span><span
+  class="s2">, </span><span class="s1">symlink </span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">'../../vendor/node/fs'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">constants </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../../constants'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">EventEmitter </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../../vendor/node/events'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">TSetTimeout </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../../setTimeoutUnref'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">IAppendFileOptions</span><span
+    class="s2">, </span><span class="s1">IFileHandleReadStreamOptions</span><span class="s2">, </span><span class="s1">IFileHandleWriteStreamOptions</span><span
+    class="s2">, </span><span class="s1">IReadableWebStreamOptions</span><span class="s2">, </span><span class="s1">IReadFileOptions</span><span
+    class="s2">, </span><span class="s1">IStatOptions</span><span class="s2">, </span><span
+    class="s1">IWriteFileOptions </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'./options'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">Readable</span><span class="s2">, </span><span class="s1">Writable </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'../../vendor/node/stream'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s2">{ </span><span class="s1">symlink </span><span class="s2">};</span>
+<span class="s0">export </span><span class="s1">type PathLike </span><span class="s2">= </span><span class="s1">NodePathLike </span><span
+    class="s2">| </span><span class="s1">Uint8Array</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TDataOut </span><span class="s2">= </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">Buffer</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TEncodingExtended </span><span class="s2">= </span><span
+    class="s1">BufferEncoding </span><span class="s2">| </span><span class="s3">'buffer'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TFileId </span><span class="s2">= </span><span
+    class="s1">PathLike </span><span class="s2">| </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TData </span><span class="s2">= </span><span
+    class="s1">TDataOut </span><span class="s2">| </span><span class="s1">ArrayBufferView </span><span
+    class="s2">| </span><span class="s1">DataView</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TPromisesData </span><span class="s2">= </span><span class="s1">TData </span><span
+    class="s2">| </span><span class="s1">Readable</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TFlags </span><span class="s2">= </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TMode </span><span class="s2">= </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TTime </span><span class="s2">= </span><span
+    class="s1">number </span><span class="s2">| </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">Date</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TCallback</span><span class="s2">&lt;</span><span
+    class="s1">TData</span><span class="s2">&gt; = (</span><span class="s1">error</span><span class="s2">?: </span><span
+    class="s1">IError </span><span class="s2">| </span><span class="s0">null</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">?: </span><span class="s1">TData</span><span class="s2">) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TCallback2</span><span class="s2">&lt;</span><span
+    class="s1">T1</span><span class="s2">, </span><span class="s1">T2</span><span class="s2">&gt; = (</span><span
+    class="s1">error</span><span class="s2">: </span><span class="s1">IError </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">, </span><span class="s1">bytesRead</span><span class="s2">?: </span><span
+    class="s1">T1</span><span class="s2">, </span><span class="s1">buffers</span><span class="s2">?: </span><span
+    class="s1">T2</span><span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s0">export interface </span><span class="s1">IError </span><span class="s0">extends </span><span
+    class="s1">Error </span><span class="s2">{</span>
+    <span class="s1">code</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">type TFlagsCopy </span><span class="s2">= </span><span
+    class="s0">typeof </span><span class="s1">constants</span><span class="s2">.</span><span
+    class="s1">COPYFILE_EXCL </span><span class="s2">| </span><span class="s0">typeof </span><span
+    class="s1">constants</span><span class="s2">.</span><span class="s1">COPYFILE_FICLONE </span><span
+    class="s2">| </span><span class="s0">typeof </span><span class="s1">constants</span><span class="s2">.</span><span
+    class="s1">COPYFILE_FICLONE_FORCE</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type TStatNumber </span><span class="s2">= </span><span class="s1">number </span><span
+    class="s2">| </span><span class="s1">bigint</span><span class="s2">;</span>
+<span class="s0">export interface </span><span class="s1">IStats</span><span class="s2">&lt;</span><span
+    class="s1">T </span><span class="s2">= </span><span class="s1">TStatNumber</span><span class="s2">&gt; {</span>
+    <span class="s1">uid</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">gid</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">rdev</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">blksize</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">ino</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">size</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">blocks</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">atime</span><span class="s2">: </span><span class="s1">Date</span><span class="s2">;</span>
+    <span class="s1">mtime</span><span class="s2">: </span><span class="s1">Date</span><span class="s2">;</span>
+    <span class="s1">ctime</span><span class="s2">: </span><span class="s1">Date</span><span class="s2">;</span>
+    <span class="s1">birthtime</span><span class="s2">: </span><span class="s1">Date</span><span class="s2">;</span>
+    <span class="s1">atimeMs</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">mtimeMs</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">ctimeMs</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">birthtimeMs</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">dev</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">mode</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">nlink</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">isDirectory</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isFile</span><span class="s2">(): </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">isBlockDevice</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isCharacterDevice</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isSymbolicLink</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isFIFO</span><span class="s2">(): </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">isSocket</span><span class="s2">(): </span><span class="s1">boolean</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IStatFs</span><span class="s2">&lt;</span><span
+    class="s1">T </span><span class="s2">= </span><span class="s1">TStatNumber</span><span class="s2">&gt; {</span>
+    <span class="s1">bavail</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">bfree</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">blocks</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">bsize</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">ffree</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">files</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+    <span class="s1">type</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IDir </span><span class="s2">{</span>
+    <span class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">close</span><span class="s2">(): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">close</span><span class="s2">(</span><span class="s1">callback</span><span
+    class="s2">?: (</span><span class="s1">err</span><span class="s2">?: </span><span class="s1">Error</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">closeSync</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">read</span><span class="s2">(): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">IDirent </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">read</span><span class="s2">(</span><span class="s1">callback</span><span
+    class="s2">?: (</span><span class="s1">err</span><span class="s2">: </span><span class="s1">Error </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">, </span><span class="s1">dir</span><span
+    class="s2">?: </span><span class="s1">IDirent </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">readSync</span><span class="s2">(): </span><span class="s1">IDirent </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">;</span>
+    <span class="s2">[</span><span class="s1">Symbol</span><span class="s2">.</span><span
+    class="s1">asyncIterator</span><span class="s2">](): </span><span class="s1">AsyncIterableIterator</span><span
+    class="s2">&lt;</span><span class="s1">IDirent</span><span class="s2">&gt;;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IDirent </span><span class="s2">{</span>
+    <span class="s1">name</span><span class="s2">: </span><span class="s1">TDataOut</span><span class="s2">;</span>
+    <span class="s1">isDirectory</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isFile</span><span class="s2">(): </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">isBlockDevice</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isCharacterDevice</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isSymbolicLink</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isFIFO</span><span class="s2">(): </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">isSocket</span><span class="s2">(): </span><span class="s1">boolean</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IStatWatcher </span><span class="s0">extends </span><span
+    class="s1">EventEmitter </span><span class="s2">{</span>
+    <span class="s1">filename</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">interval</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">timeoutRef</span><span class="s2">?: </span><span class="s1">any</span><span class="s2">;</span>
+    <span class="s1">setTimeout</span><span class="s2">: </span><span class="s1">TSetTimeout</span><span
+    class="s2">;</span>
+    <span class="s1">prev</span><span class="s2">: </span><span class="s1">IStats</span><span class="s2">;</span>
+    <span class="s1">start</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">persistent</span><span class="s2">?: </span><span
+    class="s1">boolean</span><span class="s2">, </span><span class="s1">interval</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">stop</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IReadStream </span><span class="s0">extends </span><span
+    class="s1">Readable </span><span class="s2">{</span>
+    <span class="s1">bytesRead</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">path</span><span class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">Buffer</span><span class="s2">;</span>
+    <span class="s1">pending</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IWriteStream </span><span class="s0">extends </span><span
+    class="s1">Writable </span><span class="s2">{</span>
+    <span class="s1">bytesWritten</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">pending</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">close</span><span class="s2">(</span><span class="s1">callback</span><span
+    class="s2">?: (</span><span class="s1">err</span><span class="s2">?: </span><span class="s1">Error</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IFSWatcher </span><span class="s0">extends </span><span
+    class="s1">EventEmitter </span><span class="s2">{</span>
+    <span class="s1">start</span><span class="s2">(</span><span class="s1">path</span><span class="s2">: </span><span
+    class="s1">PathLike</span><span class="s2">, </span><span class="s1">persistent</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">, </span><span class="s1">recursive</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">, </span><span class="s1">encoding</span><span
+    class="s2">?: </span><span class="s1">BufferEncoding</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">close</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s4">/**</span>
+ <span class="s4">* Declare ReadableStream in case dom.d.ts is not added to the tsconfig lib causing</span>
+ <span class="s4">* ReadableStream interface is not defined. For developers with dom.d.ts added,</span>
+ <span class="s4">* the ReadableStream interface will be merged correctly.</span>
+ <span class="s4">*/</span>
+<span class="s1">declare global </span><span class="s2">{</span>
+    <span class="s0">export interface </span><span class="s1">ReadableStream </span><span class="s2">{</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">IFileHandle </span><span class="s0">extends </span><span
+    class="s1">EventEmitter </span><span class="s2">{</span>
+    <span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">getAsyncId</span><span class="s2">(): </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">appendFile</span><span class="s2">(</span><span class="s1">data</span><span
+    class="s2">: </span><span class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">IAppendFileOptions </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">chmod</span><span class="s2">(</span><span class="s1">mode</span><span class="s2">: </span><span
+    class="s1">TMode</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">chown</span><span class="s2">(</span><span class="s1">uid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">close</span><span class="s2">(): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">createReadStream</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">: </span><span class="s1">IFileHandleReadStreamOptions</span><span class="s2">): </span><span class="s1">IReadStream</span><span
+    class="s2">;</span>
+    <span class="s1">createWriteStream</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">: </span><span class="s1">IFileHandleWriteStreamOptions</span><span class="s2">): </span><span
+    class="s1">IWriteStream</span><span class="s2">;</span>
+    <span class="s1">datasync</span><span class="s2">(): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">readableWebStream</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">IReadableWebStreamOptions</span><span class="s2">): </span><span class="s1">ReadableStream</span><span
+    class="s2">;</span>
+    <span class="s1">read</span><span class="s2">(</span><span class="s1">buffer</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">Uint8Array</span><span class="s2">, </span><span
+    class="s1">offset</span><span class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">length</span><span class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">position</span><span class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">TFileHandleReadResult</span><span class="s2">&gt;;</span>
+    <span class="s1">readv</span><span class="s2">(</span><span class="s1">buffers</span><span class="s2">: </span><span
+    class="s1">ArrayBufferView</span><span class="s2">[], </span><span class="s1">position</span><span
+    class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">TFileHandleReadvResult</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">readFile</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">IReadFileOptions </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">TDataOut</span><span class="s2">&gt;;</span>
+    <span class="s1">stat</span><span class="s2">(</span><span class="s1">options</span><span class="s2">?: </span><span
+    class="s1">IStatOptions</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">IStats</span><span class="s2">&gt;;</span>
+    <span class="s1">truncate</span><span class="s2">(</span><span class="s1">len</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">utimes</span><span class="s2">(</span><span class="s1">atime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">, </span><span class="s1">mtime</span><span class="s2">: </span><span
+    class="s1">TTime</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">buffer</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">ArrayBufferView </span><span
+    class="s2">| </span><span class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span
+    class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">TFileHandleWriteResult</span><span
+    class="s2">&gt;;</span>
+    <span class="s1">writev</span><span class="s2">(</span><span class="s1">buffers</span><span
+    class="s2">: </span><span class="s1">ArrayBufferView</span><span class="s2">[], </span><span
+    class="s1">position</span><span class="s2">?: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">TFileHandleWritevResult</span><span class="s2">&gt;;</span>
+    <span class="s1">writeFile</span><span class="s2">(</span><span class="s1">data</span><span
+    class="s2">: </span><span class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">IWriteFileOptions</span><span class="s2">): </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">type TFileHandle </span><span class="s2">= </span><span class="s1">PathLike </span><span
+    class="s2">| </span><span class="s1">IFileHandle</span><span class="s2">;</span>
+<span class="s0">export interface </span><span class="s1">TFileHandleReadResult </span><span class="s2">{</span>
+    <span class="s1">bytesRead</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">Uint8Array</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">TFileHandleWriteResult </span><span class="s2">{</span>
+    <span class="s1">bytesWritten</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">buffer</span><span class="s2">: </span><span class="s1">Buffer </span><span
+    class="s2">| </span><span class="s1">Uint8Array</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">TFileHandleReadvResult </span><span class="s2">{</span>
+    <span class="s1">bytesRead</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">buffers</span><span class="s2">: </span><span class="s1">ArrayBufferView</span><span
+    class="s2">[];</span>
+<span class="s2">}</span>
+<span class="s0">export interface </span><span class="s1">TFileHandleWritevResult </span><span class="s2">{</span>
+    <span class="s1">bytesWritten</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">buffers</span><span class="s2">: </span><span class="s1">ArrayBufferView</span><span
+    class="s2">[];</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s1">type AssertCallback</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt; = </span><span class="s1">T </span><span class="s0">extends </span><span
+    class="s2">() =&gt; </span><span class="s0">void </span><span class="s2">? </span><span class="s1">T </span><span
+    class="s2">: </span><span class="s1">never</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

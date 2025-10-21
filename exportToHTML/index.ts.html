@@ -1,0 +1,301 @@
+<html>
+<head>
+  <title>index.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          index.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">AnySchemaObject</span><span class="s2">, </span><span class="s1">KeywordErrorDefinition</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">getProperty</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">DiscrError</span><span
+    class="s2">, </span><span class="s1">DiscrErrorObj</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../discriminator/types&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">resolveRef</span><span
+    class="s2">, </span><span class="s1">SchemaEnv</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;../../compile&quot;</span>
+<span class="s0">import </span><span class="s1">MissingRefError from </span><span class="s3">&quot;../../compile/ref_error&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">schemaHasRulesButRef</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/util&quot;</span>
+
+<span class="s0">export </span><span class="s1">type DiscriminatorError </span><span class="s2">= </span><span
+    class="s1">DiscrErrorObj</span><span class="s2">&lt;</span><span class="s1">DiscrError</span><span
+    class="s2">.</span><span class="s1">Tag</span><span class="s2">&gt; | </span><span
+    class="s1">DiscrErrorObj</span><span class="s2">&lt;</span><span class="s1">DiscrError</span><span
+    class="s2">.</span><span class="s1">Mapping</span><span class="s2">&gt;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: ({</span><span class="s1">params</span><span
+    class="s2">: {</span><span class="s1">discrError</span><span class="s2">, </span><span
+    class="s1">tagName</span><span class="s2">}}) =&gt;</span>
+    <span class="s1">discrError </span><span class="s2">=== </span><span class="s1">DiscrError</span><span
+    class="s2">.</span><span class="s1">Tag</span>
+      <span class="s2">? </span><span class="s3">`tag &quot;</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">tagName</span><span class="s2">}</span><span
+    class="s3">&quot; must be string`</span>
+      <span class="s2">: </span><span class="s3">`value of tag &quot;</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">tagName</span><span class="s2">}</span><span
+    class="s3">&quot; must be in oneOf`</span><span class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">params</span><span
+    class="s2">: {</span><span class="s1">discrError</span><span class="s2">, </span><span class="s1">tag</span><span
+    class="s2">, </span><span class="s1">tagName</span><span class="s2">}}) =&gt;</span>
+    <span class="s1">_</span><span class="s3">`{error: </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">discrError</span><span class="s2">}</span><span class="s3">, tag: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">tagName</span><span class="s2">}</span><span class="s3">, tagValue: </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">tag</span><span class="s2">}</span><span
+    class="s3">}`</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;discriminator&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">parentSchema</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">oneOf</span><span
+    class="s2">} = </span><span class="s1">parentSchema</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">discriminator</span><span class="s2">) {</span>
+      <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;discriminator: requires discriminator option&quot;</span><span
+    class="s2">)</span>
+    <span class="s2">}</span>
+    <span class="s0">const </span><span class="s1">tagName </span><span class="s2">= </span><span
+    class="s1">schema</span><span class="s2">.</span><span class="s1">propertyName</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">tagName </span><span class="s2">!= </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">) </span><span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">&quot;discriminator: requires propertyName&quot;</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">schema</span><span class="s2">.</span><span
+    class="s1">mapping</span><span class="s2">) </span><span class="s0">throw new </span><span
+    class="s1">Error</span><span class="s2">(</span><span
+    class="s3">&quot;discriminator: mapping is not supported&quot;</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">oneOf</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;discriminator: requires oneOf keyword&quot;</span><span
+    class="s2">)</span>
+    <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span class="s3">&quot;valid&quot;</span><span
+    class="s2">, </span><span class="s0">false</span><span class="s2">)</span>
+    <span class="s0">const </span><span class="s1">tag </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">const</span><span class="s2">(</span><span
+    class="s3">&quot;tag&quot;</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">getProperty</span><span class="s2">(</span><span
+    class="s1">tagName</span><span class="s2">)}</span><span class="s3">`</span><span class="s2">)</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span>
+      <span class="s1">_</span><span class="s3">`typeof </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">tag</span><span class="s2">} </span><span class="s3">== &quot;string&quot;`</span><span
+    class="s2">,</span>
+      <span class="s2">() =&gt; </span><span class="s1">validateMapping</span><span class="s2">(),</span>
+      <span class="s2">() =&gt; </span><span class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span
+    class="s2">(</span><span class="s0">false</span><span class="s2">, {</span><span class="s1">discrError</span><span
+    class="s2">: </span><span class="s1">DiscrError</span><span class="s2">.</span><span class="s1">Tag</span><span
+    class="s2">, </span><span class="s1">tag</span><span class="s2">, </span><span class="s1">tagName</span><span
+    class="s2">})</span>
+    <span class="s2">)</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">)</span>
+
+    <span class="s0">function </span><span class="s1">validateMapping</span><span class="s2">(): </span><span
+    class="s0">void </span><span class="s2">{</span>
+      <span class="s0">const </span><span class="s1">mapping </span><span class="s2">= </span><span class="s1">getMapping</span><span
+    class="s2">()</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s0">false</span><span class="s2">)</span>
+      <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span
+    class="s1">tagValue </span><span class="s0">in </span><span class="s1">mapping</span><span class="s2">) {</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">elseIf</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">tag</span><span class="s2">} </span><span class="s3">=== </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">tagValue</span><span class="s2">}</span><span class="s3">`</span><span
+    class="s2">)</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s1">applyTagSchema</span><span
+    class="s2">(</span><span class="s1">mapping</span><span class="s2">[</span><span class="s1">tagValue</span><span
+    class="s2">]))</span>
+      <span class="s2">}</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">else</span><span class="s2">()</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span class="s2">(</span><span
+    class="s0">false</span><span class="s2">, {</span><span class="s1">discrError</span><span class="s2">: </span><span
+    class="s1">DiscrError</span><span class="s2">.</span><span class="s1">Mapping</span><span class="s2">, </span><span
+    class="s1">tag</span><span class="s2">, </span><span class="s1">tagName</span><span class="s2">})</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">endIf</span><span class="s2">()</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">applyTagSchema</span><span class="s2">(</span><span class="s1">schemaProp</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">): </span><span class="s1">Name </span><span
+    class="s2">{</span>
+      <span class="s0">const </span><span class="s1">_valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+      <span class="s0">const </span><span class="s1">schCxt </span><span class="s2">= </span><span class="s1">cxt</span><span
+    class="s2">.</span><span class="s1">subschema</span><span class="s2">({</span><span class="s1">keyword</span><span
+    class="s2">: </span><span class="s3">&quot;oneOf&quot;</span><span class="s2">, </span><span
+    class="s1">schemaProp</span><span class="s2">}, </span><span class="s1">_valid</span><span class="s2">)</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">mergeEvaluated</span><span
+    class="s2">(</span><span class="s1">schCxt</span><span class="s2">, </span><span class="s1">Name</span><span
+    class="s2">)</span>
+      <span class="s0">return </span><span class="s1">_valid</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">getMapping</span><span class="s2">(): {[</span><span
+    class="s1">T </span><span class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">number</span><span class="s2">} {</span>
+      <span class="s0">const </span><span class="s1">oneOfMapping</span><span class="s2">: {[</span><span
+    class="s1">T </span><span class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span
+    class="s1">number</span><span class="s2">} = {}</span>
+      <span class="s0">const </span><span class="s1">topRequired </span><span class="s2">= </span><span class="s1">hasRequired</span><span
+    class="s2">(</span><span class="s1">parentSchema</span><span class="s2">)</span>
+      <span class="s0">let </span><span class="s1">tagRequired </span><span class="s2">= </span><span
+    class="s0">true</span>
+      <span class="s0">for </span><span class="s2">(</span><span class="s0">let </span><span class="s1">i </span><span
+    class="s2">= </span><span class="s4">0</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&lt; </span><span
+    class="s1">oneOf</span><span class="s2">.</span><span class="s1">length</span><span class="s2">; </span><span
+    class="s1">i</span><span class="s2">++) {</span>
+        <span class="s0">let </span><span class="s1">sch </span><span class="s2">= </span><span
+    class="s1">oneOf</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">sch</span><span class="s2">?.</span><span
+    class="s1">$ref </span><span class="s2">&amp;&amp; !</span><span class="s1">schemaHasRulesButRef</span><span
+    class="s2">(</span><span class="s1">sch</span><span class="s2">, </span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">self</span><span class="s2">.</span><span class="s1">RULES</span><span
+    class="s2">)) {</span>
+          <span class="s0">const </span><span class="s1">ref </span><span class="s2">= </span><span
+    class="s1">sch</span><span class="s2">.</span><span class="s1">$ref</span>
+          <span class="s1">sch </span><span class="s2">= </span><span class="s1">resolveRef</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">self</span><span class="s2">, </span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">schemaEnv</span><span class="s2">.</span><span class="s1">root</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">.</span><span class="s1">baseId</span><span class="s2">, </span><span
+    class="s1">ref</span><span class="s2">)</span>
+          <span class="s0">if </span><span class="s2">(</span><span class="s1">sch </span><span
+    class="s0">instanceof </span><span class="s1">SchemaEnv</span><span class="s2">) </span><span class="s1">sch </span><span
+    class="s2">= </span><span class="s1">sch</span><span class="s2">.</span><span class="s1">schema</span>
+          <span class="s0">if </span><span class="s2">(</span><span class="s1">sch </span><span
+    class="s2">=== </span><span class="s1">undefined</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">MissingRefError</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">uriResolver</span><span
+    class="s2">, </span><span class="s1">it</span><span class="s2">.</span><span class="s1">baseId</span><span
+    class="s2">, </span><span class="s1">ref</span><span class="s2">)</span>
+        <span class="s2">}</span>
+        <span class="s0">const </span><span class="s1">propSch </span><span class="s2">= </span><span
+    class="s1">sch</span><span class="s2">?.</span><span class="s1">properties</span><span class="s2">?.[</span><span
+    class="s1">tagName</span><span class="s2">]</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">propSch </span><span class="s2">!= </span><span class="s3">&quot;object&quot;</span><span
+    class="s2">) {</span>
+          <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span>
+            <span class="s3">`discriminator: oneOf subschemas (or referenced schemas) must have &quot;properties/</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">tagName</span><span class="s2">}</span><span
+    class="s3">&quot;`</span>
+          <span class="s2">)</span>
+        <span class="s2">}</span>
+        <span class="s1">tagRequired </span><span class="s2">= </span><span class="s1">tagRequired </span><span
+    class="s2">&amp;&amp; (</span><span class="s1">topRequired </span><span class="s2">|| </span><span class="s1">hasRequired</span><span
+    class="s2">(</span><span class="s1">sch</span><span class="s2">))</span>
+        <span class="s1">addMappings</span><span class="s2">(</span><span class="s1">propSch</span><span
+    class="s2">, </span><span class="s1">i</span><span class="s2">)</span>
+      <span class="s2">}</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">tagRequired</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`discriminator: &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">tagName</span><span class="s2">}</span><span
+    class="s3">&quot; must be required`</span><span class="s2">)</span>
+      <span class="s0">return </span><span class="s1">oneOfMapping</span>
+
+      <span class="s0">function </span><span class="s1">hasRequired</span><span class="s2">({</span><span class="s1">required</span><span
+    class="s2">}: </span><span class="s1">AnySchemaObject</span><span class="s2">): </span><span
+    class="s1">boolean </span><span class="s2">{</span>
+        <span class="s0">return </span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">required</span><span
+    class="s2">) &amp;&amp; </span><span class="s1">required</span><span class="s2">.</span><span
+    class="s1">includes</span><span class="s2">(</span><span class="s1">tagName</span><span class="s2">)</span>
+      <span class="s2">}</span>
+
+      <span class="s0">function </span><span class="s1">addMappings</span><span class="s2">(</span><span
+    class="s1">sch</span><span class="s2">: </span><span class="s1">AnySchemaObject</span><span
+    class="s2">, </span><span class="s1">i</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">sch</span><span class="s2">.</span><span
+    class="s1">const</span><span class="s2">) {</span>
+          <span class="s1">addMapping</span><span class="s2">(</span><span class="s1">sch</span><span
+    class="s2">.</span><span class="s1">const</span><span class="s2">, </span><span class="s1">i</span><span class="s2">)</span>
+        <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span
+    class="s1">sch</span><span class="s2">.</span><span class="s1">enum</span><span class="s2">) {</span>
+          <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">tagValue of sch</span><span
+    class="s2">.</span><span class="s1">enum</span><span class="s2">) {</span>
+            <span class="s1">addMapping</span><span class="s2">(</span><span class="s1">tagValue</span><span class="s2">, </span><span
+    class="s1">i</span><span class="s2">)</span>
+          <span class="s2">}</span>
+        <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+          <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`discriminator: &quot;properties/</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">tagName</span><span class="s2">}</span><span
+    class="s3">&quot; must have &quot;const&quot; or &quot;enum&quot;`</span><span class="s2">)</span>
+        <span class="s2">}</span>
+      <span class="s2">}</span>
+
+      <span class="s0">function </span><span class="s1">addMapping</span><span class="s2">(</span><span class="s1">tagValue</span><span
+    class="s2">: </span><span class="s1">unknown</span><span class="s2">, </span><span class="s1">i</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">tagValue </span><span class="s2">!= </span><span class="s3">&quot;string&quot; </span><span
+    class="s2">|| </span><span class="s1">tagValue </span><span class="s0">in </span><span
+    class="s1">oneOfMapping</span><span class="s2">) {</span>
+          <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`discriminator: &quot;</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">tagName</span><span class="s2">}</span><span
+    class="s3">&quot; values must be unique strings`</span><span class="s2">)</span>
+        <span class="s2">}</span>
+        <span class="s1">oneOfMapping</span><span class="s2">[</span><span class="s1">tagValue</span><span class="s2">] = </span><span
+    class="s1">i</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

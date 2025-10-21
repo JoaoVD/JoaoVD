@@ -1,0 +1,298 @@
+<html>
+<head>
+  <title>array.coffee</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #6aab73;
+    }
+
+    .s3 {
+      color: #56a8f5;
+    }
+
+    .s4 {
+      color: #cf8e6d;
+    }
+
+    .s5 {
+      color: #2aacb8;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #c77dbb;
+      font-style: italic;
+    }
+
+    .s8 {
+      color: #bcbec4;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          array.coffee</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">require '</span><span class="s2">./_prepare</span><span class="s0">'</span>
+
+<span class="s0">array = </span><span class="s3">mod </span><span class="s0">'</span><span class="s2">array</span><span
+    class="s0">'</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">from</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">array.</span><span class="s3">from</span><span class="s0">([</span><span class="s5">1</span><span
+    class="s0">]).should.be.an.</span><span class="s3">instanceOf </span><span class="s1">Array</span>
+	<span class="s0">array.</span><span class="s3">from</span><span class="s0">([</span><span class="s5">1</span><span
+    class="s0">])[</span><span class="s5">0</span><span class="s0">].should.</span><span class="s3">equal </span><span
+    class="s5">1</span>
+
+<span class="s0"># </span><span class="s6">test 'clone', -&gt;</span>
+
+<span class="s0"># 	</span><span class="s6">a = [0, 1, 2]</span>
+
+<span class="s0"># 	</span><span class="s6">b = array.clone a</span>
+
+<span class="s0"># 	</span><span class="s6">b[0].should.equal 0</span>
+<span class="s0"># 	</span><span class="s6">b[1].should.equal 1</span>
+
+<span class="s0"># 	</span><span class="s6">b[0] = 3</span>
+
+<span class="s0"># 	</span><span class="s6">a[0].should.equal 0</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">pluck</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">a = [</span><span class="s5">0</span><span class="s0">, </span><span class="s5">1</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">, </span><span class="s5">3</span><span
+    class="s0">]</span>
+
+	<span class="s0">after = array.</span><span class="s3">pluck </span><span class="s1">a</span><span
+    class="s0">, </span><span class="s5">1</span>
+
+	<span class="s0">after.length.should.</span><span class="s3">equal </span><span class="s5">3</span>
+
+	<span class="s1">after</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">0</span>
+	<span class="s1">after</span><span class="s0">[</span><span class="s5">1</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">2</span>
+	<span class="s1">after</span><span class="s0">[</span><span class="s5">2</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span>
+	<span class="s0">after.should.</span><span class="s3">equal </span><span class="s1">a</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">pluckMultiple</span><span
+    class="s0">', </span><span class="s4">-&gt;</span>
+
+	<span class="s0">a = [</span><span class="s5">0</span><span class="s0">, </span><span class="s5">1</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">, </span><span class="s5">3</span><span
+    class="s0">, </span><span class="s5">4</span><span class="s0">, </span><span class="s5">5</span><span
+    class="s0">, </span><span class="s5">6</span><span class="s0">]</span>
+
+	<span class="s0">array.</span><span class="s3">pluckMultiple </span><span class="s1">a</span><span
+    class="s0">, [</span><span class="s5">0</span><span class="s0">, </span><span class="s5">4</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">, </span><span class="s5">6</span><span
+    class="s0">]</span>
+
+	<span class="s0">a.length.should.</span><span class="s3">equal </span><span class="s5">3</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">1</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">1</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">2</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">5</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">pluckItem</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">a = [</span><span class="s5">0</span><span class="s0">, </span><span class="s5">1</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">, </span><span class="s5">3</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">, </span><span class="s5">4</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">]</span>
+
+	<span class="s0">array.</span><span class="s3">pluckItem </span><span class="s1">a</span><span
+    class="s0">, </span><span class="s5">2</span>
+
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">0</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">1</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">1</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">2</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">3</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">4</span>
+
+	<span class="s0">array.</span><span class="s3">pluckItem</span><span class="s0">([</span><span
+    class="s5">1</span><span class="s0">], </span><span class="s5">2</span><span class="s0">).length.should.</span><span
+    class="s3">equal </span><span class="s5">1</span>
+
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">pluckOneItem</span><span
+    class="s0">', </span><span class="s4">-&gt;</span>
+
+	<span class="s0">a = [</span><span class="s5">0</span><span class="s0">, </span><span class="s5">1</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">, </span><span class="s5">3</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">, </span><span class="s5">4</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">]</span>
+
+	<span class="s0">array.</span><span class="s3">pluckOneItem </span><span class="s1">a</span><span class="s0">, </span><span
+    class="s5">2</span>
+
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">0</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">1</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">1</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">2</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">3</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">2</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">4</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">4</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">5</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">2</span>
+
+	<span class="s0">a = [</span><span class="s5">1</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s0">]</span>
+
+	<span class="s0">array.</span><span class="s3">pluckOneItem </span><span class="s1">a</span><span class="s0">, </span><span
+    class="s5">1</span>
+
+	<span class="s0">a.length.should.</span><span class="s3">equal </span><span class="s5">1</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">2</span>
+
+	<span class="s0">array.</span><span class="s3">pluckOneItem</span><span class="s0">([], </span><span
+    class="s5">1</span><span class="s0">).length.should.</span><span class="s3">equal </span><span class="s5">0</span>
+
+	<span class="s0">array.</span><span class="s3">pluckOneItem</span><span class="s0">([</span><span
+    class="s5">1</span><span class="s0">], </span><span class="s5">2</span><span class="s0">).length.should.</span><span
+    class="s3">equal </span><span class="s5">1</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">plcukByCallback</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">a = [</span><span class="s5">0</span><span class="s0">, </span><span class="s5">1</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s0">, </span><span class="s5">3</span><span
+    class="s0">]</span>
+
+	<span class="s0">array.</span><span class="s3">pluckByCallback </span><span class="s1">a</span><span class="s0">, (val, i) </span><span
+    class="s4">-&gt;</span>
+
+		<span class="s4">return </span><span class="s7">yes </span><span class="s4">if </span><span
+    class="s1">val </span><span class="s0">is </span><span class="s5">2</span>
+
+		<span class="s4">return </span><span class="s7">no</span>
+
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">0</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">1</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">1</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">2</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">injectByCallback</span><span
+    class="s0">', </span><span class="s4">-&gt;</span>
+
+	<span class="s3">shouldInject </span><span class="s0">= (valA, valB, toInject) </span><span class="s4">-&gt;</span>
+
+		<span class="s4">unless </span><span class="s1">valA</span><span class="s0">?</span>
+
+			<span class="s4">return </span><span class="s7">yes </span><span class="s4">if </span><span
+    class="s1">toInject </span><span class="s0">&lt;= </span><span class="s1">valB
+</span>
+			<span class="s4">return </span><span class="s7">no</span>
+
+		<span class="s4">unless </span><span class="s1">valB</span><span class="s0">?</span>
+
+			<span class="s4">return </span><span class="s7">yes </span><span class="s4">if </span><span
+    class="s1">valA </span><span class="s0">&lt;= </span><span class="s1">toInject
+</span>
+			<span class="s4">return </span><span class="s7">no</span>
+
+		<span class="s4">return </span><span class="s7">yes </span><span class="s4">if </span><span
+    class="s1">valA </span><span class="s0">&lt;= </span><span class="s1">toInject </span><span class="s0">&lt;= </span><span
+    class="s1">valB
+</span>
+		<span class="s4">return </span><span class="s7">no</span>
+
+	<span class="s0">a = [</span><span class="s5">0</span><span class="s8">.</span><span class="s5">5</span><span
+    class="s0">, </span><span class="s5">1</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">5</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">5</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">75</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">75</span><span class="s0">, </span><span class="s5">3</span><span
+    class="s0">]</span>
+
+	<span class="s0">array.</span><span class="s3">injectByCallback </span><span class="s1">a</span><span
+    class="s0">, </span><span class="s5">0</span><span class="s0">, </span><span class="s1">shouldInject</span>
+
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">0</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">1</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">0</span><span class="s8">.</span><span class="s5">5</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">7</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span>
+
+	<span class="s0">a = [</span><span class="s5">0</span><span class="s8">.</span><span class="s5">5</span><span
+    class="s0">, </span><span class="s5">1</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">5</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">5</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">75</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">75</span><span class="s0">, </span><span class="s5">3</span><span
+    class="s0">]</span>
+
+	<span class="s0">array.</span><span class="s3">injectByCallback </span><span class="s1">a</span><span
+    class="s0">, </span><span class="s5">2</span><span class="s8">.</span><span class="s5">7</span><span
+    class="s0">, </span><span class="s1">shouldInject</span>
+
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">0</span><span class="s8">.</span><span class="s5">5</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">4</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">2</span><span class="s8">.</span><span class="s5">7</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">5</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">2</span><span class="s8">.</span><span class="s5">75</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">7</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span>
+
+	<span class="s0">a = [</span><span class="s5">0</span><span class="s8">.</span><span class="s5">5</span><span
+    class="s0">, </span><span class="s5">1</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">5</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">5</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">75</span><span class="s0">, </span><span class="s5">2</span><span
+    class="s8">.</span><span class="s5">75</span><span class="s0">, </span><span class="s5">3</span><span
+    class="s0">]</span>
+
+	<span class="s0">array.</span><span class="s3">injectByCallback </span><span class="s1">a</span><span
+    class="s0">, </span><span class="s5">3</span><span class="s8">.</span><span class="s5">2</span><span
+    class="s0">, </span><span class="s1">shouldInject</span>
+
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">0</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">0</span><span class="s8">.</span><span class="s5">5</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">4</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">2</span><span class="s8">.</span><span class="s5">75</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">6</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span>
+	<span class="s1">a</span><span class="s0">[</span><span class="s5">7</span><span class="s0">].should.</span><span
+    class="s3">equal </span><span class="s5">3</span><span class="s8">.</span><span class="s5">2</span></pre>
+</body>
+</html>

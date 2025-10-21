@@ -1,0 +1,166 @@
+<html>
+<head>
+  <title>strict.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          strict.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* In strict assertion mode, non-strict methods behave like their corresponding</span>
+ <span class="s0">* strict methods. For example, `assert.deepEqual()` will behave like</span>
+ <span class="s0">* `assert.deepStrictEqual()`.</span>
+ <span class="s0">*</span>
+ <span class="s0">* In strict assertion mode, error messages for objects display a diff. In legacy</span>
+ <span class="s0">* assertion mode, error messages for objects display the objects, often truncated.</span>
+ <span class="s0">*</span>
+ <span class="s0">* To use strict assertion mode:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { strict as assert } from 'node:assert';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import assert from 'node:assert/strict';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* Example error diff:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { strict as assert } from 'node:assert';</span>
+ <span class="s0">*</span>
+ <span class="s0">* assert.deepEqual([[[1, 2, 3]], 4, 5], [[[1, 2, '3']], 4, 5]);</span>
+ <span class="s0">* // AssertionError: Expected inputs to be strictly deep-equal:</span>
+ <span class="s0">* // + actual - expected ... Lines skipped</span>
+ <span class="s0">* //</span>
+ <span class="s0">* //   [</span>
+ <span class="s0">* //     [</span>
+ <span class="s0">* // ...</span>
+ <span class="s0">* //       2,</span>
+ <span class="s0">* // +     3</span>
+ <span class="s0">* // -     '3'</span>
+ <span class="s0">* //     ],</span>
+ <span class="s0">* // ...</span>
+ <span class="s0">* //     5</span>
+ <span class="s0">* //   ]</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* To deactivate the colors, use the `NO_COLOR` or `NODE_DISABLE_COLORS`</span>
+ <span class="s0">* environment variables. This will also deactivate the colors in the REPL. For</span>
+ <span class="s0">* more on color support in terminal environments, read the tty</span>
+ <span class="s0">* [`getColorDepth()`](https://nodejs.org/docs/latest-v24.x/api/tty.html#writestreamgetcolordepthenv) documentation.</span>
+ <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.0.0</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/assert/strict.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;assert/strict&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{</span>
+        <span class="s2">Assert</span><span class="s4">,</span>
+        <span class="s2">AssertionError</span><span class="s4">,</span>
+        <span class="s2">AssertionErrorOptions</span><span class="s4">,</span>
+        <span class="s2">AssertOptions</span><span class="s4">,</span>
+        <span class="s2">AssertPredicate</span><span class="s4">,</span>
+        <span class="s2">AssertStrict</span><span class="s4">,</span>
+        <span class="s2">CallTracker</span><span class="s4">,</span>
+        <span class="s2">CallTrackerCall</span><span class="s4">,</span>
+        <span class="s2">CallTrackerReportInformation</span><span class="s4">,</span>
+        <span class="s2">deepStrictEqual</span><span class="s4">,</span>
+        <span class="s2">doesNotMatch</span><span class="s4">,</span>
+        <span class="s2">doesNotReject</span><span class="s4">,</span>
+        <span class="s2">doesNotThrow</span><span class="s4">,</span>
+        <span class="s2">fail</span><span class="s4">,</span>
+        <span class="s2">ifError</span><span class="s4">,</span>
+        <span class="s2">match</span><span class="s4">,</span>
+        <span class="s2">notDeepStrictEqual</span><span class="s4">,</span>
+        <span class="s2">notStrictEqual</span><span class="s4">,</span>
+        <span class="s2">ok</span><span class="s4">,</span>
+        <span class="s2">partialDeepStrictEqual</span><span class="s4">,</span>
+        <span class="s2">rejects</span><span class="s4">,</span>
+        <span class="s2">strictEqual</span><span class="s4">,</span>
+        <span class="s2">throws</span><span class="s4">,</span>
+    <span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:assert&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">function </span><span class="s2">strict</span><span class="s4">(</span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s2">asserts value</span><span class="s4">;</span>
+    <span class="s2">namespace strict </span><span class="s4">{</span>
+        <span class="s5">export </span><span class="s4">{</span>
+            <span class="s2">Assert</span><span class="s4">,</span>
+            <span class="s2">AssertionError</span><span class="s4">,</span>
+            <span class="s2">AssertionErrorOptions</span><span class="s4">,</span>
+            <span class="s2">AssertOptions</span><span class="s4">,</span>
+            <span class="s2">AssertPredicate</span><span class="s4">,</span>
+            <span class="s2">AssertStrict</span><span class="s4">,</span>
+            <span class="s2">CallTracker</span><span class="s4">,</span>
+            <span class="s2">CallTrackerCall</span><span class="s4">,</span>
+            <span class="s2">CallTrackerReportInformation</span><span class="s4">,</span>
+            <span class="s2">deepStrictEqual</span><span class="s4">,</span>
+            <span class="s2">deepStrictEqual </span><span class="s4">as </span><span class="s2">deepEqual</span><span
+    class="s4">,</span>
+            <span class="s2">doesNotMatch</span><span class="s4">,</span>
+            <span class="s2">doesNotReject</span><span class="s4">,</span>
+            <span class="s2">doesNotThrow</span><span class="s4">,</span>
+            <span class="s2">fail</span><span class="s4">,</span>
+            <span class="s2">ifError</span><span class="s4">,</span>
+            <span class="s2">match</span><span class="s4">,</span>
+            <span class="s2">notDeepStrictEqual</span><span class="s4">,</span>
+            <span class="s2">notDeepStrictEqual </span><span class="s4">as </span><span
+    class="s2">notDeepEqual</span><span class="s4">,</span>
+            <span class="s2">notStrictEqual</span><span class="s4">,</span>
+            <span class="s2">notStrictEqual </span><span class="s4">as </span><span class="s2">notEqual</span><span
+    class="s4">,</span>
+            <span class="s2">ok</span><span class="s4">,</span>
+            <span class="s2">partialDeepStrictEqual</span><span class="s4">,</span>
+            <span class="s2">rejects</span><span class="s4">,</span>
+            <span class="s2">strict</span><span class="s4">,</span>
+            <span class="s2">strictEqual</span><span class="s4">,</span>
+            <span class="s2">strictEqual </span><span class="s4">as </span><span class="s2">equal</span><span
+    class="s4">,</span>
+            <span class="s2">throws</span><span class="s4">,</span>
+        <span class="s4">};</span>
+    <span class="s4">}</span>
+    <span class="s5">export </span><span class="s4">= </span><span class="s2">strict</span><span class="s4">;</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:assert/strict&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s2">strict </span><span class="s4">= </span><span
+    class="s2">require</span><span class="s4">(</span><span class="s3">&quot;assert/strict&quot;</span><span class="s4">);</span>
+    <span class="s5">export </span><span class="s4">= </span><span class="s2">strict</span><span class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

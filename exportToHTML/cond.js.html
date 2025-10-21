@@ -1,0 +1,137 @@
+<html>
+<head>
+  <title>cond.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          cond.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">apply </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_apply'</span><span class="s2">),</span>
+    <span class="s1">arrayMap </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_arrayMap'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">),</span>
+    <span class="s1">baseRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">);</span>
+
+<span class="s4">/** Error message constants. */</span>
+<span class="s0">var </span><span class="s1">FUNC_ERROR_TEXT </span><span class="s2">= </span><span class="s3">'Expected a function'</span><span
+    class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a function that iterates over `pairs` and invokes the corresponding</span>
+ <span class="s4">* function of the first predicate to return truthy. The predicate-function</span>
+ <span class="s4">* pairs are invoked with the `this` binding and arguments of the created</span>
+ <span class="s4">* function.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">4.0.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Util</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Array} pairs The predicate-function pairs.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Function} Returns the new composite function.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var func = _.cond([</span>
+ <span class="s4">*   [_.matches({ 'a': 1 }),           _.constant('matches A')],</span>
+ <span class="s4">*   [_.conforms({ 'b': _.isNumber }), _.constant('matches B')],</span>
+ <span class="s4">*   [_.stubTrue,                      _.constant('no match')]</span>
+ <span class="s4">* ]);</span>
+ <span class="s4">*</span>
+ <span class="s4">* func({ 'a': 1, 'b': 2 });</span>
+ <span class="s4">* // =&gt; 'matches A'</span>
+ <span class="s4">*</span>
+ <span class="s4">* func({ 'a': 0, 'b': 1 });</span>
+ <span class="s4">* // =&gt; 'matches B'</span>
+ <span class="s4">*</span>
+ <span class="s4">* func({ 'a': '1', 'b': '2' });</span>
+ <span class="s4">* // =&gt; 'no match'</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">cond</span><span class="s2">(</span><span class="s1">pairs</span><span
+    class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">length </span><span class="s2">= </span><span
+    class="s1">pairs </span><span class="s2">== </span><span class="s0">null </span><span class="s2">? </span><span
+    class="s6">0 </span><span class="s2">: </span><span class="s1">pairs</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">,</span>
+      <span class="s1">toIteratee </span><span class="s2">= </span><span class="s1">baseIteratee</span><span class="s2">;</span>
+
+  <span class="s1">pairs </span><span class="s2">= !</span><span class="s1">length </span><span
+    class="s2">? [] : </span><span class="s1">arrayMap</span><span class="s2">(</span><span class="s1">pairs</span><span
+    class="s2">, </span><span class="s0">function</span><span class="s2">(</span><span class="s1">pair</span><span
+    class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">pair</span><span
+    class="s2">[</span><span class="s6">1</span><span class="s2">] != </span><span class="s3">'function'</span><span
+    class="s2">) {</span>
+      <span class="s0">throw new </span><span class="s1">TypeError</span><span class="s2">(</span><span class="s1">FUNC_ERROR_TEXT</span><span
+    class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s2">[</span><span class="s1">toIteratee</span><span
+    class="s2">(</span><span class="s1">pair</span><span class="s2">[</span><span class="s6">0</span><span class="s2">]), </span><span
+    class="s1">pair</span><span class="s2">[</span><span class="s6">1</span><span class="s2">]];</span>
+  <span class="s2">});</span>
+
+  <span class="s0">return </span><span class="s1">baseRest</span><span class="s2">(</span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">args</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">index </span><span class="s2">= -</span><span class="s6">1</span><span
+    class="s2">;</span>
+    <span class="s0">while </span><span class="s2">(++</span><span class="s1">index </span><span class="s2">&lt; </span><span
+    class="s1">length</span><span class="s2">) {</span>
+      <span class="s0">var </span><span class="s1">pair </span><span class="s2">= </span><span
+    class="s1">pairs</span><span class="s2">[</span><span class="s1">index</span><span class="s2">];</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">apply</span><span class="s2">(</span><span
+    class="s1">pair</span><span class="s2">[</span><span class="s6">0</span><span class="s2">], </span><span class="s0">this</span><span
+    class="s2">, </span><span class="s1">args</span><span class="s2">)) {</span>
+        <span class="s0">return </span><span class="s1">apply</span><span class="s2">(</span><span
+    class="s1">pair</span><span class="s2">[</span><span class="s6">1</span><span class="s2">], </span><span class="s0">this</span><span
+    class="s2">, </span><span class="s1">args</span><span class="s2">);</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+  <span class="s2">});</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">cond</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<html>
+<head>
+  <title>2020.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          2020.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">MissingRefError </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">ValidationError </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">CodeGen </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">Name </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">nil </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">stringify </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">str </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">_ </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">KeywordCxt </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span class="s2">Ajv2020 </span><span
+    class="s1">= </span><span class="s3">void </span><span class="s4">0</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s2">core_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./core&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">draft2020_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./vocabularies/draft2020&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">discriminator_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span
+    class="s0">&quot;./vocabularies/discriminator&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">json_schema_2020_12_1 </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;./refs/json-schema-2020-12&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">META_SCHEMA_ID </span><span class="s1">= </span><span class="s0">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span
+    class="s1">;</span>
+<span class="s3">class </span><span class="s2">Ajv2020 </span><span class="s3">extends </span><span
+    class="s2">core_1</span><span class="s1">.</span><span class="s2">default </span><span class="s1">{</span>
+    <span class="s2">constructor</span><span class="s1">(</span><span class="s2">opts </span><span
+    class="s1">= {}) {</span>
+        <span class="s3">super</span><span class="s1">({</span>
+            <span class="s2">...opts</span><span class="s1">,</span>
+            <span class="s2">dynamicRef</span><span class="s1">: </span><span class="s3">true</span><span
+    class="s1">,</span>
+            <span class="s2">next</span><span class="s1">: </span><span class="s3">true</span><span class="s1">,</span>
+            <span class="s2">unevaluated</span><span class="s1">: </span><span class="s3">true</span><span
+    class="s1">,</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">_addVocabularies</span><span class="s1">() {</span>
+        <span class="s3">super</span><span class="s1">.</span><span class="s2">_addVocabularies</span><span class="s1">();</span>
+        <span class="s2">draft2020_1</span><span class="s1">.</span><span class="s2">default</span><span
+    class="s1">.</span><span class="s2">forEach</span><span class="s1">((</span><span class="s2">v</span><span
+    class="s1">) =&gt; </span><span class="s3">this</span><span class="s1">.</span><span class="s2">addVocabulary</span><span
+    class="s1">(</span><span class="s2">v</span><span class="s1">));</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">opts</span><span class="s1">.</span><span class="s2">discriminator</span><span class="s1">)</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">addKeyword</span><span
+    class="s1">(</span><span class="s2">discriminator_1</span><span class="s1">.</span><span
+    class="s2">default</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">_addDefaultMetaSchema</span><span class="s1">() {</span>
+        <span class="s3">super</span><span class="s1">.</span><span class="s2">_addDefaultMetaSchema</span><span
+    class="s1">();</span>
+        <span class="s3">const </span><span class="s1">{ </span><span class="s2">$data</span><span
+    class="s1">, </span><span class="s2">meta </span><span class="s1">} = </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">opts</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(!</span><span class="s2">meta</span><span class="s1">)</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s2">json_schema_2020_12_1</span><span class="s1">.</span><span class="s2">default</span><span
+    class="s1">.</span><span class="s2">call</span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">, </span><span class="s2">$data</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">refs</span><span class="s1">[</span><span
+    class="s0">&quot;http://json-schema.org/schema&quot;</span><span class="s1">] = </span><span class="s2">META_SCHEMA_ID</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s2">defaultMeta</span><span class="s1">() {</span>
+        <span class="s3">return </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">opts</span><span class="s1">.</span><span class="s2">defaultMeta </span><span
+    class="s1">=</span>
+            <span class="s3">super</span><span class="s1">.</span><span class="s2">defaultMeta</span><span class="s1">() || (</span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">getSchema</span><span class="s1">(</span><span
+    class="s2">META_SCHEMA_ID</span><span class="s1">) ? </span><span class="s2">META_SCHEMA_ID </span><span class="s1">: </span><span
+    class="s2">undefined</span><span class="s1">));</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">Ajv2020 </span><span class="s1">= </span><span
+    class="s2">Ajv2020</span><span class="s1">;</span>
+<span class="s2">module</span><span class="s1">.</span><span class="s2">exports </span><span class="s1">= </span><span
+    class="s2">exports </span><span class="s1">= </span><span class="s2">Ajv2020</span><span class="s1">;</span>
+<span class="s2">module</span><span class="s1">.</span><span class="s2">exports</span><span class="s1">.</span><span
+    class="s2">Ajv2020 </span><span class="s1">= </span><span class="s2">Ajv2020</span><span class="s1">;</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">default </span><span class="s1">= </span><span
+    class="s2">Ajv2020</span><span class="s1">;</span>
+<span class="s3">var </span><span class="s2">validate_1 </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;./compile/validate&quot;</span><span class="s1">);</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;KeywordCxt&quot;</span><span class="s1">, { </span><span class="s2">enumerable</span><span
+    class="s1">: </span><span class="s3">true</span><span class="s1">, </span><span class="s2">get</span><span
+    class="s1">: </span><span class="s3">function </span><span class="s1">() { </span><span
+    class="s3">return </span><span class="s2">validate_1</span><span class="s1">.</span><span
+    class="s2">KeywordCxt</span><span class="s1">; } });</span>
+<span class="s3">var </span><span class="s2">codegen_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./compile/codegen&quot;</span><span
+    class="s1">);</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;_&quot;</span><span class="s1">, { </span><span class="s2">enumerable</span><span
+    class="s1">: </span><span class="s3">true</span><span class="s1">, </span><span class="s2">get</span><span
+    class="s1">: </span><span class="s3">function </span><span class="s1">() { </span><span
+    class="s3">return </span><span class="s2">codegen_1</span><span class="s1">.</span><span class="s2">_</span><span
+    class="s1">; } });</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;str&quot;</span><span class="s1">, { </span><span class="s2">enumerable</span><span
+    class="s1">: </span><span class="s3">true</span><span class="s1">, </span><span class="s2">get</span><span
+    class="s1">: </span><span class="s3">function </span><span class="s1">() { </span><span
+    class="s3">return </span><span class="s2">codegen_1</span><span class="s1">.</span><span class="s2">str</span><span
+    class="s1">; } });</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;stringify&quot;</span><span class="s1">, { </span><span class="s2">enumerable</span><span
+    class="s1">: </span><span class="s3">true</span><span class="s1">, </span><span class="s2">get</span><span
+    class="s1">: </span><span class="s3">function </span><span class="s1">() { </span><span
+    class="s3">return </span><span class="s2">codegen_1</span><span class="s1">.</span><span class="s2">stringify</span><span
+    class="s1">; } });</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;nil&quot;</span><span class="s1">, { </span><span class="s2">enumerable</span><span
+    class="s1">: </span><span class="s3">true</span><span class="s1">, </span><span class="s2">get</span><span
+    class="s1">: </span><span class="s3">function </span><span class="s1">() { </span><span
+    class="s3">return </span><span class="s2">codegen_1</span><span class="s1">.</span><span class="s2">nil</span><span
+    class="s1">; } });</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span class="s0">&quot;Name&quot;</span><span
+    class="s1">, { </span><span class="s2">enumerable</span><span class="s1">: </span><span class="s3">true</span><span
+    class="s1">, </span><span class="s2">get</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s1">() { </span><span class="s3">return </span><span class="s2">codegen_1</span><span
+    class="s1">.</span><span class="s2">Name</span><span class="s1">; } });</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;CodeGen&quot;</span><span class="s1">, { </span><span class="s2">enumerable</span><span class="s1">: </span><span
+    class="s3">true</span><span class="s1">, </span><span class="s2">get</span><span class="s1">: </span><span
+    class="s3">function </span><span class="s1">() { </span><span class="s3">return </span><span
+    class="s2">codegen_1</span><span class="s1">.</span><span class="s2">CodeGen</span><span class="s1">; } });</span>
+<span class="s3">var </span><span class="s2">validation_error_1 </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;./runtime/validation_error&quot;</span><span class="s1">);</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span class="s0">&quot;ValidationError&quot;</span><span
+    class="s1">, { </span><span class="s2">enumerable</span><span class="s1">: </span><span class="s3">true</span><span
+    class="s1">, </span><span class="s2">get</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s1">() { </span><span class="s3">return </span><span class="s2">validation_error_1</span><span
+    class="s1">.</span><span class="s2">default</span><span class="s1">; } });</span>
+<span class="s3">var </span><span class="s2">ref_error_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./compile/ref_error&quot;</span><span
+    class="s1">);</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span class="s0">&quot;MissingRefError&quot;</span><span
+    class="s1">, { </span><span class="s2">enumerable</span><span class="s1">: </span><span class="s3">true</span><span
+    class="s1">, </span><span class="s2">get</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s1">() { </span><span class="s3">return </span><span class="s2">ref_error_1</span><span
+    class="s1">.</span><span class="s2">default</span><span class="s1">; } });</span>
+<span class="s5">//# sourceMappingURL=2020.js.map</span></pre>
+</body>
+</html>

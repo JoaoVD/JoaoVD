@@ -1,0 +1,112 @@
+<html>
+<head>
+  <title>dynamicAnchor.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          dynamicAnchor.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">getProperty</span><span class="s2">, </span><span class="s1">Code</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s1">N from </span><span class="s3">&quot;../../compile/names&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">SchemaEnv</span><span class="s2">, </span><span
+    class="s1">compileSchema</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">getValidate</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../core/ref&quot;</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;$dynamicAnchor&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;string&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">code</span><span class="s2">: (</span><span class="s1">cxt</span><span
+    class="s2">) =&gt; </span><span class="s1">dynamicAnchor</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">, </span><span class="s1">cxt</span><span class="s2">.</span><span class="s1">schema</span><span
+    class="s2">),</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">dynamicAnchor</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span class="s1">anchor</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+  <span class="s1">it</span><span class="s2">.</span><span class="s1">schemaEnv</span><span class="s2">.</span><span
+    class="s1">root</span><span class="s2">.</span><span class="s1">dynamicAnchors</span><span class="s2">[</span><span
+    class="s1">anchor</span><span class="s2">] = </span><span class="s0">true</span>
+  <span class="s0">const </span><span class="s1">v </span><span class="s2">= </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">N</span><span
+    class="s2">.</span><span class="s1">dynamicAnchors</span><span class="s2">}</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">getProperty</span><span class="s2">(</span><span class="s1">anchor</span><span
+    class="s2">)}</span><span class="s3">`</span>
+  <span class="s0">const </span><span class="s1">validate </span><span class="s2">= </span><span
+    class="s1">it</span><span class="s2">.</span><span class="s1">errSchemaPath </span><span class="s2">=== </span><span
+    class="s3">&quot;#&quot; </span><span class="s2">? </span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">validateName </span><span class="s2">: </span><span class="s1">_getValidate</span><span
+    class="s2">(</span><span class="s1">cxt</span><span class="s2">)</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`!</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">v</span><span class="s2">}</span><span class="s3">`</span><span class="s2">, () =&gt; </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">v</span><span class="s2">, </span><span class="s1">validate</span><span class="s2">))</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">_getValidate</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">): </span><span
+    class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">schemaEnv</span><span
+    class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span class="s1">self</span><span
+    class="s2">} = </span><span class="s1">cxt</span><span class="s2">.</span><span class="s1">it</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">root</span><span class="s2">, </span><span
+    class="s1">baseId</span><span class="s2">, </span><span class="s1">localRefs</span><span class="s2">, </span><span
+    class="s1">meta</span><span class="s2">} = </span><span class="s1">schemaEnv</span><span class="s2">.</span><span
+    class="s1">root</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">schemaId</span><span
+    class="s2">} = </span><span class="s1">self</span><span class="s2">.</span><span class="s1">opts</span>
+  <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span class="s0">new </span><span
+    class="s1">SchemaEnv</span><span class="s2">({</span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">schemaId</span><span class="s2">, </span><span class="s1">root</span><span class="s2">, </span><span
+    class="s1">baseId</span><span class="s2">, </span><span class="s1">localRefs</span><span class="s2">, </span><span
+    class="s1">meta</span><span class="s2">})</span>
+  <span class="s1">compileSchema</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s1">self</span><span class="s2">, </span><span class="s1">sch</span><span
+    class="s2">)</span>
+  <span class="s0">return </span><span class="s1">getValidate</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">, </span><span class="s1">sch</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

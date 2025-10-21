@@ -1,0 +1,60 @@
+<html>
+<head>
+  <title>normalize-windows-path.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          normalize-windows-path.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// on windows, either \ or / are valid directory separators.</span>
+<span class="s0">// on unix, \ is a valid character in filenames.</span>
+<span class="s0">// so, on windows, and only on windows, we replace all \ chars with /,</span>
+<span class="s0">// so that we can use / as our one and only directory separator char.</span>
+
+<span class="s2">const </span><span class="s1">platform </span><span class="s3">= </span><span class="s1">process</span><span
+    class="s3">.</span><span class="s1">env</span><span class="s3">.</span><span
+    class="s1">TESTING_TAR_FAKE_PLATFORM </span><span class="s3">|| </span><span class="s1">process</span><span
+    class="s3">.</span><span class="s1">platform</span>
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">platform </span><span class="s3">!== </span><span class="s4">'win32' </span><span
+    class="s3">? </span><span class="s1">p </span><span class="s3">=&gt; </span><span class="s1">p</span>
+  <span class="s3">: </span><span class="s1">p </span><span class="s3">=&gt; </span><span class="s1">p </span><span
+    class="s3">&amp;&amp; </span><span class="s1">p</span><span class="s3">.</span><span class="s1">replace</span><span
+    class="s3">(</span><span class="s5">/\\/g</span><span class="s3">, </span><span class="s4">'/'</span><span
+    class="s3">)</span>
+</pre>
+</body>
+</html>

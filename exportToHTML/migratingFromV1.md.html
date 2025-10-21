@@ -1,0 +1,136 @@
+<html>
+<head>
+  <title>migratingFromV1.md</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #c77dbb;
+      font-style: italic;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          migratingFromV1.md</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0"># </span><span class="s2">socks</span>
+
+<span class="s0">## </span><span class="s2">Migrating from v1</span>
+
+<span class="s2">For the most part, migrating from v1 takes minimal effort as v2 still supports factory creation of proxy connections with callback support.</span>
+
+<span class="s0">### </span><span class="s2">Notable breaking changes</span>
+
+<span class="s0">- </span><span class="s2">In an options object, the proxy </span><span class="s1">'</span><span
+    class="s2">command' is now required and does not default to </span><span class="s1">'</span><span class="s2">connect'.</span>
+<span class="s0">- </span><span class="s1">**</span><span class="s2">In an options object, </span><span
+    class="s1">'</span><span class="s2">target' is now known as </span><span class="s1">'</span><span class="s2">destination'.</span><span
+    class="s1">**</span>
+<span class="s0">- </span><span class="s2">Sockets are no longer paused after a SOCKS connection is made, so socket.resume</span><span
+    class="s1">() </span><span class="s2">is no longer required. </span><span class="s1">(</span><span class="s2">Please be sure to attach data handlers immediately to the Socket to avoid losing data</span><span
+    class="s1">)</span><span class="s2">.</span>
+<span class="s0">- </span><span class="s2">In v2, only the </span><span class="s1">'</span><span class="s2">connect' command is supported via the factory SocksClient.createConnection function. </span><span
+    class="s1">(</span><span
+    class="s2">BIND and ASSOCIATE must be used with a SocksClient instance via event handlers</span><span
+    class="s1">)</span><span class="s2">.</span>
+<span class="s0">- </span><span class="s2">In v2, the factory SocksClient.createConnection function callback is called with a single object rather than separate socket and info object.</span>
+<span class="s0">- </span><span class="s2">A SOCKS http/https agent is no longer bundled into the library.</span>
+
+<span class="s2">For informational purposes, here is the original getting started example from v1 converted to work with v2.</span>
+
+<span class="s0">### </span><span class="s2">Before </span><span class="s1">(</span><span class="s2">v1</span><span
+    class="s1">)</span>
+
+<span class="s0">```</span><span class="s3">javascript</span>
+<span class="s4">var Socks = require('socks');</span>
+
+<span class="s4">var options = {</span>
+    <span class="s4">proxy: {</span>
+        <span class="s4">ipaddress: &quot;202.101.228.108&quot;,</span>
+        <span class="s4">port: 1080,</span>
+        <span class="s4">type: 5</span>
+    <span class="s4">},</span>
+    <span class="s4">target: {</span>
+        <span class="s4">host: &quot;google.com&quot;,</span>
+        <span class="s4">port: 80</span>
+    <span class="s4">},</span>
+    <span class="s4">command: 'connect'</span>
+<span class="s4">};</span>
+
+<span class="s4">Socks.createConnection(options, function(err, socket, info) {</span>
+    <span class="s4">if (err)</span>
+        <span class="s4">console.log(err);</span>
+    <span class="s4">else {</span>
+        <span class="s4">socket.write(&quot;GET / HTTP/1.1\nHost: google.com\n\n&quot;);</span>
+        <span class="s4">socket.on('data', function(data) {</span>
+            <span class="s4">console.log(data.length);</span>
+            <span class="s4">console.log(data);</span>
+        <span class="s4">});</span>
+
+        <span class="s4">// PLEASE NOTE: sockets need to be resumed before any data will come in or out as they are paused right before this callback is fired.</span>
+        <span class="s4">socket.resume();</span>
+
+        <span class="s4">// 569</span>
+        <span class="s4">// &lt;Buffer 48 54 54 50 2f 31 2e 31 20 33 30 31 20 4d 6f 76 65 64 20 50 65...</span>
+    <span class="s4">}</span>
+<span class="s4">});</span>
+<span class="s0">```</span>
+
+<span class="s0">### </span><span class="s2">After </span><span class="s1">(</span><span class="s2">v2</span><span
+    class="s1">)</span>
+<span class="s0">```</span><span class="s3">javascript</span>
+<span class="s4">const SocksClient = require('socks').SocksClient;</span>
+
+<span class="s4">let options = {</span>
+    <span class="s4">proxy: {</span>
+        <span class="s4">ipaddress: &quot;202.101.228.108&quot;,</span>
+        <span class="s4">port: 1080,</span>
+        <span class="s4">type: 5</span>
+    <span class="s4">},</span>
+    <span class="s4">destination: {</span>
+        <span class="s4">host: &quot;google.com&quot;,</span>
+        <span class="s4">port: 80</span>
+    <span class="s4">},</span>
+    <span class="s4">command: 'connect'</span>
+<span class="s4">};</span>
+
+<span class="s4">SocksClient.createConnection(options, function(err, result) {</span>
+    <span class="s4">if (err)</span>
+        <span class="s4">console.log(err);</span>
+    <span class="s4">else {</span>
+        <span class="s4">result.socket.write(&quot;GET / HTTP/1.1\nHost: google.com\n\n&quot;);</span>
+        <span class="s4">result.socket.on('data', function(data) {</span>
+            <span class="s4">console.log(data.length);</span>
+            <span class="s4">console.log(data);</span>
+        <span class="s4">});</span>
+
+        <span class="s4">// 569</span>
+        <span class="s4">// &lt;Buffer 48 54 54 50 2f 31 2e 31 20 33 30 31 20 4d 6f 76 65 64 20 50 65...</span>
+    <span class="s4">}</span>
+<span class="s4">});</span>
+<span class="s0">```</span></pre>
+</body>
+</html>

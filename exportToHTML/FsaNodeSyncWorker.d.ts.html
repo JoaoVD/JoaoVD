@@ -1,0 +1,100 @@
+<html>
+<head>
+  <title>FsaNodeSyncWorker.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsaNodeSyncWorker.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">AsyncCallback</span><span
+  class="s2">, </span><span class="s1">SyncMessenger </span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">'./SyncMessenger'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">FsaNodeFs </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../FsaNodeFs'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">* as </span><span
+    class="s1">fsa from </span><span class="s3">'../../fsa/types'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">FsaNodeWorkerMsg </span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">'./types'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">FsaNodeSyncAdapterApi </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'../types'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">FsaNodeSyncWorker </span><span
+    class="s2">{</span>
+    <span class="s0">protected </span><span class="s1">readonly sab</span><span class="s2">: </span><span class="s1">SharedArrayBuffer</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly messenger</span><span class="s2">: </span><span
+    class="s1">SyncMessenger</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">root</span><span class="s2">: </span><span
+    class="s1">fsa</span><span class="s2">.</span><span class="s1">IFileSystemDirectoryHandle</span><span
+    class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">fs</span><span class="s2">: </span><span
+    class="s1">FsaNodeFs</span><span class="s2">;</span>
+    <span class="s1">start</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">onPostMessage</span><span class="s2">: (</span><span class="s1">msg</span><span
+    class="s2">: </span><span class="s1">FsaNodeWorkerMsg</span><span class="s2">) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">readonly onRequest</span><span class="s2">: </span><span
+    class="s1">AsyncCallback</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">getDir</span><span class="s2">(</span><span
+    class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span class="s2">[], </span><span
+    class="s1">create</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">, </span><span
+    class="s1">funcName</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">fsa</span><span class="s2">.</span><span
+    class="s1">IFileSystemDirectoryHandle</span><span class="s2">&gt;;</span>
+    <span class="s0">protected </span><span class="s1">getFile</span><span class="s2">(</span><span
+    class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span class="s2">[], </span><span
+    class="s1">name</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">funcName</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">create</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">): </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">fsa</span><span class="s2">.</span><span
+    class="s1">IFileSystemFileHandle</span><span class="s2">&gt;;</span>
+    <span class="s0">protected </span><span class="s1">getFileOrDir</span><span class="s2">(</span><span
+    class="s1">path</span><span class="s2">: </span><span class="s1">string</span><span class="s2">[], </span><span
+    class="s1">name</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">funcName</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">create</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">): </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">fsa</span><span class="s2">.</span><span
+    class="s1">IFileSystemFileHandle </span><span class="s2">| </span><span class="s1">fsa</span><span
+    class="s2">.</span><span class="s1">IFileSystemDirectoryHandle</span><span class="s2">&gt;;</span>
+    <span class="s0">protected </span><span class="s1">handlers</span><span class="s2">: {</span>
+        <span class="s2">[</span><span class="s1">K </span><span class="s0">in </span><span class="s1">keyof FsaNodeSyncAdapterApi</span><span
+    class="s2">]: (</span><span class="s1">request</span><span class="s2">: </span><span
+    class="s1">Parameters</span><span class="s2">&lt;</span><span class="s1">FsaNodeSyncAdapterApi</span><span
+    class="s2">[</span><span class="s1">K</span><span class="s2">]&gt;[</span><span class="s4">0</span><span class="s2">]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">ReturnType</span><span
+    class="s2">&lt;</span><span class="s1">FsaNodeSyncAdapterApi</span><span class="s2">[</span><span
+    class="s1">K</span><span class="s2">]&gt;&gt;;</span>
+    <span class="s2">};</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

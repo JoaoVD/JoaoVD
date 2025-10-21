@@ -1,0 +1,475 @@
+<html>
+<head>
+  <title>event-target.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          event-target.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span><span class="s1">;</span>
+
+<span class="s3">const </span><span class="s1">{ </span><span class="s2">kForOnEventAttribute</span><span
+    class="s1">, </span><span class="s2">kListener </span><span class="s1">} = </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'./constants'</span><span class="s1">);</span>
+
+<span class="s3">const </span><span class="s2">kCode </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'kCode'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kData </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'kData'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kError </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'kError'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kMessage </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'kMessage'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kReason </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'kReason'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kTarget </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'kTarget'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kType </span><span class="s1">= </span><span
+    class="s2">Symbol</span><span class="s1">(</span><span class="s0">'kType'</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">kWasClean </span><span class="s1">= </span><span class="s2">Symbol</span><span
+    class="s1">(</span><span class="s0">'kWasClean'</span><span class="s1">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Class representing an event.</span>
+ <span class="s4">*/</span>
+<span class="s3">class </span><span class="s2">Event </span><span class="s1">{</span>
+  <span class="s4">/**</span>
+   <span class="s4">* Create a new `Event`.</span>
+   <span class="s4">*</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{String} type The name of the event</span>
+   <span class="s4">* </span><span class="s5">@throws </span><span class="s4">{TypeError} If the `type` argument is not specified</span>
+   <span class="s4">*/</span>
+  <span class="s2">constructor</span><span class="s1">(</span><span class="s2">type</span><span class="s1">) {</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kTarget</span><span
+    class="s1">] = </span><span class="s3">null</span><span class="s1">;</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kType</span><span class="s1">] = </span><span
+    class="s2">type</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* </span><span class="s5">@type </span><span class="s4">{*}</span>
+   <span class="s4">*/</span>
+  <span class="s2">get target</span><span class="s1">() {</span>
+    <span class="s3">return this</span><span class="s1">[</span><span class="s2">kTarget</span><span
+    class="s1">];</span>
+  <span class="s1">}</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* </span><span class="s5">@type </span><span class="s4">{String}</span>
+   <span class="s4">*/</span>
+  <span class="s2">get type</span><span class="s1">() {</span>
+    <span class="s3">return this</span><span class="s1">[</span><span class="s2">kType</span><span class="s1">];</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">Event</span><span class="s1">.</span><span class="s2">prototype</span><span
+    class="s1">, </span><span class="s0">'target'</span><span class="s1">, { </span><span
+    class="s2">enumerable</span><span class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">Event</span><span class="s1">.</span><span class="s2">prototype</span><span
+    class="s1">, </span><span class="s0">'type'</span><span class="s1">, { </span><span
+    class="s2">enumerable</span><span class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Class representing a close event.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@extends </span><span class="s4">Event</span>
+ <span class="s4">*/</span>
+<span class="s3">class </span><span class="s2">CloseEvent </span><span class="s3">extends </span><span
+    class="s2">Event </span><span class="s1">{</span>
+  <span class="s4">/**</span>
+   <span class="s4">* Create a new `CloseEvent`.</span>
+   <span class="s4">*</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{String} type The name of the event</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} [options] A dictionary object that allows for setting</span>
+   <span class="s4">*     attributes via object members of the same name</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Number} [options.code=0] The status code explaining why the</span>
+   <span class="s4">*     connection was closed</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{String} [options.reason=''] A human-readable string explaining why</span>
+   <span class="s4">*     the connection was closed</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Boolean} [options.wasClean=false] Indicates whether or not the</span>
+   <span class="s4">*     connection was cleanly closed</span>
+   <span class="s4">*/</span>
+  <span class="s2">constructor</span><span class="s1">(</span><span class="s2">type</span><span
+    class="s1">, </span><span class="s2">options </span><span class="s1">= {}) {</span>
+    <span class="s3">super</span><span class="s1">(</span><span class="s2">type</span><span class="s1">);</span>
+
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kCode</span><span class="s1">] = </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">code </span><span class="s1">=== </span><span
+    class="s2">undefined </span><span class="s1">? </span><span class="s6">0 </span><span class="s1">: </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">code</span><span class="s1">;</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kReason</span><span
+    class="s1">] = </span><span class="s2">options</span><span class="s1">.</span><span class="s2">reason </span><span
+    class="s1">=== </span><span class="s2">undefined </span><span class="s1">? </span><span class="s0">'' </span><span
+    class="s1">: </span><span class="s2">options</span><span class="s1">.</span><span class="s2">reason</span><span
+    class="s1">;</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kWasClean</span><span
+    class="s1">] = </span><span class="s2">options</span><span class="s1">.</span><span class="s2">wasClean </span><span
+    class="s1">=== </span><span class="s2">undefined </span><span class="s1">? </span><span
+    class="s3">false </span><span class="s1">: </span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">wasClean</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* </span><span class="s5">@type </span><span class="s4">{Number}</span>
+   <span class="s4">*/</span>
+  <span class="s2">get code</span><span class="s1">() {</span>
+    <span class="s3">return this</span><span class="s1">[</span><span class="s2">kCode</span><span class="s1">];</span>
+  <span class="s1">}</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* </span><span class="s5">@type </span><span class="s4">{String}</span>
+   <span class="s4">*/</span>
+  <span class="s2">get reason</span><span class="s1">() {</span>
+    <span class="s3">return this</span><span class="s1">[</span><span class="s2">kReason</span><span
+    class="s1">];</span>
+  <span class="s1">}</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* </span><span class="s5">@type </span><span class="s4">{Boolean}</span>
+   <span class="s4">*/</span>
+  <span class="s2">get wasClean</span><span class="s1">() {</span>
+    <span class="s3">return this</span><span class="s1">[</span><span class="s2">kWasClean</span><span
+    class="s1">];</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">CloseEvent</span><span class="s1">.</span><span class="s2">prototype</span><span
+    class="s1">, </span><span class="s0">'code'</span><span class="s1">, { </span><span
+    class="s2">enumerable</span><span class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">CloseEvent</span><span class="s1">.</span><span class="s2">prototype</span><span
+    class="s1">, </span><span class="s0">'reason'</span><span class="s1">, { </span><span
+    class="s2">enumerable</span><span class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">CloseEvent</span><span class="s1">.</span><span class="s2">prototype</span><span
+    class="s1">, </span><span class="s0">'wasClean'</span><span class="s1">, { </span><span class="s2">enumerable</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Class representing an error event.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@extends </span><span class="s4">Event</span>
+ <span class="s4">*/</span>
+<span class="s3">class </span><span class="s2">ErrorEvent </span><span class="s3">extends </span><span
+    class="s2">Event </span><span class="s1">{</span>
+  <span class="s4">/**</span>
+   <span class="s4">* Create a new `ErrorEvent`.</span>
+   <span class="s4">*</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{String} type The name of the event</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} [options] A dictionary object that allows for setting</span>
+   <span class="s4">*     attributes via object members of the same name</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{*} [options.error=null] The error that generated this event</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{String} [options.message=''] The error message</span>
+   <span class="s4">*/</span>
+  <span class="s2">constructor</span><span class="s1">(</span><span class="s2">type</span><span
+    class="s1">, </span><span class="s2">options </span><span class="s1">= {}) {</span>
+    <span class="s3">super</span><span class="s1">(</span><span class="s2">type</span><span class="s1">);</span>
+
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kError</span><span class="s1">] = </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">error </span><span class="s1">=== </span><span
+    class="s2">undefined </span><span class="s1">? </span><span class="s3">null </span><span class="s1">: </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">error</span><span class="s1">;</span>
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kMessage</span><span
+    class="s1">] = </span><span class="s2">options</span><span class="s1">.</span><span class="s2">message </span><span
+    class="s1">=== </span><span class="s2">undefined </span><span class="s1">? </span><span class="s0">'' </span><span
+    class="s1">: </span><span class="s2">options</span><span class="s1">.</span><span class="s2">message</span><span
+    class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* </span><span class="s5">@type </span><span class="s4">{*}</span>
+   <span class="s4">*/</span>
+  <span class="s2">get error</span><span class="s1">() {</span>
+    <span class="s3">return this</span><span class="s1">[</span><span class="s2">kError</span><span class="s1">];</span>
+  <span class="s1">}</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* </span><span class="s5">@type </span><span class="s4">{String}</span>
+   <span class="s4">*/</span>
+  <span class="s2">get message</span><span class="s1">() {</span>
+    <span class="s3">return this</span><span class="s1">[</span><span class="s2">kMessage</span><span
+    class="s1">];</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">ErrorEvent</span><span class="s1">.</span><span class="s2">prototype</span><span
+    class="s1">, </span><span class="s0">'error'</span><span class="s1">, { </span><span
+    class="s2">enumerable</span><span class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">ErrorEvent</span><span class="s1">.</span><span class="s2">prototype</span><span
+    class="s1">, </span><span class="s0">'message'</span><span class="s1">, { </span><span
+    class="s2">enumerable</span><span class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Class representing a message event.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@extends </span><span class="s4">Event</span>
+ <span class="s4">*/</span>
+<span class="s3">class </span><span class="s2">MessageEvent </span><span class="s3">extends </span><span class="s2">Event </span><span
+    class="s1">{</span>
+  <span class="s4">/**</span>
+   <span class="s4">* Create a new `MessageEvent`.</span>
+   <span class="s4">*</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{String} type The name of the event</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} [options] A dictionary object that allows for setting</span>
+   <span class="s4">*     attributes via object members of the same name</span>
+   <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{*} [options.data=null] The message content</span>
+   <span class="s4">*/</span>
+  <span class="s2">constructor</span><span class="s1">(</span><span class="s2">type</span><span
+    class="s1">, </span><span class="s2">options </span><span class="s1">= {}) {</span>
+    <span class="s3">super</span><span class="s1">(</span><span class="s2">type</span><span class="s1">);</span>
+
+    <span class="s3">this</span><span class="s1">[</span><span class="s2">kData</span><span class="s1">] = </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">data </span><span class="s1">=== </span><span
+    class="s2">undefined </span><span class="s1">? </span><span class="s3">null </span><span class="s1">: </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">data</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* </span><span class="s5">@type </span><span class="s4">{*}</span>
+   <span class="s4">*/</span>
+  <span class="s2">get data</span><span class="s1">() {</span>
+    <span class="s3">return this</span><span class="s1">[</span><span class="s2">kData</span><span class="s1">];</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">MessageEvent</span><span class="s1">.</span><span
+    class="s2">prototype</span><span class="s1">, </span><span class="s0">'data'</span><span class="s1">, { </span><span
+    class="s2">enumerable</span><span class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* This provides methods for emulating the `EventTarget` interface. It's not</span>
+ <span class="s4">* meant to be used directly.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@mixin</span>
+ <span class="s4">*/</span>
+<span class="s3">const </span><span class="s2">EventTarget </span><span class="s1">= {</span>
+  <span class="s4">/**</span>
+   <span class="s4">* Register an event listener.</span>
+   <span class="s4">*</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{String} type A string representing the event type to listen for</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{(Function|Object)} handler The listener to add</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} [options] An options object specifies characteristics about</span>
+   <span class="s4">*     the event listener</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Boolean} [options.once=false] A `Boolean` indicating that the</span>
+   <span class="s4">*     listener should be invoked at most once after being added. If `true`,</span>
+   <span class="s4">*     the listener would be automatically removed when invoked.</span>
+   <span class="s4">* </span><span class="s5">@public</span>
+   <span class="s4">*/</span>
+  <span class="s2">addEventListener</span><span class="s1">(</span><span class="s2">type</span><span
+    class="s1">, </span><span class="s2">handler</span><span class="s1">, </span><span class="s2">options </span><span
+    class="s1">= {}) {</span>
+    <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span
+    class="s2">listener of </span><span class="s3">this</span><span class="s1">.</span><span class="s2">listeners</span><span
+    class="s1">(</span><span class="s2">type</span><span class="s1">)) {</span>
+      <span class="s3">if </span><span class="s1">(</span>
+        <span class="s1">!</span><span class="s2">options</span><span class="s1">[</span><span class="s2">kForOnEventAttribute</span><span
+    class="s1">] &amp;&amp;</span>
+        <span class="s2">listener</span><span class="s1">[</span><span class="s2">kListener</span><span
+    class="s1">] === </span><span class="s2">handler </span><span class="s1">&amp;&amp;</span>
+        <span class="s1">!</span><span class="s2">listener</span><span class="s1">[</span><span class="s2">kForOnEventAttribute</span><span
+    class="s1">]</span>
+      <span class="s1">) {</span>
+        <span class="s3">return</span><span class="s1">;</span>
+      <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s3">let </span><span class="s2">wrapper</span><span class="s1">;</span>
+
+    <span class="s3">if </span><span class="s1">(</span><span class="s2">type </span><span class="s1">=== </span><span
+    class="s0">'message'</span><span class="s1">) {</span>
+      <span class="s2">wrapper </span><span class="s1">= </span><span class="s3">function </span><span class="s2">onMessage</span><span
+    class="s1">(</span><span class="s2">data</span><span class="s1">, </span><span class="s2">isBinary</span><span
+    class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">event </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">MessageEvent</span><span class="s1">(</span><span class="s0">'message'</span><span
+    class="s1">, {</span>
+          <span class="s2">data</span><span class="s1">: </span><span class="s2">isBinary </span><span
+    class="s1">? </span><span class="s2">data </span><span class="s1">: </span><span class="s2">data</span><span
+    class="s1">.</span><span class="s2">toString</span><span class="s1">()</span>
+        <span class="s1">});</span>
+
+        <span class="s2">event</span><span class="s1">[</span><span class="s2">kTarget</span><span
+    class="s1">] = </span><span class="s3">this</span><span class="s1">;</span>
+        <span class="s2">callListener</span><span class="s1">(</span><span class="s2">handler</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">, </span><span class="s2">event</span><span
+    class="s1">);</span>
+      <span class="s1">};</span>
+    <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span><span
+    class="s2">type </span><span class="s1">=== </span><span class="s0">'close'</span><span class="s1">) {</span>
+      <span class="s2">wrapper </span><span class="s1">= </span><span class="s3">function </span><span class="s2">onClose</span><span
+    class="s1">(</span><span class="s2">code</span><span class="s1">, </span><span class="s2">message</span><span
+    class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">event </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">CloseEvent</span><span class="s1">(</span><span
+    class="s0">'close'</span><span class="s1">, {</span>
+          <span class="s2">code</span><span class="s1">,</span>
+          <span class="s2">reason</span><span class="s1">: </span><span class="s2">message</span><span
+    class="s1">.</span><span class="s2">toString</span><span class="s1">(),</span>
+          <span class="s2">wasClean</span><span class="s1">: </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">_closeFrameReceived </span><span class="s1">&amp;&amp; </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">_closeFrameSent</span>
+        <span class="s1">});</span>
+
+        <span class="s2">event</span><span class="s1">[</span><span class="s2">kTarget</span><span
+    class="s1">] = </span><span class="s3">this</span><span class="s1">;</span>
+        <span class="s2">callListener</span><span class="s1">(</span><span class="s2">handler</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">, </span><span class="s2">event</span><span
+    class="s1">);</span>
+      <span class="s1">};</span>
+    <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span><span
+    class="s2">type </span><span class="s1">=== </span><span class="s0">'error'</span><span class="s1">) {</span>
+      <span class="s2">wrapper </span><span class="s1">= </span><span class="s3">function </span><span class="s2">onError</span><span
+    class="s1">(</span><span class="s2">error</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">event </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">ErrorEvent</span><span class="s1">(</span><span
+    class="s0">'error'</span><span class="s1">, {</span>
+          <span class="s2">error</span><span class="s1">,</span>
+          <span class="s2">message</span><span class="s1">: </span><span class="s2">error</span><span
+    class="s1">.</span><span class="s2">message</span>
+        <span class="s1">});</span>
+
+        <span class="s2">event</span><span class="s1">[</span><span class="s2">kTarget</span><span
+    class="s1">] = </span><span class="s3">this</span><span class="s1">;</span>
+        <span class="s2">callListener</span><span class="s1">(</span><span class="s2">handler</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">, </span><span class="s2">event</span><span
+    class="s1">);</span>
+      <span class="s1">};</span>
+    <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span><span
+    class="s2">type </span><span class="s1">=== </span><span class="s0">'open'</span><span class="s1">) {</span>
+      <span class="s2">wrapper </span><span class="s1">= </span><span class="s3">function </span><span
+    class="s2">onOpen</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">event </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">Event</span><span class="s1">(</span><span class="s0">'open'</span><span
+    class="s1">);</span>
+
+        <span class="s2">event</span><span class="s1">[</span><span class="s2">kTarget</span><span
+    class="s1">] = </span><span class="s3">this</span><span class="s1">;</span>
+        <span class="s2">callListener</span><span class="s1">(</span><span class="s2">handler</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">, </span><span class="s2">event</span><span
+    class="s1">);</span>
+      <span class="s1">};</span>
+    <span class="s1">} </span><span class="s3">else </span><span class="s1">{</span>
+      <span class="s3">return</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">wrapper</span><span class="s1">[</span><span class="s2">kForOnEventAttribute</span><span
+    class="s1">] = !!</span><span class="s2">options</span><span class="s1">[</span><span class="s2">kForOnEventAttribute</span><span
+    class="s1">];</span>
+    <span class="s2">wrapper</span><span class="s1">[</span><span class="s2">kListener</span><span
+    class="s1">] = </span><span class="s2">handler</span><span class="s1">;</span>
+
+    <span class="s3">if </span><span class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">once</span><span class="s1">) {</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">once</span><span class="s1">(</span><span
+    class="s2">type</span><span class="s1">, </span><span class="s2">wrapper</span><span class="s1">);</span>
+    <span class="s1">} </span><span class="s3">else </span><span class="s1">{</span>
+      <span class="s3">this</span><span class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span
+    class="s2">type</span><span class="s1">, </span><span class="s2">wrapper</span><span class="s1">);</span>
+    <span class="s1">}</span>
+  <span class="s1">},</span>
+
+  <span class="s4">/**</span>
+   <span class="s4">* Remove an event listener.</span>
+   <span class="s4">*</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{String} type A string representing the event type to remove</span>
+   <span class="s4">* </span><span class="s5">@param </span><span class="s4">{(Function|Object)} handler The listener to remove</span>
+   <span class="s4">* </span><span class="s5">@public</span>
+   <span class="s4">*/</span>
+  <span class="s2">removeEventListener</span><span class="s1">(</span><span class="s2">type</span><span
+    class="s1">, </span><span class="s2">handler</span><span class="s1">) {</span>
+    <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span
+    class="s2">listener of </span><span class="s3">this</span><span class="s1">.</span><span class="s2">listeners</span><span
+    class="s1">(</span><span class="s2">type</span><span class="s1">)) {</span>
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">listener</span><span class="s1">[</span><span
+    class="s2">kListener</span><span class="s1">] === </span><span class="s2">handler </span><span class="s1">&amp;&amp; !</span><span
+    class="s2">listener</span><span class="s1">[</span><span class="s2">kForOnEventAttribute</span><span
+    class="s1">]) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">removeListener</span><span
+    class="s1">(</span><span class="s2">type</span><span class="s1">, </span><span class="s2">listener</span><span
+    class="s1">);</span>
+        <span class="s3">break</span><span class="s1">;</span>
+      <span class="s1">}</span>
+    <span class="s1">}</span>
+  <span class="s1">}</span>
+<span class="s1">};</span>
+
+<span class="s2">module</span><span class="s1">.</span><span class="s2">exports </span><span class="s1">= {</span>
+  <span class="s2">CloseEvent</span><span class="s1">,</span>
+  <span class="s2">ErrorEvent</span><span class="s1">,</span>
+  <span class="s2">Event</span><span class="s1">,</span>
+  <span class="s2">EventTarget</span><span class="s1">,</span>
+  <span class="s2">MessageEvent</span>
+<span class="s1">};</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Call an event listener</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{(Function|Object)} listener The listener to call</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{*} thisArg The value to use as `this`` when calling the listener</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Event} event The event to pass to the listener</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">*/</span>
+<span class="s3">function </span><span class="s2">callListener</span><span class="s1">(</span><span
+    class="s2">listener</span><span class="s1">, </span><span class="s2">thisArg</span><span class="s1">, </span><span
+    class="s2">event</span><span class="s1">) {</span>
+  <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span
+    class="s2">listener </span><span class="s1">=== </span><span class="s0">'object' </span><span
+    class="s1">&amp;&amp; </span><span class="s2">listener</span><span class="s1">.</span><span
+    class="s2">handleEvent</span><span class="s1">) {</span>
+    <span class="s2">listener</span><span class="s1">.</span><span class="s2">handleEvent</span><span
+    class="s1">.</span><span class="s2">call</span><span class="s1">(</span><span class="s2">listener</span><span
+    class="s1">, </span><span class="s2">event</span><span class="s1">);</span>
+  <span class="s1">} </span><span class="s3">else </span><span class="s1">{</span>
+    <span class="s2">listener</span><span class="s1">.</span><span class="s2">call</span><span class="s1">(</span><span
+    class="s2">thisArg</span><span class="s1">, </span><span class="s2">event</span><span class="s1">);</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

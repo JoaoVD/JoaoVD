@@ -1,0 +1,104 @@
+<html>
+<head>
+  <title>socket.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          socket.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">var </span><span class="s1">util </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'util'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">net </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'net'</span><span class="s3">)</span>
+
+<span class="s2">function </span><span class="s1">Socket </span><span class="s3">(</span><span
+    class="s1">parent</span><span class="s3">, </span><span class="s1">options</span><span class="s3">) {</span>
+  <span class="s1">net</span><span class="s3">.</span><span class="s1">Socket</span><span class="s3">.</span><span
+    class="s1">call</span><span class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span
+    class="s1">options</span><span class="s3">)</span>
+
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= {}</span>
+
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">_spdyState </span><span
+    class="s3">= </span><span class="s1">state</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">parent </span><span class="s3">= </span><span
+    class="s1">parent</span>
+
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">servername </span><span
+    class="s3">= </span><span class="s1">parent</span><span class="s3">.</span><span class="s1">servername</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">npnProtocol </span><span
+    class="s3">= </span><span class="s1">parent</span><span class="s3">.</span><span class="s1">npnProtocol</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">alpnProtocol </span><span
+    class="s3">= </span><span class="s1">parent</span><span class="s3">.</span><span class="s1">alpnProtocol</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">authorized </span><span
+    class="s3">= </span><span class="s1">parent</span><span class="s3">.</span><span class="s1">authorized</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">authorizationError </span><span
+    class="s3">= </span><span class="s1">parent</span><span class="s3">.</span><span
+    class="s1">authorizationError</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">encrypted </span><span class="s3">= </span><span
+    class="s2">true</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">allowHalfOpen </span><span
+    class="s3">= </span><span class="s2">true</span>
+<span class="s3">}</span>
+
+<span class="s1">util</span><span class="s3">.</span><span class="s1">inherits</span><span class="s3">(</span><span
+    class="s1">Socket</span><span class="s3">, </span><span class="s1">net</span><span class="s3">.</span><span
+    class="s1">Socket</span><span class="s3">)</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">Socket</span>
+
+<span class="s2">var </span><span class="s1">methods </span><span class="s3">= [</span>
+  <span class="s0">'renegotiate'</span><span class="s3">, </span><span class="s0">'setMaxSendFragment'</span><span
+    class="s3">, </span><span class="s0">'getTLSTicket'</span><span class="s3">, </span><span
+    class="s0">'setServername'</span><span class="s3">,</span>
+  <span class="s0">'setSession'</span><span class="s3">, </span><span class="s0">'getPeerCertificate'</span><span
+    class="s3">, </span><span class="s0">'getSession'</span><span class="s3">, </span><span
+    class="s0">'isSessionReused'</span><span class="s3">,</span>
+  <span class="s0">'getCipher'</span><span class="s3">, </span><span class="s0">'getEphemeralKeyInfo'</span>
+<span class="s3">]</span>
+
+<span class="s1">methods</span><span class="s3">.</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">method</span><span class="s3">) {</span>
+  <span class="s1">Socket</span><span class="s3">.</span><span class="s1">prototype</span><span class="s3">[</span><span
+    class="s1">method</span><span class="s3">] = </span><span class="s2">function </span><span
+    class="s1">methodWrap </span><span class="s3">() {</span>
+    <span class="s2">var </span><span class="s1">parent </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">_spdyState</span><span class="s3">.</span><span
+    class="s1">parent</span>
+    <span class="s2">return </span><span class="s1">parent</span><span class="s3">[</span><span class="s1">method</span><span
+    class="s3">].</span><span class="s1">apply</span><span class="s3">(</span><span class="s1">parent</span><span
+    class="s3">, </span><span class="s1">arguments</span><span class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">})</span>
+</pre>
+</body>
+</html>

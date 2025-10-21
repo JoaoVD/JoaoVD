@@ -1,0 +1,1308 @@
+<html>
+<head>
+  <title>index.mjs</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          index.mjs</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">const </span><span class="s1">proc </span><span class="s3">=</span>
+  <span class="s2">typeof </span><span class="s1">process </span><span class="s3">=== </span><span
+    class="s0">'object' </span><span class="s3">&amp;&amp; </span><span class="s1">process</span>
+    <span class="s3">? </span><span class="s1">process</span>
+    <span class="s3">: {</span>
+        <span class="s1">stdout</span><span class="s3">: </span><span class="s2">null</span><span class="s3">,</span>
+        <span class="s1">stderr</span><span class="s3">: </span><span class="s2">null</span><span class="s3">,</span>
+      <span class="s3">}</span>
+<span class="s2">import </span><span class="s1">EE from </span><span class="s0">'events'</span>
+<span class="s2">import </span><span class="s1">Stream from </span><span class="s0">'stream'</span>
+<span class="s2">import </span><span class="s1">stringdecoder from </span><span class="s0">'string_decoder'</span>
+<span class="s2">const </span><span class="s1">SD </span><span class="s3">= </span><span class="s1">stringdecoder</span><span
+    class="s3">.</span><span class="s1">StringDecoder</span>
+
+<span class="s2">const </span><span class="s1">EOF </span><span class="s3">= </span><span class="s1">Symbol</span><span
+    class="s3">(</span><span class="s0">'EOF'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">MAYBE_EMIT_END </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'maybeEmitEnd'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">EMITTED_END </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'emittedEnd'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">EMITTING_END </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'emittingEnd'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">EMITTED_ERROR </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'emittedError'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">CLOSED </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'closed'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">READ </span><span class="s3">= </span><span class="s1">Symbol</span><span
+    class="s3">(</span><span class="s0">'read'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">FLUSH </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'flush'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">FLUSHCHUNK </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'flushChunk'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ENCODING </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'encoding'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">DECODER </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'decoder'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">FLOWING </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'flowing'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">PAUSED </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'paused'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">RESUME </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'resume'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">BUFFER </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'buffer'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">PIPES </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'pipes'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">BUFFERLENGTH </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'bufferLength'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">BUFFERPUSH </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'bufferPush'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">BUFFERSHIFT </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'bufferShift'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">OBJECTMODE </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'objectMode'</span><span class="s3">)</span>
+<span class="s4">// internal event when stream is destroyed</span>
+<span class="s2">const </span><span class="s1">DESTROYED </span><span class="s3">= </span><span class="s1">Symbol</span><span
+    class="s3">(</span><span class="s0">'destroyed'</span><span class="s3">)</span>
+<span class="s4">// internal event when stream has an error</span>
+<span class="s2">const </span><span class="s1">ERROR </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'error'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">EMITDATA </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'emitData'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">EMITEND </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'emitEnd'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">EMITEND2 </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'emitEnd2'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ASYNC </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'async'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ABORT </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'abort'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">ABORTED </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'aborted'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">SIGNAL </span><span class="s3">= </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'signal'</span><span class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">defer </span><span class="s3">= </span><span class="s1">fn </span><span
+    class="s3">=&gt; </span><span class="s1">Promise</span><span class="s3">.</span><span class="s1">resolve</span><span
+    class="s3">().</span><span class="s1">then</span><span class="s3">(</span><span class="s1">fn</span><span
+    class="s3">)</span>
+
+<span class="s4">// TODO remove when Node v8 support drops</span>
+<span class="s2">const </span><span class="s1">doIter </span><span class="s3">= </span><span
+    class="s1">global</span><span class="s3">.</span><span class="s1">_MP_NO_ITERATOR_SYMBOLS_ </span><span class="s3">!== </span><span
+    class="s0">'1'</span>
+<span class="s2">const </span><span class="s1">ASYNCITERATOR </span><span class="s3">=</span>
+  <span class="s3">(</span><span class="s1">doIter </span><span class="s3">&amp;&amp; </span><span
+    class="s1">Symbol</span><span class="s3">.</span><span class="s1">asyncIterator</span><span
+    class="s3">) || </span><span class="s1">Symbol</span><span class="s3">(</span><span class="s0">'asyncIterator not implemented'</span><span
+    class="s3">)</span>
+<span class="s2">const </span><span class="s1">ITERATOR </span><span class="s3">=</span>
+  <span class="s3">(</span><span class="s1">doIter </span><span class="s3">&amp;&amp; </span><span
+    class="s1">Symbol</span><span class="s3">.</span><span class="s1">iterator</span><span class="s3">) || </span><span
+    class="s1">Symbol</span><span class="s3">(</span><span class="s0">'iterator not implemented'</span><span class="s3">)</span>
+
+<span class="s4">// events that mean 'the stream is over'</span>
+<span class="s4">// these are treated specially, and re-emitted</span>
+<span class="s4">// if they are listened for after emitting.</span>
+<span class="s2">const </span><span class="s1">isEndish </span><span class="s3">= </span><span
+    class="s1">ev </span><span class="s3">=&gt; </span><span class="s1">ev </span><span class="s3">=== </span><span
+    class="s0">'end' </span><span class="s3">|| </span><span class="s1">ev </span><span class="s3">=== </span><span
+    class="s0">'finish' </span><span class="s3">|| </span><span class="s1">ev </span><span class="s3">=== </span><span
+    class="s0">'prefinish'</span>
+
+<span class="s2">const </span><span class="s1">isArrayBuffer </span><span class="s3">= </span><span class="s1">b </span><span
+    class="s3">=&gt;</span>
+  <span class="s1">b </span><span class="s2">instanceof </span><span class="s1">ArrayBuffer </span><span
+    class="s3">||</span>
+  <span class="s3">(</span><span class="s2">typeof </span><span class="s1">b </span><span class="s3">=== </span><span
+    class="s0">'object' </span><span class="s3">&amp;&amp;</span>
+    <span class="s1">b</span><span class="s3">.</span><span class="s1">constructor </span><span
+    class="s3">&amp;&amp;</span>
+    <span class="s1">b</span><span class="s3">.</span><span class="s1">constructor</span><span class="s3">.</span><span
+    class="s1">name </span><span class="s3">=== </span><span class="s0">'ArrayBuffer' </span><span
+    class="s3">&amp;&amp;</span>
+    <span class="s1">b</span><span class="s3">.</span><span class="s1">byteLength </span><span
+    class="s3">&gt;= </span><span class="s5">0</span><span class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">isArrayBufferView </span><span class="s3">= </span><span
+    class="s1">b </span><span class="s3">=&gt; !</span><span class="s1">Buffer</span><span class="s3">.</span><span
+    class="s1">isBuffer</span><span class="s3">(</span><span class="s1">b</span><span
+    class="s3">) &amp;&amp; </span><span class="s1">ArrayBuffer</span><span class="s3">.</span><span
+    class="s1">isView</span><span class="s3">(</span><span class="s1">b</span><span class="s3">)</span>
+
+<span class="s2">class </span><span class="s1">Pipe </span><span class="s3">{</span>
+  <span class="s1">constructor</span><span class="s3">(</span><span class="s1">src</span><span class="s3">, </span><span
+    class="s1">dest</span><span class="s3">, </span><span class="s1">opts</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">src </span><span class="s3">= </span><span
+    class="s1">src</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">dest </span><span class="s3">= </span><span
+    class="s1">dest</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">opts </span><span class="s3">= </span><span
+    class="s1">opts</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">ondrain </span><span
+    class="s3">= () =&gt; </span><span class="s1">src</span><span class="s3">[</span><span class="s1">RESUME</span><span
+    class="s3">]()</span>
+    <span class="s1">dest</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'drain'</span><span class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">ondrain</span><span class="s3">)</span>
+  <span class="s3">}</span>
+  <span class="s1">unpipe</span><span class="s3">() {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">dest</span><span class="s3">.</span><span
+    class="s1">removeListener</span><span class="s3">(</span><span class="s0">'drain'</span><span
+    class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span class="s1">ondrain</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+  <span class="s4">// istanbul ignore next - only here for the prototype</span>
+  <span class="s1">proxyErrors</span><span class="s3">() {}</span>
+  <span class="s1">end</span><span class="s3">() {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">unpipe</span><span class="s3">()</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">opts</span><span class="s3">.</span><span class="s1">end</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">dest</span><span class="s3">.</span><span
+    class="s1">end</span><span class="s3">()</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">class </span><span class="s1">PipeProxyErrors </span><span class="s2">extends </span><span class="s1">Pipe </span><span
+    class="s3">{</span>
+  <span class="s1">unpipe</span><span class="s3">() {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">src</span><span class="s3">.</span><span
+    class="s1">removeListener</span><span class="s3">(</span><span class="s0">'error'</span><span
+    class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span class="s1">proxyErrors</span><span
+    class="s3">)</span>
+    <span class="s2">super</span><span class="s3">.</span><span class="s1">unpipe</span><span class="s3">()</span>
+  <span class="s3">}</span>
+  <span class="s1">constructor</span><span class="s3">(</span><span class="s1">src</span><span class="s3">, </span><span
+    class="s1">dest</span><span class="s3">, </span><span class="s1">opts</span><span class="s3">) {</span>
+    <span class="s2">super</span><span class="s3">(</span><span class="s1">src</span><span class="s3">, </span><span
+    class="s1">dest</span><span class="s3">, </span><span class="s1">opts</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">proxyErrors </span><span
+    class="s3">= </span><span class="s1">er </span><span class="s3">=&gt; </span><span class="s1">dest</span><span
+    class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span class="s0">'error'</span><span
+    class="s3">, </span><span class="s1">er</span><span class="s3">)</span>
+    <span class="s1">src</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">proxyErrors</span><span class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">export class </span><span class="s1">Minipass </span><span class="s2">extends </span><span class="s1">Stream </span><span
+    class="s3">{</span>
+  <span class="s1">constructor</span><span class="s3">(</span><span class="s1">options</span><span class="s3">) {</span>
+    <span class="s2">super</span><span class="s3">()</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">FLOWING</span><span
+    class="s3">] = </span><span class="s2">false</span>
+    <span class="s4">// whether we're explicitly paused</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">PAUSED</span><span class="s3">] = </span><span
+    class="s2">false</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">PIPES</span><span class="s3">] = []</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span class="s3">] = []</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">OBJECTMODE</span><span class="s3">] = (</span><span
+    class="s1">options </span><span class="s3">&amp;&amp; </span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">objectMode</span><span class="s3">) || </span><span class="s2">false</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ENCODING</span><span class="s3">] = </span><span class="s2">null</span>
+    <span class="s2">else this</span><span class="s3">[</span><span class="s1">ENCODING</span><span
+    class="s3">] = (</span><span class="s1">options </span><span class="s3">&amp;&amp; </span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">encoding</span><span class="s3">) || </span><span
+    class="s2">null</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ENCODING</span><span class="s3">] === </span><span class="s0">'buffer'</span><span
+    class="s3">) </span><span class="s2">this</span><span class="s3">[</span><span class="s1">ENCODING</span><span
+    class="s3">] = </span><span class="s2">null</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">ASYNC</span><span class="s3">] = (</span><span
+    class="s1">options </span><span class="s3">&amp;&amp; !!</span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">async</span><span class="s3">) || </span><span class="s2">false</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">DECODER</span><span
+    class="s3">] = </span><span class="s2">this</span><span class="s3">[</span><span class="s1">ENCODING</span><span
+    class="s3">] ? </span><span class="s2">new </span><span class="s1">SD</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">ENCODING</span><span class="s3">]) : </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">EOF</span><span class="s3">] = </span><span
+    class="s2">false</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">EMITTED_END</span><span class="s3">] = </span><span
+    class="s2">false</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">EMITTING_END</span><span
+    class="s3">] = </span><span class="s2">false</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">CLOSED</span><span class="s3">] = </span><span
+    class="s2">false</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">EMITTED_ERROR</span><span
+    class="s3">] = </span><span class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">writable </span><span
+    class="s3">= </span><span class="s2">true</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">readable </span><span
+    class="s3">= </span><span class="s2">true</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFERLENGTH</span><span
+    class="s3">] = </span><span class="s5">0</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">DESTROYED</span><span
+    class="s3">] = </span><span class="s2">false</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">options </span><span
+    class="s3">&amp;&amp; </span><span class="s1">options</span><span class="s3">.</span><span class="s1">debugExposeBuffer </span><span
+    class="s3">=== </span><span class="s2">true</span><span class="s3">) {</span>
+      <span class="s1">Object</span><span class="s3">.</span><span class="s1">defineProperty</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span class="s0">'buffer'</span><span
+    class="s3">, { </span><span class="s1">get</span><span class="s3">: () =&gt; </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span class="s3">] })</span>
+    <span class="s3">}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">options </span><span
+    class="s3">&amp;&amp; </span><span class="s1">options</span><span class="s3">.</span><span class="s1">debugExposePipes </span><span
+    class="s3">=== </span><span class="s2">true</span><span class="s3">) {</span>
+      <span class="s1">Object</span><span class="s3">.</span><span class="s1">defineProperty</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span class="s0">'pipes'</span><span
+    class="s3">, { </span><span class="s1">get</span><span class="s3">: () =&gt; </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">PIPES</span><span class="s3">] })</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">SIGNAL</span><span class="s3">] = </span><span
+    class="s1">options </span><span class="s3">&amp;&amp; </span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">signal</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">ABORTED</span><span
+    class="s3">] = </span><span class="s2">false</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">SIGNAL</span><span class="s3">]) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">SIGNAL</span><span class="s3">].</span><span
+    class="s1">addEventListener</span><span class="s3">(</span><span class="s0">'abort'</span><span class="s3">, () =&gt; </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">ABORT</span><span class="s3">]())</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">SIGNAL</span><span class="s3">].</span><span class="s1">aborted</span><span class="s3">) {</span>
+        <span class="s2">this</span><span class="s3">[</span><span class="s1">ABORT</span><span class="s3">]()</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get bufferLength</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">BUFFERLENGTH</span><span
+    class="s3">]</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get encoding</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">ENCODING</span><span
+    class="s3">]</span>
+  <span class="s3">}</span>
+  <span class="s1">set encoding</span><span class="s3">(</span><span class="s1">enc</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) </span><span class="s2">throw new </span><span
+    class="s1">Error</span><span class="s3">(</span><span class="s0">'cannot set encoding in objectMode'</span><span
+    class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">ENCODING</span><span
+    class="s3">] &amp;&amp;</span>
+      <span class="s1">enc </span><span class="s3">!== </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ENCODING</span><span class="s3">] &amp;&amp;</span>
+      <span class="s3">((</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DECODER</span><span class="s3">] &amp;&amp; </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">DECODER</span><span class="s3">].</span><span class="s1">lastNeed</span><span
+    class="s3">) || </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFERLENGTH</span><span class="s3">])</span>
+    <span class="s3">)</span>
+      <span class="s2">throw new </span><span class="s1">Error</span><span class="s3">(</span><span class="s0">'cannot change encoding'</span><span
+    class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ENCODING</span><span class="s3">] !== </span><span class="s1">enc</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">DECODER</span><span
+    class="s3">] = </span><span class="s1">enc </span><span class="s3">? </span><span class="s2">new </span><span
+    class="s1">SD</span><span class="s3">(</span><span class="s1">enc</span><span class="s3">) : </span><span
+    class="s2">null</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFER</span><span class="s3">].</span><span class="s1">length</span><span class="s3">)</span>
+        <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span
+    class="s3">] = </span><span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span
+    class="s3">].</span><span class="s1">map</span><span class="s3">(</span><span class="s1">chunk </span><span
+    class="s3">=&gt; </span><span class="s2">this</span><span class="s3">[</span><span class="s1">DECODER</span><span
+    class="s3">].</span><span class="s1">write</span><span class="s3">(</span><span class="s1">chunk</span><span
+    class="s3">))</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">ENCODING</span><span
+    class="s3">] = </span><span class="s1">enc</span>
+  <span class="s3">}</span>
+
+  <span class="s1">setEncoding</span><span class="s3">(</span><span class="s1">enc</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">encoding </span><span
+    class="s3">= </span><span class="s1">enc</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get objectMode</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">OBJECTMODE</span><span
+    class="s3">]</span>
+  <span class="s3">}</span>
+  <span class="s1">set objectMode</span><span class="s3">(</span><span class="s1">om</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">OBJECTMODE</span><span
+    class="s3">] = </span><span class="s2">this</span><span class="s3">[</span><span class="s1">OBJECTMODE</span><span
+    class="s3">] || !!</span><span class="s1">om</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get </span><span class="s3">[</span><span class="s0">'async'</span><span class="s3">]() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">ASYNC</span><span class="s3">]</span>
+  <span class="s3">}</span>
+  <span class="s1">set </span><span class="s3">[</span><span class="s0">'async'</span><span class="s3">](</span><span
+    class="s1">a</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">ASYNC</span><span class="s3">] = </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">ASYNC</span><span class="s3">] || !!</span><span
+    class="s1">a</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// drop everything and get out of the flow completely</span>
+  <span class="s3">[</span><span class="s1">ABORT</span><span class="s3">]() {</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">ABORTED</span><span
+    class="s3">] = </span><span class="s2">true</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'abort'</span><span class="s3">, </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">SIGNAL</span><span class="s3">].</span><span class="s1">reason</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">destroy</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">SIGNAL</span><span class="s3">].</span><span
+    class="s1">reason</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get aborted</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">ABORTED</span><span class="s3">]</span>
+  <span class="s3">}</span>
+  <span class="s1">set aborted</span><span class="s3">(</span><span class="s1">_</span><span class="s3">) {}</span>
+
+  <span class="s1">write</span><span class="s3">(</span><span class="s1">chunk</span><span class="s3">, </span><span
+    class="s1">encoding</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ABORTED</span><span class="s3">]) </span><span class="s2">return false</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">EOF</span><span class="s3">]) </span><span class="s2">throw new </span><span class="s1">Error</span><span
+    class="s3">(</span><span class="s0">'write after end'</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DESTROYED</span><span class="s3">]) {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span>
+        <span class="s0">'error'</span><span class="s3">,</span>
+        <span class="s1">Object</span><span class="s3">.</span><span class="s1">assign</span><span class="s3">(</span>
+          <span class="s2">new </span><span class="s1">Error</span><span class="s3">(</span><span class="s0">'Cannot call write after a stream was destroyed'</span><span
+    class="s3">),</span>
+          <span class="s3">{ </span><span class="s1">code</span><span class="s3">: </span><span class="s0">'ERR_STREAM_DESTROYED' </span><span
+    class="s3">}</span>
+        <span class="s3">)</span>
+      <span class="s3">)</span>
+      <span class="s2">return true</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">encoding </span><span
+    class="s3">=== </span><span class="s0">'function'</span><span class="s3">) (</span><span class="s1">cb </span><span
+    class="s3">= </span><span class="s1">encoding</span><span class="s3">), (</span><span
+    class="s1">encoding </span><span class="s3">= </span><span class="s0">'utf8'</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">encoding</span><span class="s3">) </span><span
+    class="s1">encoding </span><span class="s3">= </span><span class="s0">'utf8'</span>
+
+    <span class="s2">const </span><span class="s1">fn </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">ASYNC</span><span class="s3">] ? </span><span class="s1">defer </span><span
+    class="s3">: </span><span class="s1">f </span><span class="s3">=&gt; </span><span class="s1">f</span><span
+    class="s3">()</span>
+
+    <span class="s4">// convert array buffers and typed array views into buffers</span>
+    <span class="s4">// at some point in the future, we may want to do the opposite!</span>
+    <span class="s4">// leave strings and buffers as-is</span>
+    <span class="s4">// anything else switches us into object mode</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">] &amp;&amp; !</span><span class="s1">Buffer</span><span
+    class="s3">.</span><span class="s1">isBuffer</span><span class="s3">(</span><span class="s1">chunk</span><span
+    class="s3">)) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">isArrayBufferView</span><span
+    class="s3">(</span><span class="s1">chunk</span><span class="s3">))</span>
+        <span class="s1">chunk </span><span class="s3">= </span><span class="s1">Buffer</span><span
+    class="s3">.</span><span class="s1">from</span><span class="s3">(</span><span class="s1">chunk</span><span
+    class="s3">.</span><span class="s1">buffer</span><span class="s3">, </span><span class="s1">chunk</span><span
+    class="s3">.</span><span class="s1">byteOffset</span><span class="s3">, </span><span class="s1">chunk</span><span
+    class="s3">.</span><span class="s1">byteLength</span><span class="s3">)</span>
+      <span class="s2">else if </span><span class="s3">(</span><span class="s1">isArrayBuffer</span><span
+    class="s3">(</span><span class="s1">chunk</span><span class="s3">)) </span><span class="s1">chunk </span><span
+    class="s3">= </span><span class="s1">Buffer</span><span class="s3">.</span><span class="s1">from</span><span
+    class="s3">(</span><span class="s1">chunk</span><span class="s3">)</span>
+      <span class="s2">else if </span><span class="s3">(</span><span class="s2">typeof </span><span
+    class="s1">chunk </span><span class="s3">!== </span><span class="s0">'string'</span><span class="s3">)</span>
+        <span class="s4">// use the setter so we throw if we have encoding set</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">objectMode </span><span
+    class="s3">= </span><span class="s2">true</span>
+    <span class="s3">}</span>
+
+    <span class="s4">// handle object mode up front, since it's simpler</span>
+    <span class="s4">// this yields better performance, fewer checks later.</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) {</span>
+      <span class="s4">/* istanbul ignore if - maybe impossible? */</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">flowing </span><span class="s3">&amp;&amp; </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">BUFFERLENGTH</span><span class="s3">] !== </span><span class="s5">0</span><span
+    class="s3">) </span><span class="s2">this</span><span class="s3">[</span><span class="s1">FLUSH</span><span
+    class="s3">](</span><span class="s2">true</span><span class="s3">)</span>
+
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">flowing</span><span class="s3">) </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">emit</span><span class="s3">(</span><span class="s0">'data'</span><span class="s3">, </span><span
+    class="s1">chunk</span><span class="s3">)</span>
+      <span class="s2">else this</span><span class="s3">[</span><span class="s1">BUFFERPUSH</span><span
+    class="s3">](</span><span class="s1">chunk</span><span class="s3">)</span>
+
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFERLENGTH</span><span class="s3">] !== </span><span class="s5">0</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'readable'</span><span class="s3">)</span>
+
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">cb</span><span class="s3">) </span><span
+    class="s1">fn</span><span class="s3">(</span><span class="s1">cb</span><span class="s3">)</span>
+
+      <span class="s2">return this</span><span class="s3">.</span><span class="s1">flowing</span>
+    <span class="s3">}</span>
+
+    <span class="s4">// at this point the chunk is a buffer or string</span>
+    <span class="s4">// don't buffer it up or send it to the decoder</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">chunk</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFERLENGTH</span><span class="s3">] !== </span><span class="s5">0</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'readable'</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">cb</span><span class="s3">) </span><span
+    class="s1">fn</span><span class="s3">(</span><span class="s1">cb</span><span class="s3">)</span>
+      <span class="s2">return this</span><span class="s3">.</span><span class="s1">flowing</span>
+    <span class="s3">}</span>
+
+    <span class="s4">// fast-path writing strings of same encoding to a stream with</span>
+    <span class="s4">// an empty buffer, skipping the buffer/decoder dance</span>
+    <span class="s2">if </span><span class="s3">(</span>
+      <span class="s2">typeof </span><span class="s1">chunk </span><span class="s3">=== </span><span
+    class="s0">'string' </span><span class="s3">&amp;&amp;</span>
+      <span class="s4">// unless it is a string already ready for us to use</span>
+      <span class="s3">!(</span><span class="s1">encoding </span><span class="s3">=== </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">ENCODING</span><span
+    class="s3">] &amp;&amp; !</span><span class="s2">this</span><span class="s3">[</span><span class="s1">DECODER</span><span
+    class="s3">].</span><span class="s1">lastNeed</span><span class="s3">)</span>
+    <span class="s3">) {</span>
+      <span class="s1">chunk </span><span class="s3">= </span><span class="s1">Buffer</span><span
+    class="s3">.</span><span class="s1">from</span><span class="s3">(</span><span class="s1">chunk</span><span
+    class="s3">, </span><span class="s1">encoding</span><span class="s3">)</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">Buffer</span><span class="s3">.</span><span
+    class="s1">isBuffer</span><span class="s3">(</span><span class="s1">chunk</span><span
+    class="s3">) &amp;&amp; </span><span class="s2">this</span><span class="s3">[</span><span class="s1">ENCODING</span><span
+    class="s3">])</span>
+      <span class="s1">chunk </span><span class="s3">= </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DECODER</span><span class="s3">].</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s1">chunk</span><span class="s3">)</span>
+
+    <span class="s4">// Note: flushing CAN potentially switch us into not-flowing mode</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">flowing </span><span class="s3">&amp;&amp; </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">BUFFERLENGTH</span><span class="s3">] !== </span><span class="s5">0</span><span
+    class="s3">) </span><span class="s2">this</span><span class="s3">[</span><span class="s1">FLUSH</span><span
+    class="s3">](</span><span class="s2">true</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">flowing</span><span class="s3">) </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">emit</span><span class="s3">(</span><span class="s0">'data'</span><span class="s3">, </span><span
+    class="s1">chunk</span><span class="s3">)</span>
+    <span class="s2">else this</span><span class="s3">[</span><span class="s1">BUFFERPUSH</span><span
+    class="s3">](</span><span class="s1">chunk</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFERLENGTH</span><span class="s3">] !== </span><span class="s5">0</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'readable'</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">cb</span><span class="s3">) </span><span
+    class="s1">fn</span><span class="s3">(</span><span class="s1">cb</span><span class="s3">)</span>
+
+    <span class="s2">return this</span><span class="s3">.</span><span class="s1">flowing</span>
+  <span class="s3">}</span>
+
+  <span class="s1">read</span><span class="s3">(</span><span class="s1">n</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DESTROYED</span><span class="s3">]) </span><span class="s2">return null</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFERLENGTH</span><span class="s3">] === </span><span class="s5">0 </span><span
+    class="s3">|| </span><span class="s1">n </span><span class="s3">=== </span><span class="s5">0 </span><span
+    class="s3">|| </span><span class="s1">n </span><span class="s3">&gt; </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">BUFFERLENGTH</span><span class="s3">]) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">MAYBE_EMIT_END</span><span
+    class="s3">]()</span>
+      <span class="s2">return null</span>
+    <span class="s3">}</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) </span><span class="s1">n </span><span class="s3">= </span><span
+    class="s2">null</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFER</span><span class="s3">].</span><span class="s1">length </span><span class="s3">&gt; </span><span
+    class="s5">1 </span><span class="s3">&amp;&amp; !</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">encoding</span><span class="s3">) </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFER</span><span class="s3">] = [</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFER</span><span class="s3">].</span><span class="s1">join</span><span class="s3">(</span><span
+    class="s0">''</span><span class="s3">)]</span>
+      <span class="s2">else this</span><span class="s3">[</span><span class="s1">BUFFER</span><span
+    class="s3">] = [</span><span class="s1">Buffer</span><span class="s3">.</span><span class="s1">concat</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span
+    class="s3">], </span><span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFERLENGTH</span><span
+    class="s3">])]</span>
+    <span class="s3">}</span>
+
+    <span class="s2">const </span><span class="s1">ret </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">READ</span><span class="s3">](</span><span
+    class="s1">n </span><span class="s3">|| </span><span class="s2">null</span><span class="s3">, </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span class="s3">][</span><span
+    class="s5">0</span><span class="s3">])</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">MAYBE_EMIT_END</span><span
+    class="s3">]()</span>
+    <span class="s2">return </span><span class="s1">ret</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">READ</span><span class="s3">](</span><span class="s1">n</span><span
+    class="s3">, </span><span class="s1">chunk</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">n </span><span class="s3">=== </span><span
+    class="s1">chunk</span><span class="s3">.</span><span class="s1">length </span><span class="s3">|| </span><span
+    class="s1">n </span><span class="s3">=== </span><span class="s2">null</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">BUFFERSHIFT</span><span class="s3">]()</span>
+    <span class="s2">else </span><span class="s3">{</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span class="s3">][</span><span
+    class="s5">0</span><span class="s3">] = </span><span class="s1">chunk</span><span class="s3">.</span><span
+    class="s1">slice</span><span class="s3">(</span><span class="s1">n</span><span class="s3">)</span>
+      <span class="s1">chunk </span><span class="s3">= </span><span class="s1">chunk</span><span
+    class="s3">.</span><span class="s1">slice</span><span class="s3">(</span><span class="s5">0</span><span
+    class="s3">, </span><span class="s1">n</span><span class="s3">)</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFERLENGTH</span><span
+    class="s3">] -= </span><span class="s1">n</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'data'</span><span class="s3">, </span><span class="s1">chunk</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFER</span><span class="s3">].</span><span class="s1">length </span><span
+    class="s3">&amp;&amp; !</span><span class="s2">this</span><span class="s3">[</span><span class="s1">EOF</span><span
+    class="s3">]) </span><span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s0">'drain'</span><span class="s3">)</span>
+
+    <span class="s2">return </span><span class="s1">chunk</span>
+  <span class="s3">}</span>
+
+  <span class="s1">end</span><span class="s3">(</span><span class="s1">chunk</span><span class="s3">, </span><span
+    class="s1">encoding</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span
+    class="s1">chunk </span><span class="s3">=== </span><span class="s0">'function'</span><span
+    class="s3">) (</span><span class="s1">cb </span><span class="s3">= </span><span class="s1">chunk</span><span
+    class="s3">), (</span><span class="s1">chunk </span><span class="s3">= </span><span class="s2">null</span><span
+    class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">encoding </span><span
+    class="s3">=== </span><span class="s0">'function'</span><span class="s3">) (</span><span class="s1">cb </span><span
+    class="s3">= </span><span class="s1">encoding</span><span class="s3">), (</span><span
+    class="s1">encoding </span><span class="s3">= </span><span class="s0">'utf8'</span><span class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">chunk</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s1">chunk</span><span class="s3">, </span><span class="s1">encoding</span><span class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">cb</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s0">'end'</span><span class="s3">, </span><span class="s1">cb</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">EOF</span><span class="s3">] = </span><span
+    class="s2">true</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">writable </span><span
+    class="s3">= </span><span class="s2">false</span>
+
+    <span class="s4">// if we haven't written anything, then go ahead and emit,</span>
+    <span class="s4">// even if we're not reading.</span>
+    <span class="s4">// we'll re-emit if a new 'end' listener is added anyway.</span>
+    <span class="s4">// This makes MP more suitable to write-only use cases.</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">flowing </span><span class="s3">|| !</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">PAUSED</span><span class="s3">]) </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">MAYBE_EMIT_END</span><span class="s3">]()</span>
+    <span class="s2">return this</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// don't let the internal resume be overwritten</span>
+  <span class="s3">[</span><span class="s1">RESUME</span><span class="s3">]() {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DESTROYED</span><span class="s3">]) </span><span class="s2">return</span>
+
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">PAUSED</span><span class="s3">] = </span><span
+    class="s2">false</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">FLOWING</span><span
+    class="s3">] = </span><span class="s2">true</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'resume'</span><span class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFER</span><span class="s3">].</span><span class="s1">length</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">FLUSH</span><span class="s3">]()</span>
+    <span class="s2">else if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">EOF</span><span class="s3">]) </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">MAYBE_EMIT_END</span><span class="s3">]()</span>
+    <span class="s2">else this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'drain'</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">resume</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">RESUME</span><span
+    class="s3">]()</span>
+  <span class="s3">}</span>
+
+  <span class="s1">pause</span><span class="s3">() {</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">FLOWING</span><span
+    class="s3">] = </span><span class="s2">false</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">PAUSED</span><span class="s3">] = </span><span
+    class="s2">true</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get destroyed</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">DESTROYED</span><span
+    class="s3">]</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get flowing</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">FLOWING</span><span class="s3">]</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get paused</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">PAUSED</span><span class="s3">]</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">BUFFERPUSH</span><span class="s3">](</span><span
+    class="s1">chunk</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFERLENGTH</span><span class="s3">] += </span><span class="s5">1</span>
+    <span class="s2">else this</span><span class="s3">[</span><span class="s1">BUFFERLENGTH</span><span
+    class="s3">] += </span><span class="s1">chunk</span><span class="s3">.</span><span class="s1">length</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span class="s3">].</span><span
+    class="s1">push</span><span class="s3">(</span><span class="s1">chunk</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">BUFFERSHIFT</span><span class="s3">]() {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFERLENGTH</span><span class="s3">] -= </span><span class="s5">1</span>
+    <span class="s2">else this</span><span class="s3">[</span><span class="s1">BUFFERLENGTH</span><span
+    class="s3">] -= </span><span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span
+    class="s3">][</span><span class="s5">0</span><span class="s3">].</span><span class="s1">length</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">BUFFER</span><span class="s3">].</span><span
+    class="s1">shift</span><span class="s3">()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">FLUSH</span><span class="s3">](</span><span class="s1">noDrain</span><span
+    class="s3">) {</span>
+    <span class="s2">do </span><span class="s3">{} </span><span class="s2">while </span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">FLUSHCHUNK</span><span class="s3">](</span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">BUFFERSHIFT</span><span
+    class="s3">]()) &amp;&amp; </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFER</span><span class="s3">].</span><span class="s1">length</span><span class="s3">)</span>
+
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">noDrain </span><span
+    class="s3">&amp;&amp; !</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">BUFFER</span><span class="s3">].</span><span class="s1">length </span><span
+    class="s3">&amp;&amp; !</span><span class="s2">this</span><span class="s3">[</span><span class="s1">EOF</span><span
+    class="s3">]) </span><span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s0">'drain'</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">FLUSHCHUNK</span><span class="s3">](</span><span
+    class="s1">chunk</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'data'</span><span class="s3">, </span><span class="s1">chunk</span><span class="s3">)</span>
+    <span class="s2">return this</span><span class="s3">.</span><span class="s1">flowing</span>
+  <span class="s3">}</span>
+
+  <span class="s1">pipe</span><span class="s3">(</span><span class="s1">dest</span><span class="s3">, </span><span
+    class="s1">opts</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DESTROYED</span><span class="s3">]) </span><span class="s2">return</span>
+
+    <span class="s2">const </span><span class="s1">ended </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">EMITTED_END</span><span class="s3">]</span>
+    <span class="s1">opts </span><span class="s3">= </span><span class="s1">opts </span><span class="s3">|| {}</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">dest </span><span class="s3">=== </span><span
+    class="s1">proc</span><span class="s3">.</span><span class="s1">stdout </span><span class="s3">|| </span><span
+    class="s1">dest </span><span class="s3">=== </span><span class="s1">proc</span><span class="s3">.</span><span
+    class="s1">stderr</span><span class="s3">) </span><span class="s1">opts</span><span class="s3">.</span><span
+    class="s1">end </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s2">else </span><span class="s1">opts</span><span class="s3">.</span><span class="s1">end </span><span
+    class="s3">= </span><span class="s1">opts</span><span class="s3">.</span><span class="s1">end </span><span
+    class="s3">!== </span><span class="s2">false</span>
+    <span class="s1">opts</span><span class="s3">.</span><span class="s1">proxyErrors </span><span
+    class="s3">= !!</span><span class="s1">opts</span><span class="s3">.</span><span class="s1">proxyErrors</span>
+
+    <span class="s4">// piping an ended stream ends immediately</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">ended</span><span class="s3">) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">opts</span><span class="s3">.</span><span
+    class="s1">end</span><span class="s3">) </span><span class="s1">dest</span><span class="s3">.</span><span
+    class="s1">end</span><span class="s3">()</span>
+    <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">PIPES</span><span class="s3">].</span><span
+    class="s1">push</span><span class="s3">(</span>
+        <span class="s3">!</span><span class="s1">opts</span><span class="s3">.</span><span
+    class="s1">proxyErrors</span>
+          <span class="s3">? </span><span class="s2">new </span><span class="s1">Pipe</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span class="s1">dest</span><span
+    class="s3">, </span><span class="s1">opts</span><span class="s3">)</span>
+          <span class="s3">: </span><span class="s2">new </span><span class="s1">PipeProxyErrors</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">, </span><span class="s1">dest</span><span class="s3">, </span><span
+    class="s1">opts</span><span class="s3">)</span>
+      <span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ASYNC</span><span class="s3">]) </span><span class="s1">defer</span><span
+    class="s3">(() =&gt; </span><span class="s2">this</span><span class="s3">[</span><span class="s1">RESUME</span><span
+    class="s3">]())</span>
+      <span class="s2">else this</span><span class="s3">[</span><span class="s1">RESUME</span><span
+    class="s3">]()</span>
+    <span class="s3">}</span>
+
+    <span class="s2">return </span><span class="s1">dest</span>
+  <span class="s3">}</span>
+
+  <span class="s1">unpipe</span><span class="s3">(</span><span class="s1">dest</span><span class="s3">) {</span>
+    <span class="s2">const </span><span class="s1">p </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">PIPES</span><span class="s3">].</span><span class="s1">find</span><span
+    class="s3">(</span><span class="s1">p </span><span class="s3">=&gt; </span><span class="s1">p</span><span
+    class="s3">.</span><span class="s1">dest </span><span class="s3">=== </span><span class="s1">dest</span><span
+    class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">p</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">PIPES</span><span class="s3">].</span><span
+    class="s1">splice</span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">PIPES</span><span class="s3">].</span><span class="s1">indexOf</span><span class="s3">(</span><span
+    class="s1">p</span><span class="s3">), </span><span class="s5">1</span><span class="s3">)</span>
+      <span class="s1">p</span><span class="s3">.</span><span class="s1">unpipe</span><span class="s3">()</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s1">addListener</span><span class="s3">(</span><span class="s1">ev</span><span class="s3">, </span><span
+    class="s1">fn</span><span class="s3">) {</span>
+    <span class="s2">return this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s1">ev</span><span class="s3">, </span><span class="s1">fn</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">on</span><span class="s3">(</span><span class="s1">ev</span><span class="s3">, </span><span
+    class="s1">fn</span><span class="s3">) {</span>
+    <span class="s2">const </span><span class="s1">ret </span><span class="s3">= </span><span
+    class="s2">super</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span class="s1">ev</span><span
+    class="s3">, </span><span class="s1">fn</span><span class="s3">)</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">ev </span><span class="s3">=== </span><span
+    class="s0">'data' </span><span class="s3">&amp;&amp; !</span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">PIPES</span><span class="s3">].</span><span class="s1">length </span><span
+    class="s3">&amp;&amp; !</span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">flowing</span><span class="s3">) </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">RESUME</span><span class="s3">]()</span>
+    <span class="s2">else if </span><span class="s3">(</span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'readable' </span><span class="s3">&amp;&amp; </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">BUFFERLENGTH</span><span
+    class="s3">] !== </span><span class="s5">0</span><span class="s3">)</span>
+      <span class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'readable'</span><span class="s3">)</span>
+    <span class="s2">else if </span><span class="s3">(</span><span class="s1">isEndish</span><span
+    class="s3">(</span><span class="s1">ev</span><span class="s3">) &amp;&amp; </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">EMITTED_END</span><span class="s3">]) {</span>
+      <span class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s1">ev</span><span class="s3">)</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">removeAllListeners</span><span
+    class="s3">(</span><span class="s1">ev</span><span class="s3">)</span>
+    <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'error' </span><span class="s3">&amp;&amp; </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">EMITTED_ERROR</span><span class="s3">]) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ASYNC</span><span class="s3">]) </span><span class="s1">defer</span><span
+    class="s3">(() =&gt; </span><span class="s1">fn</span><span class="s3">.</span><span class="s1">call</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">EMITTED_ERROR</span><span class="s3">]))</span>
+      <span class="s2">else </span><span class="s1">fn</span><span class="s3">.</span><span class="s1">call</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">EMITTED_ERROR</span><span class="s3">])</span>
+    <span class="s3">}</span>
+    <span class="s2">return </span><span class="s1">ret</span>
+  <span class="s3">}</span>
+
+  <span class="s1">get emittedEnd</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">EMITTED_END</span><span
+    class="s3">]</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">MAYBE_EMIT_END</span><span class="s3">]() {</span>
+    <span class="s2">if </span><span class="s3">(</span>
+      <span class="s3">!</span><span class="s2">this</span><span class="s3">[</span><span class="s1">EMITTING_END</span><span
+    class="s3">] &amp;&amp;</span>
+      <span class="s3">!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">EMITTED_END</span><span class="s3">] &amp;&amp;</span>
+      <span class="s3">!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DESTROYED</span><span class="s3">] &amp;&amp;</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span class="s3">].</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">0 </span><span class="s3">&amp;&amp;</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">EOF</span><span class="s3">]</span>
+    <span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">EMITTING_END</span><span
+    class="s3">] = </span><span class="s2">true</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'end'</span><span class="s3">)</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'prefinish'</span><span class="s3">)</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'finish'</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">CLOSED</span><span class="s3">]) </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">emit</span><span class="s3">(</span><span class="s0">'close'</span><span class="s3">)</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">EMITTING_END</span><span
+    class="s3">] = </span><span class="s2">false</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s1">emit</span><span class="s3">(</span><span class="s1">ev</span><span class="s3">, </span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">...extra</span><span class="s3">) {</span>
+    <span class="s4">// error and close are only events allowed after calling destroy()</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">ev </span><span class="s3">!== </span><span
+    class="s0">'error' </span><span class="s3">&amp;&amp; </span><span class="s1">ev </span><span class="s3">!== </span><span
+    class="s0">'close' </span><span class="s3">&amp;&amp; </span><span class="s1">ev </span><span class="s3">!== </span><span
+    class="s1">DESTROYED </span><span class="s3">&amp;&amp; </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DESTROYED</span><span class="s3">])</span>
+      <span class="s2">return</span>
+    <span class="s2">else if </span><span class="s3">(</span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'data'</span><span class="s3">) {</span>
+      <span class="s2">return </span><span class="s3">!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">] &amp;&amp; !</span><span class="s1">data</span>
+        <span class="s3">? </span><span class="s2">false</span>
+        <span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ASYNC</span><span class="s3">]</span>
+        <span class="s3">? </span><span class="s1">defer</span><span class="s3">(() =&gt; </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">EMITDATA</span><span class="s3">](</span><span
+    class="s1">data</span><span class="s3">))</span>
+        <span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">EMITDATA</span><span class="s3">](</span><span class="s1">data</span><span class="s3">)</span>
+    <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'end'</span><span class="s3">) {</span>
+      <span class="s2">return this</span><span class="s3">[</span><span class="s1">EMITEND</span><span
+    class="s3">]()</span>
+    <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'close'</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">CLOSED</span><span
+    class="s3">] = </span><span class="s2">true</span>
+      <span class="s4">// don't emit close before 'end' and 'finish'</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">EMITTED_END</span><span class="s3">] &amp;&amp; !</span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">DESTROYED</span><span class="s3">]) </span><span class="s2">return</span>
+      <span class="s2">const </span><span class="s1">ret </span><span class="s3">= </span><span
+    class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'close'</span><span class="s3">)</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">removeAllListeners</span><span
+    class="s3">(</span><span class="s0">'close'</span><span class="s3">)</span>
+      <span class="s2">return </span><span class="s1">ret</span>
+    <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'error'</span><span class="s3">) {</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">EMITTED_ERROR</span><span
+    class="s3">] = </span><span class="s1">data</span>
+      <span class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s1">ERROR</span><span class="s3">, </span><span class="s1">data</span><span class="s3">)</span>
+      <span class="s2">const </span><span class="s1">ret </span><span class="s3">=</span>
+        <span class="s3">!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">SIGNAL</span><span class="s3">] || </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">listeners</span><span class="s3">(</span><span class="s0">'error'</span><span class="s3">).</span><span
+    class="s1">length</span>
+          <span class="s3">? </span><span class="s2">super</span><span class="s3">.</span><span
+    class="s1">emit</span><span class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span
+    class="s1">data</span><span class="s3">)</span>
+          <span class="s3">: </span><span class="s2">false</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">MAYBE_EMIT_END</span><span
+    class="s3">]()</span>
+      <span class="s2">return </span><span class="s1">ret</span>
+    <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'resume'</span><span class="s3">) {</span>
+      <span class="s2">const </span><span class="s1">ret </span><span class="s3">= </span><span
+    class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'resume'</span><span class="s3">)</span>
+      <span class="s2">this</span><span class="s3">[</span><span class="s1">MAYBE_EMIT_END</span><span
+    class="s3">]()</span>
+      <span class="s2">return </span><span class="s1">ret</span>
+    <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'finish' </span><span class="s3">|| </span><span class="s1">ev </span><span
+    class="s3">=== </span><span class="s0">'prefinish'</span><span class="s3">) {</span>
+      <span class="s2">const </span><span class="s1">ret </span><span class="s3">= </span><span
+    class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s1">ev</span><span class="s3">)</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">removeAllListeners</span><span
+    class="s3">(</span><span class="s1">ev</span><span class="s3">)</span>
+      <span class="s2">return </span><span class="s1">ret</span>
+    <span class="s3">}</span>
+
+    <span class="s4">// Some other unknown event</span>
+    <span class="s2">const </span><span class="s1">ret </span><span class="s3">= </span><span
+    class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s1">ev</span><span class="s3">, </span><span class="s1">data</span><span class="s3">, </span><span
+    class="s1">...extra</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">MAYBE_EMIT_END</span><span
+    class="s3">]()</span>
+    <span class="s2">return </span><span class="s1">ret</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">EMITDATA</span><span class="s3">](</span><span class="s1">data</span><span
+    class="s3">) {</span>
+    <span class="s2">for </span><span class="s3">(</span><span class="s2">const </span><span
+    class="s1">p of </span><span class="s2">this</span><span class="s3">[</span><span class="s1">PIPES</span><span
+    class="s3">]) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">p</span><span class="s3">.</span><span
+    class="s1">dest</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">) === </span><span class="s2">false</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">pause</span><span class="s3">()</span>
+    <span class="s3">}</span>
+    <span class="s2">const </span><span class="s1">ret </span><span class="s3">= </span><span
+    class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'data'</span><span class="s3">, </span><span class="s1">data</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">MAYBE_EMIT_END</span><span
+    class="s3">]()</span>
+    <span class="s2">return </span><span class="s1">ret</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">EMITEND</span><span class="s3">]() {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">EMITTED_END</span><span class="s3">]) </span><span class="s2">return</span>
+
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">EMITTED_END</span><span class="s3">] = </span><span
+    class="s2">true</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">readable </span><span
+    class="s3">= </span><span class="s2">false</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ASYNC</span><span class="s3">]) </span><span class="s1">defer</span><span
+    class="s3">(() =&gt; </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">EMITEND2</span><span class="s3">]())</span>
+    <span class="s2">else this</span><span class="s3">[</span><span class="s1">EMITEND2</span><span
+    class="s3">]()</span>
+  <span class="s3">}</span>
+
+  <span class="s3">[</span><span class="s1">EMITEND2</span><span class="s3">]() {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DECODER</span><span class="s3">]) {</span>
+      <span class="s2">const </span><span class="s1">data </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">DECODER</span><span class="s3">].</span><span
+    class="s1">end</span><span class="s3">()</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">data</span><span class="s3">) {</span>
+        <span class="s2">for </span><span class="s3">(</span><span class="s2">const </span><span class="s1">p of </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">PIPES</span><span class="s3">]) {</span>
+          <span class="s1">p</span><span class="s3">.</span><span class="s1">dest</span><span class="s3">.</span><span
+    class="s1">write</span><span class="s3">(</span><span class="s1">data</span><span class="s3">)</span>
+        <span class="s3">}</span>
+        <span class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'data'</span><span class="s3">, </span><span class="s1">data</span><span class="s3">)</span>
+      <span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s2">for </span><span class="s3">(</span><span class="s2">const </span><span
+    class="s1">p of </span><span class="s2">this</span><span class="s3">[</span><span class="s1">PIPES</span><span
+    class="s3">]) {</span>
+      <span class="s1">p</span><span class="s3">.</span><span class="s1">end</span><span class="s3">()</span>
+    <span class="s3">}</span>
+    <span class="s2">const </span><span class="s1">ret </span><span class="s3">= </span><span
+    class="s2">super</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'end'</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">removeAllListeners</span><span
+    class="s3">(</span><span class="s0">'end'</span><span class="s3">)</span>
+    <span class="s2">return </span><span class="s1">ret</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// const all = await stream.collect()</span>
+  <span class="s1">collect</span><span class="s3">() {</span>
+    <span class="s2">const </span><span class="s1">buf </span><span class="s3">= []</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) </span><span class="s1">buf</span><span class="s3">.</span><span
+    class="s1">dataLength </span><span class="s3">= </span><span class="s5">0</span>
+    <span class="s4">// set the promise first, in case an error is raised</span>
+    <span class="s4">// by triggering the flow here.</span>
+    <span class="s2">const </span><span class="s1">p </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">promise</span><span class="s3">()</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'data'</span><span class="s3">, </span><span class="s1">c </span><span class="s3">=&gt; {</span>
+      <span class="s1">buf</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s1">c</span><span class="s3">)</span>
+      <span class="s2">if </span><span class="s3">(!</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">OBJECTMODE</span><span class="s3">]) </span><span class="s1">buf</span><span class="s3">.</span><span
+    class="s1">dataLength </span><span class="s3">+= </span><span class="s1">c</span><span class="s3">.</span><span
+    class="s1">length</span>
+    <span class="s3">})</span>
+    <span class="s2">return </span><span class="s1">p</span><span class="s3">.</span><span class="s1">then</span><span
+    class="s3">(() =&gt; </span><span class="s1">buf</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// const data = await stream.concat()</span>
+  <span class="s1">concat</span><span class="s3">() {</span>
+    <span class="s2">return this</span><span class="s3">[</span><span class="s1">OBJECTMODE</span><span
+    class="s3">]</span>
+      <span class="s3">? </span><span class="s1">Promise</span><span class="s3">.</span><span
+    class="s1">reject</span><span class="s3">(</span><span class="s2">new </span><span class="s1">Error</span><span
+    class="s3">(</span><span class="s0">'cannot concat in objectMode'</span><span class="s3">))</span>
+      <span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">collect</span><span class="s3">().</span><span class="s1">then</span><span class="s3">(</span><span
+    class="s1">buf </span><span class="s3">=&gt;</span>
+          <span class="s2">this</span><span class="s3">[</span><span class="s1">OBJECTMODE</span><span
+    class="s3">]</span>
+            <span class="s3">? </span><span class="s1">Promise</span><span class="s3">.</span><span
+    class="s1">reject</span><span class="s3">(</span><span class="s2">new </span><span class="s1">Error</span><span
+    class="s3">(</span><span class="s0">'cannot concat in objectMode'</span><span class="s3">))</span>
+            <span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">ENCODING</span><span class="s3">]</span>
+            <span class="s3">? </span><span class="s1">buf</span><span class="s3">.</span><span
+    class="s1">join</span><span class="s3">(</span><span class="s0">''</span><span class="s3">)</span>
+            <span class="s3">: </span><span class="s1">Buffer</span><span class="s3">.</span><span
+    class="s1">concat</span><span class="s3">(</span><span class="s1">buf</span><span class="s3">, </span><span
+    class="s1">buf</span><span class="s3">.</span><span class="s1">dataLength</span><span class="s3">)</span>
+        <span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// stream.promise().then(() =&gt; done, er =&gt; emitted error)</span>
+  <span class="s1">promise</span><span class="s3">() {</span>
+    <span class="s2">return new </span><span class="s1">Promise</span><span class="s3">((</span><span
+    class="s1">resolve</span><span class="s3">, </span><span class="s1">reject</span><span class="s3">) =&gt; {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s1">DESTROYED</span><span class="s3">, () =&gt; </span><span class="s1">reject</span><span
+    class="s3">(</span><span class="s2">new </span><span class="s1">Error</span><span class="s3">(</span><span
+    class="s0">'stream destroyed'</span><span class="s3">)))</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s1">er </span><span class="s3">=&gt; </span><span
+    class="s1">reject</span><span class="s3">(</span><span class="s1">er</span><span class="s3">))</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'end'</span><span class="s3">, () =&gt; </span><span class="s1">resolve</span><span class="s3">())</span>
+    <span class="s3">})</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// for await (let chunk of stream)</span>
+  <span class="s3">[</span><span class="s1">ASYNCITERATOR</span><span class="s3">]() {</span>
+    <span class="s2">let </span><span class="s1">stopped </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s2">const </span><span class="s1">stop </span><span class="s3">= () =&gt; {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">pause</span><span class="s3">()</span>
+      <span class="s1">stopped </span><span class="s3">= </span><span class="s2">true</span>
+      <span class="s2">return </span><span class="s1">Promise</span><span class="s3">.</span><span
+    class="s1">resolve</span><span class="s3">({ </span><span class="s1">done</span><span class="s3">: </span><span
+    class="s2">true </span><span class="s3">})</span>
+    <span class="s3">}</span>
+    <span class="s2">const </span><span class="s1">next </span><span class="s3">= () =&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">stopped</span><span class="s3">) </span><span
+    class="s2">return </span><span class="s1">stop</span><span class="s3">()</span>
+      <span class="s2">const </span><span class="s1">res </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">read</span><span class="s3">()</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">res </span><span class="s3">!== </span><span
+    class="s2">null</span><span class="s3">) </span><span class="s2">return </span><span class="s1">Promise</span><span
+    class="s3">.</span><span class="s1">resolve</span><span class="s3">({ </span><span class="s1">done</span><span
+    class="s3">: </span><span class="s2">false</span><span class="s3">, </span><span class="s1">value</span><span
+    class="s3">: </span><span class="s1">res </span><span class="s3">})</span>
+
+      <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">EOF</span><span class="s3">]) </span><span class="s2">return </span><span class="s1">stop</span><span
+    class="s3">()</span>
+
+      <span class="s2">let </span><span class="s1">resolve </span><span class="s3">= </span><span class="s2">null</span>
+      <span class="s2">let </span><span class="s1">reject </span><span class="s3">= </span><span class="s2">null</span>
+      <span class="s2">const </span><span class="s1">onerr </span><span class="s3">= </span><span
+    class="s1">er </span><span class="s3">=&gt; {</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s0">'data'</span><span class="s3">, </span><span class="s1">ondata</span><span
+    class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s0">'end'</span><span class="s3">, </span><span class="s1">onend</span><span
+    class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">DESTROYED</span><span class="s3">, </span><span class="s1">ondestroy</span><span
+    class="s3">)</span>
+        <span class="s1">stop</span><span class="s3">()</span>
+        <span class="s1">reject</span><span class="s3">(</span><span class="s1">er</span><span class="s3">)</span>
+      <span class="s3">}</span>
+      <span class="s2">const </span><span class="s1">ondata </span><span class="s3">= </span><span
+    class="s1">value </span><span class="s3">=&gt; {</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span class="s1">onerr</span><span
+    class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s0">'end'</span><span class="s3">, </span><span class="s1">onend</span><span
+    class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">DESTROYED</span><span class="s3">, </span><span class="s1">ondestroy</span><span
+    class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">pause</span><span class="s3">()</span>
+        <span class="s1">resolve</span><span class="s3">({ </span><span class="s1">value</span><span
+    class="s3">: </span><span class="s1">value</span><span class="s3">, </span><span class="s1">done</span><span
+    class="s3">: !!</span><span class="s2">this</span><span class="s3">[</span><span class="s1">EOF</span><span
+    class="s3">] })</span>
+      <span class="s3">}</span>
+      <span class="s2">const </span><span class="s1">onend </span><span class="s3">= () =&gt; {</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s0">'error'</span><span class="s3">, </span><span class="s1">onerr</span><span
+    class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s0">'data'</span><span class="s3">, </span><span class="s1">ondata</span><span
+    class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">DESTROYED</span><span class="s3">, </span><span class="s1">ondestroy</span><span
+    class="s3">)</span>
+        <span class="s1">stop</span><span class="s3">()</span>
+        <span class="s1">resolve</span><span class="s3">({ </span><span class="s1">done</span><span class="s3">: </span><span
+    class="s2">true </span><span class="s3">})</span>
+      <span class="s3">}</span>
+      <span class="s2">const </span><span class="s1">ondestroy </span><span class="s3">= () =&gt; </span><span
+    class="s1">onerr</span><span class="s3">(</span><span class="s2">new </span><span class="s1">Error</span><span
+    class="s3">(</span><span class="s0">'stream destroyed'</span><span class="s3">))</span>
+      <span class="s2">return new </span><span class="s1">Promise</span><span class="s3">((</span><span
+    class="s1">res</span><span class="s3">, </span><span class="s1">rej</span><span class="s3">) =&gt; {</span>
+        <span class="s1">reject </span><span class="s3">= </span><span class="s1">rej</span>
+        <span class="s1">resolve </span><span class="s3">= </span><span class="s1">res</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s1">DESTROYED</span><span class="s3">, </span><span class="s1">ondestroy</span><span class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s1">onerr</span><span class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s0">'end'</span><span class="s3">, </span><span class="s1">onend</span><span class="s3">)</span>
+        <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s0">'data'</span><span class="s3">, </span><span class="s1">ondata</span><span class="s3">)</span>
+      <span class="s3">})</span>
+    <span class="s3">}</span>
+
+    <span class="s2">return </span><span class="s3">{</span>
+      <span class="s1">next</span><span class="s3">,</span>
+      <span class="s2">throw</span><span class="s3">: </span><span class="s1">stop</span><span class="s3">,</span>
+      <span class="s2">return</span><span class="s3">: </span><span class="s1">stop</span><span class="s3">,</span>
+      <span class="s3">[</span><span class="s1">ASYNCITERATOR</span><span class="s3">]() {</span>
+        <span class="s2">return this</span>
+      <span class="s3">},</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// for (let chunk of stream)</span>
+  <span class="s3">[</span><span class="s1">ITERATOR</span><span class="s3">]() {</span>
+    <span class="s2">let </span><span class="s1">stopped </span><span class="s3">= </span><span class="s2">false</span>
+    <span class="s2">const </span><span class="s1">stop </span><span class="s3">= () =&gt; {</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">pause</span><span class="s3">()</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">ERROR</span><span class="s3">, </span><span class="s1">stop</span><span
+    class="s3">)</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s1">DESTROYED</span><span class="s3">, </span><span class="s1">stop</span><span
+    class="s3">)</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">removeListener</span><span
+    class="s3">(</span><span class="s0">'end'</span><span class="s3">, </span><span class="s1">stop</span><span
+    class="s3">)</span>
+      <span class="s1">stopped </span><span class="s3">= </span><span class="s2">true</span>
+      <span class="s2">return </span><span class="s3">{ </span><span class="s1">done</span><span
+    class="s3">: </span><span class="s2">true </span><span class="s3">}</span>
+    <span class="s3">}</span>
+
+    <span class="s2">const </span><span class="s1">next </span><span class="s3">= () =&gt; {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">stopped</span><span class="s3">) </span><span
+    class="s2">return </span><span class="s1">stop</span><span class="s3">()</span>
+      <span class="s2">const </span><span class="s1">value </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">read</span><span class="s3">()</span>
+      <span class="s2">return </span><span class="s1">value </span><span class="s3">=== </span><span
+    class="s2">null </span><span class="s3">? </span><span class="s1">stop</span><span class="s3">() : { </span><span
+    class="s1">value </span><span class="s3">}</span>
+    <span class="s3">}</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s0">'end'</span><span class="s3">, </span><span class="s1">stop</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s1">ERROR</span><span class="s3">, </span><span class="s1">stop</span><span class="s3">)</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s1">DESTROYED</span><span class="s3">, </span><span class="s1">stop</span><span class="s3">)</span>
+
+    <span class="s2">return </span><span class="s3">{</span>
+      <span class="s1">next</span><span class="s3">,</span>
+      <span class="s2">throw</span><span class="s3">: </span><span class="s1">stop</span><span class="s3">,</span>
+      <span class="s2">return</span><span class="s3">: </span><span class="s1">stop</span><span class="s3">,</span>
+      <span class="s3">[</span><span class="s1">ITERATOR</span><span class="s3">]() {</span>
+        <span class="s2">return this</span>
+      <span class="s3">},</span>
+    <span class="s3">}</span>
+  <span class="s3">}</span>
+
+  <span class="s1">destroy</span><span class="s3">(</span><span class="s1">er</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">DESTROYED</span><span class="s3">]) {</span>
+      <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span class="s3">)</span>
+      <span class="s2">else this</span><span class="s3">.</span><span class="s1">emit</span><span
+    class="s3">(</span><span class="s1">DESTROYED</span><span class="s3">)</span>
+      <span class="s2">return this</span>
+    <span class="s3">}</span>
+
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">DESTROYED</span><span
+    class="s3">] = </span><span class="s2">true</span>
+
+    <span class="s4">// throw away all buffered data, it's never coming out</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFER</span><span class="s3">].</span><span
+    class="s1">length </span><span class="s3">= </span><span class="s5">0</span>
+    <span class="s2">this</span><span class="s3">[</span><span class="s1">BUFFERLENGTH</span><span
+    class="s3">] = </span><span class="s5">0</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof this</span><span
+    class="s3">.</span><span class="s1">close </span><span class="s3">=== </span><span
+    class="s0">'function' </span><span class="s3">&amp;&amp; !</span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">CLOSED</span><span class="s3">]) </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">close</span><span class="s3">()</span>
+
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">er</span><span class="s3">) </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s1">er</span><span class="s3">)</span>
+    <span class="s4">// if no error to emit, still reject pending promises</span>
+    <span class="s2">else this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s1">DESTROYED</span><span class="s3">)</span>
+
+    <span class="s2">return this</span>
+  <span class="s3">}</span>
+
+  <span class="s2">static </span><span class="s1">isStream</span><span class="s3">(</span><span class="s1">s</span><span
+    class="s3">) {</span>
+    <span class="s2">return </span><span class="s3">(</span>
+      <span class="s3">!!</span><span class="s1">s </span><span class="s3">&amp;&amp;</span>
+      <span class="s3">(</span><span class="s1">s </span><span class="s2">instanceof </span><span
+    class="s1">Minipass </span><span class="s3">||</span>
+        <span class="s1">s </span><span class="s2">instanceof </span><span class="s1">Stream </span><span
+    class="s3">||</span>
+        <span class="s3">(</span><span class="s1">s </span><span class="s2">instanceof </span><span
+    class="s1">EE </span><span class="s3">&amp;&amp;</span>
+          <span class="s4">// readable</span>
+          <span class="s3">(</span><span class="s2">typeof </span><span class="s1">s</span><span
+    class="s3">.</span><span class="s1">pipe </span><span class="s3">=== </span><span class="s0">'function' </span><span
+    class="s3">||</span>
+            <span class="s4">// writable</span>
+            <span class="s3">(</span><span class="s2">typeof </span><span class="s1">s</span><span
+    class="s3">.</span><span class="s1">write </span><span class="s3">=== </span><span
+    class="s0">'function' </span><span class="s3">&amp;&amp; </span><span class="s2">typeof </span><span
+    class="s1">s</span><span class="s3">.</span><span class="s1">end </span><span class="s3">=== </span><span
+    class="s0">'function'</span><span class="s3">))))</span>
+    <span class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+
+</pre>
+</body>
+</html>

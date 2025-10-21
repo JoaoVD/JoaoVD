@@ -1,0 +1,2187 @@
+<html>
+<head>
+  <title>child_process.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          child_process.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:child_process` module provides the ability to spawn subprocesses in</span>
+ <span class="s0">* a manner that is similar, but not identical, to [`popen(3)`](http://man7.org/linux/man-pages/man3/popen.3.html). This capability</span>
+ <span class="s0">* is primarily provided by the {</span><span class="s1">@link </span><span
+    class="s0">spawn} function:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { spawn } from 'node:child_process';</span>
+ <span class="s0">* const ls = spawn('ls', ['-lh', '/usr']);</span>
+ <span class="s0">*</span>
+ <span class="s0">* ls.stdout.on('data', (data) =&gt; {</span>
+ <span class="s0">*   console.log(`stdout: ${data}`);</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* ls.stderr.on('data', (data) =&gt; {</span>
+ <span class="s0">*   console.error(`stderr: ${data}`);</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* ls.on('close', (code) =&gt; {</span>
+ <span class="s0">*   console.log(`child process exited with code ${code}`);</span>
+ <span class="s0">* });</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* By default, pipes for `stdin`, `stdout`, and `stderr` are established between</span>
+ <span class="s0">* the parent Node.js process and the spawned subprocess. These pipes have</span>
+ <span class="s0">* limited (and platform-specific) capacity. If the subprocess writes to</span>
+ <span class="s0">* stdout in excess of that limit without the output being captured, the</span>
+ <span class="s0">* subprocess blocks, waiting for the pipe buffer to accept more data. This is</span>
+ <span class="s0">* identical to the behavior of pipes in the shell. Use the `{ stdio: 'ignore' }` option if the output will not be consumed.</span>
+ <span class="s0">*</span>
+ <span class="s0">* The command lookup is performed using the `options.env.PATH` environment</span>
+ <span class="s0">* variable if `env` is in the `options` object. Otherwise, `process.env.PATH` is</span>
+ <span class="s0">* used. If `options.env` is set without `PATH`, lookup on Unix is performed</span>
+ <span class="s0">* on a default search path search of `/usr/bin:/bin` (see your operating system's</span>
+ <span class="s0">* manual for execvpe/execvp), on Windows the current processes environment</span>
+ <span class="s0">* variable `PATH` is used.</span>
+ <span class="s0">*</span>
+ <span class="s0">* On Windows, environment variables are case-insensitive. Node.js</span>
+ <span class="s0">* lexicographically sorts the `env` keys and uses the first one that</span>
+ <span class="s0">* case-insensitively matches. Only first (in lexicographic order) entry will be</span>
+ <span class="s0">* passed to the subprocess. This might lead to issues on Windows when passing</span>
+ <span
+   class="s0">* objects to the `env` option that have multiple variants of the same key, such as `PATH` and `Path`.</span>
+ <span class="s0">*</span>
+ <span class="s0">* The {</span><span class="s1">@link </span><span class="s0">spawn} method spawns the child process asynchronously,</span>
+ <span class="s0">* without blocking the Node.js event loop. The {</span><span class="s1">@link </span><span class="s0">spawnSync} function provides equivalent functionality in a synchronous manner that blocks</span>
+ <span class="s0">* the event loop until the spawned process either exits or is terminated.</span>
+ <span class="s0">*</span>
+ <span class="s0">* For convenience, the `node:child_process` module provides a handful of</span>
+ <span class="s0">* synchronous and asynchronous alternatives to {</span><span class="s1">@link </span><span class="s0">spawn} and {</span><span
+    class="s1">@link </span><span class="s0">spawnSync}. Each of these alternatives are implemented on</span>
+ <span class="s0">* top of {</span><span class="s1">@link </span><span class="s0">spawn} or {</span><span class="s1">@link </span><span
+    class="s0">spawnSync}.</span>
+ <span class="s0">*</span>
+ <span class="s0">* * {</span><span class="s1">@link </span><span class="s0">exec}: spawns a shell and runs a command within that</span>
+ <span class="s0">* shell, passing the `stdout` and `stderr` to a callback function when</span>
+ <span class="s0">* complete.</span>
+ <span class="s0">* * {</span><span class="s1">@link </span><span class="s0">execFile}: similar to {</span><span
+    class="s1">@link </span><span class="s0">exec} except</span>
+ <span class="s0">* that it spawns the command directly without first spawning a shell by</span>
+ <span class="s0">* default.</span>
+ <span class="s0">* * {</span><span class="s1">@link </span><span class="s0">fork}: spawns a new Node.js process and invokes a</span>
+ <span class="s0">* specified module with an IPC communication channel established that allows</span>
+ <span class="s0">* sending messages between parent and child.</span>
+ <span class="s0">* * {</span><span class="s1">@link </span><span
+    class="s0">execSync}: a synchronous version of {</span><span class="s1">@link </span><span class="s0">exec} that will block the Node.js event loop.</span>
+ <span class="s0">* * {</span><span class="s1">@link </span><span
+    class="s0">execFileSync}: a synchronous version of {</span><span class="s1">@link </span><span class="s0">execFile} that will block the Node.js event loop.</span>
+ <span class="s0">*</span>
+ <span class="s0">* For certain use cases, such as automating shell scripts, the `synchronous counterparts` may be more convenient. In many cases, however,</span>
+ <span class="s0">* the synchronous methods can have significant impact on performance due to</span>
+ <span class="s0">* stalling the event loop while spawned processes complete.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/child_process.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;child_process&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Abortable</span><span class="s4">, </span><span
+    class="s2">EventEmitter </span><span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:events&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">dgram from </span><span class="s3">&quot;node:dgram&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">net from </span><span class="s3">&quot;node:net&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Pipe</span><span class="s4">, </span><span
+    class="s2">Readable</span><span class="s4">, </span><span class="s2">Stream</span><span class="s4">, </span><span
+    class="s2">Writable </span><span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:stream&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">URL </span><span class="s4">} </span><span
+    class="s2">from </span><span class="s3">&quot;node:url&quot;</span><span class="s4">;</span>
+    <span class="s2">type Serializable </span><span class="s4">= </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">object </span><span class="s4">| </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">boolean </span><span class="s4">| </span><span class="s2">bigint</span><span class="s4">;</span>
+    <span class="s2">type SendHandle </span><span class="s4">= </span><span class="s2">net</span><span
+    class="s4">.</span><span class="s2">Socket </span><span class="s4">| </span><span class="s2">net</span><span
+    class="s4">.</span><span class="s2">Server </span><span class="s4">| </span><span class="s2">dgram</span><span
+    class="s4">.</span><span class="s2">Socket </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Instances of the `ChildProcess` represent spawned child processes.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Instances of `ChildProcess` are not intended to be created directly. Rather,</span>
+     <span class="s0">* use the {</span><span class="s1">@link </span><span class="s0">spawn}, {</span><span class="s1">@link </span><span
+    class="s0">exec},{</span><span class="s1">@link </span><span class="s0">execFile}, or {</span><span
+    class="s1">@link </span><span class="s0">fork} methods to create</span>
+     <span class="s0">* instances of `ChildProcess`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v2.2.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">ChildProcess </span><span class="s5">extends </span><span class="s2">EventEmitter </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A `Writable Stream` that represents the child process's `stdin`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If a child process waits to read all of its input, the child will not continue</span>
+         <span class="s0">* until this stream has been closed via `end()`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the child was spawned with `stdio[0]` set to anything other than `'pipe'`,</span>
+         <span class="s0">* then this will be `null`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `subprocess.stdin` is an alias for `subprocess.stdio[0]`. Both properties will</span>
+         <span class="s0">* refer to the same value.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `subprocess.stdin` property can be `null` or `undefined` if the child process could not be successfully spawned.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">*/</span>
+        <span class="s2">stdin</span><span class="s4">: </span><span class="s2">Writable </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A `Readable Stream` that represents the child process's `stdout`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the child was spawned with `stdio[1]` set to anything other than `'pipe'`,</span>
+         <span class="s0">* then this will be `null`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `subprocess.stdout` is an alias for `subprocess.stdio[1]`. Both properties will</span>
+         <span class="s0">* refer to the same value.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { spawn } from 'node:child_process';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const subprocess = spawn('ls');</span>
+         <span class="s0">*</span>
+         <span class="s0">* subprocess.stdout.on('data', (data) =&gt; {</span>
+         <span class="s0">*   console.log(`Received chunk ${data}`);</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `subprocess.stdout` property can be `null` or `undefined` if the child process could not be successfully spawned.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">*/</span>
+        <span class="s2">stdout</span><span class="s4">: </span><span class="s2">Readable </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A `Readable Stream` that represents the child process's `stderr`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the child was spawned with `stdio[2]` set to anything other than `'pipe'`,</span>
+         <span class="s0">* then this will be `null`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `subprocess.stderr` is an alias for `subprocess.stdio[2]`. Both properties will</span>
+         <span class="s0">* refer to the same value.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `subprocess.stderr` property can be `null` or `undefined` if the child process could not be successfully spawned.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">*/</span>
+        <span class="s2">stderr</span><span class="s4">: </span><span class="s2">Readable </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `subprocess.channel` property is a reference to the child's IPC channel. If</span>
+         <span class="s0">* no IPC channel exists, this property is `undefined`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v7.1.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly channel</span><span class="s4">?: </span><span class="s2">Pipe </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A sparse array of pipes to the child process, corresponding with positions in</span>
+         <span class="s0">* the `stdio` option passed to {</span><span class="s1">@link </span><span class="s0">spawn} that have been set</span>
+         <span class="s0">* to the value `'pipe'`. `subprocess.stdio[0]`, `subprocess.stdio[1]`, and `subprocess.stdio[2]` are also available as `subprocess.stdin`, `subprocess.stdout`, and `subprocess.stderr`,</span>
+         <span class="s0">* respectively.</span>
+         <span class="s0">*</span>
+         <span class="s0">* In the following example, only the child's fd `1` (stdout) is configured as a</span>
+         <span class="s0">* pipe, so only the parent's `subprocess.stdio[1]` is a stream, all other values</span>
+         <span class="s0">* in the array are `null`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert';</span>
+         <span class="s0">* import fs from 'node:fs';</span>
+         <span class="s0">* import child_process from 'node:child_process';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const subprocess = child_process.spawn('ls', {</span>
+         <span class="s0">*   stdio: [</span>
+         <span class="s0">*     0, // Use parent's stdin for child.</span>
+         <span class="s0">*     'pipe', // Pipe child's stdout to parent.</span>
+         <span class="s0">*     fs.openSync('err.out', 'w'), // Direct child's stderr to a file.</span>
+         <span class="s0">*   ],</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.strictEqual(subprocess.stdio[0], null);</span>
+         <span class="s0">* assert.strictEqual(subprocess.stdio[0], subprocess.stdin);</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert(subprocess.stdout);</span>
+         <span class="s0">* assert.strictEqual(subprocess.stdio[1], subprocess.stdout);</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.strictEqual(subprocess.stdio[2], null);</span>
+         <span class="s0">* assert.strictEqual(subprocess.stdio[2], subprocess.stderr);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `subprocess.stdio` property can be `undefined` if the child process could</span>
+         <span class="s0">* not be successfully spawned.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.10</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly stdio</span><span class="s4">: [</span>
+            <span class="s2">Writable </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+            <span class="s6">// stdin</span>
+            <span class="s2">Readable </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+            <span class="s6">// stdout</span>
+            <span class="s2">Readable </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+            <span class="s6">// stderr</span>
+            <span class="s2">Readable </span><span class="s4">| </span><span class="s2">Writable </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">,</span>
+            <span class="s6">// extra</span>
+            <span class="s2">Readable </span><span class="s4">| </span><span class="s2">Writable </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">, </span><span class="s6">// extra</span>
+        <span class="s4">];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `subprocess.killed` property indicates whether the child process</span>
+         <span class="s0">* successfully received a signal from `subprocess.kill()`. The `killed` property</span>
+         <span class="s0">* does not indicate that the child process has been terminated.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.10</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly killed</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the process identifier (PID) of the child process. If the child process</span>
+         <span class="s0">* fails to spawn due to errors, then the value is `undefined` and `error` is</span>
+         <span class="s0">* emitted.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { spawn } from 'node:child_process';</span>
+         <span class="s0">* const grep = spawn('grep', ['ssh']);</span>
+         <span class="s0">*</span>
+         <span class="s0">* console.log(`Spawned child pid: ${grep.pid}`);</span>
+         <span class="s0">* grep.stdin.end();</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly pid</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `subprocess.connected` property indicates whether it is still possible to</span>
+         <span class="s0">* send and receive messages from a child process. When `subprocess.connected` is `false`, it is no longer possible to send or receive messages.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.2</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly connected</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `subprocess.exitCode` property indicates the exit code of the child process.</span>
+         <span class="s0">* If the child process is still running, the field will be `null`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly exitCode</span><span class="s4">: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `subprocess.signalCode` property indicates the signal received by</span>
+         <span class="s0">* the child process if any, else `null`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly signalCode</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `subprocess.spawnargs` property represents the full list of command-line</span>
+         <span class="s0">* arguments the child process was launched with.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly spawnargs</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">[];</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `subprocess.spawnfile` property indicates the executable file name of</span>
+         <span class="s0">* the child process that is launched.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For {</span><span class="s1">@link </span><span class="s0">fork}, its value will be equal to `process.execPath`.</span>
+         <span class="s0">* For {</span><span class="s1">@link </span><span class="s0">spawn}, its value will be the name of</span>
+         <span class="s0">* the executable file.</span>
+         <span class="s0">* For {</span><span class="s1">@link </span><span class="s0">exec},  its value will be the name of the shell</span>
+         <span class="s0">* in which the child process is launched.</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly spawnfile</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `subprocess.kill()` method sends a signal to the child process. If no</span>
+         <span class="s0">* argument is given, the process will be sent the `'SIGTERM'` signal. See [`signal(7)`](http://man7.org/linux/man-pages/man7/signal.7.html) for a list of available signals. This function</span>
+         <span class="s0">* returns `true` if [`kill(2)`](http://man7.org/linux/man-pages/man2/kill.2.html) succeeds, and `false` otherwise.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { spawn } from 'node:child_process';</span>
+         <span class="s0">* const grep = spawn('grep', ['ssh']);</span>
+         <span class="s0">*</span>
+         <span class="s0">* grep.on('close', (code, signal) =&gt; {</span>
+         <span class="s0">*   console.log(</span>
+         <span class="s0">*     `child process terminated due to receipt of signal ${signal}`);</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Send SIGHUP to process.</span>
+         <span class="s0">* grep.kill('SIGHUP');</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `ChildProcess` object may emit an `'error'` event if the signal</span>
+         <span class="s0">* cannot be delivered. Sending a signal to a child process that has already exited</span>
+         <span class="s0">* is not an error but may have unforeseen consequences. Specifically, if the</span>
+         <span class="s0">* process identifier (PID) has been reassigned to another process, the signal will</span>
+         <span class="s0">* be delivered to that process instead which can have unexpected results.</span>
+         <span class="s0">*</span>
+         <span class="s0">* While the function is called `kill`, the signal delivered to the child process</span>
+         <span class="s0">* may not actually terminate the process.</span>
+         <span class="s0">*</span>
+         <span class="s0">* See [`kill(2)`](http://man7.org/linux/man-pages/man2/kill.2.html) for reference.</span>
+         <span class="s0">*</span>
+         <span class="s0">* On Windows, where POSIX signals do not exist, the `signal` argument will be</span>
+         <span
+           class="s0">* ignored, and the process will be killed forcefully and abruptly (similar to `'SIGKILL'`).</span>
+         <span class="s0">* See `Signal Events` for more details.</span>
+         <span class="s0">*</span>
+         <span class="s0">* On Linux, child processes of child processes will not be terminated</span>
+         <span class="s0">* when attempting to kill their parent. This is likely to happen when running a</span>
+         <span class="s0">* new process in a shell or with the use of the `shell` option of `ChildProcess`:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* 'use strict';</span>
+         <span class="s0">* import { spawn } from 'node:child_process';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const subprocess = spawn(</span>
+         <span class="s0">*   'sh',</span>
+         <span class="s0">*   [</span>
+         <span class="s0">*     '-c',</span>
+         <span class="s0">*     `node -e &quot;setInterval(() =&gt; {</span>
+         <span class="s0">*       console.log(process.pid, 'is alive')</span>
+         <span class="s0">*     }, 500);&quot;`,</span>
+         <span class="s0">*   ], {</span>
+         <span class="s0">*     stdio: ['inherit', 'inherit', 'inherit'],</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* );</span>
+         <span class="s0">*</span>
+         <span class="s0">* setTimeout(() =&gt; {</span>
+         <span class="s0">*   subprocess.kill(); // Does not terminate the Node.js process in the shell.</span>
+         <span class="s0">* }, 2000);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+         <span class="s0">*/</span>
+        <span class="s2">kill</span><span class="s4">(</span><span class="s2">signal</span><span
+    class="s4">?: </span><span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Signals </span><span
+    class="s4">| </span><span class="s2">number</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Calls {</span><span class="s1">@link </span><span class="s0">ChildProcess.kill} with `'SIGTERM'`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v20.5.0</span>
+         <span class="s0">*/</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">dispose</span><span class="s4">](): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When an IPC channel has been established between the parent and child (</span>
+         <span class="s0">* i.e. when using {</span><span class="s1">@link </span><span class="s0">fork}), the `subprocess.send()` method can</span>
+         <span class="s0">* be used to send messages to the child process. When the child process is a</span>
+         <span class="s0">* Node.js instance, these messages can be received via the `'message'` event.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The message goes through serialization and parsing. The resulting</span>
+         <span class="s0">* message might not be the same as what is originally sent.</span>
+         <span class="s0">*</span>
+         <span class="s0">* For example, in the parent script:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import cp from 'node:child_process';</span>
+         <span class="s0">* const n = cp.fork(`${__dirname}/sub.js`);</span>
+         <span class="s0">*</span>
+         <span class="s0">* n.on('message', (m) =&gt; {</span>
+         <span class="s0">*   console.log('PARENT got message:', m);</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Causes the child to print: CHILD got message: { hello: 'world' }</span>
+         <span class="s0">* n.send({ hello: 'world' });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* And then the child script, `'sub.js'` might look like this:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* process.on('message', (m) =&gt; {</span>
+         <span class="s0">*   console.log('CHILD got message:', m);</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Causes the parent to print: PARENT got message: { foo: 'bar', baz: null }</span>
+         <span class="s0">* process.send({ foo: 'bar', baz: NaN });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Child Node.js processes will have a `process.send()` method of their own</span>
+         <span class="s0">* that allows the child to send messages back to the parent.</span>
+         <span class="s0">*</span>
+         <span class="s0">* There is a special case when sending a `{cmd: 'NODE_foo'}` message. Messages</span>
+         <span class="s0">* containing a `NODE_` prefix in the `cmd` property are reserved for use within</span>
+         <span class="s0">* Node.js core and will not be emitted in the child's `'message'` event. Rather, such messages are emitted using the `'internalMessage'` event and are consumed internally by Node.js.</span>
+         <span class="s0">* Applications should avoid using such messages or listening for `'internalMessage'` events as it is subject to change without notice.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The optional `sendHandle` argument that may be passed to `subprocess.send()` is</span>
+         <span class="s0">* for passing a TCP server or socket object to the child process. The child will</span>
+         <span class="s0">* receive the object as the second argument passed to the callback function</span>
+         <span class="s0">* registered on the `'message'` event. Any data that is received and buffered in</span>
+         <span
+           class="s0">* the socket will not be sent to the child. Sending IPC sockets is not supported on Windows.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The optional `callback` is a function that is invoked after the message is</span>
+         <span class="s0">* sent but before the child may have received it. The function is called with a</span>
+         <span class="s0">* single argument: `null` on success, or an `Error` object on failure.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If no `callback` function is provided and the message cannot be sent, an `'error'` event will be emitted by the `ChildProcess` object. This can</span>
+         <span class="s0">* happen, for instance, when the child process has already exited.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `subprocess.send()` will return `false` if the channel has closed or when the</span>
+         <span class="s0">* backlog of unsent messages exceeds a threshold that makes it unwise to send</span>
+         <span class="s0">* more. Otherwise, the method returns `true`. The `callback` function can be</span>
+         <span class="s0">* used to implement flow control.</span>
+         <span class="s0">*</span>
+         <span class="s0">* #### Example: sending a server object</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `sendHandle` argument can be used, for instance, to pass the handle of</span>
+         <span class="s0">* a TCP server object to the child process as illustrated in the example below:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { createServer } from 'node:net';</span>
+         <span class="s0">* import { fork } from 'node:child_process';</span>
+         <span class="s0">* const subprocess = fork('subprocess.js');</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Open up the server object and send the handle.</span>
+         <span class="s0">* const server = createServer();</span>
+         <span class="s0">* server.on('connection', (socket) =&gt; {</span>
+         <span class="s0">*   socket.end('handled by parent');</span>
+         <span class="s0">* });</span>
+         <span class="s0">* server.listen(1337, () =&gt; {</span>
+         <span class="s0">*   subprocess.send('server', server);</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The child would then receive the server object as:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* process.on('message', (m, server) =&gt; {</span>
+         <span class="s0">*   if (m === 'server') {</span>
+         <span class="s0">*     server.on('connection', (socket) =&gt; {</span>
+         <span class="s0">*       socket.end('handled by child');</span>
+         <span class="s0">*     });</span>
+         <span class="s0">*   }</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Once the server is now shared between the parent and child, some connections</span>
+         <span class="s0">* can be handled by the parent and some by the child.</span>
+         <span class="s0">*</span>
+         <span class="s0">* While the example above uses a server created using the `node:net` module, `node:dgram` module servers use exactly the same workflow with the exceptions of</span>
+         <span class="s0">* listening on a `'message'` event instead of `'connection'` and using `server.bind()` instead of `server.listen()`. This is, however, only</span>
+         <span class="s0">* supported on Unix platforms.</span>
+         <span class="s0">*</span>
+         <span class="s0">* #### Example: sending a socket object</span>
+         <span class="s0">*</span>
+         <span class="s0">* Similarly, the `sendHandler` argument can be used to pass the handle of a</span>
+         <span class="s0">* socket to the child process. The example below spawns two children that each</span>
+         <span class="s0">* handle connections with &quot;normal&quot; or &quot;special&quot; priority:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { createServer } from 'node:net';</span>
+         <span class="s0">* import { fork } from 'node:child_process';</span>
+         <span class="s0">* const normal = fork('subprocess.js', ['normal']);</span>
+         <span class="s0">* const special = fork('subprocess.js', ['special']);</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Open up the server and send sockets to child. Use pauseOnConnect to prevent</span>
+         <span class="s0">* // the sockets from being read before they are sent to the child process.</span>
+         <span class="s0">* const server = createServer({ pauseOnConnect: true });</span>
+         <span class="s0">* server.on('connection', (socket) =&gt; {</span>
+         <span class="s0">*</span>
+         <span class="s0">*   // If this is special priority...</span>
+         <span class="s0">*   if (socket.remoteAddress === '74.125.127.100') {</span>
+         <span class="s0">*     special.send('socket', socket);</span>
+         <span class="s0">*     return;</span>
+         <span class="s0">*   }</span>
+         <span class="s0">*   // This is normal priority.</span>
+         <span class="s0">*   normal.send('socket', socket);</span>
+         <span class="s0">* });</span>
+         <span class="s0">* server.listen(1337);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `subprocess.js` would receive the socket handle as the second argument</span>
+         <span class="s0">* passed to the event callback function:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* process.on('message', (m, socket) =&gt; {</span>
+         <span class="s0">*   if (m === 'socket') {</span>
+         <span class="s0">*     if (socket) {</span>
+         <span class="s0">*       // Check that the client socket exists.</span>
+         <span class="s0">*       // It is possible for the socket to be closed between the time it is</span>
+         <span class="s0">*       // sent and the time it is received in the child process.</span>
+         <span class="s0">*       socket.end(`Request handled with ${process.argv[2]} priority`);</span>
+         <span class="s0">*     }</span>
+         <span class="s0">*   }</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Do not use `.maxConnections` on a socket that has been passed to a subprocess.</span>
+         <span class="s0">* The parent cannot track when the socket is destroyed.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Any `'message'` handlers in the subprocess should verify that `socket` exists,</span>
+         <span class="s0">* as the connection may have been closed during the time it takes to send the</span>
+         <span class="s0">* connection to the child.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.9</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">sendHandle `undefined`, or a [`net.Socket`](https://nodejs.org/docs/latest-v24.x/api/net.html#class-netsocket), [`net.Server`](https://nodejs.org/docs/latest-v24.x/api/net.html#class-netserver), or [`dgram.Socket`](https://nodejs.org/docs/latest-v24.x/api/dgram.html#class-dgramsocket) object.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">options The `options` argument, if present, is an object used to parameterize the sending of certain types of handles. `options` supports the following properties:</span>
+         <span class="s0">*/</span>
+        <span class="s2">send</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">: </span><span class="s2">Serializable</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span class="s4">: </span><span
+    class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">send</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">: </span><span class="s2">Serializable</span><span class="s4">, </span><span class="s2">sendHandle</span><span
+    class="s4">?: </span><span class="s2">SendHandle</span><span class="s4">, </span><span
+    class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span class="s4">: </span><span
+    class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">send</span><span class="s4">(</span>
+            <span class="s2">message</span><span class="s4">: </span><span class="s2">Serializable</span><span
+    class="s4">,</span>
+            <span class="s2">sendHandle</span><span class="s4">?: </span><span class="s2">SendHandle</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">?: </span><span class="s2">MessageOptions</span><span
+    class="s4">,</span>
+            <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">Error </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Closes the IPC channel between parent and child, allowing the child to exit</span>
+         <span class="s0">* gracefully once there are no other connections keeping it alive. After calling</span>
+         <span class="s0">* this method the `subprocess.connected` and `process.connected` properties in</span>
+         <span class="s0">* both the parent and child (respectively) will be set to `false`, and it will be</span>
+         <span class="s0">* no longer possible to pass messages between the processes.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `'disconnect'` event will be emitted when there are no messages in the</span>
+         <span class="s0">* process of being received. This will most often be triggered immediately after</span>
+         <span class="s0">* calling `subprocess.disconnect()`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When the child process is a Node.js instance (e.g. spawned using {</span><span class="s1">@link </span><span
+    class="s0">fork}), the `process.disconnect()` method can be invoked</span>
+         <span class="s0">* within the child process to close the IPC channel as well.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.2</span>
+         <span class="s0">*/</span>
+        <span class="s2">disconnect</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* By default, the parent will wait for the detached child to exit. To prevent the</span>
+         <span class="s0">* parent from waiting for a given `subprocess` to exit, use the `subprocess.unref()` method. Doing so will cause the parent's event loop to not</span>
+         <span class="s0">* include the child in its reference count, allowing the parent to exit</span>
+         <span class="s0">* independently of the child, unless there is an established IPC channel between</span>
+         <span class="s0">* the child and the parent.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { spawn } from 'node:child_process';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const subprocess = spawn(process.argv[0], ['child_program.js'], {</span>
+         <span class="s0">*   detached: true,</span>
+         <span class="s0">*   stdio: 'ignore',</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* subprocess.unref();</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.10</span>
+         <span class="s0">*/</span>
+        <span class="s2">unref</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Calling `subprocess.ref()` after making a call to `subprocess.unref()` will</span>
+         <span class="s0">* restore the removed reference count for the child process, forcing the parent</span>
+         <span class="s0">* to wait for the child to exit before exiting itself.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import { spawn } from 'node:child_process';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const subprocess = spawn(process.argv[0], ['child_program.js'], {</span>
+         <span class="s0">*   detached: true,</span>
+         <span class="s0">*   stdio: 'ignore',</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* subprocess.unref();</span>
+         <span class="s0">* subprocess.ref();</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.10</span>
+         <span class="s0">*/</span>
+        <span class="s2">ref</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* events.EventEmitter</span>
+         <span class="s0">* 1. close</span>
+         <span class="s0">* 2. disconnect</span>
+         <span class="s0">* 3. error</span>
+         <span class="s0">* 4. exit</span>
+         <span class="s0">* 5. message</span>
+         <span class="s0">* 6. spawn</span>
+         <span class="s0">*/</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">code</span><span class="s4">: </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span
+    class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;disconnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">code</span><span class="s4">: </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span
+    class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">message</span><span class="s4">: </span><span
+    class="s2">Serializable</span><span class="s4">, </span><span class="s2">sendHandle</span><span class="s4">: </span><span
+    class="s2">SendHandle</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;spawn&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">code</span><span class="s4">: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">, </span><span class="s2">signal</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;disconnect&quot;</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">code</span><span class="s4">: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">, </span><span class="s2">signal</span><span class="s4">: </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">: </span><span class="s2">Serializable</span><span
+    class="s4">, </span><span class="s2">sendHandle</span><span class="s4">: </span><span
+    class="s2">SendHandle</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;spawn&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;close&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">code</span><span class="s4">: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">signal</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Signals </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;disconnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;error&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span class="s2">Error</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;exit&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">code</span><span class="s4">: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">signal</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Signals </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;message&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">message</span><span class="s4">: </span><span
+    class="s2">Serializable</span><span class="s4">, </span><span class="s2">sendHandle</span><span class="s4">: </span><span
+    class="s2">SendHandle</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;spawn&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">code</span><span class="s4">: </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span
+    class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;disconnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">code</span><span class="s4">: </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span
+    class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">message</span><span class="s4">: </span><span
+    class="s2">Serializable</span><span class="s4">, </span><span class="s2">sendHandle</span><span class="s4">: </span><span
+    class="s2">SendHandle</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;spawn&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">code</span><span class="s4">: </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span
+    class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;disconnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;exit&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">code</span><span class="s4">: </span><span
+    class="s2">number </span><span class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span
+    class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">message</span><span class="s4">: </span><span
+    class="s2">Serializable</span><span class="s4">, </span><span class="s2">sendHandle</span><span class="s4">: </span><span
+    class="s2">SendHandle</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;spawn&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;close&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">code</span><span
+    class="s4">: </span><span class="s2">number </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;disconnect&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;error&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">err</span><span class="s4">: </span><span
+    class="s2">Error</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span>
+            <span class="s2">event</span><span class="s4">: </span><span class="s3">&quot;exit&quot;</span><span
+    class="s4">,</span>
+            <span class="s2">listener</span><span class="s4">: (</span><span class="s2">code</span><span
+    class="s4">: </span><span class="s2">number </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;message&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">message</span><span class="s4">: </span><span
+    class="s2">Serializable</span><span class="s4">, </span><span class="s2">sendHandle</span><span class="s4">: </span><span
+    class="s2">SendHandle</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;spawn&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s6">// return this object when stdio option is undefined or not specified</span>
+    <span class="s5">interface </span><span class="s2">ChildProcessWithoutNullStreams </span><span
+    class="s5">extends </span><span class="s2">ChildProcess </span><span class="s4">{</span>
+        <span class="s2">stdin</span><span class="s4">: </span><span class="s2">Writable</span><span class="s4">;</span>
+        <span class="s2">stdout</span><span class="s4">: </span><span class="s2">Readable</span><span
+    class="s4">;</span>
+        <span class="s2">stderr</span><span class="s4">: </span><span class="s2">Readable</span><span
+    class="s4">;</span>
+        <span class="s2">readonly stdio</span><span class="s4">: [</span>
+            <span class="s2">Writable</span><span class="s4">,</span>
+            <span class="s2">Readable</span><span class="s4">,</span>
+            <span class="s2">Readable</span><span class="s4">,</span>
+            <span class="s6">// stderr</span>
+            <span class="s2">Readable </span><span class="s4">| </span><span class="s2">Writable </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">,</span>
+            <span class="s6">// extra, no modification</span>
+            <span class="s2">Readable </span><span class="s4">| </span><span class="s2">Writable </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">, </span><span class="s6">// extra, no modification</span>
+        <span class="s4">];</span>
+    <span class="s4">}</span>
+    <span class="s6">// return this object when stdio option is a tuple of 3</span>
+    <span class="s5">interface </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span
+    class="s2">I </span><span class="s5">extends null </span><span class="s4">| </span><span
+    class="s2">Writable</span><span class="s4">, </span><span class="s2">O </span><span
+    class="s5">extends null </span><span class="s4">| </span><span class="s2">Readable</span><span
+    class="s4">, </span><span class="s2">E </span><span class="s5">extends null </span><span class="s4">| </span><span
+    class="s2">Readable</span><span class="s4">&gt;</span>
+        <span class="s5">extends </span><span class="s2">ChildProcess</span>
+    <span class="s4">{</span>
+        <span class="s2">stdin</span><span class="s4">: </span><span class="s2">I</span><span class="s4">;</span>
+        <span class="s2">stdout</span><span class="s4">: </span><span class="s2">O</span><span class="s4">;</span>
+        <span class="s2">stderr</span><span class="s4">: </span><span class="s2">E</span><span class="s4">;</span>
+        <span class="s2">readonly stdio</span><span class="s4">: [</span>
+            <span class="s2">I</span><span class="s4">,</span>
+            <span class="s2">O</span><span class="s4">,</span>
+            <span class="s2">E</span><span class="s4">,</span>
+            <span class="s2">Readable </span><span class="s4">| </span><span class="s2">Writable </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">,</span>
+            <span class="s6">// extra, no modification</span>
+            <span class="s2">Readable </span><span class="s4">| </span><span class="s2">Writable </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">, </span><span class="s6">// extra, no modification</span>
+        <span class="s4">];</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">MessageOptions </span><span class="s4">{</span>
+        <span class="s2">keepOpen</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type IOType </span><span class="s4">= </span><span class="s3">&quot;overlapped&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;pipe&quot; </span><span class="s4">| </span><span class="s3">&quot;ignore&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;inherit&quot;</span><span class="s4">;</span>
+    <span class="s2">type StdioOptions </span><span class="s4">= </span><span class="s2">IOType </span><span class="s4">| </span><span
+    class="s2">Array</span><span class="s4">&lt;</span><span class="s2">IOType </span><span class="s4">| </span><span
+    class="s3">&quot;ipc&quot; </span><span class="s4">| </span><span class="s2">Stream </span><span
+    class="s4">| </span><span class="s2">number </span><span class="s4">| </span><span class="s5">null </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">&gt;;</span>
+    <span class="s2">type SerializationType </span><span class="s4">= </span><span
+    class="s3">&quot;json&quot; </span><span class="s4">| </span><span class="s3">&quot;advanced&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">MessagingOptions </span><span class="s5">extends </span><span
+    class="s2">Abortable </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specify the kind of serialization used for sending messages between processes.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'json'</span>
+         <span class="s0">*/</span>
+        <span class="s2">serialization</span><span class="s4">?: </span><span class="s2">SerializationType </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* The signal value to be used when the spawned process will be killed by the abort signal.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'SIGTERM'</span>
+         <span class="s0">*/</span>
+        <span class="s2">killSignal</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* In milliseconds the maximum amount of time the process is allowed to run.</span>
+         <span class="s0">*/</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ProcessEnvOptions </span><span class="s4">{</span>
+        <span class="s2">uid</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">gid</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">cwd</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">URL </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">env</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ProcessEnv </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">CommonOptions </span><span class="s5">extends </span><span
+    class="s2">ProcessEnvOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">windowsHide</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">timeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">CommonSpawnOptions </span><span class="s5">extends </span><span
+    class="s2">CommonOptions</span><span class="s4">, </span><span class="s2">MessagingOptions</span><span
+    class="s4">, </span><span class="s2">Abortable </span><span class="s4">{</span>
+        <span class="s2">argv0</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Can be set to 'pipe', 'inherit', 'overlapped', or 'ignore', or an array of these strings.</span>
+         <span class="s0">* If passed as an array, the first element is used for `stdin`, the second for</span>
+         <span class="s0">* `stdout`, and the third for `stderr`. A fourth element can be used to</span>
+         <span class="s0">* specify the `stdio` behavior beyond the standard streams. See</span>
+         <span class="s0">* {</span><span class="s1">@link </span><span class="s0">ChildProcess.stdio} for more information.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'pipe'</span>
+         <span class="s0">*/</span>
+        <span class="s2">stdio</span><span class="s4">?: </span><span class="s2">StdioOptions </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">shell</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">string </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">windowsVerbatimArguments</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SpawnOptions </span><span class="s5">extends </span><span
+    class="s2">CommonSpawnOptions </span><span class="s4">{</span>
+        <span class="s2">detached</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SpawnOptionsWithoutStdio </span><span
+    class="s5">extends </span><span class="s2">SpawnOptions </span><span class="s4">{</span>
+        <span class="s2">stdio</span><span class="s4">?: </span><span class="s2">StdioPipeNamed </span><span class="s4">| </span><span
+    class="s2">StdioPipe</span><span class="s4">[] | </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type StdioNull </span><span class="s4">= </span><span class="s3">&quot;inherit&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;ignore&quot; </span><span class="s4">| </span><span
+    class="s2">Stream</span><span class="s4">;</span>
+    <span class="s2">type StdioPipeNamed </span><span class="s4">= </span><span class="s3">&quot;pipe&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;overlapped&quot;</span><span class="s4">;</span>
+    <span class="s2">type StdioPipe </span><span class="s4">= </span><span class="s2">undefined </span><span class="s4">| </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">StdioPipeNamed</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">SpawnOptionsWithStdioTuple</span><span class="s4">&lt;</span>
+        <span class="s2">Stdin </span><span class="s5">extends </span><span class="s2">StdioNull </span><span
+    class="s4">| </span><span class="s2">StdioPipe</span><span class="s4">,</span>
+        <span class="s2">Stdout </span><span class="s5">extends </span><span class="s2">StdioNull </span><span
+    class="s4">| </span><span class="s2">StdioPipe</span><span class="s4">,</span>
+        <span class="s2">Stderr </span><span class="s5">extends </span><span class="s2">StdioNull </span><span
+    class="s4">| </span><span class="s2">StdioPipe</span><span class="s4">,</span>
+    <span class="s4">&gt; </span><span class="s5">extends </span><span class="s2">SpawnOptions </span><span
+    class="s4">{</span>
+        <span class="s2">stdio</span><span class="s4">: [</span><span class="s2">Stdin</span><span
+    class="s4">, </span><span class="s2">Stdout</span><span class="s4">, </span><span class="s2">Stderr</span><span
+    class="s4">];</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `child_process.spawn()` method spawns a new process using the given `command`, with command-line arguments in `args`. If omitted, `args` defaults</span>
+     <span class="s0">* to an empty array.</span>
+     <span class="s0">*</span>
+     <span class="s0">* **If the `shell` option is enabled, do not pass unsanitized user input to this**</span>
+     <span class="s0">* **function. Any input containing shell metacharacters may be used to trigger**</span>
+     <span class="s0">* **arbitrary command execution.**</span>
+     <span class="s0">*</span>
+     <span class="s0">* A third argument may be used to specify additional options, with these defaults:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const defaults = {</span>
+     <span class="s0">*   cwd: undefined,</span>
+     <span class="s0">*   env: process.env,</span>
+     <span class="s0">* };</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Use `cwd` to specify the working directory from which the process is spawned.</span>
+     <span class="s0">* If not given, the default is to inherit the current working directory. If given,</span>
+     <span class="s0">* but the path does not exist, the child process emits an `ENOENT` error</span>
+     <span class="s0">* and exits immediately. `ENOENT` is also emitted when the command</span>
+     <span class="s0">* does not exist.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Use `env` to specify environment variables that will be visible to the new</span>
+     <span class="s0">* process, the default is `process.env`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* `undefined` values in `env` will be ignored.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Example of running `ls -lh /usr`, capturing `stdout`, `stderr`, and the</span>
+     <span class="s0">* exit code:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { spawn } from 'node:child_process';</span>
+     <span class="s0">* const ls = spawn('ls', ['-lh', '/usr']);</span>
+     <span class="s0">*</span>
+     <span class="s0">* ls.stdout.on('data', (data) =&gt; {</span>
+     <span class="s0">*   console.log(`stdout: ${data}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* ls.stderr.on('data', (data) =&gt; {</span>
+     <span class="s0">*   console.error(`stderr: ${data}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* ls.on('close', (code) =&gt; {</span>
+     <span class="s0">*   console.log(`child process exited with code ${code}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Example: A very elaborate way to run `ps ax | grep ssh`</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { spawn } from 'node:child_process';</span>
+     <span class="s0">* const ps = spawn('ps', ['ax']);</span>
+     <span class="s0">* const grep = spawn('grep', ['ssh']);</span>
+     <span class="s0">*</span>
+     <span class="s0">* ps.stdout.on('data', (data) =&gt; {</span>
+     <span class="s0">*   grep.stdin.write(data);</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* ps.stderr.on('data', (data) =&gt; {</span>
+     <span class="s0">*   console.error(`ps stderr: ${data}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* ps.on('close', (code) =&gt; {</span>
+     <span class="s0">*   if (code !== 0) {</span>
+     <span class="s0">*     console.log(`ps process exited with code ${code}`);</span>
+     <span class="s0">*   }</span>
+     <span class="s0">*   grep.stdin.end();</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* grep.stdout.on('data', (data) =&gt; {</span>
+     <span class="s0">*   console.log(data.toString());</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* grep.stderr.on('data', (data) =&gt; {</span>
+     <span class="s0">*   console.error(`grep stderr: ${data}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* grep.on('close', (code) =&gt; {</span>
+     <span class="s0">*   if (code !== 0) {</span>
+     <span class="s0">*     console.log(`grep process exited with code ${code}`);</span>
+     <span class="s0">*   }</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Example of checking for failed `spawn`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { spawn } from 'node:child_process';</span>
+     <span class="s0">* const subprocess = spawn('bad_command');</span>
+     <span class="s0">*</span>
+     <span class="s0">* subprocess.on('error', (err) =&gt; {</span>
+     <span class="s0">*   console.error('Failed to start subprocess.');</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Certain platforms (macOS, Linux) will use the value of `argv[0]` for the process</span>
+     <span class="s0">* title while others (Windows, SunOS) will use `command`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Node.js overwrites `argv[0]` with `process.execPath` on startup, so `process.argv[0]` in a Node.js child process will not match the `argv0` parameter passed to `spawn` from the parent. Retrieve</span>
+     <span class="s0">* it with the `process.argv0` property instead.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the `signal` option is enabled, calling `.abort()` on the corresponding `AbortController` is similar to calling `.kill()` on the child process except</span>
+     <span class="s0">* the error passed to the callback will be an `AbortError`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { spawn } from 'node:child_process';</span>
+     <span class="s0">* const controller = new AbortController();</span>
+     <span class="s0">* const { signal } = controller;</span>
+     <span class="s0">* const grep = spawn('grep', ['ssh'], { signal });</span>
+     <span class="s0">* grep.on('error', (err) =&gt; {</span>
+     <span class="s0">*   // This will be called with err being an AbortError if the controller aborts</span>
+     <span class="s0">* });</span>
+     <span class="s0">* controller.abort(); // Stops the child process</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">command The command to run.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">args List of string arguments.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">SpawnOptionsWithoutStdio</span><span
+    class="s4">): </span><span class="s2">ChildProcessWithoutNullStreams</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioPipe</span><span class="s4">, </span><span
+    class="s2">StdioPipe</span><span class="s4">, </span><span class="s2">StdioPipe</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s2">Writable</span><span
+    class="s4">, </span><span class="s2">Readable</span><span class="s4">, </span><span class="s2">Readable</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioPipe</span><span class="s4">, </span><span
+    class="s2">StdioPipe</span><span class="s4">, </span><span class="s2">StdioNull</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s2">Writable</span><span
+    class="s4">, </span><span class="s2">Readable</span><span class="s4">, </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioPipe</span><span class="s4">, </span><span
+    class="s2">StdioNull</span><span class="s4">, </span><span class="s2">StdioPipe</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s2">Writable</span><span
+    class="s4">, </span><span class="s5">null</span><span class="s4">, </span><span class="s2">Readable</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioNull</span><span class="s4">, </span><span
+    class="s2">StdioPipe</span><span class="s4">, </span><span class="s2">StdioPipe</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">Readable</span><span class="s4">, </span><span class="s2">Readable</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioPipe</span><span class="s4">, </span><span
+    class="s2">StdioNull</span><span class="s4">, </span><span class="s2">StdioNull</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s2">Writable</span><span
+    class="s4">, </span><span class="s5">null</span><span class="s4">, </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioNull</span><span class="s4">, </span><span
+    class="s2">StdioPipe</span><span class="s4">, </span><span class="s2">StdioNull</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">Readable</span><span class="s4">, </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioNull</span><span class="s4">, </span><span
+    class="s2">StdioNull</span><span class="s4">, </span><span class="s2">StdioPipe</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s5">null</span><span
+    class="s4">, </span><span class="s5">null</span><span class="s4">, </span><span class="s2">Readable</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioNull</span><span class="s4">, </span><span
+    class="s2">StdioNull</span><span class="s4">, </span><span class="s2">StdioNull</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s5">null</span><span
+    class="s4">, </span><span class="s5">null</span><span class="s4">, </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptions</span><span
+    class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s6">// overloads of spawn with 'args'</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">?: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">?: </span><span class="s2">SpawnOptionsWithoutStdio</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessWithoutNullStreams</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioPipe</span><span class="s4">, </span><span
+    class="s2">StdioPipe</span><span class="s4">, </span><span class="s2">StdioPipe</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s2">Writable</span><span
+    class="s4">, </span><span class="s2">Readable</span><span class="s4">, </span><span class="s2">Readable</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioPipe</span><span class="s4">, </span><span
+    class="s2">StdioPipe</span><span class="s4">, </span><span class="s2">StdioNull</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s2">Writable</span><span
+    class="s4">, </span><span class="s2">Readable</span><span class="s4">, </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioPipe</span><span class="s4">, </span><span
+    class="s2">StdioNull</span><span class="s4">, </span><span class="s2">StdioPipe</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s2">Writable</span><span
+    class="s4">, </span><span class="s5">null</span><span class="s4">, </span><span class="s2">Readable</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioNull</span><span class="s4">, </span><span
+    class="s2">StdioPipe</span><span class="s4">, </span><span class="s2">StdioPipe</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">Readable</span><span class="s4">, </span><span class="s2">Readable</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioPipe</span><span class="s4">, </span><span
+    class="s2">StdioNull</span><span class="s4">, </span><span class="s2">StdioNull</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s2">Writable</span><span
+    class="s4">, </span><span class="s5">null</span><span class="s4">, </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioNull</span><span class="s4">, </span><span
+    class="s2">StdioPipe</span><span class="s4">, </span><span class="s2">StdioNull</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">Readable</span><span class="s4">, </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioNull</span><span class="s4">, </span><span
+    class="s2">StdioNull</span><span class="s4">, </span><span class="s2">StdioPipe</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s5">null</span><span
+    class="s4">, </span><span class="s5">null</span><span class="s4">, </span><span class="s2">Readable</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">SpawnOptionsWithStdioTuple</span><span
+    class="s4">&lt;</span><span class="s2">StdioNull</span><span class="s4">, </span><span
+    class="s2">StdioNull</span><span class="s4">, </span><span class="s2">StdioNull</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">ChildProcessByStdio</span><span class="s4">&lt;</span><span class="s5">null</span><span
+    class="s4">, </span><span class="s5">null</span><span class="s4">, </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawn</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span
+    class="s4">[], </span><span class="s2">options</span><span class="s4">: </span><span
+    class="s2">SpawnOptions</span><span class="s4">): </span><span class="s2">ChildProcess</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">ExecOptions </span><span class="s5">extends </span><span
+    class="s2">CommonOptions </span><span class="s4">{</span>
+        <span class="s2">shell</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">signal</span><span class="s4">?: </span><span class="s2">AbortSignal </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">maxBuffer</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">killSignal</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecOptionsWithStringEncoding </span><span
+    class="s5">extends </span><span class="s2">ExecOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s2">BufferEncoding </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecOptionsWithBufferEncoding </span><span
+    class="s5">extends </span><span class="s2">ExecOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">: </span><span class="s3">&quot;buffer&quot; </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">; </span><span class="s6">// specify `null`.</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecException </span><span class="s5">extends </span><span
+    class="s2">Error </span><span class="s4">{</span>
+        <span class="s2">cmd</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">killed</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">code</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">signal</span><span class="s4">?: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">Signals </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">stdout</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">;</span>
+        <span class="s2">stderr</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Spawns a shell then executes the `command` within that shell, buffering any</span>
+     <span class="s0">* generated output. The `command` string passed to the exec function is processed</span>
+     <span class="s0">* directly by the shell and special characters (vary based on [shell](https://en.wikipedia.org/wiki/List_of_command-line_interpreters))</span>
+     <span class="s0">* need to be dealt with accordingly:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { exec } from 'node:child_process';</span>
+     <span class="s0">*</span>
+     <span class="s0">* exec('&quot;/path/to/test file/test.sh&quot; arg1 arg2');</span>
+     <span class="s0">* // Double quotes are used so that the space in the path is not interpreted as</span>
+     <span class="s0">* // a delimiter of multiple arguments.</span>
+     <span class="s0">*</span>
+     <span class="s0">* exec('echo &quot;The \\$HOME variable is $HOME&quot;');</span>
+     <span class="s0">* // The $HOME variable is escaped in the first instance, but not in the second.</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* **Never pass unsanitized user input to this function. Any input containing shell**</span>
+     <span class="s0">* **metacharacters may be used to trigger arbitrary command execution.**</span>
+     <span class="s0">*</span>
+     <span class="s0">* If a `callback` function is provided, it is called with the arguments `(error, stdout, stderr)`. On success, `error` will be `null`. On error, `error` will be an instance of `Error`. The</span>
+     <span class="s0">* `error.code` property will be</span>
+     <span class="s0">* the exit code of the process. By convention, any exit code other than `0` indicates an error. `error.signal` will be the signal that terminated the</span>
+     <span class="s0">* process.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `stdout` and `stderr` arguments passed to the callback will contain the</span>
+     <span class="s0">* stdout and stderr output of the child process. By default, Node.js will decode</span>
+     <span class="s0">* the output as UTF-8 and pass strings to the callback. The `encoding` option</span>
+     <span class="s0">* can be used to specify the character encoding used to decode the stdout and</span>
+     <span class="s0">* stderr output. If `encoding` is `'buffer'`, or an unrecognized character</span>
+     <span class="s0">* encoding, `Buffer` objects will be passed to the callback instead.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { exec } from 'node:child_process';</span>
+     <span class="s0">* exec('cat *.js missing_file | wc -l', (error, stdout, stderr) =&gt; {</span>
+     <span class="s0">*   if (error) {</span>
+     <span class="s0">*     console.error(`exec error: ${error}`);</span>
+     <span class="s0">*     return;</span>
+     <span class="s0">*   }</span>
+     <span class="s0">*   console.log(`stdout: ${stdout}`);</span>
+     <span class="s0">*   console.error(`stderr: ${stderr}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `timeout` is greater than `0`, the parent will send the signal</span>
+     <span class="s0">* identified by the `killSignal` property (the default is `'SIGTERM'`) if the</span>
+     <span class="s0">* child runs longer than `timeout` milliseconds.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Unlike the [`exec(3)`](http://man7.org/linux/man-pages/man3/exec.3.html) POSIX system call, `child_process.exec()` does not replace</span>
+     <span class="s0">* the existing process and uses a shell to execute the command.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If this method is invoked as its `util.promisify()` ed version, it returns</span>
+     <span class="s0">* a `Promise` for an `Object` with `stdout` and `stderr` properties. The returned `ChildProcess` instance is attached to the `Promise` as a `child` property. In</span>
+     <span class="s0">* case of an error (including any error resulting in an exit code other than 0), a</span>
+     <span class="s0">* rejected promise is returned, with the same `error` object given in the</span>
+     <span class="s0">* callback, but with two additional properties `stdout` and `stderr`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import util from 'node:util';</span>
+     <span class="s0">* import child_process from 'node:child_process';</span>
+     <span class="s0">* const exec = util.promisify(child_process.exec);</span>
+     <span class="s0">*</span>
+     <span class="s0">* async function lsExample() {</span>
+     <span class="s0">*   const { stdout, stderr } = await exec('ls');</span>
+     <span class="s0">*   console.log('stdout:', stdout);</span>
+     <span class="s0">*   console.error('stderr:', stderr);</span>
+     <span class="s0">* }</span>
+     <span class="s0">* lsExample();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the `signal` option is enabled, calling `.abort()` on the corresponding `AbortController` is similar to calling `.kill()` on the child process except</span>
+     <span class="s0">* the error passed to the callback will be an `AbortError`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { exec } from 'node:child_process';</span>
+     <span class="s0">* const controller = new AbortController();</span>
+     <span class="s0">* const { signal } = controller;</span>
+     <span class="s0">* const child = exec('grep ssh', { signal }, (error) =&gt; {</span>
+     <span class="s0">*   console.error(error); // an AbortError</span>
+     <span class="s0">* });</span>
+     <span class="s0">* controller.abort();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.90</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">command The command to run, with space-separated arguments.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback called with the output when process terminates.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">exec</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecException </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s6">// `options` with `&quot;buffer&quot;` or `null` for `encoding` means stdout/stderr are definitely `Buffer`.</span>
+    <span class="s5">function </span><span class="s2">exec</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecOptionsWithBufferEncoding</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecException </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span
+      class="s6">// `options` with well-known or absent `encoding` means stdout/stderr are definitely `string`.</span>
+    <span class="s5">function </span><span class="s2">exec</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecOptionsWithStringEncoding</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecException </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s6">// fallback if nothing else matches. Worst case is always `string | Buffer`.</span>
+    <span class="s5">function </span><span class="s2">exec</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">ExecOptions </span><span
+    class="s4">| </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecException </span><span class="s4">| </span><span
+    class="s5">null</span><span class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span class="s4">, </span><span
+    class="s2">stderr</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;</span><span
+    class="s2">T</span><span class="s4">&gt; </span><span class="s5">extends </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">T</span><span class="s4">&gt; {</span>
+        <span class="s2">child</span><span class="s4">: </span><span class="s2">ChildProcess</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">namespace exec </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">command</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecOptionsWithBufferEncoding</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecOptionsWithStringEncoding</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span class="s2">ExecOptions </span><span
+    class="s4">| </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecFileOptions </span><span class="s5">extends </span><span
+    class="s2">CommonOptions</span><span class="s4">, </span><span class="s2">Abortable </span><span class="s4">{</span>
+        <span class="s2">maxBuffer</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">killSignal</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">windowsVerbatimArguments</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">shell</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">string </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">signal</span><span class="s4">?: </span><span class="s2">AbortSignal </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecFileOptionsWithStringEncoding </span><span
+    class="s5">extends </span><span class="s2">ExecFileOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s2">BufferEncoding </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecFileOptionsWithBufferEncoding </span><span
+    class="s5">extends </span><span class="s2">ExecFileOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">: </span><span class="s3">&quot;buffer&quot; </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/** </span><span class="s1">@deprecated </span><span
+    class="s0">Use `ExecFileOptions` instead. */</span>
+    <span class="s5">interface </span><span class="s2">ExecFileOptionsWithOtherEncoding </span><span
+    class="s5">extends </span><span class="s2">ExecFileOptions </span><span class="s4">{}</span>
+    <span class="s2">type ExecFileException </span><span class="s4">=</span>
+        <span class="s4">&amp; </span><span class="s2">Omit</span><span class="s4">&lt;</span><span class="s2">ExecException</span><span
+    class="s4">, </span><span class="s3">&quot;code&quot;</span><span class="s4">&gt;</span>
+        <span class="s4">&amp; </span><span class="s2">Omit</span><span class="s4">&lt;</span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">ErrnoException</span><span
+    class="s4">, </span><span class="s3">&quot;code&quot;</span><span class="s4">&gt;</span>
+        <span class="s4">&amp; { </span><span class="s2">code</span><span class="s4">?: </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">undefined </span><span class="s4">| </span><span class="s5">null </span><span class="s4">};</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `child_process.execFile()` function is similar to {</span><span
+    class="s1">@link </span><span class="s0">exec} except that it does not spawn a shell by default. Rather, the specified</span>
+     <span class="s0">* executable `file` is spawned directly as a new process making it slightly more</span>
+     <span class="s0">* efficient than {</span><span class="s1">@link </span><span class="s0">exec}.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The same options as {</span><span class="s1">@link </span><span class="s0">exec} are supported. Since a shell is</span>
+     <span class="s0">* not spawned, behaviors such as I/O redirection and file globbing are not</span>
+     <span class="s0">* supported.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { execFile } from 'node:child_process';</span>
+     <span class="s0">* const child = execFile('node', ['--version'], (error, stdout, stderr) =&gt; {</span>
+     <span class="s0">*   if (error) {</span>
+     <span class="s0">*     throw error;</span>
+     <span class="s0">*   }</span>
+     <span class="s0">*   console.log(stdout);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `stdout` and `stderr` arguments passed to the callback will contain the</span>
+     <span class="s0">* stdout and stderr output of the child process. By default, Node.js will decode</span>
+     <span class="s0">* the output as UTF-8 and pass strings to the callback. The `encoding` option</span>
+     <span class="s0">* can be used to specify the character encoding used to decode the stdout and</span>
+     <span class="s0">* stderr output. If `encoding` is `'buffer'`, or an unrecognized character</span>
+     <span class="s0">* encoding, `Buffer` objects will be passed to the callback instead.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If this method is invoked as its `util.promisify()` ed version, it returns</span>
+     <span class="s0">* a `Promise` for an `Object` with `stdout` and `stderr` properties. The returned `ChildProcess` instance is attached to the `Promise` as a `child` property. In</span>
+     <span class="s0">* case of an error (including any error resulting in an exit code other than 0), a</span>
+     <span class="s0">* rejected promise is returned, with the same `error` object given in the</span>
+     <span class="s0">* callback, but with two additional properties `stdout` and `stderr`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import util from 'node:util';</span>
+     <span class="s0">* import child_process from 'node:child_process';</span>
+     <span class="s0">* const execFile = util.promisify(child_process.execFile);</span>
+     <span class="s0">* async function getVersion() {</span>
+     <span class="s0">*   const { stdout } = await execFile('node', ['--version']);</span>
+     <span class="s0">*   console.log(stdout);</span>
+     <span class="s0">* }</span>
+     <span class="s0">* getVersion();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* **If the `shell` option is enabled, do not pass unsanitized user input to this**</span>
+     <span class="s0">* **function. Any input containing shell metacharacters may be used to trigger**</span>
+     <span class="s0">* **arbitrary command execution.**</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the `signal` option is enabled, calling `.abort()` on the corresponding `AbortController` is similar to calling `.kill()` on the child process except</span>
+     <span class="s0">* the error passed to the callback will be an `AbortError`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { execFile } from 'node:child_process';</span>
+     <span class="s0">* const controller = new AbortController();</span>
+     <span class="s0">* const { signal } = controller;</span>
+     <span class="s0">* const child = execFile('node', ['--version'], { signal }, (error) =&gt; {</span>
+     <span class="s0">*   console.error(error); // an AbortError</span>
+     <span class="s0">* });</span>
+     <span class="s0">* controller.abort();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.91</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">file The name or path of the executable file to run.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">args List of string arguments.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Called with the output when process terminates.</span>
+     <span class="s0">*/</span>
+    <span class="s6">// no `options` definitely means stdout/stderr are `string`.</span>
+    <span class="s5">function </span><span class="s2">execFile</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecFileException </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFile</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[] | </span><span
+    class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecFileException </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s6">// `options` with `&quot;buffer&quot;` or `null` for `encoding` means stdout/stderr are definitely `Buffer`.</span>
+    <span class="s5">function </span><span class="s2">execFile</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileOptionsWithBufferEncoding</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecFileException </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFile</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[] | </span><span
+    class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileOptionsWithBufferEncoding</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecFileException </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span
+      class="s6">// `options` with well-known or absent `encoding` means stdout/stderr are definitely `string`.</span>
+    <span class="s5">function </span><span class="s2">execFile</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileOptionsWithStringEncoding</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecFileException </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFile</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[] | </span><span
+    class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileOptionsWithStringEncoding</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">?: (</span><span class="s2">error</span><span
+    class="s4">: </span><span class="s2">ExecFileException </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">, </span><span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s6">// fallback if nothing else matches. Worst case is always `string | Buffer`.</span>
+    <span class="s5">function </span><span class="s2">execFile</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">ExecFileOptions </span><span
+    class="s4">| </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">:</span>
+            <span class="s4">| ((</span><span class="s2">error</span><span class="s4">: </span><span class="s2">ExecFileException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">stdout</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">)</span>
+            <span class="s4">| </span><span class="s2">undefined</span>
+            <span class="s4">| </span><span class="s5">null</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFile</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[] | </span><span
+    class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span class="s4">,</span>
+        <span class="s2">options</span><span class="s4">: </span><span class="s2">ExecFileOptions </span><span
+    class="s4">| </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">:</span>
+            <span class="s4">| ((</span><span class="s2">error</span><span class="s4">: </span><span class="s2">ExecFileException </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">, </span><span class="s2">stdout</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">, </span><span class="s2">stderr</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">) =&gt; </span><span class="s5">void</span><span
+    class="s4">)</span>
+            <span class="s4">| </span><span class="s2">undefined</span>
+            <span class="s4">| </span><span class="s5">null</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s2">namespace execFile </span><span class="s4">{</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span><span class="s2">file</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span
+    class="s4">[] | </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileOptionsWithBufferEncoding</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span
+    class="s4">[] | </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileOptionsWithBufferEncoding</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileOptionsWithStringEncoding</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span
+    class="s4">[] | </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileOptionsWithStringEncoding</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span class="s2">ExecFileOptions </span><span
+    class="s4">| </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+        <span class="s5">function </span><span class="s2">__promisify__</span><span class="s4">(</span>
+            <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span
+    class="s4">[] | </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+            <span class="s2">options</span><span class="s4">: </span><span class="s2">ExecFileOptions </span><span
+    class="s4">| </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s2">PromiseWithChild</span><span class="s4">&lt;{</span>
+            <span class="s2">stdout</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">;</span>
+            <span class="s2">stderr</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">;</span>
+        <span class="s4">}&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ForkOptions </span><span class="s5">extends </span><span
+    class="s2">ProcessEnvOptions</span><span class="s4">, </span><span class="s2">MessagingOptions</span><span
+    class="s4">, </span><span class="s2">Abortable </span><span class="s4">{</span>
+        <span class="s2">execPath</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">execArgv</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">[] | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">silent</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Can be set to 'pipe', 'inherit', 'overlapped', or 'ignore', or an array of these strings.</span>
+         <span class="s0">* If passed as an array, the first element is used for `stdin`, the second for</span>
+         <span class="s0">* `stdout`, and the third for `stderr`. A fourth element can be used to</span>
+         <span class="s0">* specify the `stdio` behavior beyond the standard streams. See</span>
+         <span class="s0">* {</span><span class="s1">@link </span><span class="s0">ChildProcess.stdio} for more information.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'pipe'</span>
+         <span class="s0">*/</span>
+        <span class="s2">stdio</span><span class="s4">?: </span><span class="s2">StdioOptions </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">detached</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">windowsVerbatimArguments</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `child_process.fork()` method is a special case of {</span><span
+    class="s1">@link </span><span class="s0">spawn} used specifically to spawn new Node.js processes.</span>
+     <span class="s0">* Like {</span><span class="s1">@link </span><span class="s0">spawn}, a `ChildProcess` object is returned. The</span>
+     <span class="s0">* returned `ChildProcess` will have an additional communication channel</span>
+     <span class="s0">* built-in that allows messages to be passed back and forth between the parent and</span>
+     <span class="s0">* child. See `subprocess.send()` for details.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Keep in mind that spawned Node.js child processes are</span>
+     <span class="s0">* independent of the parent with exception of the IPC communication channel</span>
+     <span class="s0">* that is established between the two. Each process has its own memory, with</span>
+     <span class="s0">* their own V8 instances. Because of the additional resource allocations</span>
+     <span class="s0">* required, spawning a large number of child Node.js processes is not</span>
+     <span class="s0">* recommended.</span>
+     <span class="s0">*</span>
+     <span class="s0">* By default, `child_process.fork()` will spawn new Node.js instances using the `process.execPath` of the parent process. The `execPath` property in the `options` object allows for an alternative</span>
+     <span class="s0">* execution path to be used.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Node.js processes launched with a custom `execPath` will communicate with the</span>
+     <span class="s0">* parent process using the file descriptor (fd) identified using the</span>
+     <span class="s0">* environment variable `NODE_CHANNEL_FD` on the child process.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Unlike the [`fork(2)`](http://man7.org/linux/man-pages/man2/fork.2.html) POSIX system call, `child_process.fork()` does not clone the</span>
+     <span class="s0">* current process.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `shell` option available in {</span><span class="s1">@link </span><span class="s0">spawn} is not supported by `child_process.fork()` and will be ignored if set.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the `signal` option is enabled, calling `.abort()` on the corresponding `AbortController` is similar to calling `.kill()` on the child process except</span>
+     <span class="s0">* the error passed to the callback will be an `AbortError`:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* if (process.argv[2] === 'child') {</span>
+     <span class="s0">*   setTimeout(() =&gt; {</span>
+     <span class="s0">*     console.log(`Hello from ${process.argv[2]}!`);</span>
+     <span class="s0">*   }, 1_000);</span>
+     <span class="s0">* } else {</span>
+     <span class="s0">*   import { fork } from 'node:child_process';</span>
+     <span class="s0">*   const controller = new AbortController();</span>
+     <span class="s0">*   const { signal } = controller;</span>
+     <span class="s0">*   const child = fork(__filename, ['child'], { signal });</span>
+     <span class="s0">*   child.on('error', (err) =&gt; {</span>
+     <span class="s0">*     // This will be called with err being an AbortError if the controller aborts</span>
+     <span class="s0">*   });</span>
+     <span class="s0">*   controller.abort(); // Stops the child process</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">modulePath The module to run in the child.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">args List of string arguments.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">fork</span><span class="s4">(</span><span
+    class="s2">modulePath</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">URL</span><span class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">ForkOptions</span><span class="s4">): </span><span class="s2">ChildProcess</span><span
+    class="s4">;</span>
+    <span class="s5">function </span><span class="s2">fork</span><span class="s4">(</span><span
+    class="s2">modulePath</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">URL</span><span class="s4">, </span><span class="s2">args</span><span class="s4">?: </span><span
+    class="s2">readonly string</span><span class="s4">[], </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">ForkOptions</span><span class="s4">): </span><span
+    class="s2">ChildProcess</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">SpawnSyncOptions </span><span class="s5">extends </span><span
+    class="s2">CommonSpawnOptions </span><span class="s4">{</span>
+        <span class="s2">input</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s2">maxBuffer</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s2">BufferEncoding </span><span
+    class="s4">| </span><span class="s3">&quot;buffer&quot; </span><span class="s4">| </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SpawnSyncOptionsWithStringEncoding </span><span class="s5">extends </span><span
+    class="s2">SpawnSyncOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">: </span><span class="s2">BufferEncoding</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SpawnSyncOptionsWithBufferEncoding </span><span class="s5">extends </span><span
+    class="s2">SpawnSyncOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s3">&quot;buffer&quot; </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span
+    class="s2">T</span><span class="s4">&gt; {</span>
+        <span class="s2">pid</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">output</span><span class="s4">: </span><span class="s2">Array</span><span
+    class="s4">&lt;</span><span class="s2">T </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">stdout</span><span class="s4">: </span><span class="s2">T</span><span class="s4">;</span>
+        <span class="s2">stderr</span><span class="s4">: </span><span class="s2">T</span><span class="s4">;</span>
+        <span class="s2">status</span><span class="s4">: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">;</span>
+        <span class="s2">signal</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span class="s5">null</span><span
+    class="s4">;</span>
+        <span class="s2">error</span><span class="s4">?: </span><span class="s2">Error </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `child_process.spawnSync()` method is generally identical to {</span><span
+    class="s1">@link </span><span class="s0">spawn} with the exception that the function will not return</span>
+     <span class="s0">* until the child process has fully closed. When a timeout has been encountered</span>
+     <span class="s0">* and `killSignal` is sent, the method won't return until the process has</span>
+     <span class="s0">* completely exited. If the process intercepts and handles the `SIGTERM` signal</span>
+     <span class="s0">* and doesn't exit, the parent process will wait until the child process has</span>
+     <span class="s0">* exited.</span>
+     <span class="s0">*</span>
+     <span class="s0">* **If the `shell` option is enabled, do not pass unsanitized user input to this**</span>
+     <span class="s0">* **function. Any input containing shell metacharacters may be used to trigger**</span>
+     <span class="s0">* **arbitrary command execution.**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">command The command to run.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">args List of string arguments.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">spawnSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawnSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">SpawnSyncOptionsWithStringEncoding</span><span
+    class="s4">): </span><span class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span
+    class="s2">string</span><span class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawnSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">SpawnSyncOptionsWithBufferEncoding</span><span
+    class="s4">): </span><span class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span
+    class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawnSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">SpawnSyncOptions</span><span
+    class="s4">): </span><span class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawnSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[]): </span><span
+    class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawnSync</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">SpawnSyncOptionsWithStringEncoding</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span class="s2">string</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawnSync</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">SpawnSyncOptionsWithBufferEncoding</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span class="s2">Buffer</span><span
+    class="s4">&gt;;</span>
+    <span class="s5">function </span><span class="s2">spawnSync</span><span class="s4">(</span>
+        <span class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">?: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">?: </span><span class="s2">SpawnSyncOptions</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">SpawnSyncReturns</span><span class="s4">&lt;</span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Buffer</span><span class="s4">&gt;;</span>
+    <span class="s5">interface </span><span class="s2">CommonExecOptions </span><span class="s5">extends </span><span
+    class="s2">CommonOptions </span><span class="s4">{</span>
+        <span class="s2">input</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ArrayBufferView </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Can be set to 'pipe', 'inherit, or 'ignore', or an array of these strings.</span>
+         <span class="s0">* If passed as an array, the first element is used for `stdin`, the second for</span>
+         <span class="s0">* `stdout`, and the third for `stderr`. A fourth element can be used to</span>
+         <span class="s0">* specify the `stdio` behavior beyond the standard streams. See</span>
+         <span class="s0">* {</span><span class="s1">@link </span><span class="s0">ChildProcess.stdio} for more information.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">'pipe'</span>
+         <span class="s0">*/</span>
+        <span class="s2">stdio</span><span class="s4">?: </span><span class="s2">StdioOptions </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">killSignal</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Signals </span><span class="s4">| </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">maxBuffer</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s2">BufferEncoding </span><span
+    class="s4">| </span><span class="s3">&quot;buffer&quot; </span><span class="s4">| </span><span
+    class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecSyncOptions </span><span class="s5">extends </span><span
+    class="s2">CommonExecOptions </span><span class="s4">{</span>
+        <span class="s2">shell</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecSyncOptionsWithStringEncoding </span><span
+    class="s5">extends </span><span class="s2">ExecSyncOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">: </span><span class="s2">BufferEncoding</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecSyncOptionsWithBufferEncoding </span><span
+    class="s5">extends </span><span class="s2">ExecSyncOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s3">&quot;buffer&quot; </span><span
+    class="s4">| </span><span class="s5">null </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `child_process.execSync()` method is generally identical to {</span><span
+    class="s1">@link </span><span class="s0">exec} with the exception that the method will not return</span>
+     <span class="s0">* until the child process has fully closed. When a timeout has been encountered</span>
+     <span class="s0">* and `killSignal` is sent, the method won't return until the process has</span>
+     <span class="s0">* completely exited. If the child process intercepts and handles the `SIGTERM` signal and doesn't exit, the parent process will wait until the child process</span>
+     <span class="s0">* has exited.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the process times out or has a non-zero exit code, this method will throw.</span>
+     <span class="s0">* The `Error` object will contain the entire result from {</span><span
+    class="s1">@link </span><span class="s0">spawnSync}.</span>
+     <span class="s0">*</span>
+     <span class="s0">* **Never pass unsanitized user input to this function. Any input containing shell**</span>
+     <span class="s0">* **metacharacters may be used to trigger arbitrary command execution.**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">command The command to run.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The stdout from the command.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">execSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ExecSyncOptionsWithStringEncoding</span><span
+    class="s4">): </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ExecSyncOptionsWithBufferEncoding</span><span
+    class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execSync</span><span class="s4">(</span><span
+    class="s2">command</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ExecSyncOptions</span><span
+    class="s4">): </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">ExecFileSyncOptions </span><span class="s5">extends </span><span
+    class="s2">CommonExecOptions </span><span class="s4">{</span>
+        <span class="s2">shell</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">string </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecFileSyncOptionsWithStringEncoding </span><span class="s5">extends </span><span
+    class="s2">ExecFileSyncOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">: </span><span class="s2">BufferEncoding</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ExecFileSyncOptionsWithBufferEncoding </span><span class="s5">extends </span><span
+    class="s2">ExecFileSyncOptions </span><span class="s4">{</span>
+        <span class="s2">encoding</span><span class="s4">?: </span><span class="s3">&quot;buffer&quot; </span><span
+    class="s4">| </span><span class="s5">null</span><span class="s4">; </span><span class="s6">// specify `null`.</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `child_process.execFileSync()` method is generally identical to {</span><span class="s1">@link </span><span
+    class="s0">execFile} with the exception that the method will not</span>
+     <span class="s0">* return until the child process has fully closed. When a timeout has been</span>
+     <span class="s0">* encountered and `killSignal` is sent, the method won't return until the process</span>
+     <span class="s0">* has completely exited.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the child process intercepts and handles the `SIGTERM` signal and</span>
+     <span class="s0">* does not exit, the parent process will still wait until the child process has</span>
+     <span class="s0">* exited.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the process times out or has a non-zero exit code, this method will throw an `Error` that will include the full result of the underlying {</span><span
+    class="s1">@link </span><span class="s0">spawnSync}.</span>
+     <span class="s0">*</span>
+     <span class="s0">* **If the `shell` option is enabled, do not pass unsanitized user input to this**</span>
+     <span class="s0">* **function. Any input containing shell metacharacters may be used to trigger**</span>
+     <span class="s0">* **arbitrary command execution.**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.11.12</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">file The name or path of the executable file to run.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">args List of string arguments.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The stdout from the command.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">execFileSync</span><span class="s4">(</span><span
+    class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFileSync</span><span class="s4">(</span><span
+    class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileSyncOptionsWithStringEncoding</span><span class="s4">): </span><span
+    class="s2">string</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFileSync</span><span class="s4">(</span><span
+    class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileSyncOptionsWithBufferEncoding</span><span class="s4">): </span><span
+    class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFileSync</span><span class="s4">(</span><span
+    class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ExecFileSyncOptions</span><span
+    class="s4">): </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFileSync</span><span class="s4">(</span><span
+    class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[]): </span><span
+    class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFileSync</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileSyncOptionsWithStringEncoding</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFileSync</span><span class="s4">(</span>
+        <span class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">args</span><span class="s4">: </span><span class="s2">readonly string</span><span class="s4">[],</span>
+        <span class="s2">options</span><span class="s4">: </span><span
+    class="s2">ExecFileSyncOptionsWithBufferEncoding</span><span class="s4">,</span>
+    <span class="s4">): </span><span class="s2">Buffer</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">execFileSync</span><span class="s4">(</span><span
+    class="s2">file</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">args</span><span class="s4">?: </span><span class="s2">readonly string</span><span class="s4">[], </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ExecFileSyncOptions</span><span
+    class="s4">): </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:child_process&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;child_process&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

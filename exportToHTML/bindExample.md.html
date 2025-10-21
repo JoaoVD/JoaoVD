@@ -1,0 +1,140 @@
+<html>
+<head>
+  <title>bindExample.md</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #c77dbb;
+      font-style: italic;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          bindExample.md</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0"># </span><span class="s2">socks examples</span>
+
+<span class="s0">## </span><span class="s2">Example for SOCKS </span><span class="s1">'</span><span class="s2">bind' command</span>
+
+<span class="s2">The bind command tells the SOCKS proxy server to bind and listen on a new TCP port for an incoming connection. It communicates the newly opened port back to the origin client. Once a incoming connection is accepted by the SOCKS proxy server it then communicates the remote host that connected to the SOCKS proxy back through the same initial connection via the origin client.</span>
+
+<span class="s2">This can be used for things such as FTP clients which require incoming TCP connections, etc.</span>
+
+<span class="s1">**</span><span class="s2">Connection Steps</span><span class="s1">**</span>
+
+<span class="s0">1. </span><span class="s2">Client -</span><span class="s1">(</span><span class="s2">bind</span><span
+    class="s1">)</span><span class="s2">-</span><span class="s1">&gt; </span><span class="s2">Proxy    </span><span
+    class="s1">(</span><span class="s2">Tells the proxy to bind to a new port</span><span class="s1">)</span>
+<span class="s0">2. </span><span class="s2">Client </span><span class="s1">&lt;</span><span class="s2">-</span><span
+    class="s1">(</span><span class="s2">port</span><span class="s1">)</span><span class="s2">- Proxy    </span><span
+    class="s1">(</span><span class="s2">Tells the origin client which port it opened</span><span class="s1">)</span>
+<span class="s0">3. </span><span class="s2">Client2 --</span><span class="s1">&gt; </span><span
+    class="s2">Proxy    </span><span class="s1">(</span><span
+    class="s2">Other client connects to the proxy on this port</span><span class="s1">)</span>
+<span class="s0">4. </span><span class="s2">Client </span><span class="s1">&lt;</span><span class="s2">--</span><span
+    class="s1">(</span><span class="s2">client2's host info</span><span class="s1">)  (</span><span class="s2">Proxy tells the origin client who connected to it</span><span
+    class="s1">)</span>
+<span class="s0">5. </span><span
+    class="s2">Original connection to the proxy is now a full TCP stream between client </span><span class="s1">(</span><span
+    class="s2">you</span><span class="s1">) </span><span class="s2">and client2.</span>
+<span class="s0">6. </span><span class="s2">Client </span><span class="s1">&lt;</span><span class="s2">--</span><span
+    class="s1">&gt; </span><span class="s2">Proxy </span><span class="s1">&lt;</span><span class="s2">--</span><span
+    class="s1">&gt; </span><span class="s2">Client2</span>
+
+
+<span class="s0">## </span><span class="s2">Usage</span>
+
+<span class="s2">The </span><span class="s1">'</span><span class="s2">bind' command can only be used by creating a new SocksClient instance and listening for </span><span
+    class="s1">'</span><span class="s2">bound' and </span><span class="s1">'</span><span
+    class="s2">established' events.</span>
+
+
+<span class="s0">```</span><span class="s3">typescript</span>
+<span class="s4">import { SocksClient, SocksClientOptions } from 'socks';</span>
+
+<span class="s4">const options: SocksClientOptions = {</span>
+  <span class="s4">proxy: {</span>
+    <span class="s4">host: '104.131.124.203',</span>
+    <span class="s4">port: 1081,</span>
+    <span class="s4">type: 5</span>
+  <span class="s4">},</span>
+
+  <span class="s4">// This should be the ip and port of the expected client that will connect to the SOCKS proxy server on the newly bound port.</span>
+  <span class="s4">// Most SOCKS servers accept 0.0.0.0 as a wildcard address to accept any client.</span>
+  <span class="s4">destination: {</span>
+    <span class="s4">host: '0.0.0.0',</span>
+    <span class="s4">port: 0</span>
+  <span class="s4">},</span>
+
+  <span class="s4">command: 'bind'</span>
+<span class="s4">};</span>
+
+<span class="s4">const client = new SocksClient(options);</span>
+
+<span class="s4">// This event is fired when the SOCKS server has started listening on a new port for incoming connections.</span>
+<span class="s4">client.on('bound', (info) =&gt; {</span>
+  <span class="s4">console.log(info);</span>
+  <span class="s4">/*</span>
+  <span class="s4">{</span>
+    <span class="s4">socket: &lt;Socket ...&gt;,</span>
+    <span class="s4">remoteHost: { // This is the remote ip and port of the SOCKS proxy that is now accepting incoming connections.</span>
+      <span class="s4">host: '104.131.124.203',</span>
+      <span class="s4">port: 49928</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+  <span class="s4">*/</span>
+<span class="s4">});</span>
+
+<span class="s4">// This event is fired when the SOCKS server has accepted an incoming connection on the newly bound port.</span>
+<span class="s4">client.on('established', (info) =&gt; {</span>
+  <span class="s4">console.log(info);</span>
+  <span class="s4">/*</span>
+  <span class="s4">{</span>
+    <span class="s4">socket: &lt;Socket ...&gt;,</span>
+    <span class="s4">remoteHost: { // This is the remote ip and port that connected to the SOCKS proxy on the newly bound port.</span>
+      <span class="s4">host: '1.2.3.4',</span>
+      <span class="s4">port: 58232</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+  <span class="s4">*/</span>
+
+  <span class="s4">// At this point info.socket is a regular net.Socket TCP connection between client and client2 (1.2.3.4) (the client which connected to the proxy on the newly bound port.)</span>
+
+  <span class="s4">console.log(info.socket);</span>
+  <span class="s4">// &lt;Socket ...&gt;  (this is a raw net.Socket that is established to the destination host through the given proxy servers)</span>
+<span class="s4">});</span>
+
+<span class="s4">// SOCKS proxy failed to bind.</span>
+<span class="s4">client.on('error', () =&gt; {</span>
+  <span class="s4">// Handle errors</span>
+<span class="s4">});</span>
+
+<span class="s4">// Start connection</span>
+<span class="s4">client.connect();</span>
+<span class="s0">```</span></pre>
+</body>
+</html>

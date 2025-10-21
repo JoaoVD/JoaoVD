@@ -1,0 +1,154 @@
+<html>
+<head>
+  <title>memoize.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          memoize.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">MapCache </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_MapCache'</span><span class="s2">);</span>
+
+<span class="s4">/** Error message constants. */</span>
+<span class="s0">var </span><span class="s1">FUNC_ERROR_TEXT </span><span class="s2">= </span><span class="s3">'Expected a function'</span><span
+    class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a function that memoizes the result of `func`. If `resolver` is</span>
+ <span class="s4">* provided, it determines the cache key for storing the result based on the</span>
+ <span class="s4">* arguments provided to the memoized function. By default, the first argument</span>
+ <span class="s4">* provided to the memoized function is used as the map cache key. The `func`</span>
+ <span class="s4">* is invoked with the `this` binding of the memoized function.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** The cache is exposed as the `cache` property on the memoized</span>
+ <span class="s4">* function. Its creation may be customized by replacing the `_.memoize.Cache`</span>
+ <span class="s4">* constructor with one whose instances implement the</span>
+ <span
+   class="s4">* [`Map`](http://ecma-international.org/ecma-262/7.0/#sec-properties-of-the-map-prototype-object)</span>
+ <span class="s4">* method interface of `clear`, `delete`, `get`, `has`, and `set`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Function</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} func The function to have its output memoized.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [resolver] The function to resolve the cache key.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Function} Returns the new memoized function.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var object = { 'a': 1, 'b': 2 };</span>
+ <span class="s4">* var other = { 'c': 3, 'd': 4 };</span>
+ <span class="s4">*</span>
+ <span class="s4">* var values = _.memoize(_.values);</span>
+ <span class="s4">* values(object);</span>
+ <span class="s4">* // =&gt; [1, 2]</span>
+ <span class="s4">*</span>
+ <span class="s4">* values(other);</span>
+ <span class="s4">* // =&gt; [3, 4]</span>
+ <span class="s4">*</span>
+ <span class="s4">* object.a = 2;</span>
+ <span class="s4">* values(object);</span>
+ <span class="s4">* // =&gt; [1, 2]</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Modify the result cache.</span>
+ <span class="s4">* values.cache.set(object, ['a', 'b']);</span>
+ <span class="s4">* values(object);</span>
+ <span class="s4">* // =&gt; ['a', 'b']</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Replace `_.memoize.Cache`.</span>
+ <span class="s4">* _.memoize.Cache = WeakMap;</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">memoize</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">resolver</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">func </span><span
+    class="s2">!= </span><span class="s3">'function' </span><span class="s2">|| (</span><span
+    class="s1">resolver </span><span class="s2">!= </span><span class="s0">null </span><span
+    class="s2">&amp;&amp; </span><span class="s0">typeof </span><span class="s1">resolver </span><span
+    class="s2">!= </span><span class="s3">'function'</span><span class="s2">)) {</span>
+    <span class="s0">throw new </span><span class="s1">TypeError</span><span class="s2">(</span><span class="s1">FUNC_ERROR_TEXT</span><span
+    class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">memoized </span><span class="s2">= </span><span
+    class="s0">function</span><span class="s2">() {</span>
+    <span class="s0">var </span><span class="s1">args </span><span class="s2">= </span><span class="s1">arguments</span><span
+    class="s2">,</span>
+        <span class="s1">key </span><span class="s2">= </span><span class="s1">resolver </span><span
+    class="s2">? </span><span class="s1">resolver</span><span class="s2">.</span><span class="s1">apply</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">args</span><span
+    class="s2">) : </span><span class="s1">args</span><span class="s2">[</span><span class="s6">0</span><span
+    class="s2">],</span>
+        <span class="s1">cache </span><span class="s2">= </span><span class="s1">memoized</span><span
+    class="s2">.</span><span class="s1">cache</span><span class="s2">;</span>
+
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">cache</span><span class="s2">.</span><span
+    class="s1">has</span><span class="s2">(</span><span class="s1">key</span><span class="s2">)) {</span>
+      <span class="s0">return </span><span class="s1">cache</span><span class="s2">.</span><span
+    class="s1">get</span><span class="s2">(</span><span class="s1">key</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s0">var </span><span class="s1">result </span><span class="s2">= </span><span
+    class="s1">func</span><span class="s2">.</span><span class="s1">apply</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">, </span><span class="s1">args</span><span class="s2">);</span>
+    <span class="s1">memoized</span><span class="s2">.</span><span class="s1">cache </span><span
+    class="s2">= </span><span class="s1">cache</span><span class="s2">.</span><span class="s1">set</span><span
+    class="s2">(</span><span class="s1">key</span><span class="s2">, </span><span class="s1">result</span><span
+    class="s2">) || </span><span class="s1">cache</span><span class="s2">;</span>
+    <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">};</span>
+  <span class="s1">memoized</span><span class="s2">.</span><span class="s1">cache </span><span class="s2">= </span><span
+    class="s0">new </span><span class="s2">(</span><span class="s1">memoize</span><span class="s2">.</span><span
+    class="s1">Cache </span><span class="s2">|| </span><span class="s1">MapCache</span><span class="s2">);</span>
+  <span class="s0">return </span><span class="s1">memoized</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s7">// Expose `MapCache`.</span>
+<span class="s1">memoize</span><span class="s2">.</span><span class="s1">Cache </span><span class="s2">= </span><span
+    class="s1">MapCache</span><span class="s2">;</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">memoize</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

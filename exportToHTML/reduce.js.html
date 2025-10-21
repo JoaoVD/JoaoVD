@@ -1,0 +1,118 @@
+<html>
+<head>
+  <title>reduce.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          reduce.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">arrayReduce </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_arrayReduce'</span><span class="s2">),</span>
+    <span class="s1">baseEach </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseEach'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">),</span>
+    <span class="s1">baseReduce </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseReduce'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Reduces `collection` to a value which is the accumulated result of running</span>
+ <span class="s4">* each element in `collection` thru `iteratee`, where each successive</span>
+ <span class="s4">* invocation is supplied the return value of the previous. If `accumulator`</span>
+ <span class="s4">* is not given, the first element of `collection` is used as the initial</span>
+ <span class="s4">* value. The iteratee is invoked with four arguments:</span>
+ <span class="s4">* (accumulator, value, index|key, collection).</span>
+ <span class="s4">*</span>
+ <span class="s4">* Many lodash methods are guarded to work as iteratees for methods like</span>
+ <span class="s4">* `_.reduce`, `_.reduceRight`, and `_.transform`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* The guarded methods are:</span>
+ <span class="s4">* `assign`, `defaults`, `defaultsDeep`, `includes`, `merge`, `orderBy`,</span>
+ <span class="s4">* and `sortBy`</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Collection</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array|Object} collection The collection to iterate over.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [iteratee=_.identity] The function invoked per iteration.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{*} [accumulator] The initial value.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{*} Returns the accumulated value.</span>
+ <span class="s4">* </span><span class="s5">@see </span><span class="s4">_.reduceRight</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.reduce([1, 2], function(sum, n) {</span>
+ <span class="s4">*   return sum + n;</span>
+ <span class="s4">* }, 0);</span>
+ <span class="s4">* // =&gt; 3</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.reduce({ 'a': 1, 'b': 2, 'c': 1 }, function(result, value, key) {</span>
+ <span class="s4">*   (result[value] || (result[value] = [])).push(key);</span>
+ <span class="s4">*   return result;</span>
+ <span class="s4">* }, {});</span>
+ <span class="s4">* // =&gt; { '1': ['a', 'c'], '2': ['b'] } (iteration order is not guaranteed)</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">reduce</span><span class="s2">(</span><span
+    class="s1">collection</span><span class="s2">, </span><span class="s1">iteratee</span><span
+    class="s2">, </span><span class="s1">accumulator</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">func </span><span class="s2">= </span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">) ? </span><span class="s1">arrayReduce </span><span class="s2">: </span><span
+    class="s1">baseReduce</span><span class="s2">,</span>
+      <span class="s1">initAccum </span><span class="s2">= </span><span class="s1">arguments</span><span
+    class="s2">.</span><span class="s1">length </span><span class="s2">&lt; </span><span class="s6">3</span><span
+    class="s2">;</span>
+
+  <span class="s0">return </span><span class="s1">func</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">, </span><span class="s1">baseIteratee</span><span class="s2">(</span><span
+    class="s1">iteratee</span><span class="s2">, </span><span class="s6">4</span><span class="s2">), </span><span
+    class="s1">accumulator</span><span class="s2">, </span><span class="s1">initAccum</span><span
+    class="s2">, </span><span class="s1">baseEach</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">reduce</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<html>
+<head>
+  <title>progress-bar.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          progress-bar.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">var </span><span class="s1">validate </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'aproba'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">renderTemplate </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./render-template.js'</span><span
+    class="s3">)</span>
+<span class="s2">var </span><span class="s1">wideTruncate </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./wide-truncate'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">stringWidth </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'string-width'</span><span class="s3">)</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">theme</span><span class="s3">, </span><span
+    class="s1">width</span><span class="s3">, </span><span class="s1">completed</span><span class="s3">) {</span>
+  <span class="s1">validate</span><span class="s3">(</span><span class="s0">'ONN'</span><span class="s3">, [</span><span
+    class="s1">theme</span><span class="s3">, </span><span class="s1">width</span><span class="s3">, </span><span
+    class="s1">completed</span><span class="s3">])</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">completed </span><span
+    class="s3">&lt; </span><span class="s4">0</span><span class="s3">) {</span>
+    <span class="s1">completed </span><span class="s3">= </span><span class="s4">0</span>
+  <span class="s3">}</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">completed </span><span
+    class="s3">&gt; </span><span class="s4">1</span><span class="s3">) {</span>
+    <span class="s1">completed </span><span class="s3">= </span><span class="s4">1</span>
+  <span class="s3">}</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">width </span><span class="s3">&lt;= </span><span
+    class="s4">0</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s0">''</span>
+  <span class="s3">}</span>
+  <span class="s2">var </span><span class="s1">sofar </span><span class="s3">= </span><span class="s1">Math</span><span
+    class="s3">.</span><span class="s1">round</span><span class="s3">(</span><span class="s1">width </span><span
+    class="s3">* </span><span class="s1">completed</span><span class="s3">)</span>
+  <span class="s2">var </span><span class="s1">rest </span><span class="s3">= </span><span class="s1">width </span><span
+    class="s3">- </span><span class="s1">sofar</span>
+  <span class="s2">var </span><span class="s1">template </span><span class="s3">= [</span>
+    <span class="s3">{ </span><span class="s1">type</span><span class="s3">: </span><span
+    class="s0">'complete'</span><span class="s3">, </span><span class="s1">value</span><span class="s3">: </span><span
+    class="s1">repeat</span><span class="s3">(</span><span class="s1">theme</span><span class="s3">.</span><span
+    class="s1">complete</span><span class="s3">, </span><span class="s1">sofar</span><span class="s3">), </span><span
+    class="s1">length</span><span class="s3">: </span><span class="s1">sofar </span><span class="s3">},</span>
+    <span class="s3">{ </span><span class="s1">type</span><span class="s3">: </span><span
+    class="s0">'remaining'</span><span class="s3">, </span><span class="s1">value</span><span class="s3">: </span><span
+    class="s1">repeat</span><span class="s3">(</span><span class="s1">theme</span><span class="s3">.</span><span
+    class="s1">remaining</span><span class="s3">, </span><span class="s1">rest</span><span class="s3">), </span><span
+    class="s1">length</span><span class="s3">: </span><span class="s1">rest </span><span class="s3">},</span>
+  <span class="s3">]</span>
+  <span class="s2">return </span><span class="s1">renderTemplate</span><span class="s3">(</span><span
+    class="s1">width</span><span class="s3">, </span><span class="s1">template</span><span class="s3">, </span><span
+    class="s1">theme</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s5">// lodash's way of repeating</span>
+<span class="s2">function </span><span class="s1">repeat </span><span class="s3">(</span><span
+    class="s1">string</span><span class="s3">, </span><span class="s1">width</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">result </span><span class="s3">= </span><span class="s0">''</span>
+  <span class="s2">var </span><span class="s1">n </span><span class="s3">= </span><span class="s1">width</span>
+  <span class="s2">do </span><span class="s3">{</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">n </span><span class="s3">% </span><span
+    class="s4">2</span><span class="s3">) {</span>
+      <span class="s1">result </span><span class="s3">+= </span><span class="s1">string</span>
+    <span class="s3">}</span>
+    <span class="s1">n </span><span class="s3">= </span><span class="s1">Math</span><span class="s3">.</span><span
+    class="s1">floor</span><span class="s3">(</span><span class="s1">n </span><span class="s3">/ </span><span
+    class="s4">2</span><span class="s3">)</span>
+    <span class="s5">/* eslint no-self-assign: 0 */</span>
+    <span class="s1">string </span><span class="s3">+= </span><span class="s1">string</span>
+  <span class="s3">} </span><span class="s2">while </span><span class="s3">(</span><span class="s1">n </span><span
+    class="s3">&amp;&amp; </span><span class="s1">stringWidth</span><span class="s3">(</span><span
+    class="s1">result</span><span class="s3">) &lt; </span><span class="s1">width</span><span class="s3">)</span>
+
+  <span class="s2">return </span><span class="s1">wideTruncate</span><span class="s3">(</span><span
+    class="s1">result</span><span class="s3">, </span><span class="s1">width</span><span class="s3">)</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,756 @@
+<html>
+<head>
+  <title>diagnostics_channel.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          diagnostics_channel.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:diagnostics_channel` module provides an API to create named channels</span>
+ <span class="s0">* to report arbitrary message data for diagnostics purposes.</span>
+ <span class="s0">*</span>
+ <span class="s0">* It can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* It is intended that a module writer wanting to report diagnostics messages</span>
+ <span class="s0">* will create one or many top-level channels to report messages through.</span>
+ <span class="s0">* Channels may also be acquired at runtime but it is not encouraged</span>
+ <span class="s0">* due to the additional overhead of doing so. Channels may be exported for</span>
+ <span class="s0">* convenience, but as long as the name is known it can be acquired anywhere.</span>
+ <span class="s0">*</span>
+ <span class="s0">* If you intend for your module to produce diagnostics data for others to</span>
+ <span class="s0">* consume it is recommended that you include documentation of what named</span>
+ <span class="s0">* channels are used along with the shape of the message data. Channel names</span>
+ <span class="s0">* should generally include the module name to avoid collisions with data from</span>
+ <span class="s0">* other modules.</span>
+ <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/diagnostics_channel.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;diagnostics_channel&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">AsyncLocalStorage </span><span class="s4">} </span><span
+    class="s2">from </span><span class="s3">&quot;node:async_hooks&quot;</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Check if there are active subscribers to the named channel. This is helpful if</span>
+     <span class="s0">* the message you want to send might be expensive to prepare.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This API is optional but helpful when trying to publish messages from very</span>
+     <span class="s0">* performance-sensitive code.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+     <span class="s0">*</span>
+     <span class="s0">* if (diagnostics_channel.hasSubscribers('my-channel')) {</span>
+     <span class="s0">*   // There are subscribers, prepare and publish message</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">name The channel name</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">If there are active subscribers</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">hasSubscribers</span><span class="s4">(</span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This is the primary entry-point for anyone wanting to publish to a named</span>
+     <span class="s0">* channel. It produces a channel object which is optimized to reduce overhead at</span>
+     <span class="s0">* publish time as much as possible.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const channel = diagnostics_channel.channel('my-channel');</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">name The channel name</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The named channel object</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">channel</span><span class="s4">(</span><span
+    class="s2">name</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">symbol</span><span class="s4">): </span><span class="s2">Channel</span><span class="s4">;</span>
+    <span class="s2">type ChannelListener </span><span class="s4">= (</span><span class="s2">message</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Register a message handler to subscribe to this channel. This message handler</span>
+     <span class="s0">* will be run synchronously whenever a message is published to the channel. Any</span>
+     <span class="s0">* errors thrown in the message handler will trigger an `'uncaughtException'`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+     <span class="s0">*</span>
+     <span class="s0">* diagnostics_channel.subscribe('my-channel', (message, name) =&gt; {</span>
+     <span class="s0">*   // Received data</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.7.0, v16.17.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">name The channel name</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">onMessage The handler to receive channel messages</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">subscribe</span><span class="s4">(</span><span
+    class="s2">name</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">symbol</span><span class="s4">, </span><span class="s2">onMessage</span><span class="s4">: </span><span
+    class="s2">ChannelListener</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Remove a message handler previously registered to this channel with {</span><span class="s1">@link </span><span
+    class="s0">subscribe}.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+     <span class="s0">*</span>
+     <span class="s0">* function onMessage(message, name) {</span>
+     <span class="s0">*   // Received data</span>
+     <span class="s0">* }</span>
+     <span class="s0">*</span>
+     <span class="s0">* diagnostics_channel.subscribe('my-channel', onMessage);</span>
+     <span class="s0">*</span>
+     <span class="s0">* diagnostics_channel.unsubscribe('my-channel', onMessage);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.7.0, v16.17.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">name The channel name</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">onMessage The previous subscribed handler to remove</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">`true` if the handler was found, `false` otherwise.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">unsubscribe</span><span class="s4">(</span><span
+    class="s2">name</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">symbol</span><span class="s4">, </span><span class="s2">onMessage</span><span class="s4">: </span><span
+    class="s2">ChannelListener</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Creates a `TracingChannel` wrapper for the given `TracingChannel Channels`. If a name is given, the corresponding tracing</span>
+     <span class="s0">* channels will be created in the form of `tracing:${name}:${eventType}` where `eventType` corresponds to the types of `TracingChannel Channels`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const channelsByName = diagnostics_channel.tracingChannel('my-channel');</span>
+     <span class="s0">*</span>
+     <span class="s0">* // or...</span>
+     <span class="s0">*</span>
+     <span class="s0">* const channelsByCollection = diagnostics_channel.tracingChannel({</span>
+     <span class="s0">*   start: diagnostics_channel.channel('tracing:my-channel:start'),</span>
+     <span class="s0">*   end: diagnostics_channel.channel('tracing:my-channel:end'),</span>
+     <span class="s0">*   asyncStart: diagnostics_channel.channel('tracing:my-channel:asyncStart'),</span>
+     <span class="s0">*   asyncEnd: diagnostics_channel.channel('tracing:my-channel:asyncEnd'),</span>
+     <span class="s0">*   error: diagnostics_channel.channel('tracing:my-channel:error'),</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">nameOrChannels Channel name or object containing all the `TracingChannel Channels`</span>
+     <span class="s0">* </span><span class="s1">@return </span><span
+    class="s0">Collection of channels to trace with</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">tracingChannel</span><span class="s4">&lt;</span>
+        <span class="s2">StoreType </span><span class="s4">= </span><span class="s2">unknown</span><span
+    class="s4">,</span>
+        <span class="s2">ContextType </span><span class="s5">extends </span><span class="s2">object </span><span
+    class="s4">= </span><span class="s2">StoreType </span><span class="s5">extends </span><span
+    class="s2">object </span><span class="s4">? </span><span class="s2">StoreType </span><span class="s4">: </span><span
+    class="s2">object</span><span class="s4">,</span>
+    <span class="s4">&gt;(</span>
+        <span class="s2">nameOrChannels</span><span class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">TracingChannelCollection</span><span class="s4">&lt;</span><span class="s2">StoreType</span><span
+    class="s4">, </span><span class="s2">ContextType</span><span class="s4">&gt;,</span>
+    <span class="s4">): </span><span class="s2">TracingChannel</span><span class="s4">&lt;</span><span class="s2">StoreType</span><span
+    class="s4">, </span><span class="s2">ContextType</span><span class="s4">&gt;;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The class `Channel` represents an individual named channel within the data</span>
+     <span class="s0">* pipeline. It is used to track subscribers and to publish messages when there</span>
+     <span class="s0">* are subscribers present. It exists as a separate object to avoid channel</span>
+     <span class="s0">* lookups at publish time, enabling very fast publish speeds and allowing</span>
+     <span class="s0">* for heavy use while incurring very minimal cost. Channels are created with {</span><span
+    class="s1">@link </span><span class="s0">channel}, constructing a channel directly</span>
+     <span class="s0">* with `new Channel(name)` is not supported.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Channel</span><span class="s4">&lt;</span><span
+    class="s2">StoreType </span><span class="s4">= </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">ContextType </span><span class="s4">= </span><span class="s2">StoreType</span><span
+    class="s4">&gt; {</span>
+        <span class="s2">readonly name</span><span class="s4">: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">symbol</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Check if there are active subscribers to this channel. This is helpful if</span>
+         <span class="s0">* the message you want to send might be expensive to prepare.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This API is optional but helpful when trying to publish messages from very</span>
+         <span class="s0">* performance-sensitive code.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channel = diagnostics_channel.channel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* if (channel.hasSubscribers) {</span>
+         <span class="s0">*   // There are subscribers, prepare and publish message</span>
+         <span class="s0">* }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly hasSubscribers</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s5">private </span><span class="s2">constructor</span><span class="s4">(</span><span class="s2">name</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Publish a message to any subscribers to the channel. This will trigger</span>
+         <span class="s0">* message handlers synchronously so they will execute within the same context.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channel = diagnostics_channel.channel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channel.publish({</span>
+         <span class="s0">*   some: 'message',</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">message The message to send to the channel subscribers</span>
+         <span class="s0">*/</span>
+        <span class="s2">publish</span><span class="s4">(</span><span class="s2">message</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Register a message handler to subscribe to this channel. This message handler</span>
+         <span class="s0">* will be run synchronously whenever a message is published to the channel. Any</span>
+         <span class="s0">* errors thrown in the message handler will trigger an `'uncaughtException'`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channel = diagnostics_channel.channel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channel.subscribe((message, name) =&gt; {</span>
+         <span class="s0">*   // Received data</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+         <span class="s0">* </span><span class="s1">@deprecated </span><span
+    class="s0">Since v18.7.0,v16.17.0 - Use {</span><span class="s1">@link </span><span class="s0">subscribe(name, onMessage)}</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">onMessage The handler to receive channel messages</span>
+         <span class="s0">*/</span>
+        <span class="s2">subscribe</span><span class="s4">(</span><span class="s2">onMessage</span><span
+    class="s4">: </span><span class="s2">ChannelListener</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Remove a message handler previously registered to this channel with `channel.subscribe(onMessage)`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channel = diagnostics_channel.channel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* function onMessage(message, name) {</span>
+         <span class="s0">*   // Received data</span>
+         <span class="s0">* }</span>
+         <span class="s0">*</span>
+         <span class="s0">* channel.subscribe(onMessage);</span>
+         <span class="s0">*</span>
+         <span class="s0">* channel.unsubscribe(onMessage);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.1.0, v14.17.0</span>
+         <span class="s0">* </span><span class="s1">@deprecated </span><span
+    class="s0">Since v18.7.0,v16.17.0 - Use {</span><span class="s1">@link </span><span class="s0">unsubscribe(name, onMessage)}</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">onMessage The previous subscribed handler to remove</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`true` if the handler was found, `false` otherwise.</span>
+         <span class="s0">*/</span>
+        <span class="s2">unsubscribe</span><span class="s4">(</span><span class="s2">onMessage</span><span
+    class="s4">: </span><span class="s2">ChannelListener</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When `channel.runStores(context, ...)` is called, the given context data</span>
+         <span class="s0">* will be applied to any store bound to the channel. If the store has already been</span>
+         <span class="s0">* bound the previous `transform` function will be replaced with the new one.</span>
+         <span class="s0">* The `transform` function may be omitted to set the given context data as the</span>
+         <span class="s0">* context directly.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">* import { AsyncLocalStorage } from 'node:async_hooks';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const store = new AsyncLocalStorage();</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channel = diagnostics_channel.channel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channel.bindStore(store, (data) =&gt; {</span>
+         <span class="s0">*   return { data };</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">store The store to which to bind the context data</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">transform Transform context data before setting the store context</span>
+         <span class="s0">*/</span>
+        <span class="s2">bindStore</span><span class="s4">(</span><span class="s2">store</span><span
+    class="s4">: </span><span class="s2">AsyncLocalStorage</span><span class="s4">&lt;</span><span
+    class="s2">StoreType</span><span class="s4">&gt;, </span><span class="s2">transform</span><span
+    class="s4">?: (</span><span class="s2">context</span><span class="s4">: </span><span
+    class="s2">ContextType</span><span class="s4">) =&gt; </span><span class="s2">StoreType</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Remove a message handler previously registered to this channel with `channel.bindStore(store)`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">* import { AsyncLocalStorage } from 'node:async_hooks';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const store = new AsyncLocalStorage();</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channel = diagnostics_channel.channel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channel.bindStore(store);</span>
+         <span class="s0">* channel.unbindStore(store);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">store The store to unbind from the channel.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`true` if the store was found, `false` otherwise.</span>
+         <span class="s0">*/</span>
+        <span class="s2">unbindStore</span><span class="s4">(</span><span class="s2">store</span><span
+    class="s4">: </span><span class="s2">AsyncLocalStorage</span><span class="s4">&lt;</span><span
+    class="s2">StoreType</span><span class="s4">&gt;): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Applies the given data to any AsyncLocalStorage instances bound to the channel</span>
+         <span class="s0">* for the duration of the given function, then publishes to the channel within</span>
+         <span class="s0">* the scope of that data is applied to the stores.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If a transform function was given to `channel.bindStore(store)` it will be</span>
+         <span class="s0">* applied to transform the message data before it becomes the context value for</span>
+         <span class="s0">* the store. The prior storage context is accessible from within the transform</span>
+         <span class="s0">* function in cases where context linking is required.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The context applied to the store should be accessible in any async code which</span>
+         <span class="s0">* continues from execution which began during the given function, however</span>
+         <span class="s0">* there are some situations in which `context loss` may occur.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">* import { AsyncLocalStorage } from 'node:async_hooks';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const store = new AsyncLocalStorage();</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channel = diagnostics_channel.channel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channel.bindStore(store, (message) =&gt; {</span>
+         <span class="s0">*   const parent = store.getStore();</span>
+         <span class="s0">*   return new Span(message, parent);</span>
+         <span class="s0">* });</span>
+         <span class="s0">* channel.runStores({ some: 'message' }, () =&gt; {</span>
+         <span class="s0">*   store.getStore(); // Span({ some: 'message' })</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">context Message to send to subscribers and bind to stores</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">fn Handler to run within the entered storage context</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">thisArg The receiver to be used for the function call.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">args Optional arguments to pass to the function.</span>
+         <span class="s0">*/</span>
+        <span class="s2">runStores</span><span class="s4">&lt;</span><span class="s2">ThisArg </span><span
+    class="s4">= </span><span class="s2">any</span><span class="s4">, </span><span class="s2">Args </span><span
+    class="s5">extends </span><span class="s2">any</span><span class="s4">[] = </span><span class="s2">any</span><span
+    class="s4">[], </span><span class="s2">Result </span><span class="s4">= </span><span class="s2">any</span><span
+    class="s4">&gt;(</span>
+            <span class="s2">context</span><span class="s4">: </span><span class="s2">ContextType</span><span
+    class="s4">,</span>
+            <span class="s2">fn</span><span class="s4">: (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">ThisArg</span><span class="s4">, </span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">Args</span><span class="s4">) =&gt; </span><span class="s2">Result</span><span
+    class="s4">,</span>
+            <span class="s2">thisArg</span><span class="s4">?: </span><span class="s2">ThisArg</span><span
+    class="s4">,</span>
+            <span class="s2">...args</span><span class="s4">: </span><span class="s2">Args</span>
+        <span class="s4">): </span><span class="s2">Result</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">TracingChannelSubscribers</span><span class="s4">&lt;</span><span
+    class="s2">ContextType </span><span class="s5">extends </span><span class="s2">object</span><span
+    class="s4">&gt; {</span>
+        <span class="s2">start</span><span class="s4">: (</span><span class="s2">message</span><span
+    class="s4">: </span><span class="s2">ContextType</span><span class="s4">) =&gt; </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s2">end</span><span class="s4">: (</span>
+            <span class="s2">message</span><span class="s4">: </span><span class="s2">ContextType </span><span
+    class="s4">&amp; {</span>
+                <span class="s2">error</span><span class="s4">?: </span><span class="s2">unknown</span><span class="s4">;</span>
+                <span class="s2">result</span><span class="s4">?: </span><span class="s2">unknown</span><span
+    class="s4">;</span>
+            <span class="s4">},</span>
+        <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">asyncStart</span><span class="s4">: (</span>
+            <span class="s2">message</span><span class="s4">: </span><span class="s2">ContextType </span><span
+    class="s4">&amp; {</span>
+                <span class="s2">error</span><span class="s4">?: </span><span class="s2">unknown</span><span class="s4">;</span>
+                <span class="s2">result</span><span class="s4">?: </span><span class="s2">unknown</span><span
+    class="s4">;</span>
+            <span class="s4">},</span>
+        <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">asyncEnd</span><span class="s4">: (</span>
+            <span class="s2">message</span><span class="s4">: </span><span class="s2">ContextType </span><span
+    class="s4">&amp; {</span>
+                <span class="s2">error</span><span class="s4">?: </span><span class="s2">unknown</span><span class="s4">;</span>
+                <span class="s2">result</span><span class="s4">?: </span><span class="s2">unknown</span><span
+    class="s4">;</span>
+            <span class="s4">},</span>
+        <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">error</span><span class="s4">: (</span>
+            <span class="s2">message</span><span class="s4">: </span><span class="s2">ContextType </span><span
+    class="s4">&amp; {</span>
+                <span class="s2">error</span><span class="s4">: </span><span class="s2">unknown</span><span
+    class="s4">;</span>
+            <span class="s4">},</span>
+        <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">TracingChannelCollection</span><span class="s4">&lt;</span><span
+    class="s2">StoreType </span><span class="s4">= </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">ContextType </span><span class="s4">= </span><span class="s2">StoreType</span><span
+    class="s4">&gt; {</span>
+        <span class="s2">start</span><span class="s4">: </span><span class="s2">Channel</span><span
+    class="s4">&lt;</span><span class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">end</span><span class="s4">: </span><span class="s2">Channel</span><span class="s4">&lt;</span><span
+    class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">asyncStart</span><span class="s4">: </span><span class="s2">Channel</span><span
+    class="s4">&lt;</span><span class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">asyncEnd</span><span class="s4">: </span><span class="s2">Channel</span><span
+    class="s4">&lt;</span><span class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">error</span><span class="s4">: </span><span class="s2">Channel</span><span
+    class="s4">&lt;</span><span class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The class `TracingChannel` is a collection of `TracingChannel Channels` which</span>
+     <span class="s0">* together express a single traceable action. It is used to formalize and</span>
+     <span class="s0">* simplify the process of producing events for tracing application flow. {</span><span class="s1">@link </span><span
+    class="s0">tracingChannel} is used to construct a `TracingChannel`. As with `Channel` it is recommended to create and reuse a</span>
+     <span class="s0">* single `TracingChannel` at the top-level of the file rather than creating them</span>
+     <span class="s0">* dynamically.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+     <span class="s0">* </span><span class="s1">@experimental</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">TracingChannel</span><span class="s4">&lt;</span><span class="s2">StoreType </span><span
+    class="s4">= </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">ContextType </span><span class="s5">extends </span><span class="s2">object </span><span class="s4">= {}&gt; </span><span
+    class="s5">implements </span><span class="s2">TracingChannelCollection </span><span class="s4">{</span>
+        <span class="s2">start</span><span class="s4">: </span><span class="s2">Channel</span><span
+    class="s4">&lt;</span><span class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">end</span><span class="s4">: </span><span class="s2">Channel</span><span class="s4">&lt;</span><span
+    class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">asyncStart</span><span class="s4">: </span><span class="s2">Channel</span><span
+    class="s4">&lt;</span><span class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">asyncEnd</span><span class="s4">: </span><span class="s2">Channel</span><span
+    class="s4">&lt;</span><span class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s2">error</span><span class="s4">: </span><span class="s2">Channel</span><span
+    class="s4">&lt;</span><span class="s2">StoreType</span><span class="s4">, </span><span class="s2">ContextType</span><span
+    class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Helper to subscribe a collection of functions to the corresponding channels.</span>
+         <span class="s0">* This is the same as calling `channel.subscribe(onMessage)` on each channel</span>
+         <span class="s0">* individually.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channels = diagnostics_channel.tracingChannel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channels.subscribe({</span>
+         <span class="s0">*   start(message) {</span>
+         <span class="s0">*     // Handle start message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   end(message) {</span>
+         <span class="s0">*     // Handle end message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   asyncStart(message) {</span>
+         <span class="s0">*     // Handle asyncStart message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   asyncEnd(message) {</span>
+         <span class="s0">*     // Handle asyncEnd message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   error(message) {</span>
+         <span class="s0">*     // Handle error message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">subscribers Set of `TracingChannel Channels` subscribers</span>
+         <span class="s0">*/</span>
+        <span class="s2">subscribe</span><span class="s4">(</span><span class="s2">subscribers</span><span
+    class="s4">: </span><span class="s2">TracingChannelSubscribers</span><span class="s4">&lt;</span><span class="s2">ContextType</span><span
+    class="s4">&gt;): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Helper to unsubscribe a collection of functions from the corresponding channels.</span>
+         <span class="s0">* This is the same as calling `channel.unsubscribe(onMessage)` on each channel</span>
+         <span class="s0">* individually.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channels = diagnostics_channel.tracingChannel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channels.unsubscribe({</span>
+         <span class="s0">*   start(message) {</span>
+         <span class="s0">*     // Handle start message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   end(message) {</span>
+         <span class="s0">*     // Handle end message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   asyncStart(message) {</span>
+         <span class="s0">*     // Handle asyncStart message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   asyncEnd(message) {</span>
+         <span class="s0">*     // Handle asyncEnd message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   error(message) {</span>
+         <span class="s0">*     // Handle error message</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">subscribers Set of `TracingChannel Channels` subscribers</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">`true` if all handlers were successfully unsubscribed, and `false` otherwise.</span>
+         <span class="s0">*/</span>
+        <span class="s2">unsubscribe</span><span class="s4">(</span><span class="s2">subscribers</span><span class="s4">: </span><span
+    class="s2">TracingChannelSubscribers</span><span class="s4">&lt;</span><span class="s2">ContextType</span><span
+    class="s4">&gt;): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Trace a synchronous function call. This will always produce a `start event` and `end event` around the execution and may produce an `error event` if the given function throws an error.</span>
+         <span class="s0">* This will run the given function using `channel.runStores(context, ...)` on the `start` channel which ensures all</span>
+         <span class="s0">* events should have any bound stores set to match this trace context.</span>
+         <span class="s0">*</span>
+         <span class="s0">* To ensure only correct trace graphs are formed, events will only be published if subscribers are present prior to starting the trace. Subscriptions</span>
+         <span class="s0">* which are added after the trace begins will not receive future events from that trace, only future traces will be seen.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channels = diagnostics_channel.tracingChannel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channels.traceSync(() =&gt; {</span>
+         <span class="s0">*   // Do something</span>
+         <span class="s0">* }, {</span>
+         <span class="s0">*   some: 'thing',</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">fn Function to wrap a trace around</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">context Shared object to correlate events through</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">thisArg The receiver to be used for the function call</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">args Optional arguments to pass to the function</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The return value of the given function</span>
+         <span class="s0">*/</span>
+        <span class="s2">traceSync</span><span class="s4">&lt;</span><span class="s2">ThisArg </span><span
+    class="s4">= </span><span class="s2">any</span><span class="s4">, </span><span class="s2">Args </span><span
+    class="s5">extends </span><span class="s2">any</span><span class="s4">[] = </span><span class="s2">any</span><span
+    class="s4">[], </span><span class="s2">Result </span><span class="s4">= </span><span class="s2">any</span><span
+    class="s4">&gt;(</span>
+            <span class="s2">fn</span><span class="s4">: (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">ThisArg</span><span class="s4">, </span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">Args</span><span class="s4">) =&gt; </span><span class="s2">Result</span><span
+    class="s4">,</span>
+            <span class="s2">context</span><span class="s4">?: </span><span class="s2">ContextType</span><span
+    class="s4">,</span>
+            <span class="s2">thisArg</span><span class="s4">?: </span><span class="s2">ThisArg</span><span
+    class="s4">,</span>
+            <span class="s2">...args</span><span class="s4">: </span><span class="s2">Args</span>
+        <span class="s4">): </span><span class="s2">Result</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Trace a promise-returning function call. This will always produce a `start event` and `end event` around the synchronous portion of the</span>
+         <span class="s0">* function execution, and will produce an `asyncStart event` and `asyncEnd event` when a promise continuation is reached. It may also</span>
+         <span class="s0">* produce an `error event` if the given function throws an error or the</span>
+         <span class="s0">* returned promise rejects. This will run the given function using `channel.runStores(context, ...)` on the `start` channel which ensures all</span>
+         <span class="s0">* events should have any bound stores set to match this trace context.</span>
+         <span class="s0">*</span>
+         <span class="s0">* To ensure only correct trace graphs are formed, events will only be published if subscribers are present prior to starting the trace. Subscriptions</span>
+         <span class="s0">* which are added after the trace begins will not receive future events from that trace, only future traces will be seen.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channels = diagnostics_channel.tracingChannel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channels.tracePromise(async () =&gt; {</span>
+         <span class="s0">*   // Do something</span>
+         <span class="s0">* }, {</span>
+         <span class="s0">*   some: 'thing',</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">fn Promise-returning function to wrap a trace around</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">context Shared object to correlate trace events through</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">thisArg The receiver to be used for the function call</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">args Optional arguments to pass to the function</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">Chained from promise returned by the given function</span>
+         <span class="s0">*/</span>
+        <span class="s2">tracePromise</span><span class="s4">&lt;</span><span class="s2">ThisArg </span><span
+    class="s4">= </span><span class="s2">any</span><span class="s4">, </span><span class="s2">Args </span><span
+    class="s5">extends </span><span class="s2">any</span><span class="s4">[] = </span><span class="s2">any</span><span
+    class="s4">[], </span><span class="s2">Result </span><span class="s4">= </span><span class="s2">any</span><span
+    class="s4">&gt;(</span>
+            <span class="s2">fn</span><span class="s4">: (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">ThisArg</span><span class="s4">, </span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">Args</span><span class="s4">) =&gt; </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">Result</span><span class="s4">&gt;,</span>
+            <span class="s2">context</span><span class="s4">?: </span><span class="s2">ContextType</span><span
+    class="s4">,</span>
+            <span class="s2">thisArg</span><span class="s4">?: </span><span class="s2">ThisArg</span><span
+    class="s4">,</span>
+            <span class="s2">...args</span><span class="s4">: </span><span class="s2">Args</span>
+        <span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s2">Result</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Trace a callback-receiving function call. This will always produce a `start event` and `end event` around the synchronous portion of the</span>
+         <span class="s0">* function execution, and will produce a `asyncStart event` and `asyncEnd event` around the callback execution. It may also produce an `error event` if the given function throws an error or</span>
+         <span class="s0">* the returned</span>
+         <span class="s0">* promise rejects. This will run the given function using `channel.runStores(context, ...)` on the `start` channel which ensures all</span>
+         <span class="s0">* events should have any bound stores set to match this trace context.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `position` will be -1 by default to indicate the final argument should</span>
+         <span class="s0">* be used as the callback.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channels = diagnostics_channel.tracingChannel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* channels.traceCallback((arg1, callback) =&gt; {</span>
+         <span class="s0">*   // Do something</span>
+         <span class="s0">*   callback(null, 'result');</span>
+         <span class="s0">* }, 1, {</span>
+         <span class="s0">*   some: 'thing',</span>
+         <span class="s0">* }, thisArg, arg1, callback);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The callback will also be run with `channel.runStores(context, ...)` which</span>
+         <span class="s0">* enables context loss recovery in some cases.</span>
+         <span class="s0">*</span>
+         <span class="s0">* To ensure only correct trace graphs are formed, events will only be published if subscribers are present prior to starting the trace. Subscriptions</span>
+         <span class="s0">* which are added after the trace begins will not receive future events from that trace, only future traces will be seen.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import diagnostics_channel from 'node:diagnostics_channel';</span>
+         <span class="s0">* import { AsyncLocalStorage } from 'node:async_hooks';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channels = diagnostics_channel.tracingChannel('my-channel');</span>
+         <span class="s0">* const myStore = new AsyncLocalStorage();</span>
+         <span class="s0">*</span>
+         <span class="s0">* // The start channel sets the initial store data to something</span>
+         <span class="s0">* // and stores that store data value on the trace context object</span>
+         <span class="s0">* channels.start.bindStore(myStore, (data) =&gt; {</span>
+         <span class="s0">*   const span = new Span(data);</span>
+         <span class="s0">*   data.span = span;</span>
+         <span class="s0">*   return span;</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Then asyncStart can restore from that data it stored previously</span>
+         <span class="s0">* channels.asyncStart.bindStore(myStore, (data) =&gt; {</span>
+         <span class="s0">*   return data.span;</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.9.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">fn callback using function to wrap a trace around</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">position Zero-indexed argument position of expected callback</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">context Shared object to correlate trace events through</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">thisArg The receiver to be used for the function call</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">args Optional arguments to pass to the function</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The return value of the given function</span>
+         <span class="s0">*/</span>
+        <span class="s2">traceCallback</span><span class="s4">&lt;</span><span class="s2">ThisArg </span><span
+    class="s4">= </span><span class="s2">any</span><span class="s4">, </span><span class="s2">Args </span><span
+    class="s5">extends </span><span class="s2">any</span><span class="s4">[] = </span><span class="s2">any</span><span
+    class="s4">[], </span><span class="s2">Result </span><span class="s4">= </span><span class="s2">any</span><span
+    class="s4">&gt;(</span>
+            <span class="s2">fn</span><span class="s4">: (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">ThisArg</span><span class="s4">, </span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">Args</span><span class="s4">) =&gt; </span><span class="s2">Result</span><span
+    class="s4">,</span>
+            <span class="s2">position</span><span class="s4">?: </span><span class="s2">number</span><span
+    class="s4">,</span>
+            <span class="s2">context</span><span class="s4">?: </span><span class="s2">ContextType</span><span
+    class="s4">,</span>
+            <span class="s2">thisArg</span><span class="s4">?: </span><span class="s2">ThisArg</span><span
+    class="s4">,</span>
+            <span class="s2">...args</span><span class="s4">: </span><span class="s2">Args</span>
+        <span class="s4">): </span><span class="s2">Result</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `true` if any of the individual channels has a subscriber, `false` if not.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This is a helper method available on a {</span><span class="s1">@link </span><span
+    class="s0">TracingChannel} instance to check</span>
+         <span class="s0">* if any of the [TracingChannel Channels](https://nodejs.org/api/diagnostics_channel.html#tracingchannel-channels) have subscribers.</span>
+         <span class="s0">* A `true` is returned if any of them have at least one subscriber, a `false` is returned otherwise.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const diagnostics_channel = require('node:diagnostics_channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* const channels = diagnostics_channel.tracingChannel('my-channel');</span>
+         <span class="s0">*</span>
+         <span class="s0">* if (channels.hasSubscribers) {</span>
+         <span class="s0">*   // Do something</span>
+         <span class="s0">* }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.0.0, v20.13.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly hasSubscribers</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:diagnostics_channel&quot; </span><span
+    class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;diagnostics_channel&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

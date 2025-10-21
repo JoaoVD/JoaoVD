@@ -1,0 +1,155 @@
+<html>
+<head>
+  <title>associateExample.md</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #c77dbb;
+      font-style: italic;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          associateExample.md</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0"># </span><span class="s2">socks examples</span>
+
+<span class="s0">## </span><span class="s2">Example for SOCKS </span><span class="s1">'</span><span class="s2">associate' command</span>
+
+<span class="s2">The associate command tells the SOCKS proxy server to establish a UDP relay. The server binds to a new UDP port and communicates the newly opened port back to the origin client. From here, any SOCKS UDP frame packets sent to this special UDP port on the Proxy server will be forwarded to the desired destination, and any responses will be forwarded back to the origin client </span><span
+    class="s1">(</span><span class="s2">you</span><span class="s1">)</span><span class="s2">.</span>
+
+<span class="s2">This can be used for things such as DNS queries, and other UDP communicates.</span>
+
+<span class="s1">**</span><span class="s2">Connection Steps</span><span class="s1">**</span>
+
+<span class="s0">1. </span><span class="s2">Client -</span><span class="s1">(</span><span
+    class="s2">associate</span><span class="s1">)</span><span class="s2">-</span><span class="s1">&gt; </span><span
+    class="s2">Proxy </span><span class="s1">(</span><span class="s2">Tells the proxy to create a UDP relay and bind on a new port</span><span
+    class="s1">)</span>
+<span class="s0">2. </span><span class="s2">Client </span><span class="s1">&lt;</span><span class="s2">-</span><span
+    class="s1">(</span><span class="s2">port</span><span class="s1">)</span><span class="s2">- Proxy </span><span
+    class="s1">(</span><span class="s2">Tells the origin client which port it opened and is accepting UDP frame packets on</span><span
+    class="s1">)</span>
+
+<span class="s2">At this point the proxy is accepting UDP frames on the specified port.</span>
+
+<span class="s0">3. </span><span class="s2">Client --</span><span class="s1">(</span><span
+    class="s2">udp frame</span><span class="s1">) </span><span class="s2">-</span><span class="s1">&gt; </span><span
+    class="s2">Proxy -</span><span class="s1">&gt; </span><span class="s2">Destination </span><span
+    class="s1">(</span><span class="s2">The origin client sends a UDP frame to the proxy on the UDP port, and the proxy then forwards it to the destination specified in the UDP frame.</span><span
+    class="s1">)</span>
+<span class="s0">4. </span><span class="s2">Client </span><span class="s1">&lt;</span><span class="s2">--</span><span
+    class="s1">(</span><span class="s2">udp frame</span><span class="s1">) &lt;</span><span
+    class="s2">-- Proxy </span><span class="s1">&lt;</span><span class="s2">-- Destination </span><span
+    class="s1">(</span><span class="s2">The destination client responds to the udp packet sent in #3</span><span
+    class="s1">)</span>
+
+<span class="s0">## </span><span class="s2">Usage</span>
+
+<span class="s2">The </span><span class="s1">'</span><span class="s2">associate' command can only be used by creating a new SocksClient instance and listening for the </span><span
+    class="s1">'</span><span class="s2">established' event.</span>
+
+<span class="s1">**</span><span class="s2">Note</span><span class="s1">:** </span><span class="s2">UDP packets relayed through the proxy servers are packaged in a special Socks UDP frame format. SocksClient.createUDPFrame</span><span
+    class="s1">() </span><span class="s2">and SocksClient.parseUDPFrame</span><span class="s1">() </span><span
+    class="s2">create and parse these special UDP packets.</span>
+
+<span class="s0">```</span><span class="s3">typescript</span>
+<span class="s4">import * as dgram from 'dgram';</span>
+<span class="s4">import { SocksClient, SocksClientOptions } from 'socks';</span>
+
+<span class="s4">// Create a local UDP socket for sending/receiving packets to/from the proxy.</span>
+<span class="s4">const udpSocket = dgram.createSocket('udp4');</span>
+<span class="s4">udpSocket.bind();</span>
+
+<span class="s4">// Listen for incoming UDP packets from the proxy server.</span>
+<span class="s4">udpSocket.on('message', (message, rinfo) =&gt; {</span>
+  <span class="s4">console.log(SocksClient.parseUDPFrame(message));</span>
+  <span class="s4">/*</span>
+  <span class="s4">{ frameNumber: 0,</span>
+    <span class="s4">remoteHost: { host: '8.8.8.8', port: 53 }, // The remote host that replied with a UDP packet</span>
+    <span class="s4">data: &lt;Buffer 74 65 73 74 0a&gt; // The data</span>
+  <span class="s4">}</span>
+  <span class="s4">*/</span>
+<span class="s4">});</span>
+
+<span class="s4">const options: SocksClientOptions = {</span>
+  <span class="s4">proxy: {</span>
+    <span class="s4">host: '104.131.124.203',</span>
+    <span class="s4">port: 1081,</span>
+    <span class="s4">type: 5</span>
+  <span class="s4">},</span>
+
+  <span class="s4">// This should be the ip and port of the expected client that will be sending UDP frames to the newly opened UDP port on the server.</span>
+  <span
+    class="s4">// Most SOCKS servers accept 0.0.0.0 as a wildcard address to accept UDP frames from any source.</span>
+  <span class="s4">destination: {</span>
+    <span class="s4">host: '0.0.0.0',</span>
+    <span class="s4">port: 0</span>
+  <span class="s4">},</span>
+
+  <span class="s4">command: 'associate'</span>
+<span class="s4">};</span>
+
+<span class="s4">const client = new SocksClient(options);</span>
+
+<span
+  class="s4">// This event is fired when the SOCKS server has started listening on a new UDP port for UDP relaying.</span>
+<span class="s4">client.on('established', info =&gt; {</span>
+  <span class="s4">console.log(info);</span>
+  <span class="s4">/*</span>
+  <span class="s4">{</span>
+    <span class="s4">socket: &lt;Socket ...&gt;,</span>
+    <span
+      class="s4">remoteHost: { // This is the remote port on the SOCKS proxy server to send UDP frame packets to.</span>
+      <span class="s4">host: '104.131.124.203',</span>
+      <span class="s4">port: 58232</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+  <span class="s4">*/</span>
+
+  <span class="s4">// Send a udp frame to 8.8.8.8 on port 53 through the proxy.</span>
+  <span class="s4">const packet = SocksClient.createUDPFrame({</span>
+    <span class="s4">remoteHost: { host: '8.8.8.8', port: 53 },</span>
+    <span class="s4">data: Buffer.from('hello') // A DNS lookup in the real world.</span>
+  <span class="s4">});</span>
+
+  <span class="s4">// Send packet.</span>
+  <span class="s4">udpSocket.send(packet, info.remoteHost.port, info.remoteHost.host);</span>
+<span class="s4">});</span>
+
+<span class="s4">// SOCKS proxy failed to bind.</span>
+<span class="s4">client.on('error', () =&gt; {</span>
+  <span class="s4">// Handle errors</span>
+<span class="s4">});</span>
+
+<span class="s4">// Start connection</span>
+<span class="s4">client.connect();</span>
+<span class="s0">```</span>
+</pre>
+</body>
+</html>

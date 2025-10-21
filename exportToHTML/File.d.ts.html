@@ -1,0 +1,115 @@
+<html>
+<head>
+  <title>File.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          File.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">Buffer </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'../vendor/node/internal/buffer'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">Link </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./Link'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">Node </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./Node'</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* Represents an open file (file descriptor) that points to a `Link` (Hard-link) and a `Node`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@todo </span><span class="s4">Rename to `OpenFile`.</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">File </span><span class="s2">{</span>
+    <span class="s1">readonly link</span><span class="s2">: </span><span class="s1">Link</span><span class="s2">;</span>
+    <span class="s1">readonly node</span><span class="s2">: </span><span class="s1">Node</span><span class="s2">;</span>
+    <span class="s1">flags</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* A cursor/offset position in a file, where data will be written on write.</span>
+     <span class="s4">* User can &quot;seek&quot; this position.</span>
+     <span class="s4">*/</span>
+    <span class="s1">position</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* Open a Link-Node pair. `node` is provided separately as that might be a different node</span>
+     <span class="s4">* rather the one `link` points to, because it might be a symlink.</span>
+     <span class="s4">* </span><span class="s5">@param </span><span class="s4">link</span>
+     <span class="s4">* </span><span class="s5">@param </span><span class="s4">node</span>
+     <span class="s4">* </span><span class="s5">@param </span><span class="s4">flags</span>
+     <span class="s4">* </span><span class="s5">@param </span><span class="s4">fd</span>
+     <span class="s4">*/</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">link</span><span
+    class="s2">: </span><span class="s1">Link</span><span class="s2">, </span><span class="s1">node</span><span
+    class="s2">: </span><span class="s1">Node</span><span class="s2">, </span><span class="s1">flags</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">);</span>
+    <span class="s1">getString</span><span class="s2">(</span><span class="s1">encoding</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s1">setString</span><span class="s2">(</span><span class="s1">str</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">getBuffer</span><span class="s2">(): </span><span class="s1">Buffer</span><span class="s2">;</span>
+    <span class="s1">setBuffer</span><span class="s2">(</span><span class="s1">buf</span><span class="s2">: </span><span
+    class="s1">Buffer</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">getSize</span><span class="s2">(): </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">truncate</span><span class="s2">(</span><span class="s1">len</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">seekTo</span><span class="s2">(</span><span class="s1">position</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">buf</span><span class="s2">: </span><span
+    class="s1">Buffer</span><span class="s2">, </span><span class="s1">offset</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span class="s2">?: </span><span
+    class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span class="s2">): </span><span
+    class="s1">number</span><span class="s2">;</span>
+    <span class="s1">read</span><span class="s2">(</span><span class="s1">buf</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">ArrayBufferView </span><span
+    class="s2">| </span><span class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">): </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">chmod</span><span class="s2">(</span><span class="s1">perm</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">chown</span><span class="s2">(</span><span class="s1">uid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,448 @@
+<html>
+<head>
+  <title>FsPromises.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsPromises.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">FsPromises </span><span
+    class="s1">= </span><span class="s3">void </span><span class="s4">0</span><span class="s1">;</span>
+<span class="s3">const </span><span class="s2">util_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;./util&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">constants_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../constants&quot;</span><span class="s1">);</span>
+<span class="s5">// AsyncIterator implementation for promises.watch</span>
+<span class="s3">class </span><span class="s2">FSWatchAsyncIterator </span><span class="s1">{</span>
+    <span class="s2">constructor</span><span class="s1">(</span><span class="s2">fs</span><span
+    class="s1">, </span><span class="s2">path</span><span class="s1">, </span><span class="s2">options </span><span
+    class="s1">= {}) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">fs </span><span class="s1">= </span><span
+    class="s2">fs</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">path </span><span
+    class="s1">= </span><span class="s2">path</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">options </span><span
+    class="s1">= </span><span class="s2">options</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">eventQueue </span><span
+    class="s1">= [];</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">resolveQueue </span><span
+    class="s1">= [];</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">finished </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">maxQueue </span><span class="s1">= </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">maxQueue </span><span class="s1">|| </span><span
+    class="s4">2048</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">overflow </span><span class="s1">= </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">overflow </span><span class="s1">|| </span><span
+    class="s0">'ignore'</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">startWatching</span><span
+    class="s1">();</span>
+        <span class="s5">// Handle AbortSignal</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">signal</span><span class="s1">) {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">signal</span><span class="s1">.</span><span class="s2">aborted</span><span class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">finish</span><span
+    class="s1">();</span>
+                <span class="s3">return</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s2">options</span><span class="s1">.</span><span class="s2">signal</span><span
+    class="s1">.</span><span class="s2">addEventListener</span><span class="s1">(</span><span
+    class="s0">'abort'</span><span class="s1">, () =&gt; {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">finish</span><span
+    class="s1">();</span>
+            <span class="s1">});</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">startWatching</span><span class="s1">() {</span>
+        <span class="s3">try </span><span class="s1">{</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">watcher </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">fs</span><span class="s1">.</span><span
+    class="s2">watch</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">path</span><span class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">, (</span><span class="s2">eventType</span><span class="s1">, </span><span
+    class="s2">filename</span><span class="s1">) =&gt; {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">enqueueEvent</span><span
+    class="s1">({ </span><span class="s2">eventType</span><span class="s1">, </span><span
+    class="s2">filename </span><span class="s1">});</span>
+            <span class="s1">});</span>
+        <span class="s1">}</span>
+        <span class="s3">catch </span><span class="s1">(</span><span class="s2">error</span><span class="s1">) {</span>
+            <span class="s5">// If we can't start watching, finish immediately</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">finish</span><span
+    class="s1">();</span>
+            <span class="s3">throw </span><span class="s2">error</span><span class="s1">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">enqueueEvent</span><span class="s1">(</span><span class="s2">event</span><span
+    class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">finished</span><span class="s1">)</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s5">// Handle queue overflow</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">eventQueue</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">&gt;= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">maxQueue</span><span
+    class="s1">) {</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">overflow </span><span class="s1">=== </span><span class="s0">'throw'</span><span
+    class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">error </span><span class="s1">= </span><span class="s3">new </span><span
+    class="s2">Error</span><span class="s1">(</span><span class="s0">`Watch queue overflow: more than </span><span
+    class="s2">$</span><span class="s1">{</span><span class="s3">this</span><span class="s1">.</span><span class="s2">maxQueue</span><span
+    class="s1">} </span><span class="s0">events queued`</span><span class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">finish</span><span
+    class="s1">(</span><span class="s2">error</span><span class="s1">);</span>
+                <span class="s3">return</span><span class="s1">;</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s5">// 'ignore' - drop the oldest event</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">eventQueue</span><span class="s1">.</span><span
+    class="s2">shift</span><span class="s1">();</span>
+                <span class="s2">console</span><span class="s1">.</span><span class="s2">warn</span><span
+    class="s1">(</span><span class="s0">`Watch queue overflow: dropping event due to exceeding maxQueue of </span><span
+    class="s2">$</span><span class="s1">{</span><span class="s3">this</span><span class="s1">.</span><span class="s2">maxQueue</span><span
+    class="s1">}</span><span class="s0">`</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">eventQueue</span><span class="s1">.</span><span
+    class="s2">push</span><span class="s1">(</span><span class="s2">event</span><span class="s1">);</span>
+        <span class="s5">// If there's a waiting promise, resolve it</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">resolveQueue</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">&gt; </span><span class="s4">0</span><span class="s1">) {</span>
+            <span class="s3">const </span><span class="s1">{ </span><span class="s2">resolve </span><span
+    class="s1">} = </span><span class="s3">this</span><span class="s1">.</span><span class="s2">resolveQueue</span><span
+    class="s1">.</span><span class="s2">shift</span><span class="s1">();</span>
+            <span class="s3">const </span><span class="s2">nextEvent </span><span class="s1">= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">eventQueue</span><span class="s1">.</span><span class="s2">shift</span><span
+    class="s1">();</span>
+            <span class="s2">resolve</span><span class="s1">({ </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s2">nextEvent</span><span class="s1">, </span><span class="s2">done</span><span
+    class="s1">: </span><span class="s3">false </span><span class="s1">});</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">finish</span><span class="s1">(</span><span class="s2">error</span><span class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">finished</span><span class="s1">)</span>
+            <span class="s3">return</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">finished </span><span class="s1">= </span><span
+    class="s3">true</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">watcher</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">watcher</span><span
+    class="s1">.</span><span class="s2">close</span><span class="s1">();</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">watcher </span><span
+    class="s1">= </span><span class="s3">null</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s5">// Resolve or reject all pending promises</span>
+        <span class="s3">while </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">resolveQueue</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">&gt; </span><span class="s4">0</span><span class="s1">) {</span>
+            <span class="s3">const </span><span class="s1">{ </span><span class="s2">resolve</span><span
+    class="s1">, </span><span class="s2">reject </span><span class="s1">} = </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">resolveQueue</span><span class="s1">.</span><span class="s2">shift</span><span
+    class="s1">();</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">error</span><span class="s1">) {</span>
+                <span class="s2">reject</span><span class="s1">(</span><span class="s2">error</span><span
+    class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s2">resolve</span><span class="s1">({ </span><span class="s2">value</span><span class="s1">: </span><span
+    class="s2">undefined</span><span class="s1">, </span><span class="s2">done</span><span class="s1">: </span><span
+    class="s3">true </span><span class="s1">});</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">async next</span><span class="s1">() {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">finished</span><span class="s1">) {</span>
+            <span class="s3">return </span><span class="s1">{ </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s2">undefined</span><span class="s1">, </span><span class="s2">done</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">};</span>
+        <span class="s1">}</span>
+        <span class="s5">// If we have queued events, return one</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">eventQueue</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">&gt; </span><span class="s4">0</span><span class="s1">) {</span>
+            <span class="s3">const </span><span class="s2">event </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">eventQueue</span><span class="s1">.</span><span
+    class="s2">shift</span><span class="s1">();</span>
+            <span class="s3">return </span><span class="s1">{ </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s2">event</span><span class="s1">, </span><span class="s2">done</span><span
+    class="s1">: </span><span class="s3">false </span><span class="s1">};</span>
+        <span class="s1">}</span>
+        <span class="s5">// Otherwise, wait for the next event</span>
+        <span class="s3">return new </span><span class="s2">Promise</span><span class="s1">((</span><span class="s2">resolve</span><span
+    class="s1">, </span><span class="s2">reject</span><span class="s1">) =&gt; {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">resolveQueue</span><span
+    class="s1">.</span><span class="s2">push</span><span class="s1">({ </span><span class="s2">resolve</span><span
+    class="s1">, </span><span class="s2">reject </span><span class="s1">});</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">async </span><span class="s3">return</span><span class="s1">() {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">finish</span><span class="s1">();</span>
+        <span class="s3">return </span><span class="s1">{ </span><span class="s2">value</span><span class="s1">: </span><span
+    class="s2">undefined</span><span class="s1">, </span><span class="s2">done</span><span class="s1">: </span><span
+    class="s3">true </span><span class="s1">};</span>
+    <span class="s1">}</span>
+    <span class="s2">async </span><span class="s3">throw</span><span class="s1">(</span><span
+    class="s2">error</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">finish</span><span
+    class="s1">(</span><span class="s2">error</span><span class="s1">);</span>
+        <span class="s3">throw </span><span class="s2">error</span><span class="s1">;</span>
+    <span class="s1">}</span>
+    <span class="s1">[</span><span class="s2">Symbol</span><span class="s1">.</span><span
+    class="s2">asyncIterator</span><span class="s1">]() {</span>
+        <span class="s3">return this</span><span class="s1">;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s3">class </span><span class="s2">FsPromises </span><span class="s1">{</span>
+    <span class="s2">constructor</span><span class="s1">(</span><span class="s2">fs</span><span
+    class="s1">, </span><span class="s2">FileHandle</span><span class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">fs </span><span class="s1">= </span><span
+    class="s2">fs</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">FileHandle </span><span
+    class="s1">= </span><span class="s2">FileHandle</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">constants </span><span
+    class="s1">= </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">constants</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">cp </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">fs</span><span class="s1">, </span><span class="s0">'cp'</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">opendir </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">fs</span><span class="s1">, </span><span class="s0">'opendir'</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">statfs </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'statfs'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">lutimes </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">fs</span><span class="s1">, </span><span class="s0">'lutimes'</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">glob </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'glob'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">access </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'access'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">chmod </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'chmod'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">chown </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'chown'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">copyFile </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'copyFile'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">lchmod </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'lchmod'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">lchown </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'lchown'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">link </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'link'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">lstat </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'lstat'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">mkdir </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'mkdir'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">mkdtemp </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">fs</span><span class="s1">, </span><span class="s0">'mkdtemp'</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">readdir </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">fs</span><span class="s1">, </span><span class="s0">'readdir'</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">readlink </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'readlink'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">realpath </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'realpath'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">rename </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'rename'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">rmdir </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'rmdir'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">rm </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">fs</span><span class="s1">, </span><span class="s0">'rm'</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">stat </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'stat'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">symlink </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">fs</span><span class="s1">, </span><span class="s0">'symlink'</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">truncate </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'truncate'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">unlink </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'unlink'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">utimes </span><span
+    class="s1">= (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">promisify</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s0">'utimes'</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">readFile </span><span
+    class="s1">= (</span><span class="s2">id</span><span class="s1">, </span><span class="s2">options</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s3">return </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">promisify</span><span
+    class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span
+    class="s0">'readFile'</span><span class="s1">)(</span><span class="s2">id </span><span
+    class="s3">instanceof this</span><span class="s1">.</span><span class="s2">FileHandle </span><span
+    class="s1">? </span><span class="s2">id</span><span class="s1">.</span><span class="s2">fd </span><span
+    class="s1">: </span><span class="s2">id</span><span class="s1">, </span><span class="s2">options</span><span
+    class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">appendFile </span><span
+    class="s1">= (</span><span class="s2">path</span><span class="s1">, </span><span class="s2">data</span><span
+    class="s1">, </span><span class="s2">options</span><span class="s1">) =&gt; {</span>
+            <span class="s3">return </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">promisify</span><span
+    class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span
+    class="s0">'appendFile'</span><span class="s1">)(</span><span class="s2">path </span><span class="s3">instanceof this</span><span
+    class="s1">.</span><span class="s2">FileHandle </span><span class="s1">? </span><span class="s2">path</span><span
+    class="s1">.</span><span class="s2">fd </span><span class="s1">: </span><span class="s2">path</span><span
+    class="s1">, </span><span class="s2">data</span><span class="s1">, </span><span class="s2">options</span><span
+    class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">open </span><span
+    class="s1">= (</span><span class="s2">path</span><span class="s1">, </span><span class="s2">flags </span><span
+    class="s1">= </span><span class="s0">'r'</span><span class="s1">, </span><span class="s2">mode</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s3">return </span><span class="s1">(</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">promisify</span><span
+    class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span
+    class="s0">'open'</span><span class="s1">, </span><span class="s2">fd </span><span class="s1">=&gt; </span><span
+    class="s3">new this</span><span class="s1">.</span><span class="s2">FileHandle</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span class="s2">fd</span><span
+    class="s1">))(</span><span class="s2">path</span><span class="s1">, </span><span class="s2">flags</span><span
+    class="s1">, </span><span class="s2">mode</span><span class="s1">);</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">writeFile </span><span
+    class="s1">= (</span><span class="s2">id</span><span class="s1">, </span><span class="s2">data</span><span
+    class="s1">, </span><span class="s2">options</span><span class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">dataPromise </span><span class="s1">= (</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">isReadableStream</span><span class="s1">)(</span><span class="s2">data</span><span
+    class="s1">) ? (</span><span class="s4">0</span><span class="s1">, </span><span class="s2">util_1</span><span
+    class="s1">.</span><span class="s2">streamToBuffer</span><span class="s1">)(</span><span class="s2">data</span><span
+    class="s1">) : </span><span class="s2">Promise</span><span class="s1">.</span><span class="s2">resolve</span><span
+    class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+            <span class="s3">return </span><span class="s2">dataPromise</span><span class="s1">.</span><span class="s2">then</span><span
+    class="s1">(</span><span class="s2">data </span><span class="s1">=&gt; (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">util_1</span><span class="s1">.</span><span class="s2">promisify</span><span
+    class="s1">)(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">fs</span><span class="s1">, </span><span
+    class="s0">'writeFile'</span><span class="s1">)(</span><span class="s2">id </span><span
+    class="s3">instanceof this</span><span class="s1">.</span><span class="s2">FileHandle </span><span
+    class="s1">? </span><span class="s2">id</span><span class="s1">.</span><span class="s2">fd </span><span
+    class="s1">: </span><span class="s2">id</span><span class="s1">, </span><span class="s2">data</span><span
+    class="s1">, </span><span class="s2">options</span><span class="s1">));</span>
+        <span class="s1">};</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">watch </span><span
+    class="s1">= (</span><span class="s2">filename</span><span class="s1">, </span><span class="s2">options</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s3">const </span><span class="s2">watchOptions </span><span class="s1">= </span><span
+    class="s3">typeof </span><span class="s2">options </span><span class="s1">=== </span><span
+    class="s0">'string' </span><span class="s1">? { </span><span class="s2">encoding</span><span
+    class="s1">: </span><span class="s2">options </span><span class="s1">} : </span><span
+    class="s2">options </span><span class="s1">|| {};</span>
+            <span class="s3">return new </span><span class="s2">FSWatchAsyncIterator</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">fs</span><span
+    class="s1">, </span><span class="s2">filename</span><span class="s1">, </span><span
+    class="s2">watchOptions</span><span class="s1">);</span>
+        <span class="s1">};</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">FsPromises </span><span
+    class="s1">= </span><span class="s2">FsPromises</span><span class="s1">;</span>
+<span class="s5">//# sourceMappingURL=FsPromises.js.map</span></pre>
+</body>
+</html>

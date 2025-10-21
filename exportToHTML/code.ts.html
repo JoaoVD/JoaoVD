@@ -1,0 +1,409 @@
+<html>
+<head>
+  <title>code.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          code.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+  class="s1">AnySchema</span><span class="s2">, </span><span class="s1">SchemaMap</span><span class="s2">} </span><span
+  class="s1">from </span><span class="s3">&quot;../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">SchemaCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../compile&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">CodeGen</span><span class="s2">, </span><span
+    class="s1">_</span><span class="s2">, </span><span class="s1">and</span><span class="s2">, </span><span class="s1">or</span><span
+    class="s2">, </span><span class="s1">not</span><span class="s2">, </span><span class="s1">nil</span><span
+    class="s2">, </span><span class="s1">strConcat</span><span class="s2">, </span><span
+    class="s1">getProperty</span><span class="s2">, </span><span class="s1">Code</span><span class="s2">, </span><span
+    class="s1">Name</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">, </span><span class="s1">Type</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;../compile/util&quot;</span>
+<span class="s0">import </span><span class="s1">N from </span><span class="s3">&quot;../compile/names&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">useFunc</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../compile/util&quot;</span>
+<span class="s0">export function </span><span class="s1">checkReportMissingProp</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span
+    class="s1">prop</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">noPropertyInData</span><span class="s2">(</span><span class="s1">gen</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s1">prop</span><span
+    class="s2">, </span><span class="s1">it</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">ownProperties</span><span class="s2">), () =&gt; {</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">setParams</span><span class="s2">({</span><span
+    class="s1">missingProperty</span><span class="s2">: </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">prop</span><span class="s2">}</span><span
+    class="s3">`</span><span class="s2">}, </span><span class="s0">true</span><span class="s2">)</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span class="s2">()</span>
+  <span class="s2">})</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">checkMissingProp</span><span class="s2">(</span>
+  <span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">it</span><span class="s2">: {</span><span class="s1">opts</span><span
+    class="s2">}}: </span><span class="s1">KeywordCxt</span><span class="s2">,</span>
+  <span class="s1">properties</span><span class="s2">: </span><span class="s1">string</span><span class="s2">[],</span>
+  <span class="s1">missing</span><span class="s2">: </span><span class="s1">Name</span>
+<span class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">return </span><span class="s1">or</span><span class="s2">(</span>
+    <span class="s1">...properties</span><span class="s2">.</span><span class="s1">map</span><span
+    class="s2">((</span><span class="s1">prop</span><span class="s2">) =&gt;</span>
+      <span class="s1">and</span><span class="s2">(</span><span class="s1">noPropertyInData</span><span
+    class="s2">(</span><span class="s1">gen</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">prop</span><span class="s2">, </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">ownProperties</span><span class="s2">), </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">missing</span><span
+    class="s2">} </span><span class="s3">= </span><span class="s1">$</span><span class="s2">{</span><span class="s1">prop</span><span
+    class="s2">}</span><span class="s3">`</span><span class="s2">)</span>
+    <span class="s2">)</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">reportMissingProp</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span
+    class="s1">missing</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s1">cxt</span><span class="s2">.</span><span class="s1">setParams</span><span class="s2">({</span><span
+    class="s1">missingProperty</span><span class="s2">: </span><span class="s1">missing</span><span
+    class="s2">}, </span><span class="s0">true</span><span class="s2">)</span>
+  <span class="s1">cxt</span><span class="s2">.</span><span class="s1">error</span><span class="s2">()</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">hasPropFunc</span><span class="s2">(</span><span
+    class="s1">gen</span><span class="s2">: </span><span class="s1">CodeGen</span><span class="s2">): </span><span
+    class="s1">Name </span><span class="s2">{</span>
+  <span class="s0">return </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">scopeValue</span><span class="s2">(</span><span class="s3">&quot;func&quot;</span><span
+    class="s2">, {</span>
+    <span class="s4">// eslint-disable-next-line @typescript-eslint/unbound-method</span>
+    <span class="s1">ref</span><span class="s2">: </span><span class="s1">Object</span><span class="s2">.</span><span
+    class="s1">prototype</span><span class="s2">.</span><span class="s1">hasOwnProperty</span><span class="s2">,</span>
+    <span class="s1">code</span><span class="s2">: </span><span class="s1">_</span><span class="s3">`Object.prototype.hasOwnProperty`</span><span
+    class="s2">,</span>
+  <span class="s2">})</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">isOwnProperty</span><span class="s2">(</span><span class="s1">gen</span><span
+    class="s2">: </span><span class="s1">CodeGen</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">: </span><span class="s1">Name</span><span class="s2">, </span><span class="s1">property</span><span
+    class="s2">: </span><span class="s1">Name </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">return </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">hasPropFunc</span><span class="s2">(</span><span class="s1">gen</span><span
+    class="s2">)}</span><span class="s3">.call(</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">}</span><span class="s3">, </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">property</span><span class="s2">}</span><span class="s3">)`</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">propertyInData</span><span class="s2">(</span>
+  <span class="s1">gen</span><span class="s2">: </span><span class="s1">CodeGen</span><span class="s2">,</span>
+  <span class="s1">data</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">,</span>
+  <span class="s1">property</span><span class="s2">: </span><span class="s1">Name </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">,</span>
+  <span class="s1">ownProperties</span><span class="s2">?: </span><span class="s1">boolean</span>
+<span class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">getProperty</span><span
+    class="s2">(</span><span class="s1">property</span><span class="s2">)} </span><span class="s3">!== undefined`</span>
+  <span class="s0">return </span><span class="s1">ownProperties </span><span class="s2">? </span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">cond</span><span class="s2">} </span><span class="s3">&amp;&amp; </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">isOwnProperty</span><span class="s2">(</span><span class="s1">gen</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s1">property</span><span
+    class="s2">)}</span><span class="s3">` </span><span class="s2">: </span><span class="s1">cond</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">noPropertyInData</span><span class="s2">(</span>
+  <span class="s1">gen</span><span class="s2">: </span><span class="s1">CodeGen</span><span class="s2">,</span>
+  <span class="s1">data</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">,</span>
+  <span class="s1">property</span><span class="s2">: </span><span class="s1">Name </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">,</span>
+  <span class="s1">ownProperties</span><span class="s2">?: </span><span class="s1">boolean</span>
+<span class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">cond </span><span class="s2">= </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">getProperty</span><span
+    class="s2">(</span><span class="s1">property</span><span class="s2">)} </span><span class="s3">=== undefined`</span>
+  <span class="s0">return </span><span class="s1">ownProperties </span><span class="s2">? </span><span
+    class="s1">or</span><span class="s2">(</span><span class="s1">cond</span><span class="s2">, </span><span class="s1">not</span><span
+    class="s2">(</span><span class="s1">isOwnProperty</span><span class="s2">(</span><span class="s1">gen</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span class="s1">property</span><span
+    class="s2">))) : </span><span class="s1">cond</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">allSchemaProperties</span><span class="s2">(</span><span
+    class="s1">schemaMap</span><span class="s2">?: </span><span class="s1">SchemaMap</span><span
+    class="s2">): </span><span class="s1">string</span><span class="s2">[] {</span>
+  <span class="s0">return </span><span class="s1">schemaMap </span><span class="s2">? </span><span
+    class="s1">Object</span><span class="s2">.</span><span class="s1">keys</span><span class="s2">(</span><span
+    class="s1">schemaMap</span><span class="s2">).</span><span class="s1">filter</span><span class="s2">((</span><span
+    class="s1">p</span><span class="s2">) =&gt; </span><span class="s1">p </span><span class="s2">!== </span><span
+    class="s3">&quot;__proto__&quot;</span><span class="s2">) : []</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">schemaProperties</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaCxt</span><span class="s2">, </span><span
+    class="s1">schemaMap</span><span class="s2">: </span><span class="s1">SchemaMap</span><span
+    class="s2">): </span><span class="s1">string</span><span class="s2">[] {</span>
+  <span class="s0">return </span><span class="s1">allSchemaProperties</span><span class="s2">(</span><span class="s1">schemaMap</span><span
+    class="s2">).</span><span class="s1">filter</span><span class="s2">(</span>
+    <span class="s2">(</span><span class="s1">p</span><span class="s2">) =&gt; !</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span class="s1">schemaMap</span><span
+    class="s2">[</span><span class="s1">p</span><span class="s2">] as </span><span class="s1">AnySchema</span><span
+    class="s2">)</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">callValidateCode</span><span class="s2">(</span>
+  <span class="s2">{</span><span class="s1">schemaCode</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">it</span><span class="s2">: {</span><span class="s1">gen</span><span
+    class="s2">, </span><span class="s1">topSchemaRef</span><span class="s2">, </span><span class="s1">schemaPath</span><span
+    class="s2">, </span><span class="s1">errorPath</span><span class="s2">}, </span><span class="s1">it</span><span
+    class="s2">}: </span><span class="s1">KeywordCxt</span><span class="s2">,</span>
+  <span class="s1">func</span><span class="s2">: </span><span class="s1">Code</span><span class="s2">,</span>
+  <span class="s1">context</span><span class="s2">: </span><span class="s1">Code</span><span class="s2">,</span>
+  <span class="s1">passSchema</span><span class="s2">?: </span><span class="s1">boolean</span>
+<span class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">dataAndSchema </span><span class="s2">= </span><span class="s1">passSchema </span><span
+    class="s2">? </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span class="s3">, </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">, </span><span class="s1">$</span><span class="s2">{</span><span class="s1">topSchemaRef</span><span
+    class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">schemaPath</span><span
+    class="s2">}</span><span class="s3">` </span><span class="s2">: </span><span class="s1">data</span>
+  <span class="s0">const </span><span class="s1">valCxt</span><span class="s2">: [</span><span
+    class="s1">Name</span><span class="s2">, </span><span class="s1">Code </span><span class="s2">| </span><span
+    class="s1">number</span><span class="s2">][] = [</span>
+    <span class="s2">[</span><span class="s1">N</span><span class="s2">.</span><span class="s1">instancePath</span><span
+    class="s2">, </span><span class="s1">strConcat</span><span class="s2">(</span><span class="s1">N</span><span
+    class="s2">.</span><span class="s1">instancePath</span><span class="s2">, </span><span
+    class="s1">errorPath</span><span class="s2">)],</span>
+    <span class="s2">[</span><span class="s1">N</span><span class="s2">.</span><span class="s1">parentData</span><span
+    class="s2">, </span><span class="s1">it</span><span class="s2">.</span><span class="s1">parentData</span><span
+    class="s2">],</span>
+    <span class="s2">[</span><span class="s1">N</span><span class="s2">.</span><span
+    class="s1">parentDataProperty</span><span class="s2">, </span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">parentDataProperty</span><span class="s2">],</span>
+    <span class="s2">[</span><span class="s1">N</span><span class="s2">.</span><span class="s1">rootData</span><span
+    class="s2">, </span><span class="s1">N</span><span class="s2">.</span><span class="s1">rootData</span><span
+    class="s2">],</span>
+  <span class="s2">]</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">dynamicRef</span><span class="s2">) </span><span
+    class="s1">valCxt</span><span class="s2">.</span><span class="s1">push</span><span class="s2">([</span><span
+    class="s1">N</span><span class="s2">.</span><span class="s1">dynamicAnchors</span><span class="s2">, </span><span
+    class="s1">N</span><span class="s2">.</span><span class="s1">dynamicAnchors</span><span class="s2">])</span>
+  <span class="s0">const </span><span class="s1">args </span><span class="s2">= </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">dataAndSchema</span><span
+    class="s2">}</span><span class="s3">, </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">object</span><span class="s2">(</span><span
+    class="s1">...valCxt</span><span class="s2">)}</span><span class="s3">`</span>
+  <span class="s0">return </span><span class="s1">context </span><span class="s2">!== </span><span
+    class="s1">nil </span><span class="s2">? </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">func</span><span class="s2">}</span><span class="s3">.call(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">context</span><span class="s2">}</span><span
+    class="s3">, </span><span class="s1">$</span><span class="s2">{</span><span class="s1">args</span><span
+    class="s2">}</span><span class="s3">)` </span><span class="s2">: </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">func</span><span
+    class="s2">}</span><span class="s3">(</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">args</span><span class="s2">}</span><span class="s3">)`</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">newRegExp </span><span class="s2">= </span><span class="s1">_</span><span
+    class="s3">`new RegExp`</span>
+
+<span class="s0">export function </span><span class="s1">usePattern</span><span class="s2">({</span><span
+    class="s1">gen</span><span class="s2">, </span><span class="s1">it</span><span class="s2">: {</span><span
+    class="s1">opts</span><span class="s2">}}: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span
+    class="s1">pattern</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">Name </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s1">u </span><span class="s2">= </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">unicodeRegExp </span><span class="s2">? </span><span
+    class="s3">&quot;u&quot; </span><span class="s2">: </span><span class="s3">&quot;&quot;</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">regExp</span><span class="s2">} = </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">code</span>
+  <span class="s0">const </span><span class="s1">rx </span><span class="s2">= </span><span class="s1">regExp</span><span
+    class="s2">(</span><span class="s1">pattern</span><span class="s2">, </span><span class="s1">u</span><span
+    class="s2">)</span>
+
+  <span class="s0">return </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">scopeValue</span><span class="s2">(</span><span class="s3">&quot;pattern&quot;</span><span
+    class="s2">, {</span>
+    <span class="s1">key</span><span class="s2">: </span><span class="s1">rx</span><span class="s2">.</span><span
+    class="s1">toString</span><span class="s2">(),</span>
+    <span class="s1">ref</span><span class="s2">: </span><span class="s1">rx</span><span class="s2">,</span>
+    <span class="s1">code</span><span class="s2">: </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">regExp</span><span class="s2">.</span><span class="s1">code </span><span
+    class="s2">=== </span><span class="s3">&quot;new RegExp&quot; </span><span class="s2">? </span><span class="s1">newRegExp </span><span
+    class="s2">: </span><span class="s1">useFunc</span><span class="s2">(</span><span class="s1">gen</span><span
+    class="s2">, </span><span class="s1">regExp</span><span class="s2">)}</span><span class="s3">(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">pattern</span><span class="s2">}</span><span
+    class="s3">, </span><span class="s1">$</span><span class="s2">{</span><span class="s1">u</span><span
+    class="s2">}</span><span class="s3">)`</span><span class="s2">,</span>
+  <span class="s2">})</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">validateArray</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">): </span><span class="s1">Name </span><span
+    class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">keyword</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+  <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">allErrors</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">validArr </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+    <span class="s1">validateItems</span><span class="s2">(() =&gt; </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span class="s1">validArr</span><span
+    class="s2">, </span><span class="s0">false</span><span class="s2">))</span>
+    <span class="s0">return </span><span class="s1">validArr</span>
+  <span class="s2">}</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">var</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s0">true</span><span class="s2">)</span>
+  <span class="s1">validateItems</span><span class="s2">(() =&gt; </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">break</span><span class="s2">())</span>
+  <span class="s0">return </span><span class="s1">valid</span>
+
+  <span class="s0">function </span><span class="s1">validateItems</span><span class="s2">(</span><span class="s1">notValid</span><span
+    class="s2">: () =&gt; </span><span class="s0">void</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">len </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">const</span><span class="s2">(</span><span
+    class="s3">&quot;len&quot;</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">.length`</span><span
+    class="s2">)</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">forRange</span><span class="s2">(</span><span
+    class="s3">&quot;i&quot;</span><span class="s2">, </span><span class="s5">0</span><span class="s2">, </span><span
+    class="s1">len</span><span class="s2">, (</span><span class="s1">i</span><span class="s2">) =&gt; {</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">subschema</span><span class="s2">(</span>
+        <span class="s2">{</span>
+          <span class="s1">keyword</span><span class="s2">,</span>
+          <span class="s1">dataProp</span><span class="s2">: </span><span class="s1">i</span><span class="s2">,</span>
+          <span class="s1">dataPropType</span><span class="s2">: </span><span class="s1">Type</span><span
+    class="s2">.</span><span class="s1">Num</span><span class="s2">,</span>
+        <span class="s2">},</span>
+        <span class="s1">valid</span>
+      <span class="s2">)</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">not</span><span class="s2">(</span><span class="s1">valid</span><span class="s2">), </span><span
+    class="s1">notValid</span><span class="s2">)</span>
+    <span class="s2">})</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">validateUnion</span><span class="s2">(</span><span class="s1">cxt</span><span
+    class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">keyword</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+  <span class="s4">/* istanbul ignore if */</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">)) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;ajv implementation error&quot;</span><span
+    class="s2">)</span>
+  <span class="s0">const </span><span class="s1">alwaysValid </span><span class="s2">= </span><span
+    class="s1">schema</span><span class="s2">.</span><span class="s1">some</span><span class="s2">((</span><span
+    class="s1">sch</span><span class="s2">: </span><span class="s1">AnySchema</span><span
+    class="s2">) =&gt; </span><span class="s1">alwaysValidSchema</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">, </span><span class="s1">sch</span><span class="s2">))</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">alwaysValid </span><span
+    class="s2">&amp;&amp; !</span><span class="s1">it</span><span class="s2">.</span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">unevaluated</span><span class="s2">) </span><span class="s0">return</span>
+
+  <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">, </span><span class="s0">false</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">schValid </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span class="s3">&quot;_valid&quot;</span><span
+    class="s2">)</span>
+
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">block</span><span class="s2">(() =&gt;</span>
+    <span class="s1">schema</span><span class="s2">.</span><span class="s1">forEach</span><span
+    class="s2">((</span><span class="s1">_sch</span><span class="s2">: </span><span class="s1">AnySchema</span><span
+    class="s2">, </span><span class="s1">i</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">) =&gt; {</span>
+      <span class="s0">const </span><span class="s1">schCxt </span><span class="s2">= </span><span class="s1">cxt</span><span
+    class="s2">.</span><span class="s1">subschema</span><span class="s2">(</span>
+        <span class="s2">{</span>
+          <span class="s1">keyword</span><span class="s2">,</span>
+          <span class="s1">schemaProp</span><span class="s2">: </span><span class="s1">i</span><span class="s2">,</span>
+          <span class="s1">compositeRule</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">,</span>
+        <span class="s2">},</span>
+        <span class="s1">schValid</span>
+      <span class="s2">)</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">valid</span><span class="s2">} </span><span class="s3">|| </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schValid</span><span class="s2">}</span><span
+    class="s3">`</span><span class="s2">)</span>
+      <span class="s0">const </span><span class="s1">merged </span><span class="s2">= </span><span class="s1">cxt</span><span
+    class="s2">.</span><span class="s1">mergeValidEvaluated</span><span class="s2">(</span><span
+    class="s1">schCxt</span><span class="s2">, </span><span class="s1">schValid</span><span class="s2">)</span>
+      <span
+        class="s4">// can short-circuit if `unevaluatedProperties/Items` not supported (opts.unevaluated !== true)</span>
+      <span
+        class="s4">// or if all properties and items were evaluated (it.props === true &amp;&amp; it.items === true)</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">merged</span><span class="s2">) </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span class="s1">not</span><span
+    class="s2">(</span><span class="s1">valid</span><span class="s2">))</span>
+    <span class="s2">})</span>
+  <span class="s2">)</span>
+
+  <span class="s1">cxt</span><span class="s2">.</span><span class="s1">result</span><span class="s2">(</span>
+    <span class="s1">valid</span><span class="s2">,</span>
+    <span class="s2">() =&gt; </span><span class="s1">cxt</span><span class="s2">.</span><span
+    class="s1">reset</span><span class="s2">(),</span>
+    <span class="s2">() =&gt; </span><span class="s1">cxt</span><span class="s2">.</span><span
+    class="s1">error</span><span class="s2">(</span><span class="s0">true</span><span class="s2">)</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

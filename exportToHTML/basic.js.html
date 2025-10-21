@@ -1,0 +1,434 @@
+<html>
+<head>
+  <title>basic.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          basic.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">t </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'tap'</span><span class="s2">)</span>
+<span class="s0">var </span><span class="s1">fs </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'fs'</span><span class="s2">)</span>
+<span class="s0">var </span><span class="s1">path </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'path'</span><span class="s2">)</span>
+<span class="s0">var </span><span class="s1">fixture </span><span class="s2">= </span><span class="s1">path</span><span
+    class="s2">.</span><span class="s1">resolve</span><span class="s2">(</span><span class="s1">__dirname</span><span
+    class="s2">, </span><span class="s3">'fixtures'</span><span class="s2">)</span>
+<span class="s0">var </span><span class="s1">meow </span><span class="s2">= </span><span class="s1">fixture </span><span
+    class="s2">+ </span><span class="s3">'/meow.cat'</span>
+<span class="s0">var </span><span class="s1">mine </span><span class="s2">= </span><span class="s1">fixture </span><span
+    class="s2">+ </span><span class="s3">'/mine.cat'</span>
+<span class="s0">var </span><span class="s1">ours </span><span class="s2">= </span><span class="s1">fixture </span><span
+    class="s2">+ </span><span class="s3">'/ours.cat'</span>
+<span class="s0">var </span><span class="s1">fail </span><span class="s2">= </span><span class="s1">fixture </span><span
+    class="s2">+ </span><span class="s3">'/fail.false'</span>
+<span class="s0">var </span><span class="s1">noent </span><span class="s2">= </span><span
+    class="s1">fixture </span><span class="s2">+ </span><span class="s3">'/enoent.exe'</span>
+<span class="s0">var </span><span class="s1">mkdirp </span><span class="s2">= </span><span
+    class="s1">require</span><span class="s2">(</span><span class="s3">'mkdirp'</span><span class="s2">)</span>
+<span class="s0">var </span><span class="s1">rimraf </span><span class="s2">= </span><span
+    class="s1">require</span><span class="s2">(</span><span class="s3">'rimraf'</span><span class="s2">)</span>
+
+<span class="s0">var </span><span class="s1">isWindows </span><span class="s2">= </span><span
+    class="s1">process</span><span class="s2">.</span><span class="s1">platform </span><span class="s2">=== </span><span
+    class="s3">'win32'</span>
+<span class="s0">var </span><span class="s1">hasAccess </span><span class="s2">= </span><span
+    class="s0">typeof </span><span class="s1">fs</span><span class="s2">.</span><span class="s1">access </span><span
+    class="s2">=== </span><span class="s3">'function'</span>
+<span class="s0">var </span><span class="s1">winSkip </span><span class="s2">= </span><span class="s1">isWindows </span><span
+    class="s2">&amp;&amp; </span><span class="s3">'windows'</span>
+<span class="s0">var </span><span class="s1">accessSkip </span><span class="s2">= !</span><span
+    class="s1">hasAccess </span><span class="s2">&amp;&amp; </span><span class="s3">'no fs.access function'</span>
+<span class="s0">var </span><span class="s1">hasPromise </span><span class="s2">= </span><span class="s0">typeof </span><span
+    class="s1">Promise </span><span class="s2">=== </span><span class="s3">'function'</span>
+<span class="s0">var </span><span class="s1">promiseSkip </span><span class="s2">= !</span><span
+    class="s1">hasPromise </span><span class="s2">&amp;&amp; </span><span class="s3">'no global Promise'</span>
+
+<span class="s0">function </span><span class="s1">reset </span><span class="s2">() {</span>
+  <span class="s0">delete </span><span class="s1">require</span><span class="s2">.</span><span
+    class="s1">cache</span><span class="s2">[</span><span class="s1">require</span><span class="s2">.</span><span
+    class="s1">resolve</span><span class="s2">(</span><span class="s3">'../'</span><span class="s2">)]</span>
+  <span class="s0">return </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'../'</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s3">'setup fixtures'</span><span
+    class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span class="s1">t</span><span
+    class="s2">) {</span>
+  <span class="s1">rimraf</span><span class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span
+    class="s1">fixture</span><span class="s2">)</span>
+  <span class="s1">mkdirp</span><span class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span
+    class="s1">fixture</span><span class="s2">)</span>
+  <span class="s1">fs</span><span class="s2">.</span><span class="s1">writeFileSync</span><span class="s2">(</span><span
+    class="s1">meow</span><span class="s2">, </span><span class="s3">'#!/usr/bin/env cat</span><span
+    class="s0">\n</span><span class="s3">meow</span><span class="s0">\n</span><span class="s3">'</span><span class="s2">)</span>
+  <span class="s1">fs</span><span class="s2">.</span><span class="s1">chmodSync</span><span class="s2">(</span><span
+    class="s1">meow</span><span class="s2">, </span><span class="s1">parseInt</span><span class="s2">(</span><span
+    class="s3">'0755'</span><span class="s2">, </span><span class="s4">8</span><span class="s2">))</span>
+  <span class="s1">fs</span><span class="s2">.</span><span class="s1">writeFileSync</span><span class="s2">(</span><span
+    class="s1">fail</span><span class="s2">, </span><span class="s3">'#!/usr/bin/env false</span><span
+    class="s0">\n</span><span class="s3">'</span><span class="s2">)</span>
+  <span class="s1">fs</span><span class="s2">.</span><span class="s1">chmodSync</span><span class="s2">(</span><span
+    class="s1">fail</span><span class="s2">, </span><span class="s1">parseInt</span><span class="s2">(</span><span
+    class="s3">'0644'</span><span class="s2">, </span><span class="s4">8</span><span class="s2">))</span>
+  <span class="s1">fs</span><span class="s2">.</span><span class="s1">writeFileSync</span><span class="s2">(</span><span
+    class="s1">mine</span><span class="s2">, </span><span class="s3">'#!/usr/bin/env cat</span><span
+    class="s0">\n</span><span class="s3">mine</span><span class="s0">\n</span><span class="s3">'</span><span class="s2">)</span>
+  <span class="s1">fs</span><span class="s2">.</span><span class="s1">chmodSync</span><span class="s2">(</span><span
+    class="s1">mine</span><span class="s2">, </span><span class="s1">parseInt</span><span class="s2">(</span><span
+    class="s3">'0744'</span><span class="s2">, </span><span class="s4">8</span><span class="s2">))</span>
+  <span class="s1">fs</span><span class="s2">.</span><span class="s1">writeFileSync</span><span class="s2">(</span><span
+    class="s1">ours</span><span class="s2">, </span><span class="s3">'#!/usr/bin/env cat</span><span
+    class="s0">\n</span><span class="s3">ours</span><span class="s0">\n</span><span class="s3">'</span><span class="s2">)</span>
+  <span class="s1">fs</span><span class="s2">.</span><span class="s1">chmodSync</span><span class="s2">(</span><span
+    class="s1">ours</span><span class="s2">, </span><span class="s1">parseInt</span><span class="s2">(</span><span
+    class="s3">'0754'</span><span class="s2">, </span><span class="s4">8</span><span class="s2">))</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+<span class="s2">})</span>
+
+<span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s3">'promise'</span><span
+    class="s2">, { </span><span class="s1">skip</span><span class="s2">: </span><span
+    class="s1">promiseSkip </span><span class="s2">}, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">isexe </span><span class="s2">= </span><span class="s1">reset</span><span
+    class="s2">()</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'meow async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">meow</span><span class="s2">).</span><span
+    class="s1">then</span><span class="s2">(</span><span class="s0">function </span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">) {</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'fail async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">fail</span><span class="s2">).</span><span
+    class="s1">then</span><span class="s2">(</span><span class="s0">function </span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">) {</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">notOk</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'noent async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">noent</span><span class="s2">).</span><span
+    class="s1">catch</span><span class="s2">(</span><span class="s0">function </span><span class="s2">(</span><span
+    class="s1">er</span><span class="s2">) {</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">er</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'noent ignore async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">noent</span><span class="s2">, { </span><span
+    class="s1">ignoreErrors</span><span class="s2">: </span><span class="s0">true </span><span
+    class="s2">}).</span><span class="s1">then</span><span class="s2">(</span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">is</span><span class="s2">) {</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">notOk</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+<span class="s2">})</span>
+
+<span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s3">'no promise'</span><span
+    class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span class="s1">t</span><span
+    class="s2">) {</span>
+  <span class="s1">global</span><span class="s2">.</span><span class="s1">Promise </span><span class="s2">= </span><span
+    class="s0">null</span>
+  <span class="s0">var </span><span class="s1">isexe </span><span class="s2">= </span><span class="s1">reset</span><span
+    class="s2">()</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">throws</span><span class="s2">(</span><span
+    class="s3">'try to meow a promise'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">() {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">meow</span><span class="s2">)</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+<span class="s2">})</span>
+
+<span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s3">'access'</span><span
+    class="s2">, { </span><span class="s1">skip</span><span class="s2">: </span><span class="s1">accessSkip </span><span
+    class="s2">|| </span><span class="s1">winSkip </span><span class="s2">}, </span><span
+    class="s0">function </span><span class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+  <span class="s1">runTest</span><span class="s2">(</span><span class="s1">t</span><span class="s2">)</span>
+<span class="s2">})</span>
+
+<span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s3">'mode'</span><span
+    class="s2">, { </span><span class="s1">skip</span><span class="s2">: </span><span class="s1">winSkip </span><span
+    class="s2">}, </span><span class="s0">function </span><span class="s2">(</span><span class="s1">t</span><span
+    class="s2">) {</span>
+  <span class="s0">delete </span><span class="s1">fs</span><span class="s2">.</span><span class="s1">access</span>
+  <span class="s0">delete </span><span class="s1">fs</span><span class="s2">.</span><span class="s1">accessSync</span>
+  <span class="s0">var </span><span class="s1">isexe </span><span class="s2">= </span><span class="s1">reset</span><span
+    class="s2">()</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span class="s1">isexe</span><span
+    class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span class="s1">ours</span><span
+    class="s2">, { </span><span class="s1">uid</span><span class="s2">: </span><span class="s4">0</span><span
+    class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span class="s4">0 </span><span class="s2">}))</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span class="s1">isexe</span><span
+    class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span class="s1">mine</span><span
+    class="s2">, { </span><span class="s1">uid</span><span class="s2">: </span><span class="s4">0</span><span
+    class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span class="s4">0 </span><span class="s2">}))</span>
+  <span class="s1">runTest</span><span class="s2">(</span><span class="s1">t</span><span class="s2">)</span>
+<span class="s2">})</span>
+
+<span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s3">'windows'</span><span
+    class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span class="s1">t</span><span
+    class="s2">) {</span>
+  <span class="s1">global</span><span class="s2">.</span><span class="s1">TESTING_WINDOWS </span><span
+    class="s2">= </span><span class="s0">true</span>
+  <span class="s0">var </span><span class="s1">pathExt </span><span class="s2">= </span><span class="s3">'.EXE;.CAT;.CMD;.COM'</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'pathExt option'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">runTest</span><span class="s2">(</span><span class="s1">t</span><span class="s2">, { </span><span
+    class="s1">pathExt</span><span class="s2">: </span><span class="s3">'.EXE;.CAT;.CMD;.COM' </span><span
+    class="s2">})</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'pathExt env'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">process</span><span class="s2">.</span><span class="s1">env</span><span class="s2">.</span><span
+    class="s1">PATHEXT </span><span class="s2">= </span><span class="s1">pathExt</span>
+    <span class="s1">runTest</span><span class="s2">(</span><span class="s1">t</span><span class="s2">)</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'no pathExt'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s5">// with a pathExt of '', any filename is fine.</span>
+    <span class="s5">// so the &quot;fail&quot; one would still pass.</span>
+    <span class="s1">runTest</span><span class="s2">(</span><span class="s1">t</span><span class="s2">, { </span><span
+    class="s1">pathExt</span><span class="s2">: </span><span class="s3">''</span><span class="s2">, </span><span
+    class="s1">skipFail</span><span class="s2">: </span><span class="s0">true </span><span class="s2">})</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'pathext with empty entry'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s5">// with a pathExt of '', any filename is fine.</span>
+    <span class="s5">// so the &quot;fail&quot; one would still pass.</span>
+    <span class="s1">runTest</span><span class="s2">(</span><span class="s1">t</span><span class="s2">, { </span><span
+    class="s1">pathExt</span><span class="s2">: </span><span class="s3">';' </span><span class="s2">+ </span><span
+    class="s1">pathExt</span><span class="s2">, </span><span class="s1">skipFail</span><span class="s2">: </span><span
+    class="s0">true </span><span class="s2">})</span>
+  <span class="s2">})</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+<span class="s2">})</span>
+
+<span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s3">'cleanup'</span><span
+    class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span class="s1">t</span><span
+    class="s2">) {</span>
+  <span class="s1">rimraf</span><span class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span
+    class="s1">fixture</span><span class="s2">)</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+<span class="s2">})</span>
+
+<span class="s0">function </span><span class="s1">runTest </span><span class="s2">(</span><span class="s1">t</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">isexe </span><span class="s2">= </span><span class="s1">reset</span><span
+    class="s2">()</span>
+
+  <span class="s0">var </span><span class="s1">optionsIgnore </span><span class="s2">= </span><span
+    class="s1">Object</span><span class="s2">.</span><span class="s1">create</span><span class="s2">(</span><span
+    class="s1">options </span><span class="s2">|| {})</span>
+  <span class="s1">optionsIgnore</span><span class="s2">.</span><span class="s1">ignoreErrors </span><span
+    class="s2">= </span><span class="s0">true</span>
+
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">options </span><span class="s2">|| !</span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">skipFail</span><span class="s2">) {</span>
+    <span class="s1">t</span><span class="s2">.</span><span class="s1">notOk</span><span class="s2">(</span><span
+    class="s1">isexe</span><span class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span
+    class="s1">fail</span><span class="s2">, </span><span class="s1">options</span><span class="s2">))</span>
+  <span class="s2">}</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">notOk</span><span class="s2">(</span><span
+    class="s1">isexe</span><span class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span
+    class="s1">noent</span><span class="s2">, </span><span class="s1">optionsIgnore</span><span class="s2">))</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">options</span><span class="s2">) {</span>
+    <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">isexe</span><span class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span
+    class="s1">meow</span><span class="s2">))</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">isexe</span><span class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span
+    class="s1">meow</span><span class="s2">, </span><span class="s1">options</span><span class="s2">))</span>
+  <span class="s2">}</span>
+
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span class="s1">isexe</span><span
+    class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span class="s1">mine</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">))</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span class="s1">isexe</span><span
+    class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span class="s1">ours</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">))</span>
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">throws</span><span class="s2">(</span><span
+    class="s0">function </span><span class="s2">() {</span>
+    <span class="s1">isexe</span><span class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span
+    class="s1">noent</span><span class="s2">, </span><span class="s1">options</span><span class="s2">)</span>
+  <span class="s2">})</span>
+
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'meow async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">options</span><span class="s2">) {</span>
+      <span class="s1">isexe</span><span class="s2">(</span><span class="s1">meow</span><span class="s2">, </span><span
+    class="s0">function </span><span class="s2">(</span><span class="s1">er</span><span class="s2">, </span><span
+    class="s1">is</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">er</span><span class="s2">) {</span>
+          <span class="s0">throw </span><span class="s1">er</span>
+        <span class="s2">}</span>
+        <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+        <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+      <span class="s2">})</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">isexe</span><span class="s2">(</span><span class="s1">meow</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span
+    class="s1">er</span><span class="s2">, </span><span class="s1">is</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">er</span><span class="s2">) {</span>
+          <span class="s0">throw </span><span class="s1">er</span>
+        <span class="s2">}</span>
+        <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+        <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+      <span class="s2">})</span>
+    <span class="s2">}</span>
+  <span class="s2">})</span>
+
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'mine async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">mine</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span
+    class="s1">er</span><span class="s2">, </span><span class="s1">is</span><span class="s2">) {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">er</span><span class="s2">) {</span>
+        <span class="s0">throw </span><span class="s1">er</span>
+      <span class="s2">}</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'ours async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">ours</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span
+    class="s1">er</span><span class="s2">, </span><span class="s1">is</span><span class="s2">) {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">er</span><span class="s2">) {</span>
+        <span class="s0">throw </span><span class="s1">er</span>
+      <span class="s2">}</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">options </span><span class="s2">|| !</span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">skipFail</span><span class="s2">) {</span>
+    <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'fail async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+      <span class="s1">isexe</span><span class="s2">(</span><span class="s1">fail</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span
+    class="s1">er</span><span class="s2">, </span><span class="s1">is</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">er</span><span class="s2">) {</span>
+          <span class="s0">throw </span><span class="s1">er</span>
+        <span class="s2">}</span>
+        <span class="s1">t</span><span class="s2">.</span><span class="s1">notOk</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+        <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+      <span class="s2">})</span>
+    <span class="s2">})</span>
+  <span class="s2">}</span>
+
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'noent async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">noent</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">, </span><span class="s0">function </span><span class="s2">(</span><span
+    class="s1">er</span><span class="s2">, </span><span class="s1">is</span><span class="s2">) {</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">er</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">notOk</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'noent ignore async'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">noent</span><span class="s2">, </span><span
+    class="s1">optionsIgnore</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">er</span><span class="s2">, </span><span class="s1">is</span><span class="s2">) {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">er</span><span class="s2">) {</span>
+        <span class="s0">throw </span><span class="s1">er</span>
+      <span class="s2">}</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">notOk</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span
+    class="s3">'directory is not executable'</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">t</span><span class="s2">) {</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">__dirname</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">, </span><span class="s0">function </span><span
+    class="s2">(</span><span class="s1">er</span><span class="s2">, </span><span class="s1">is</span><span class="s2">) {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">er</span><span class="s2">) {</span>
+        <span class="s0">throw </span><span class="s1">er</span>
+      <span class="s2">}</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">notOk</span><span class="s2">(</span><span
+    class="s1">is</span><span class="s2">)</span>
+      <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+
+  <span class="s1">t</span><span class="s2">.</span><span class="s1">end</span><span class="s2">()</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<html>
+<head>
+  <title>utilities.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          utilities.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{</span><span class="s1">fileURLToPath</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'node:url'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">Transform</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'node:stream'</span><span class="s2">;</span>
+
+<span class="s0">export const </span><span class="s1">toPath </span><span class="s2">= </span><span
+    class="s1">urlOrPath </span><span class="s2">=&gt; </span><span class="s1">urlOrPath </span><span class="s0">instanceof </span><span
+    class="s1">URL </span><span class="s2">? </span><span class="s1">fileURLToPath</span><span class="s2">(</span><span
+    class="s1">urlOrPath</span><span class="s2">) : </span><span class="s1">urlOrPath</span><span class="s2">;</span>
+
+<span class="s0">export class </span><span class="s1">FilterStream </span><span class="s0">extends </span><span
+    class="s1">Transform </span><span class="s2">{</span>
+	<span class="s1">constructor</span><span class="s2">(</span><span class="s1">filter</span><span class="s2">) {</span>
+		<span class="s0">super</span><span class="s2">({</span>
+			<span class="s1">objectMode</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+			<span class="s1">transform</span><span class="s2">(</span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">encoding</span><span class="s2">, </span><span class="s1">callback</span><span
+    class="s2">) {</span>
+				<span class="s1">callback</span><span class="s2">(</span><span class="s1">undefined</span><span
+    class="s2">, </span><span class="s1">filter</span><span class="s2">(</span><span class="s1">data</span><span
+    class="s2">) ? </span><span class="s1">data </span><span class="s2">: </span><span class="s1">undefined</span><span
+    class="s2">);</span>
+			<span class="s2">},</span>
+		<span class="s2">});</span>
+	<span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export const </span><span class="s1">isNegativePattern </span><span class="s2">= </span><span
+    class="s1">pattern </span><span class="s2">=&gt; </span><span class="s1">pattern</span><span
+    class="s2">[</span><span class="s4">0</span><span class="s2">] === </span><span class="s3">'!'</span><span
+    class="s2">;</span>
+</pre>
+</body>
+</html>

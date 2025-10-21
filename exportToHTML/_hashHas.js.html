@@ -1,0 +1,80 @@
+<html>
+<head>
+  <title>_hashHas.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _hashHas.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">nativeCreate </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_nativeCreate'</span><span class="s2">);</span>
+
+<span class="s4">/** Used for built-in method references. */</span>
+<span class="s0">var </span><span class="s1">objectProto </span><span class="s2">= </span><span class="s1">Object</span><span
+    class="s2">.</span><span class="s1">prototype</span><span class="s2">;</span>
+
+<span class="s4">/** Used to check objects for own properties. */</span>
+<span class="s0">var </span><span class="s1">hasOwnProperty </span><span class="s2">= </span><span class="s1">objectProto</span><span
+    class="s2">.</span><span class="s1">hasOwnProperty</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Checks if a hash value for `key` exists.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@name </span><span class="s4">has</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">Hash</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{string} key The key of the entry to check.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{boolean} Returns `true` if an entry for `key` exists, else `false`.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">hashHas</span><span class="s2">(</span><span
+    class="s1">key</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">data </span><span class="s2">= </span><span class="s0">this</span><span
+    class="s2">.</span><span class="s1">__data__</span><span class="s2">;</span>
+  <span class="s0">return </span><span class="s1">nativeCreate </span><span class="s2">? (</span><span
+    class="s1">data</span><span class="s2">[</span><span class="s1">key</span><span class="s2">] !== </span><span
+    class="s1">undefined</span><span class="s2">) : </span><span class="s1">hasOwnProperty</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">hashHas</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

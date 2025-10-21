@@ -1,0 +1,112 @@
+<html>
+<head>
+  <title>iteratee.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          iteratee.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseClone </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseClone'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to compose bitmasks for cloning. */</span>
+<span class="s0">var </span><span class="s1">CLONE_DEEP_FLAG </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a function that invokes `func` with the arguments of the created</span>
+ <span class="s4">* function. If `func` is a property name, the created function returns the</span>
+ <span class="s4">* property value for a given element. If `func` is an array or object, the</span>
+ <span class="s4">* created function returns `true` for elements that contain the equivalent</span>
+ <span class="s4">* source properties, otherwise it returns `false`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">4.0.0</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">Util</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{*} [func=_.identity] The value to convert to a callback.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{Function} Returns the callback.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var users = [</span>
+ <span class="s4">*   { 'user': 'barney', 'age': 36, 'active': true },</span>
+ <span class="s4">*   { 'user': 'fred',   'age': 40, 'active': false }</span>
+ <span class="s4">* ];</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.matches` iteratee shorthand.</span>
+ <span class="s4">* _.filter(users, _.iteratee({ 'user': 'barney', 'active': true }));</span>
+ <span class="s4">* // =&gt; [{ 'user': 'barney', 'age': 36, 'active': true }]</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.matchesProperty` iteratee shorthand.</span>
+ <span class="s4">* _.filter(users, _.iteratee(['user', 'fred']));</span>
+ <span class="s4">* // =&gt; [{ 'user': 'fred', 'age': 40 }]</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.property` iteratee shorthand.</span>
+ <span class="s4">* _.map(users, _.iteratee('user'));</span>
+ <span class="s4">* // =&gt; ['barney', 'fred']</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Create custom iteratee shorthands.</span>
+ <span class="s4">* _.iteratee = _.wrap(_.iteratee, function(iteratee, func) {</span>
+ <span class="s4">*   return !_.isRegExp(func) ? iteratee(func) : function(string) {</span>
+ <span class="s4">*     return func.test(string);</span>
+ <span class="s4">*   };</span>
+ <span class="s4">* });</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.filter(['abc', 'def'], /ef/);</span>
+ <span class="s4">* // =&gt; ['def']</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">iteratee</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">) {</span>
+  <span class="s0">return </span><span class="s1">baseIteratee</span><span class="s2">(</span><span
+    class="s0">typeof </span><span class="s1">func </span><span class="s2">== </span><span class="s3">'function' </span><span
+    class="s2">? </span><span class="s1">func </span><span class="s2">: </span><span class="s1">baseClone</span><span
+    class="s2">(</span><span class="s1">func</span><span class="s2">, </span><span
+    class="s1">CLONE_DEEP_FLAG</span><span class="s2">));</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">iteratee</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

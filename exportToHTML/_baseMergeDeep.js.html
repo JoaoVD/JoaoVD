@@ -1,0 +1,211 @@
+<html>
+<head>
+  <title>_baseMergeDeep.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _baseMergeDeep.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">assignMergeValue </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_assignMergeValue'</span><span class="s2">),</span>
+    <span class="s1">cloneBuffer </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_cloneBuffer'</span><span class="s2">),</span>
+    <span class="s1">cloneTypedArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_cloneTypedArray'</span><span class="s2">),</span>
+    <span class="s1">copyArray </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_copyArray'</span><span class="s2">),</span>
+    <span class="s1">initCloneObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_initCloneObject'</span><span class="s2">),</span>
+    <span class="s1">isArguments </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArguments'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">),</span>
+    <span class="s1">isArrayLikeObject </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./isArrayLikeObject'</span><span class="s2">),</span>
+    <span class="s1">isBuffer </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isBuffer'</span><span class="s2">),</span>
+    <span class="s1">isFunction </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isFunction'</span><span class="s2">),</span>
+    <span class="s1">isObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isObject'</span><span class="s2">),</span>
+    <span class="s1">isPlainObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isPlainObject'</span><span class="s2">),</span>
+    <span class="s1">isTypedArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isTypedArray'</span><span class="s2">),</span>
+    <span class="s1">safeGet </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_safeGet'</span><span class="s2">),</span>
+    <span class="s1">toPlainObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./toPlainObject'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* A specialized version of `baseMerge` for arrays and objects which performs</span>
+ <span class="s4">* deep merges and tracks traversed objects enabling objects with circular</span>
+ <span class="s4">* references to be merged.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@private</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Object} object The destination object.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} source The source object.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{string} key The key of the value to merge.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{number} srcIndex The index of `source`.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} mergeFunc The function to merge values.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [customizer] The function to customize assigned values.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Object} [stack] Tracks traversed source values and their merged</span>
+ <span class="s4">*  counterparts.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">baseMergeDeep</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">source</span><span class="s2">, </span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">srcIndex</span><span class="s2">, </span><span
+    class="s1">mergeFunc</span><span class="s2">, </span><span class="s1">customizer</span><span
+    class="s2">, </span><span class="s1">stack</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">objValue </span><span class="s2">= </span><span class="s1">safeGet</span><span
+    class="s2">(</span><span class="s1">object</span><span class="s2">, </span><span class="s1">key</span><span
+    class="s2">),</span>
+      <span class="s1">srcValue </span><span class="s2">= </span><span class="s1">safeGet</span><span
+    class="s2">(</span><span class="s1">source</span><span class="s2">, </span><span class="s1">key</span><span
+    class="s2">),</span>
+      <span class="s1">stacked </span><span class="s2">= </span><span class="s1">stack</span><span
+    class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">srcValue</span><span
+    class="s2">);</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">stacked</span><span class="s2">) {</span>
+    <span class="s1">assignMergeValue</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span class="s1">stacked</span><span
+    class="s2">);</span>
+    <span class="s0">return</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">newValue </span><span class="s2">= </span><span
+    class="s1">customizer</span>
+    <span class="s2">? </span><span class="s1">customizer</span><span class="s2">(</span><span
+    class="s1">objValue</span><span class="s2">, </span><span class="s1">srcValue</span><span class="s2">, (</span><span
+    class="s1">key </span><span class="s2">+ </span><span class="s3">''</span><span class="s2">), </span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">source</span><span class="s2">, </span><span
+    class="s1">stack</span><span class="s2">)</span>
+    <span class="s2">: </span><span class="s1">undefined</span><span class="s2">;</span>
+
+  <span class="s0">var </span><span class="s1">isCommon </span><span class="s2">= </span><span
+    class="s1">newValue </span><span class="s2">=== </span><span class="s1">undefined</span><span class="s2">;</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isCommon</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">isArr </span><span class="s2">= </span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">srcValue</span><span class="s2">),</span>
+        <span class="s1">isBuff </span><span class="s2">= !</span><span class="s1">isArr </span><span class="s2">&amp;&amp; </span><span
+    class="s1">isBuffer</span><span class="s2">(</span><span class="s1">srcValue</span><span class="s2">),</span>
+        <span class="s1">isTyped </span><span class="s2">= !</span><span class="s1">isArr </span><span class="s2">&amp;&amp; !</span><span
+    class="s1">isBuff </span><span class="s2">&amp;&amp; </span><span class="s1">isTypedArray</span><span
+    class="s2">(</span><span class="s1">srcValue</span><span class="s2">);</span>
+
+    <span class="s1">newValue </span><span class="s2">= </span><span class="s1">srcValue</span><span class="s2">;</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">isArr </span><span class="s2">|| </span><span
+    class="s1">isBuff </span><span class="s2">|| </span><span class="s1">isTyped</span><span class="s2">) {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">isArray</span><span class="s2">(</span><span
+    class="s1">objValue</span><span class="s2">)) {</span>
+        <span class="s1">newValue </span><span class="s2">= </span><span class="s1">objValue</span><span
+    class="s2">;</span>
+      <span class="s2">}</span>
+      <span class="s0">else if </span><span class="s2">(</span><span class="s1">isArrayLikeObject</span><span
+    class="s2">(</span><span class="s1">objValue</span><span class="s2">)) {</span>
+        <span class="s1">newValue </span><span class="s2">= </span><span class="s1">copyArray</span><span
+    class="s2">(</span><span class="s1">objValue</span><span class="s2">);</span>
+      <span class="s2">}</span>
+      <span class="s0">else if </span><span class="s2">(</span><span class="s1">isBuff</span><span class="s2">) {</span>
+        <span class="s1">isCommon </span><span class="s2">= </span><span class="s0">false</span><span
+    class="s2">;</span>
+        <span class="s1">newValue </span><span class="s2">= </span><span class="s1">cloneBuffer</span><span
+    class="s2">(</span><span class="s1">srcValue</span><span class="s2">, </span><span class="s0">true</span><span
+    class="s2">);</span>
+      <span class="s2">}</span>
+      <span class="s0">else if </span><span class="s2">(</span><span class="s1">isTyped</span><span
+    class="s2">) {</span>
+        <span class="s1">isCommon </span><span class="s2">= </span><span class="s0">false</span><span
+    class="s2">;</span>
+        <span class="s1">newValue </span><span class="s2">= </span><span class="s1">cloneTypedArray</span><span
+    class="s2">(</span><span class="s1">srcValue</span><span class="s2">, </span><span class="s0">true</span><span
+    class="s2">);</span>
+      <span class="s2">}</span>
+      <span class="s0">else </span><span class="s2">{</span>
+        <span class="s1">newValue </span><span class="s2">= [];</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+    <span class="s0">else if </span><span class="s2">(</span><span class="s1">isPlainObject</span><span
+    class="s2">(</span><span class="s1">srcValue</span><span class="s2">) || </span><span
+    class="s1">isArguments</span><span class="s2">(</span><span class="s1">srcValue</span><span class="s2">)) {</span>
+      <span class="s1">newValue </span><span class="s2">= </span><span class="s1">objValue</span><span
+    class="s2">;</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">isArguments</span><span
+    class="s2">(</span><span class="s1">objValue</span><span class="s2">)) {</span>
+        <span class="s1">newValue </span><span class="s2">= </span><span class="s1">toPlainObject</span><span
+    class="s2">(</span><span class="s1">objValue</span><span class="s2">);</span>
+      <span class="s2">}</span>
+      <span class="s0">else if </span><span class="s2">(!</span><span class="s1">isObject</span><span
+    class="s2">(</span><span class="s1">objValue</span><span class="s2">) || </span><span
+    class="s1">isFunction</span><span class="s2">(</span><span class="s1">objValue</span><span class="s2">)) {</span>
+        <span class="s1">newValue </span><span class="s2">= </span><span class="s1">initCloneObject</span><span
+    class="s2">(</span><span class="s1">srcValue</span><span class="s2">);</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+    <span class="s0">else </span><span class="s2">{</span>
+      <span class="s1">isCommon </span><span class="s2">= </span><span class="s0">false</span><span class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isCommon</span><span class="s2">) {</span>
+    <span class="s6">// Recursively merge objects and arrays (susceptible to call stack limits).</span>
+    <span class="s1">stack</span><span class="s2">.</span><span class="s1">set</span><span class="s2">(</span><span
+    class="s1">srcValue</span><span class="s2">, </span><span class="s1">newValue</span><span class="s2">);</span>
+    <span class="s1">mergeFunc</span><span class="s2">(</span><span class="s1">newValue</span><span class="s2">, </span><span
+    class="s1">srcValue</span><span class="s2">, </span><span class="s1">srcIndex</span><span class="s2">, </span><span
+    class="s1">customizer</span><span class="s2">, </span><span class="s1">stack</span><span class="s2">);</span>
+    <span class="s1">stack</span><span class="s2">[</span><span class="s3">'delete'</span><span
+    class="s2">](</span><span class="s1">srcValue</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s1">assignMergeValue</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span class="s1">newValue</span><span
+    class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">baseMergeDeep</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

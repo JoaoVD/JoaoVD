@@ -1,0 +1,341 @@
+<html>
+<head>
+  <title>pax.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          pax.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">const </span><span class="s1">Header </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'./header.js'</span><span class="s3">)</span>
+<span class="s2">const </span><span class="s1">path </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'path'</span><span class="s3">)</span>
+
+<span class="s2">class </span><span class="s1">Pax </span><span class="s3">{</span>
+  <span class="s1">constructor </span><span class="s3">(</span><span class="s1">obj</span><span
+    class="s3">, </span><span class="s1">global</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">atime </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">atime </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">charset </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">charset </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">comment </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">comment </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">ctime </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">ctime </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">gid </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">gid </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">gname </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">gname </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">linkpath </span><span
+    class="s3">= </span><span class="s1">obj</span><span class="s3">.</span><span class="s1">linkpath </span><span
+    class="s3">|| </span><span class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">mtime </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">mtime </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">path </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">path </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">size </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">size </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">uid </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">uid </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">uname </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">uname </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">dev </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">dev </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">ino </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">ino </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">nlink </span><span class="s3">= </span><span
+    class="s1">obj</span><span class="s3">.</span><span class="s1">nlink </span><span class="s3">|| </span><span
+    class="s2">null</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">global </span><span class="s3">= </span><span
+    class="s1">global </span><span class="s3">|| </span><span class="s2">false</span>
+  <span class="s3">}</span>
+
+  <span class="s1">encode </span><span class="s3">() {</span>
+    <span class="s2">const </span><span class="s1">body </span><span class="s3">= </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">encodeBody</span><span class="s3">()</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">body </span><span class="s3">=== </span><span
+    class="s0">''</span><span class="s3">) {</span>
+      <span class="s2">return null</span>
+    <span class="s3">}</span>
+
+    <span class="s2">const </span><span class="s1">bodyLen </span><span class="s3">= </span><span
+    class="s1">Buffer</span><span class="s3">.</span><span class="s1">byteLength</span><span class="s3">(</span><span
+    class="s1">body</span><span class="s3">)</span>
+    <span class="s4">// round up to 512 bytes</span>
+    <span class="s4">// add 512 for header</span>
+    <span class="s2">const </span><span class="s1">bufLen </span><span class="s3">= </span><span
+    class="s5">512 </span><span class="s3">* </span><span class="s1">Math</span><span class="s3">.</span><span
+    class="s1">ceil</span><span class="s3">(</span><span class="s5">1 </span><span class="s3">+ </span><span class="s1">bodyLen </span><span
+    class="s3">/ </span><span class="s5">512</span><span class="s3">)</span>
+    <span class="s2">const </span><span class="s1">buf </span><span class="s3">= </span><span
+    class="s1">Buffer</span><span class="s3">.</span><span class="s1">allocUnsafe</span><span class="s3">(</span><span
+    class="s1">bufLen</span><span class="s3">)</span>
+
+    <span class="s4">// 0-fill the header section, it might not hit every field</span>
+    <span class="s2">for </span><span class="s3">(</span><span class="s2">let </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s5">512</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+      <span class="s1">buf</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] = </span><span
+    class="s5">0</span>
+    <span class="s3">}</span>
+
+    <span class="s2">new </span><span class="s1">Header</span><span class="s3">({</span>
+      <span class="s4">// XXX split the path</span>
+      <span class="s4">// then the path should be PaxHeader + basename, but less than 99,</span>
+      <span class="s4">// prepend with the dirname</span>
+      <span class="s1">path</span><span class="s3">: (</span><span class="s0">'PaxHeader/' </span><span
+    class="s3">+ </span><span class="s1">path</span><span class="s3">.</span><span class="s1">basename</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">path</span><span
+    class="s3">)).</span><span class="s1">slice</span><span class="s3">(</span><span class="s5">0</span><span
+    class="s3">, </span><span class="s5">99</span><span class="s3">),</span>
+      <span class="s1">mode</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">mode </span><span class="s3">|| </span><span class="s5">0o644</span><span class="s3">,</span>
+      <span class="s1">uid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">uid </span><span class="s3">|| </span><span class="s2">null</span><span class="s3">,</span>
+      <span class="s1">gid</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">gid </span><span class="s3">|| </span><span class="s2">null</span><span class="s3">,</span>
+      <span class="s1">size</span><span class="s3">: </span><span class="s1">bodyLen</span><span class="s3">,</span>
+      <span class="s1">mtime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">mtime </span><span class="s3">|| </span><span class="s2">null</span><span class="s3">,</span>
+      <span class="s1">type</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">global </span><span class="s3">? </span><span class="s0">'GlobalExtendedHeader' </span><span
+    class="s3">: </span><span class="s0">'ExtendedHeader'</span><span class="s3">,</span>
+      <span class="s1">linkpath</span><span class="s3">: </span><span class="s0">''</span><span class="s3">,</span>
+      <span class="s1">uname</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">uname </span><span class="s3">|| </span><span class="s0">''</span><span class="s3">,</span>
+      <span class="s1">gname</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">gname </span><span class="s3">|| </span><span class="s0">''</span><span class="s3">,</span>
+      <span class="s1">devmaj</span><span class="s3">: </span><span class="s5">0</span><span class="s3">,</span>
+      <span class="s1">devmin</span><span class="s3">: </span><span class="s5">0</span><span class="s3">,</span>
+      <span class="s1">atime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">atime </span><span class="s3">|| </span><span class="s2">null</span><span class="s3">,</span>
+      <span class="s1">ctime</span><span class="s3">: </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">ctime </span><span class="s3">|| </span><span class="s2">null</span><span class="s3">,</span>
+    <span class="s3">}).</span><span class="s1">encode</span><span class="s3">(</span><span class="s1">buf</span><span
+    class="s3">)</span>
+
+    <span class="s1">buf</span><span class="s3">.</span><span class="s1">write</span><span class="s3">(</span><span
+    class="s1">body</span><span class="s3">, </span><span class="s5">512</span><span class="s3">, </span><span
+    class="s1">bodyLen</span><span class="s3">, </span><span class="s0">'utf8'</span><span class="s3">)</span>
+
+    <span class="s4">// null pad after the body</span>
+    <span class="s2">for </span><span class="s3">(</span><span class="s2">let </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s1">bodyLen </span><span class="s3">+ </span><span class="s5">512</span><span
+    class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">buf</span><span
+    class="s3">.</span><span class="s1">length</span><span class="s3">; </span><span class="s1">i</span><span
+    class="s3">++) {</span>
+      <span class="s1">buf</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] = </span><span
+    class="s5">0</span>
+    <span class="s3">}</span>
+
+    <span class="s2">return </span><span class="s1">buf</span>
+  <span class="s3">}</span>
+
+  <span class="s1">encodeBody </span><span class="s3">() {</span>
+    <span class="s2">return </span><span class="s3">(</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'path'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'ctime'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'atime'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'dev'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'ino'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'nlink'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'charset'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'comment'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'gid'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'gname'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'linkpath'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'mtime'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'size'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'uid'</span><span class="s3">) +</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">encodeField</span><span
+    class="s3">(</span><span class="s0">'uname'</span><span class="s3">)</span>
+    <span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">encodeField </span><span class="s3">(</span><span class="s1">field</span><span class="s3">) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">field</span><span class="s3">] === </span><span class="s2">null </span><span class="s3">|| </span><span
+    class="s2">this</span><span class="s3">[</span><span class="s1">field</span><span class="s3">] === </span><span
+    class="s1">undefined</span><span class="s3">) {</span>
+      <span class="s2">return </span><span class="s0">''</span>
+    <span class="s3">}</span>
+    <span class="s2">const </span><span class="s1">v </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">[</span><span class="s1">field</span><span class="s3">] </span><span class="s2">instanceof </span><span
+    class="s1">Date </span><span class="s3">? </span><span class="s2">this</span><span class="s3">[</span><span
+    class="s1">field</span><span class="s3">].</span><span class="s1">getTime</span><span class="s3">() / </span><span
+    class="s5">1000</span>
+      <span class="s3">: </span><span class="s2">this</span><span class="s3">[</span><span class="s1">field</span><span
+    class="s3">]</span>
+    <span class="s2">const </span><span class="s1">s </span><span class="s3">= </span><span class="s0">' ' </span><span
+    class="s3">+</span>
+      <span class="s3">(</span><span class="s1">field </span><span class="s3">=== </span><span
+    class="s0">'dev' </span><span class="s3">|| </span><span class="s1">field </span><span class="s3">=== </span><span
+    class="s0">'ino' </span><span class="s3">|| </span><span class="s1">field </span><span class="s3">=== </span><span
+    class="s0">'nlink'</span>
+        <span class="s3">? </span><span class="s0">'SCHILY.' </span><span class="s3">: </span><span class="s0">''</span><span
+    class="s3">) +</span>
+      <span class="s1">field </span><span class="s3">+ </span><span class="s0">'=' </span><span
+    class="s3">+ </span><span class="s1">v </span><span class="s3">+ </span><span class="s0">'</span><span
+    class="s2">\n</span><span class="s0">'</span>
+    <span class="s2">const </span><span class="s1">byteLen </span><span class="s3">= </span><span
+    class="s1">Buffer</span><span class="s3">.</span><span class="s1">byteLength</span><span class="s3">(</span><span
+    class="s1">s</span><span class="s3">)</span>
+    <span class="s4">// the digits includes the length of the digits in ascii base-10</span>
+    <span class="s4">// so if it's 9 characters, then adding 1 for the 9 makes it 10</span>
+    <span class="s4">// which makes it 11 chars.</span>
+    <span class="s2">let </span><span class="s1">digits </span><span class="s3">= </span><span
+    class="s1">Math</span><span class="s3">.</span><span class="s1">floor</span><span class="s3">(</span><span
+    class="s1">Math</span><span class="s3">.</span><span class="s1">log</span><span class="s3">(</span><span class="s1">byteLen</span><span
+    class="s3">) / </span><span class="s1">Math</span><span class="s3">.</span><span class="s1">log</span><span
+    class="s3">(</span><span class="s5">10</span><span class="s3">)) + </span><span class="s5">1</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">byteLen </span><span class="s3">+ </span><span
+    class="s1">digits </span><span class="s3">&gt;= </span><span class="s1">Math</span><span class="s3">.</span><span
+    class="s1">pow</span><span class="s3">(</span><span class="s5">10</span><span class="s3">, </span><span class="s1">digits</span><span
+    class="s3">)) {</span>
+      <span class="s1">digits </span><span class="s3">+= </span><span class="s5">1</span>
+    <span class="s3">}</span>
+    <span class="s2">const </span><span class="s1">len </span><span class="s3">= </span><span
+    class="s1">digits </span><span class="s3">+ </span><span class="s1">byteLen</span>
+    <span class="s2">return </span><span class="s1">len </span><span class="s3">+ </span><span class="s1">s</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s1">Pax</span><span class="s3">.</span><span class="s1">parse </span><span class="s3">= (</span><span
+    class="s1">string</span><span class="s3">, </span><span class="s1">ex</span><span class="s3">, </span><span
+    class="s1">g</span><span class="s3">) =&gt; </span><span class="s2">new </span><span class="s1">Pax</span><span
+    class="s3">(</span><span class="s1">merge</span><span class="s3">(</span><span class="s1">parseKV</span><span
+    class="s3">(</span><span class="s1">string</span><span class="s3">), </span><span class="s1">ex</span><span
+    class="s3">), </span><span class="s1">g</span><span class="s3">)</span>
+
+<span class="s2">const </span><span class="s1">merge </span><span class="s3">= (</span><span class="s1">a</span><span
+    class="s3">, </span><span class="s1">b</span><span class="s3">) =&gt;</span>
+  <span class="s1">b </span><span class="s3">? </span><span class="s1">Object</span><span class="s3">.</span><span
+    class="s1">keys</span><span class="s3">(</span><span class="s1">a</span><span class="s3">).</span><span class="s1">reduce</span><span
+    class="s3">((</span><span class="s1">s</span><span class="s3">, </span><span class="s1">k</span><span class="s3">) =&gt; (</span><span
+    class="s1">s</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s1">a</span><span class="s3">[</span><span class="s1">k</span><span class="s3">], </span><span
+    class="s1">s</span><span class="s3">), </span><span class="s1">b</span><span class="s3">) : </span><span class="s1">a</span>
+
+<span class="s2">const </span><span class="s1">parseKV </span><span class="s3">= </span><span
+    class="s1">string </span><span class="s3">=&gt;</span>
+  <span class="s1">string</span>
+    <span class="s3">.</span><span class="s1">replace</span><span class="s3">(</span><span class="s6">/\n$/</span><span
+    class="s3">, </span><span class="s0">''</span><span class="s3">)</span>
+    <span class="s3">.</span><span class="s1">split</span><span class="s3">(</span><span class="s0">'</span><span
+    class="s2">\n</span><span class="s0">'</span><span class="s3">)</span>
+    <span class="s3">.</span><span class="s1">reduce</span><span class="s3">(</span><span
+    class="s1">parseKVLine</span><span class="s3">, </span><span class="s1">Object</span><span class="s3">.</span><span
+    class="s1">create</span><span class="s3">(</span><span class="s2">null</span><span class="s3">))</span>
+
+<span class="s2">const </span><span class="s1">parseKVLine </span><span class="s3">= (</span><span class="s1">set</span><span
+    class="s3">, </span><span class="s1">line</span><span class="s3">) =&gt; {</span>
+  <span class="s2">const </span><span class="s1">n </span><span class="s3">= </span><span
+    class="s1">parseInt</span><span class="s3">(</span><span class="s1">line</span><span class="s3">, </span><span
+    class="s5">10</span><span class="s3">)</span>
+
+  <span class="s4">// XXX Values with \n in them will fail this.</span>
+  <span class="s4">// Refactor to not be a naive line-by-line parse.</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">n </span><span class="s3">!== </span><span
+    class="s1">Buffer</span><span class="s3">.</span><span class="s1">byteLength</span><span class="s3">(</span><span
+    class="s1">line</span><span class="s3">) + </span><span class="s5">1</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">set</span>
+  <span class="s3">}</span>
+
+  <span class="s1">line </span><span class="s3">= </span><span class="s1">line</span><span class="s3">.</span><span
+    class="s1">slice</span><span class="s3">((</span><span class="s1">n </span><span class="s3">+ </span><span
+    class="s0">' '</span><span class="s3">).</span><span class="s1">length</span><span class="s3">)</span>
+  <span class="s2">const </span><span class="s1">kv </span><span class="s3">= </span><span class="s1">line</span><span
+    class="s3">.</span><span class="s1">split</span><span class="s3">(</span><span class="s0">'='</span><span
+    class="s3">)</span>
+  <span class="s2">const </span><span class="s1">k </span><span class="s3">= </span><span class="s1">kv</span><span
+    class="s3">.</span><span class="s1">shift</span><span class="s3">().</span><span class="s1">replace</span><span
+    class="s3">(</span><span class="s6">/^SCHILY\.(dev|ino|nlink)/</span><span class="s3">, </span><span
+    class="s0">'$1'</span><span class="s3">)</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">k</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">set</span>
+  <span class="s3">}</span>
+
+  <span class="s2">const </span><span class="s1">v </span><span class="s3">= </span><span class="s1">kv</span><span
+    class="s3">.</span><span class="s1">join</span><span class="s3">(</span><span class="s0">'='</span><span class="s3">)</span>
+  <span class="s1">set</span><span class="s3">[</span><span class="s1">k</span><span class="s3">] = </span><span
+    class="s6">/^([A-Z]+\.)?([mac]|birth|creation)time$/</span><span class="s3">.</span><span
+    class="s1">test</span><span class="s3">(</span><span class="s1">k</span><span class="s3">)</span>
+    <span class="s3">? </span><span class="s2">new </span><span class="s1">Date</span><span class="s3">(</span><span
+    class="s1">v </span><span class="s3">* </span><span class="s5">1000</span><span class="s3">)</span>
+    <span class="s3">: </span><span class="s6">/^[0-9]+$/</span><span class="s3">.</span><span
+    class="s1">test</span><span class="s3">(</span><span class="s1">v</span><span class="s3">) ? +</span><span
+    class="s1">v</span>
+    <span class="s3">: </span><span class="s1">v</span>
+  <span class="s2">return </span><span class="s1">set</span>
+<span class="s3">}</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">Pax</span>
+</pre>
+</body>
+</html>

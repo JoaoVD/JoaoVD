@@ -1,0 +1,226 @@
+<html>
+<head>
+  <title>querystring.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          querystring.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:querystring` module provides utilities for parsing and formatting URL</span>
+ <span class="s0">* query strings. It can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import querystring from 'node:querystring';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* `querystring` is more performant than `URLSearchParams` but is not a</span>
+ <span class="s0">* standardized API. Use `URLSearchParams` when performance is not critical or</span>
+ <span class="s0">* when compatibility with browser code is desirable.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/querystring.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;querystring&quot; </span><span class="s4">{</span>
+    <span class="s5">interface </span><span class="s2">StringifyOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The function to use when converting URL-unsafe characters to percent-encoding in the query string.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">`querystring.escape()`</span>
+         <span class="s0">*/</span>
+        <span class="s2">encodeURIComponent</span><span class="s4">?: ((</span><span class="s2">str</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">) =&gt; </span><span
+    class="s2">string</span><span class="s4">) | </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ParseOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Specifies the maximum number of keys to parse. Specify `0` to remove key counting limitations.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">1000</span>
+         <span class="s0">*/</span>
+        <span class="s2">maxKeys</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The function to use when decoding percent-encoded characters in the query string.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">`querystring.unescape()`</span>
+         <span class="s0">*/</span>
+        <span class="s2">decodeURIComponent</span><span class="s4">?: ((</span><span class="s2">str</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">) =&gt; </span><span
+    class="s2">string</span><span class="s4">) | </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">ParsedUrlQuery </span><span class="s5">extends </span><span
+    class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Dict</span><span class="s4">&lt;</span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">string</span><span class="s4">[]&gt; {}</span>
+    <span class="s5">interface </span><span class="s2">ParsedUrlQueryInput </span><span class="s5">extends</span>
+        <span class="s2">NodeJS</span><span class="s4">.</span><span class="s2">Dict</span><span class="s4">&lt;</span>
+            <span class="s4">| </span><span class="s2">string</span>
+            <span class="s4">| </span><span class="s2">number</span>
+            <span class="s4">| </span><span class="s2">boolean</span>
+            <span class="s4">| </span><span class="s2">bigint</span>
+            <span class="s4">| </span><span class="s2">ReadonlyArray</span><span class="s4">&lt;</span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">number </span><span class="s4">| </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">bigint</span><span class="s4">&gt;</span>
+            <span class="s4">| </span><span class="s5">null</span>
+        <span class="s4">&gt;</span>
+    <span class="s4">{}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `querystring.stringify()` method produces a URL query string from a</span>
+     <span class="s0">* given `obj` by iterating through the object's &quot;own properties&quot;.</span>
+     <span class="s0">*</span>
+     <span class="s0">* It serializes the following types of values passed in `obj`: [string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type) |</span>
+     <span
+       class="s0">* [number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type) |</span>
+     <span class="s0">* [bigint](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) |</span>
+     <span class="s0">* [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type) |</span>
+     <span class="s0">* [string\[\]](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type) |</span>
+     <span class="s0">* [number\[\]](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type) |</span>
+     <span class="s0">* [bigint\[\]](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) |</span>
+     <span class="s0">* [boolean\[\]](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type) The numeric values must be finite. Any other input values will be coerced to</span>
+     <span class="s0">* empty strings.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* querystring.stringify({ foo: 'bar', baz: ['qux', 'quux'], corge: '' });</span>
+     <span class="s0">* // Returns 'foo=bar&amp;#x26;baz=qux&amp;#x26;baz=quux&amp;#x26;corge='</span>
+     <span class="s0">*</span>
+     <span class="s0">* querystring.stringify({ foo: 'bar', baz: 'qux' }, ';', ':');</span>
+     <span class="s0">* // Returns 'foo:bar;baz:qux'</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* By default, characters requiring percent-encoding within the query string will</span>
+     <span class="s0">* be encoded as UTF-8\. If an alternative encoding is required, then an alternative `encodeURIComponent` option will need to be specified:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* // Assuming gbkEncodeURIComponent function already exists,</span>
+     <span class="s0">*</span>
+     <span class="s0">* querystring.stringify({ w: '中文', foo: 'bar' }, null, null,</span>
+     <span class="s0">*                       { encodeURIComponent: gbkEncodeURIComponent });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.25</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">obj The object to serialize into a URL query string</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">[sep='&amp;'] The substring used to delimit key and value pairs in the query string.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">[eq='='] . The substring used to delimit keys and values in the query string.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">stringify</span><span class="s4">(</span><span
+    class="s2">obj</span><span class="s4">?: </span><span class="s2">ParsedUrlQueryInput</span><span
+    class="s4">, </span><span class="s2">sep</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">eq</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">, </span><span class="s2">options</span><span class="s4">?: </span><span
+    class="s2">StringifyOptions</span><span class="s4">): </span><span class="s2">string</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `querystring.parse()` method parses a URL query string (`str`) into a</span>
+     <span class="s0">* collection of key and value pairs.</span>
+     <span class="s0">*</span>
+     <span
+       class="s0">* For example, the query string `'foo=bar&amp;#x26;abc=xyz&amp;#x26;abc=123'` is parsed into:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```json</span>
+     <span class="s0">* {</span>
+     <span class="s0">*   &quot;foo&quot;: &quot;bar&quot;,</span>
+     <span class="s0">*   &quot;abc&quot;: [&quot;xyz&quot;, &quot;123&quot;]</span>
+     <span class="s0">* }</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* The object returned by the `querystring.parse()` method _does not_ prototypically inherit from the JavaScript `Object`. This means that typical `Object` methods such as `obj.toString()`,</span>
+     <span class="s0">* `obj.hasOwnProperty()`, and others</span>
+     <span class="s0">* are not defined and _will not work_.</span>
+     <span class="s0">*</span>
+     <span class="s0">* By default, percent-encoded characters within the query string will be assumed</span>
+     <span class="s0">* to use UTF-8 encoding. If an alternative character encoding is used, then an</span>
+     <span class="s0">* alternative `decodeURIComponent` option will need to be specified:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* // Assuming gbkDecodeURIComponent function already exists...</span>
+     <span class="s0">*</span>
+     <span class="s0">* querystring.parse('w=%D6%D0%CE%C4&amp;#x26;foo=bar', null, null,</span>
+     <span class="s0">*                   { decodeURIComponent: gbkDecodeURIComponent });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.25</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">str The URL query string to parse</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">[sep='&amp;'] The substring used to delimit key and value pairs in the query string.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">[eq='='] The substring used to delimit keys and values in the query string.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">parse</span><span class="s4">(</span><span
+    class="s2">str</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">sep</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">eq</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">options</span><span class="s4">?: </span><span class="s2">ParseOptions</span><span
+    class="s4">): </span><span class="s2">ParsedUrlQuery</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The querystring.encode() function is an alias for querystring.stringify().</span>
+     <span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">encode</span><span class="s4">: </span><span
+    class="s5">typeof </span><span class="s2">stringify</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The querystring.decode() function is an alias for querystring.parse().</span>
+     <span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">decode</span><span class="s4">: </span><span
+    class="s5">typeof </span><span class="s2">parse</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `querystring.escape()` method performs URL percent-encoding on the given `str` in a manner that is optimized for the specific requirements of URL</span>
+     <span class="s0">* query strings.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `querystring.escape()` method is used by `querystring.stringify()` and is</span>
+     <span class="s0">* generally not expected to be used directly. It is exported primarily to allow</span>
+     <span class="s0">* application code to provide a replacement percent-encoding implementation if</span>
+     <span class="s0">* necessary by assigning `querystring.escape` to an alternative function.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.25</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">escape</span><span class="s4">(</span><span
+    class="s2">str</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">string</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `querystring.unescape()` method performs decoding of URL percent-encoded</span>
+     <span class="s0">* characters on the given `str`.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `querystring.unescape()` method is used by `querystring.parse()` and is</span>
+     <span class="s0">* generally not expected to be used directly. It is exported primarily to allow</span>
+     <span class="s0">* application code to provide a replacement decoding implementation if</span>
+     <span class="s0">* necessary by assigning `querystring.unescape` to an alternative function.</span>
+     <span class="s0">*</span>
+     <span class="s0">* By default, the `querystring.unescape()` method will attempt to use the</span>
+     <span class="s0">* JavaScript built-in `decodeURIComponent()` method to decode. If that fails,</span>
+     <span class="s0">* a safer equivalent that does not throw on malformed URLs will be used.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.25</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">unescape</span><span class="s4">(</span><span
+    class="s2">str</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">string</span><span class="s4">;</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:querystring&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;querystring&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<html>
+<head>
+  <title>merge.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          merge.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseMerge </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseMerge'</span><span class="s2">),</span>
+    <span class="s1">createAssigner </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createAssigner'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* This method is like `_.assign` except that it recursively merges own and</span>
+ <span class="s4">* inherited enumerable string keyed properties of source objects into the</span>
+ <span class="s4">* destination object. Source properties that resolve to `undefined` are</span>
+ <span class="s4">* skipped if a destination value exists. Array and plain object properties</span>
+ <span class="s4">* are merged recursively. Other objects and value types are overridden by</span>
+ <span class="s4">* assignment. Source objects are applied from left to right. Subsequent</span>
+ <span class="s4">* sources overwrite property assignments of previous sources.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This method mutates `object`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.5.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Object</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Object} object The destination object.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{...Object} [sources] The source objects.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Object} Returns `object`.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var object = {</span>
+ <span class="s4">*   'a': [{ 'b': 2 }, { 'd': 4 }]</span>
+ <span class="s4">* };</span>
+ <span class="s4">*</span>
+ <span class="s4">* var other = {</span>
+ <span class="s4">*   'a': [{ 'c': 3 }, { 'e': 5 }]</span>
+ <span class="s4">* };</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.merge(object, other);</span>
+ <span class="s4">* // =&gt; { 'a': [{ 'b': 2, 'c': 3 }, { 'd': 4, 'e': 5 }] }</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">merge </span><span class="s2">= </span><span
+    class="s1">createAssigner</span><span class="s2">(</span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">object</span><span class="s2">, </span><span class="s1">source</span><span
+    class="s2">, </span><span class="s1">srcIndex</span><span class="s2">) {</span>
+  <span class="s1">baseMerge</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">, </span><span class="s1">source</span><span class="s2">, </span><span class="s1">srcIndex</span><span
+    class="s2">);</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">merge</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

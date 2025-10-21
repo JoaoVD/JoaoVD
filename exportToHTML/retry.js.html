@@ -1,0 +1,222 @@
+<html>
+<head>
+  <title>retry.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          retry.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">RetryOperation </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./retry_operation'</span><span class="s2">);</span>
+
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">operation </span><span
+    class="s2">= </span><span class="s0">function</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">timeouts </span><span class="s2">= </span><span class="s1">exports</span><span
+    class="s2">.</span><span class="s1">timeouts</span><span class="s2">(</span><span class="s1">options</span><span
+    class="s2">);</span>
+  <span class="s0">return new </span><span class="s1">RetryOperation</span><span class="s2">(</span><span class="s1">timeouts</span><span
+    class="s2">, {</span>
+      <span class="s1">forever</span><span class="s2">: </span><span class="s1">options </span><span class="s2">&amp;&amp; (</span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">forever </span><span class="s2">|| </span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">retries </span><span class="s2">=== </span><span
+    class="s1">Infinity</span><span class="s2">),</span>
+      <span class="s1">unref</span><span class="s2">: </span><span class="s1">options </span><span
+    class="s2">&amp;&amp; </span><span class="s1">options</span><span class="s2">.</span><span
+    class="s1">unref</span><span class="s2">,</span>
+      <span class="s1">maxRetryTime</span><span class="s2">: </span><span class="s1">options </span><span class="s2">&amp;&amp; </span><span
+    class="s1">options</span><span class="s2">.</span><span class="s1">maxRetryTime</span>
+  <span class="s2">});</span>
+<span class="s2">};</span>
+
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">timeouts </span><span class="s2">= </span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">options</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">options </span><span
+    class="s0">instanceof </span><span class="s1">Array</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s2">[].</span><span class="s1">concat</span><span
+    class="s2">(</span><span class="s1">options</span><span class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s0">var </span><span class="s1">opts </span><span class="s2">= {</span>
+    <span class="s1">retries</span><span class="s2">: </span><span class="s4">10</span><span class="s2">,</span>
+    <span class="s1">factor</span><span class="s2">: </span><span class="s4">2</span><span class="s2">,</span>
+    <span class="s1">minTimeout</span><span class="s2">: </span><span class="s4">1 </span><span
+    class="s2">* </span><span class="s4">1000</span><span class="s2">,</span>
+    <span class="s1">maxTimeout</span><span class="s2">: </span><span class="s1">Infinity</span><span
+    class="s2">,</span>
+    <span class="s1">randomize</span><span class="s2">: </span><span class="s0">false</span>
+  <span class="s2">};</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">var </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">options</span><span class="s2">) {</span>
+    <span class="s1">opts</span><span class="s2">[</span><span class="s1">key</span><span class="s2">] = </span><span
+    class="s1">options</span><span class="s2">[</span><span class="s1">key</span><span class="s2">];</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">minTimeout </span><span class="s2">&gt; </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">maxTimeout</span><span class="s2">) {</span>
+    <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">'minTimeout is greater than maxTimeout'</span><span
+    class="s2">);</span>
+  <span class="s2">}</span>
+
+  <span class="s0">var </span><span class="s1">timeouts </span><span class="s2">= [];</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">var </span><span class="s1">i </span><span
+    class="s2">= </span><span class="s4">0</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&lt; </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">retries</span><span class="s2">; </span><span
+    class="s1">i</span><span class="s2">++) {</span>
+    <span class="s1">timeouts</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">createTimeout</span><span class="s2">(</span><span
+    class="s1">i</span><span class="s2">, </span><span class="s1">opts</span><span class="s2">));</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">options </span><span
+    class="s2">&amp;&amp; </span><span class="s1">options</span><span class="s2">.</span><span
+    class="s1">forever </span><span class="s2">&amp;&amp; !</span><span class="s1">timeouts</span><span
+    class="s2">.</span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s1">timeouts</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">.</span><span class="s1">createTimeout</span><span class="s2">(</span><span
+    class="s1">i</span><span class="s2">, </span><span class="s1">opts</span><span class="s2">));</span>
+  <span class="s2">}</span>
+
+  <span class="s5">// sort the array numerically ascending</span>
+  <span class="s1">timeouts</span><span class="s2">.</span><span class="s1">sort</span><span class="s2">(</span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">a</span><span class="s2">,</span><span
+    class="s1">b</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">a </span><span class="s2">- </span><span class="s1">b</span><span
+    class="s2">;</span>
+  <span class="s2">});</span>
+
+  <span class="s0">return </span><span class="s1">timeouts</span><span class="s2">;</span>
+<span class="s2">};</span>
+
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">createTimeout </span><span class="s2">= </span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">attempt</span><span class="s2">, </span><span
+    class="s1">opts</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">random </span><span class="s2">= (</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">randomize</span><span class="s2">)</span>
+    <span class="s2">? (</span><span class="s1">Math</span><span class="s2">.</span><span class="s1">random</span><span
+    class="s2">() + </span><span class="s4">1</span><span class="s2">)</span>
+    <span class="s2">: </span><span class="s4">1</span><span class="s2">;</span>
+
+  <span class="s0">var </span><span class="s1">timeout </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">round</span><span class="s2">(</span><span
+    class="s1">random </span><span class="s2">* </span><span class="s1">Math</span><span class="s2">.</span><span
+    class="s1">max</span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">minTimeout</span><span
+    class="s2">, </span><span class="s4">1</span><span class="s2">) * </span><span class="s1">Math</span><span
+    class="s2">.</span><span class="s1">pow</span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">factor</span><span class="s2">, </span><span class="s1">attempt</span><span class="s2">));</span>
+  <span class="s1">timeout </span><span class="s2">= </span><span class="s1">Math</span><span class="s2">.</span><span
+    class="s1">min</span><span class="s2">(</span><span class="s1">timeout</span><span class="s2">, </span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">maxTimeout</span><span class="s2">);</span>
+
+  <span class="s0">return </span><span class="s1">timeout</span><span class="s2">;</span>
+<span class="s2">};</span>
+
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">wrap </span><span class="s2">= </span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">obj</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">, </span><span class="s1">methods</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">options </span><span
+    class="s0">instanceof </span><span class="s1">Array</span><span class="s2">) {</span>
+    <span class="s1">methods </span><span class="s2">= </span><span class="s1">options</span><span class="s2">;</span>
+    <span class="s1">options </span><span class="s2">= </span><span class="s0">null</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">methods</span><span class="s2">) {</span>
+    <span class="s1">methods </span><span class="s2">= [];</span>
+    <span class="s0">for </span><span class="s2">(</span><span class="s0">var </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">obj</span><span class="s2">) {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span
+    class="s1">obj</span><span class="s2">[</span><span class="s1">key</span><span class="s2">] === </span><span
+    class="s3">'function'</span><span class="s2">) {</span>
+        <span class="s1">methods</span><span class="s2">.</span><span class="s1">push</span><span
+    class="s2">(</span><span class="s1">key</span><span class="s2">);</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">var </span><span class="s1">i </span><span
+    class="s2">= </span><span class="s4">0</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&lt; </span><span
+    class="s1">methods</span><span class="s2">.</span><span class="s1">length</span><span class="s2">; </span><span
+    class="s1">i</span><span class="s2">++) {</span>
+    <span class="s0">var </span><span class="s1">method   </span><span class="s2">= </span><span
+    class="s1">methods</span><span class="s2">[</span><span class="s1">i</span><span class="s2">];</span>
+    <span class="s0">var </span><span class="s1">original </span><span class="s2">= </span><span
+    class="s1">obj</span><span class="s2">[</span><span class="s1">method</span><span class="s2">];</span>
+
+    <span class="s1">obj</span><span class="s2">[</span><span class="s1">method</span><span class="s2">] = </span><span
+    class="s0">function </span><span class="s1">retryWrapper</span><span class="s2">(</span><span
+    class="s1">original</span><span class="s2">) {</span>
+      <span class="s0">var </span><span class="s1">op       </span><span class="s2">= </span><span
+    class="s1">exports</span><span class="s2">.</span><span class="s1">operation</span><span class="s2">(</span><span
+    class="s1">options</span><span class="s2">);</span>
+      <span class="s0">var </span><span class="s1">args     </span><span class="s2">= </span><span
+    class="s1">Array</span><span class="s2">.</span><span class="s1">prototype</span><span class="s2">.</span><span
+    class="s1">slice</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s1">arguments</span><span class="s2">, </span><span class="s4">1</span><span class="s2">);</span>
+      <span class="s0">var </span><span class="s1">callback </span><span class="s2">= </span><span
+    class="s1">args</span><span class="s2">.</span><span class="s1">pop</span><span class="s2">();</span>
+
+      <span class="s1">args</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">err</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">op</span><span class="s2">.</span><span
+    class="s1">retry</span><span class="s2">(</span><span class="s1">err</span><span class="s2">)) {</span>
+          <span class="s0">return</span><span class="s2">;</span>
+        <span class="s2">}</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">err</span><span class="s2">) {</span>
+          <span class="s1">arguments</span><span class="s2">[</span><span class="s4">0</span><span
+    class="s2">] = </span><span class="s1">op</span><span class="s2">.</span><span class="s1">mainError</span><span
+    class="s2">();</span>
+        <span class="s2">}</span>
+        <span class="s1">callback</span><span class="s2">.</span><span class="s1">apply</span><span
+    class="s2">(</span><span class="s0">this</span><span class="s2">, </span><span class="s1">arguments</span><span
+    class="s2">);</span>
+      <span class="s2">});</span>
+
+      <span class="s1">op</span><span class="s2">.</span><span class="s1">attempt</span><span class="s2">(</span><span
+    class="s0">function</span><span class="s2">() {</span>
+        <span class="s1">original</span><span class="s2">.</span><span class="s1">apply</span><span
+    class="s2">(</span><span class="s1">obj</span><span class="s2">, </span><span class="s1">args</span><span
+    class="s2">);</span>
+      <span class="s2">});</span>
+    <span class="s2">}.</span><span class="s1">bind</span><span class="s2">(</span><span class="s1">obj</span><span
+    class="s2">, </span><span class="s1">original</span><span class="s2">);</span>
+    <span class="s1">obj</span><span class="s2">[</span><span class="s1">method</span><span class="s2">].</span><span
+    class="s1">options </span><span class="s2">= </span><span class="s1">options</span><span class="s2">;</span>
+  <span class="s2">}</span>
+<span class="s2">};</span>
+</pre>
+</body>
+</html>

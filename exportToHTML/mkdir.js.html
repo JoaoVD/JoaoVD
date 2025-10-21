@@ -1,0 +1,479 @@
+<html>
+<head>
+  <title>mkdir.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #7a7e85;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          mkdir.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+<span class="s2">// wrapper around mkdirp for tar's needs.</span>
+
+<span class="s2">// TODO: This should probably be a class, not functionally</span>
+<span class="s2">// passing around state in a gazillion args.</span>
+
+<span class="s3">const </span><span class="s1">mkdirp </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'mkdirp'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">fs </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'fs'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'path'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">chownr </span><span class="s4">= </span><span
+    class="s1">require</span><span class="s4">(</span><span class="s0">'chownr'</span><span class="s4">)</span>
+<span class="s3">const </span><span class="s1">normPath </span><span class="s4">= </span><span class="s1">require</span><span
+    class="s4">(</span><span class="s0">'./normalize-windows-path.js'</span><span class="s4">)</span>
+
+<span class="s3">class </span><span class="s1">SymlinkError </span><span class="s3">extends </span><span class="s1">Error </span><span
+    class="s4">{</span>
+  <span class="s1">constructor </span><span class="s4">(</span><span class="s1">symlink</span><span class="s4">, </span><span
+    class="s1">path</span><span class="s4">) {</span>
+    <span class="s3">super</span><span class="s4">(</span><span class="s0">'Cannot extract through symbolic link'</span><span
+    class="s4">)</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">path</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">symlink </span><span class="s4">= </span><span
+    class="s1">symlink</span>
+  <span class="s4">}</span>
+
+  <span class="s1">get name </span><span class="s4">() {</span>
+    <span class="s3">return </span><span class="s0">'SylinkError'</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s3">class </span><span class="s1">CwdError </span><span class="s3">extends </span><span
+    class="s1">Error </span><span class="s4">{</span>
+  <span class="s1">constructor </span><span class="s4">(</span><span class="s1">path</span><span
+    class="s4">, </span><span class="s1">code</span><span class="s4">) {</span>
+    <span class="s3">super</span><span class="s4">(</span><span class="s1">code </span><span class="s4">+ </span><span
+    class="s0">': Cannot cd into </span><span class="s3">\'</span><span class="s0">' </span><span
+    class="s4">+ </span><span class="s1">path </span><span class="s4">+ </span><span class="s0">'</span><span
+    class="s3">\'</span><span class="s0">'</span><span class="s4">)</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">path </span><span class="s4">= </span><span
+    class="s1">path</span>
+    <span class="s3">this</span><span class="s4">.</span><span class="s1">code </span><span class="s4">= </span><span
+    class="s1">code</span>
+  <span class="s4">}</span>
+
+  <span class="s1">get name </span><span class="s4">() {</span>
+    <span class="s3">return </span><span class="s0">'CwdError'</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">cGet </span><span class="s4">= (</span><span class="s1">cache</span><span
+    class="s4">, </span><span class="s1">key</span><span class="s4">) =&gt; </span><span class="s1">cache</span><span
+    class="s4">.</span><span class="s1">get</span><span class="s4">(</span><span class="s1">normPath</span><span
+    class="s4">(</span><span class="s1">key</span><span class="s4">))</span>
+<span class="s3">const </span><span class="s1">cSet </span><span class="s4">= (</span><span class="s1">cache</span><span
+    class="s4">, </span><span class="s1">key</span><span class="s4">, </span><span class="s1">val</span><span
+    class="s4">) =&gt; </span><span class="s1">cache</span><span class="s4">.</span><span class="s1">set</span><span
+    class="s4">(</span><span class="s1">normPath</span><span class="s4">(</span><span class="s1">key</span><span
+    class="s4">), </span><span class="s1">val</span><span class="s4">)</span>
+
+<span class="s3">const </span><span class="s1">checkCwd </span><span class="s4">= (</span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) =&gt; {</span>
+  <span class="s1">fs</span><span class="s4">.</span><span class="s1">stat</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">, (</span><span class="s1">er</span><span class="s4">, </span><span
+    class="s1">st</span><span class="s4">) =&gt; {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">er </span><span class="s4">|| !</span><span
+    class="s1">st</span><span class="s4">.</span><span class="s1">isDirectory</span><span class="s4">()) {</span>
+      <span class="s1">er </span><span class="s4">= </span><span class="s3">new </span><span
+    class="s1">CwdError</span><span class="s4">(</span><span class="s1">dir</span><span class="s4">, </span><span
+    class="s1">er </span><span class="s4">&amp;&amp; </span><span class="s1">er</span><span class="s4">.</span><span
+    class="s1">code </span><span class="s4">|| </span><span class="s0">'ENOTDIR'</span><span class="s4">)</span>
+    <span class="s4">}</span>
+    <span class="s1">cb</span><span class="s4">(</span><span class="s1">er</span><span class="s4">)</span>
+  <span class="s4">})</span>
+<span class="s4">}</span>
+
+<span class="s1">module</span><span class="s4">.</span><span class="s1">exports </span><span class="s4">= (</span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s1">opt</span><span class="s4">, </span><span
+    class="s1">cb</span><span class="s4">) =&gt; {</span>
+  <span class="s1">dir </span><span class="s4">= </span><span class="s1">normPath</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">)</span>
+
+  <span class="s2">// if there's any overlap between mask and mode,</span>
+  <span class="s2">// then we'll need an explicit chmod</span>
+  <span class="s3">const </span><span class="s1">umask </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">umask</span>
+  <span class="s3">const </span><span class="s1">mode </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">mode </span><span class="s4">| </span><span class="s5">0o0700</span>
+  <span class="s3">const </span><span class="s1">needChmod </span><span class="s4">= (</span><span
+    class="s1">mode </span><span class="s4">&amp; </span><span class="s1">umask</span><span
+    class="s4">) !== </span><span class="s5">0</span>
+
+  <span class="s3">const </span><span class="s1">uid </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">uid</span>
+  <span class="s3">const </span><span class="s1">gid </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">gid</span>
+  <span class="s3">const </span><span class="s1">doChown </span><span class="s4">= </span><span
+    class="s3">typeof </span><span class="s1">uid </span><span class="s4">=== </span><span
+    class="s0">'number' </span><span class="s4">&amp;&amp;</span>
+    <span class="s3">typeof </span><span class="s1">gid </span><span class="s4">=== </span><span
+    class="s0">'number' </span><span class="s4">&amp;&amp;</span>
+    <span class="s4">(</span><span class="s1">uid </span><span class="s4">!== </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">processUid </span><span class="s4">|| </span><span class="s1">gid </span><span
+    class="s4">!== </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">processGid</span><span
+    class="s4">)</span>
+
+  <span class="s3">const </span><span class="s1">preserve </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">preserve</span>
+  <span class="s3">const </span><span class="s1">unlink </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">unlink</span>
+  <span class="s3">const </span><span class="s1">cache </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">cache</span>
+  <span class="s3">const </span><span class="s1">cwd </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">)</span>
+
+  <span class="s3">const </span><span class="s1">done </span><span class="s4">= (</span><span class="s1">er</span><span
+    class="s4">, </span><span class="s1">created</span><span class="s4">) =&gt; {</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+      <span class="s1">cb</span><span class="s4">(</span><span class="s1">er</span><span class="s4">)</span>
+    <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+      <span class="s1">cSet</span><span class="s4">(</span><span class="s1">cache</span><span class="s4">, </span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s3">true</span><span class="s4">)</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">created </span><span
+    class="s4">&amp;&amp; </span><span class="s1">doChown</span><span class="s4">) {</span>
+        <span class="s1">chownr</span><span class="s4">(</span><span class="s1">created</span><span class="s4">, </span><span
+    class="s1">uid</span><span class="s4">, </span><span class="s1">gid</span><span class="s4">, </span><span
+    class="s1">er </span><span class="s4">=&gt; </span><span class="s1">done</span><span class="s4">(</span><span
+    class="s1">er</span><span class="s4">))</span>
+      <span class="s4">} </span><span class="s3">else if </span><span class="s4">(</span><span
+    class="s1">needChmod</span><span class="s4">) {</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">chmod</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">, </span><span
+    class="s1">cb</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+        <span class="s1">cb</span><span class="s4">()</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">cache </span><span
+    class="s4">&amp;&amp; </span><span class="s1">cGet</span><span class="s4">(</span><span class="s1">cache</span><span
+    class="s4">, </span><span class="s1">dir</span><span class="s4">) === </span><span class="s3">true</span><span
+    class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">done</span><span class="s4">()</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">dir </span><span class="s4">=== </span><span
+    class="s1">cwd</span><span class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">checkCwd</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">preserve</span><span class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">mkdirp</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">, { </span><span class="s1">mode </span><span class="s4">}).</span><span
+    class="s1">then</span><span class="s4">(</span><span class="s1">made </span><span class="s4">=&gt; </span><span
+    class="s1">done</span><span class="s4">(</span><span class="s3">null</span><span class="s4">, </span><span
+    class="s1">made</span><span class="s4">), </span><span class="s1">done</span><span class="s4">)</span>
+  <span class="s4">}</span>
+
+  <span class="s3">const </span><span class="s1">sub </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">relative</span><span class="s4">(</span><span class="s1">cwd</span><span class="s4">, </span><span
+    class="s1">dir</span><span class="s4">))</span>
+  <span class="s3">const </span><span class="s1">parts </span><span class="s4">= </span><span class="s1">sub</span><span
+    class="s4">.</span><span class="s1">split</span><span class="s4">(</span><span class="s0">'/'</span><span
+    class="s4">)</span>
+  <span class="s1">mkdir_</span><span class="s4">(</span><span class="s1">cwd</span><span class="s4">, </span><span
+    class="s1">parts</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">, </span><span
+    class="s1">cache</span><span class="s4">, </span><span class="s1">unlink</span><span class="s4">, </span><span
+    class="s1">cwd</span><span class="s4">, </span><span class="s3">null</span><span class="s4">, </span><span
+    class="s1">done</span><span class="s4">)</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">mkdir_ </span><span class="s4">= (</span><span
+    class="s1">base</span><span class="s4">, </span><span class="s1">parts</span><span class="s4">, </span><span
+    class="s1">mode</span><span class="s4">, </span><span class="s1">cache</span><span class="s4">, </span><span
+    class="s1">unlink</span><span class="s4">, </span><span class="s1">cwd</span><span class="s4">, </span><span
+    class="s1">created</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) =&gt; {</span>
+  <span class="s3">if </span><span class="s4">(!</span><span class="s1">parts</span><span class="s4">.</span><span
+    class="s1">length</span><span class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">cb</span><span class="s4">(</span><span class="s3">null</span><span
+    class="s4">, </span><span class="s1">created</span><span class="s4">)</span>
+  <span class="s4">}</span>
+  <span class="s3">const </span><span class="s1">p </span><span class="s4">= </span><span class="s1">parts</span><span
+    class="s4">.</span><span class="s1">shift</span><span class="s4">()</span>
+  <span class="s3">const </span><span class="s1">part </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">resolve</span><span class="s4">(</span><span class="s1">base </span><span class="s4">+ </span><span
+    class="s0">'/' </span><span class="s4">+ </span><span class="s1">p</span><span class="s4">))</span>
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">cGet</span><span class="s4">(</span><span
+    class="s1">cache</span><span class="s4">, </span><span class="s1">part</span><span class="s4">)) {</span>
+    <span class="s3">return </span><span class="s1">mkdir_</span><span class="s4">(</span><span
+    class="s1">part</span><span class="s4">, </span><span class="s1">parts</span><span class="s4">, </span><span
+    class="s1">mode</span><span class="s4">, </span><span class="s1">cache</span><span class="s4">, </span><span
+    class="s1">unlink</span><span class="s4">, </span><span class="s1">cwd</span><span class="s4">, </span><span
+    class="s1">created</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">)</span>
+  <span class="s4">}</span>
+  <span class="s1">fs</span><span class="s4">.</span><span class="s1">mkdir</span><span class="s4">(</span><span
+    class="s1">part</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">, </span><span
+    class="s1">onmkdir</span><span class="s4">(</span><span class="s1">part</span><span class="s4">, </span><span
+    class="s1">parts</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">, </span><span
+    class="s1">cache</span><span class="s4">, </span><span class="s1">unlink</span><span class="s4">, </span><span
+    class="s1">cwd</span><span class="s4">, </span><span class="s1">created</span><span class="s4">, </span><span
+    class="s1">cb</span><span class="s4">))</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">onmkdir </span><span class="s4">= (</span><span
+    class="s1">part</span><span class="s4">, </span><span class="s1">parts</span><span class="s4">, </span><span
+    class="s1">mode</span><span class="s4">, </span><span class="s1">cache</span><span class="s4">, </span><span
+    class="s1">unlink</span><span class="s4">, </span><span class="s1">cwd</span><span class="s4">, </span><span
+    class="s1">created</span><span class="s4">, </span><span class="s1">cb</span><span class="s4">) =&gt; </span><span
+    class="s1">er </span><span class="s4">=&gt; {</span>
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+    <span class="s1">fs</span><span class="s4">.</span><span class="s1">lstat</span><span class="s4">(</span><span
+    class="s1">part</span><span class="s4">, (</span><span class="s1">statEr</span><span class="s4">, </span><span
+    class="s1">st</span><span class="s4">) =&gt; {</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">statEr</span><span class="s4">) {</span>
+        <span class="s1">statEr</span><span class="s4">.</span><span class="s1">path </span><span
+    class="s4">= </span><span class="s1">statEr</span><span class="s4">.</span><span class="s1">path </span><span
+    class="s4">&amp;&amp; </span><span class="s1">normPath</span><span class="s4">(</span><span class="s1">statEr</span><span
+    class="s4">.</span><span class="s1">path</span><span class="s4">)</span>
+        <span class="s1">cb</span><span class="s4">(</span><span class="s1">statEr</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">else if </span><span class="s4">(</span><span class="s1">st</span><span
+    class="s4">.</span><span class="s1">isDirectory</span><span class="s4">()) {</span>
+        <span class="s1">mkdir_</span><span class="s4">(</span><span class="s1">part</span><span
+    class="s4">, </span><span class="s1">parts</span><span class="s4">, </span><span class="s1">mode</span><span
+    class="s4">, </span><span class="s1">cache</span><span class="s4">, </span><span class="s1">unlink</span><span
+    class="s4">, </span><span class="s1">cwd</span><span class="s4">, </span><span class="s1">created</span><span
+    class="s4">, </span><span class="s1">cb</span><span class="s4">)</span>
+      <span class="s4">} </span><span class="s3">else if </span><span class="s4">(</span><span
+    class="s1">unlink</span><span class="s4">) {</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">unlink</span><span class="s4">(</span><span
+    class="s1">part</span><span class="s4">, </span><span class="s1">er </span><span class="s4">=&gt; {</span>
+          <span class="s3">if </span><span class="s4">(</span><span class="s1">er</span><span class="s4">) {</span>
+            <span class="s3">return </span><span class="s1">cb</span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">)</span>
+          <span class="s4">}</span>
+          <span class="s1">fs</span><span class="s4">.</span><span class="s1">mkdir</span><span class="s4">(</span><span
+    class="s1">part</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">, </span><span
+    class="s1">onmkdir</span><span class="s4">(</span><span class="s1">part</span><span class="s4">, </span><span
+    class="s1">parts</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">, </span><span
+    class="s1">cache</span><span class="s4">, </span><span class="s1">unlink</span><span class="s4">, </span><span
+    class="s1">cwd</span><span class="s4">, </span><span class="s1">created</span><span class="s4">, </span><span
+    class="s1">cb</span><span class="s4">))</span>
+        <span class="s4">})</span>
+      <span class="s4">} </span><span class="s3">else if </span><span class="s4">(</span><span class="s1">st</span><span
+    class="s4">.</span><span class="s1">isSymbolicLink</span><span class="s4">()) {</span>
+        <span class="s3">return </span><span class="s1">cb</span><span class="s4">(</span><span
+    class="s3">new </span><span class="s1">SymlinkError</span><span class="s4">(</span><span class="s1">part</span><span
+    class="s4">, </span><span class="s1">part </span><span class="s4">+ </span><span class="s0">'/' </span><span
+    class="s4">+ </span><span class="s1">parts</span><span class="s4">.</span><span class="s1">join</span><span
+    class="s4">(</span><span class="s0">'/'</span><span class="s4">)))</span>
+      <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+        <span class="s1">cb</span><span class="s4">(</span><span class="s1">er</span><span class="s4">)</span>
+      <span class="s4">}</span>
+    <span class="s4">})</span>
+  <span class="s4">} </span><span class="s3">else </span><span class="s4">{</span>
+    <span class="s1">created </span><span class="s4">= </span><span class="s1">created </span><span
+    class="s4">|| </span><span class="s1">part</span>
+    <span class="s1">mkdir_</span><span class="s4">(</span><span class="s1">part</span><span class="s4">, </span><span
+    class="s1">parts</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">, </span><span
+    class="s1">cache</span><span class="s4">, </span><span class="s1">unlink</span><span class="s4">, </span><span
+    class="s1">cwd</span><span class="s4">, </span><span class="s1">created</span><span class="s4">, </span><span
+    class="s1">cb</span><span class="s4">)</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s3">const </span><span class="s1">checkCwdSync </span><span class="s4">= </span><span
+    class="s1">dir </span><span class="s4">=&gt; {</span>
+  <span class="s3">let </span><span class="s1">ok </span><span class="s4">= </span><span class="s3">false</span>
+  <span class="s3">let </span><span class="s1">code </span><span class="s4">= </span><span class="s0">'ENOTDIR'</span>
+  <span class="s3">try </span><span class="s4">{</span>
+    <span class="s1">ok </span><span class="s4">= </span><span class="s1">fs</span><span class="s4">.</span><span
+    class="s1">statSync</span><span class="s4">(</span><span class="s1">dir</span><span class="s4">).</span><span
+    class="s1">isDirectory</span><span class="s4">()</span>
+  <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {</span>
+    <span class="s1">code </span><span class="s4">= </span><span class="s1">er</span><span class="s4">.</span><span
+    class="s1">code</span>
+  <span class="s4">} </span><span class="s3">finally </span><span class="s4">{</span>
+    <span class="s3">if </span><span class="s4">(!</span><span class="s1">ok</span><span class="s4">) {</span>
+      <span class="s3">throw new </span><span class="s1">CwdError</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s1">code</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s1">module</span><span class="s4">.</span><span class="s1">exports</span><span class="s4">.</span><span
+    class="s1">sync </span><span class="s4">= (</span><span class="s1">dir</span><span class="s4">, </span><span
+    class="s1">opt</span><span class="s4">) =&gt; {</span>
+  <span class="s1">dir </span><span class="s4">= </span><span class="s1">normPath</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">)</span>
+  <span class="s2">// if there's any overlap between mask and mode,</span>
+  <span class="s2">// then we'll need an explicit chmod</span>
+  <span class="s3">const </span><span class="s1">umask </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">umask</span>
+  <span class="s3">const </span><span class="s1">mode </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">mode </span><span class="s4">| </span><span class="s5">0o0700</span>
+  <span class="s3">const </span><span class="s1">needChmod </span><span class="s4">= (</span><span
+    class="s1">mode </span><span class="s4">&amp; </span><span class="s1">umask</span><span
+    class="s4">) !== </span><span class="s5">0</span>
+
+  <span class="s3">const </span><span class="s1">uid </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">uid</span>
+  <span class="s3">const </span><span class="s1">gid </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">gid</span>
+  <span class="s3">const </span><span class="s1">doChown </span><span class="s4">= </span><span
+    class="s3">typeof </span><span class="s1">uid </span><span class="s4">=== </span><span
+    class="s0">'number' </span><span class="s4">&amp;&amp;</span>
+    <span class="s3">typeof </span><span class="s1">gid </span><span class="s4">=== </span><span
+    class="s0">'number' </span><span class="s4">&amp;&amp;</span>
+    <span class="s4">(</span><span class="s1">uid </span><span class="s4">!== </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">processUid </span><span class="s4">|| </span><span class="s1">gid </span><span
+    class="s4">!== </span><span class="s1">opt</span><span class="s4">.</span><span class="s1">processGid</span><span
+    class="s4">)</span>
+
+  <span class="s3">const </span><span class="s1">preserve </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">preserve</span>
+  <span class="s3">const </span><span class="s1">unlink </span><span class="s4">= </span><span
+    class="s1">opt</span><span class="s4">.</span><span class="s1">unlink</span>
+  <span class="s3">const </span><span class="s1">cache </span><span class="s4">= </span><span class="s1">opt</span><span
+    class="s4">.</span><span class="s1">cache</span>
+  <span class="s3">const </span><span class="s1">cwd </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">opt</span><span class="s4">.</span><span
+    class="s1">cwd</span><span class="s4">)</span>
+
+  <span class="s3">const </span><span class="s1">done </span><span class="s4">= (</span><span
+    class="s1">created</span><span class="s4">) =&gt; {</span>
+    <span class="s1">cSet</span><span class="s4">(</span><span class="s1">cache</span><span class="s4">, </span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s3">true</span><span class="s4">)</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">created </span><span
+    class="s4">&amp;&amp; </span><span class="s1">doChown</span><span class="s4">) {</span>
+      <span class="s1">chownr</span><span class="s4">.</span><span class="s1">sync</span><span class="s4">(</span><span
+    class="s1">created</span><span class="s4">, </span><span class="s1">uid</span><span class="s4">, </span><span
+    class="s1">gid</span><span class="s4">)</span>
+    <span class="s4">}</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">needChmod</span><span class="s4">) {</span>
+      <span class="s1">fs</span><span class="s4">.</span><span class="s1">chmodSync</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">)</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">cache </span><span
+    class="s4">&amp;&amp; </span><span class="s1">cGet</span><span class="s4">(</span><span class="s1">cache</span><span
+    class="s4">, </span><span class="s1">dir</span><span class="s4">) === </span><span class="s3">true</span><span
+    class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">done</span><span class="s4">()</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">dir </span><span class="s4">=== </span><span
+    class="s1">cwd</span><span class="s4">) {</span>
+    <span class="s1">checkCwdSync</span><span class="s4">(</span><span class="s1">cwd</span><span class="s4">)</span>
+    <span class="s3">return </span><span class="s1">done</span><span class="s4">()</span>
+  <span class="s4">}</span>
+
+  <span class="s3">if </span><span class="s4">(</span><span class="s1">preserve</span><span class="s4">) {</span>
+    <span class="s3">return </span><span class="s1">done</span><span class="s4">(</span><span
+    class="s1">mkdirp</span><span class="s4">.</span><span class="s1">sync</span><span class="s4">(</span><span
+    class="s1">dir</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">))</span>
+  <span class="s4">}</span>
+
+  <span class="s3">const </span><span class="s1">sub </span><span class="s4">= </span><span
+    class="s1">normPath</span><span class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span
+    class="s1">relative</span><span class="s4">(</span><span class="s1">cwd</span><span class="s4">, </span><span
+    class="s1">dir</span><span class="s4">))</span>
+  <span class="s3">const </span><span class="s1">parts </span><span class="s4">= </span><span class="s1">sub</span><span
+    class="s4">.</span><span class="s1">split</span><span class="s4">(</span><span class="s0">'/'</span><span
+    class="s4">)</span>
+  <span class="s3">let </span><span class="s1">created </span><span class="s4">= </span><span class="s3">null</span>
+  <span class="s3">for </span><span class="s4">(</span><span class="s3">let </span><span class="s1">p </span><span
+    class="s4">= </span><span class="s1">parts</span><span class="s4">.</span><span class="s1">shift</span><span
+    class="s4">(), </span><span class="s1">part </span><span class="s4">= </span><span class="s1">cwd</span><span
+    class="s4">;</span>
+    <span class="s1">p </span><span class="s4">&amp;&amp; (</span><span class="s1">part </span><span
+    class="s4">+= </span><span class="s0">'/' </span><span class="s4">+ </span><span class="s1">p</span><span
+    class="s4">);</span>
+    <span class="s1">p </span><span class="s4">= </span><span class="s1">parts</span><span class="s4">.</span><span
+    class="s1">shift</span><span class="s4">()) {</span>
+    <span class="s1">part </span><span class="s4">= </span><span class="s1">normPath</span><span
+    class="s4">(</span><span class="s1">path</span><span class="s4">.</span><span class="s1">resolve</span><span
+    class="s4">(</span><span class="s1">part</span><span class="s4">))</span>
+    <span class="s3">if </span><span class="s4">(</span><span class="s1">cGet</span><span class="s4">(</span><span
+    class="s1">cache</span><span class="s4">, </span><span class="s1">part</span><span class="s4">)) {</span>
+      <span class="s3">continue</span>
+    <span class="s4">}</span>
+
+    <span class="s3">try </span><span class="s4">{</span>
+      <span class="s1">fs</span><span class="s4">.</span><span class="s1">mkdirSync</span><span class="s4">(</span><span
+    class="s1">part</span><span class="s4">, </span><span class="s1">mode</span><span class="s4">)</span>
+      <span class="s1">created </span><span class="s4">= </span><span class="s1">created </span><span
+    class="s4">|| </span><span class="s1">part</span>
+      <span class="s1">cSet</span><span class="s4">(</span><span class="s1">cache</span><span class="s4">, </span><span
+    class="s1">part</span><span class="s4">, </span><span class="s3">true</span><span class="s4">)</span>
+    <span class="s4">} </span><span class="s3">catch </span><span class="s4">(</span><span class="s1">er</span><span
+    class="s4">) {</span>
+      <span class="s3">const </span><span class="s1">st </span><span class="s4">= </span><span class="s1">fs</span><span
+    class="s4">.</span><span class="s1">lstatSync</span><span class="s4">(</span><span class="s1">part</span><span
+    class="s4">)</span>
+      <span class="s3">if </span><span class="s4">(</span><span class="s1">st</span><span class="s4">.</span><span
+    class="s1">isDirectory</span><span class="s4">()) {</span>
+        <span class="s1">cSet</span><span class="s4">(</span><span class="s1">cache</span><span
+    class="s4">, </span><span class="s1">part</span><span class="s4">, </span><span class="s3">true</span><span
+    class="s4">)</span>
+        <span class="s3">continue</span>
+      <span class="s4">} </span><span class="s3">else if </span><span class="s4">(</span><span
+    class="s1">unlink</span><span class="s4">) {</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">unlinkSync</span><span
+    class="s4">(</span><span class="s1">part</span><span class="s4">)</span>
+        <span class="s1">fs</span><span class="s4">.</span><span class="s1">mkdirSync</span><span
+    class="s4">(</span><span class="s1">part</span><span class="s4">, </span><span class="s1">mode</span><span
+    class="s4">)</span>
+        <span class="s1">created </span><span class="s4">= </span><span class="s1">created </span><span
+    class="s4">|| </span><span class="s1">part</span>
+        <span class="s1">cSet</span><span class="s4">(</span><span class="s1">cache</span><span
+    class="s4">, </span><span class="s1">part</span><span class="s4">, </span><span class="s3">true</span><span
+    class="s4">)</span>
+        <span class="s3">continue</span>
+      <span class="s4">} </span><span class="s3">else if </span><span class="s4">(</span><span class="s1">st</span><span
+    class="s4">.</span><span class="s1">isSymbolicLink</span><span class="s4">()) {</span>
+        <span class="s3">return new </span><span class="s1">SymlinkError</span><span class="s4">(</span><span
+    class="s1">part</span><span class="s4">, </span><span class="s1">part </span><span class="s4">+ </span><span
+    class="s0">'/' </span><span class="s4">+ </span><span class="s1">parts</span><span class="s4">.</span><span
+    class="s1">join</span><span class="s4">(</span><span class="s0">'/'</span><span class="s4">))</span>
+      <span class="s4">}</span>
+    <span class="s4">}</span>
+  <span class="s4">}</span>
+
+  <span class="s3">return </span><span class="s1">done</span><span class="s4">(</span><span
+    class="s1">created</span><span class="s4">)</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

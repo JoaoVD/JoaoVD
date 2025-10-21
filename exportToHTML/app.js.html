@@ -1,0 +1,671 @@
+<html>
+<head>
+  <title>app.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          app.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// app.js - VERSÃO COM CORREÇÃO NO FLUXO DE PAGAMENTO</span>
+
+<span class="s0">// --- CONSTANTES E VARIÁVEIS GLOBAIS ---</span>
+<span class="s2">const </span><span class="s1">API_URL </span><span class="s3">= </span><span class="s4">'http://localhost:3000'</span><span
+    class="s3">;</span>
+<span class="s2">let </span><span class="s1">pedidoAtual </span><span class="s3">= [];</span>
+<span class="s2">let </span><span class="s1">totalPedido </span><span class="s3">= </span><span class="s5">0</span><span
+    class="s3">;</span>
+<span class="s2">const </span><span class="s1">ID_CAIXA </span><span class="s3">= </span><span class="s5">1</span><span
+    class="s3">;</span>
+
+<span class="s0">// --- MAPEAMENTO DE ELEMENTOS (TODAS AS TELAS) ---</span>
+<span class="s2">const </span><span class="s1">navCaixa </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'nav-caixa'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">navAdmin </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'nav-admin'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">viewCaixa </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'view-caixa'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">viewAdmin </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'view-admin'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">produtosGrid </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'produtos-grid'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">pedidoAtualItens </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">getElementById</span><span class="s3">(</span><span class="s4">'pedido-atual-itens'</span><span
+    class="s3">);</span>
+<span class="s2">const </span><span class="s1">totalValor </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'total-valor'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">btnCancelar </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'btn-cancelar'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">btnPagar </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'btn-pagar'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">modalPagamento </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'modal-pagamento'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">totalModalValor </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">getElementById</span><span class="s3">(</span><span class="s4">'total-modal-valor'</span><span
+    class="s3">);</span>
+<span class="s2">const </span><span class="s1">btnFecharModal </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'btn-fechar-modal'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">metodosPagamentoContainer </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">querySelector</span><span
+    class="s3">(</span><span class="s4">'.metodos-pagamento'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">dinheiroSecao </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'dinheiro-secao'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">valorPagoInput </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'valor-pago'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">trocoValor </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'troco-valor'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">btnConfirmarDinheiro </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">getElementById</span><span class="s3">(</span><span class="s4">'btn-confirmar-dinheiro'</span><span
+    class="s3">);</span>
+<span class="s2">const </span><span class="s1">formProduto </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">querySelector</span><span
+    class="s3">(</span><span class="s4">'.form-produto'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">produtoIdInput </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'produto-id'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">produtoNomeInput </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">getElementById</span><span class="s3">(</span><span
+    class="s4">'produto-nome'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">produtoPrecoInput </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">getElementById</span><span class="s3">(</span><span
+    class="s4">'produto-preco'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">produtoCategoriaInput </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">getElementById</span><span class="s3">(</span><span class="s4">'produto-categoria'</span><span
+    class="s3">);</span>
+<span class="s2">const </span><span class="s1">btnSalvar </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">'btn-salvar-produto'</span><span class="s3">);</span>
+<span class="s2">const </span><span class="s1">btnCancelarEdicao </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">getElementById</span><span class="s3">(</span><span class="s4">'btn-cancelar-edicao'</span><span
+    class="s3">);</span>
+<span class="s2">const </span><span class="s1">tabelaProdutosBody </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">querySelector</span><span class="s3">(</span><span class="s4">'#tabela-produtos tbody'</span><span
+    class="s3">);</span>
+
+<span class="s0">// --- FUNÇÃO DE NAVEGAÇÃO ---</span>
+<span class="s2">function </span><span class="s1">navegarPara</span><span class="s3">(</span><span class="s1">viewElementId</span><span
+    class="s3">) {</span>
+  <span class="s1">document</span><span class="s3">.</span><span class="s1">querySelectorAll</span><span
+    class="s3">(</span><span class="s4">'.view'</span><span class="s3">).</span><span class="s1">forEach</span><span
+    class="s3">(</span><span class="s1">view </span><span class="s3">=&gt; </span><span class="s1">view</span><span
+    class="s3">.</span><span class="s1">classList</span><span class="s3">.</span><span class="s1">add</span><span
+    class="s3">(</span><span class="s4">'hidden'</span><span class="s3">));</span>
+  <span class="s1">document</span><span class="s3">.</span><span class="s1">querySelectorAll</span><span
+    class="s3">(</span><span class="s4">'.nav-btn'</span><span class="s3">).</span><span class="s1">forEach</span><span
+    class="s3">(</span><span class="s1">btn </span><span class="s3">=&gt; </span><span class="s1">btn</span><span
+    class="s3">.</span><span class="s1">classList</span><span class="s3">.</span><span class="s1">remove</span><span
+    class="s3">(</span><span class="s4">'active'</span><span class="s3">));</span>
+  <span class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s1">viewElementId</span><span class="s3">).</span><span
+    class="s1">classList</span><span class="s3">.</span><span class="s1">remove</span><span class="s3">(</span><span
+    class="s4">'hidden'</span><span class="s3">);</span>
+  <span class="s2">const </span><span class="s1">navBtn </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">getElementById</span><span
+    class="s3">(</span><span class="s4">`nav-</span><span class="s1">$</span><span class="s3">{</span><span class="s1">viewElementId</span><span
+    class="s3">.</span><span class="s1">split</span><span class="s3">(</span><span class="s4">'-'</span><span
+    class="s3">)[</span><span class="s5">1</span><span class="s3">]}</span><span class="s4">`</span><span
+    class="s3">);</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">navBtn</span><span class="s3">) </span><span
+    class="s1">navBtn</span><span class="s3">.</span><span class="s1">classList</span><span class="s3">.</span><span
+    class="s1">add</span><span class="s3">(</span><span class="s4">'active'</span><span class="s3">);</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">viewElementId </span><span class="s3">=== </span><span
+    class="s4">'view-caixa'</span><span class="s3">) </span><span class="s1">carregarProdutos</span><span
+    class="s3">();</span>
+  <span class="s2">else if </span><span class="s3">(</span><span class="s1">viewElementId </span><span
+    class="s3">=== </span><span class="s4">'view-admin'</span><span class="s3">) </span><span class="s1">carregarProdutosAdmin</span><span
+    class="s3">();</span>
+<span class="s3">}</span>
+
+<span class="s0">// --- FUNÇÕES DA TELA DO CAIXA ---</span>
+<span class="s1">async </span><span class="s2">function </span><span class="s1">carregarProdutos</span><span class="s3">() {</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s2">const </span><span class="s1">response </span><span class="s3">= </span><span
+    class="s2">await </span><span class="s1">fetch</span><span class="s3">(</span><span class="s4">`</span><span
+    class="s1">$</span><span class="s3">{</span><span class="s1">API_URL</span><span class="s3">}</span><span
+    class="s4">/produtos`</span><span class="s3">);</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">response</span><span class="s3">.</span><span
+    class="s1">ok</span><span class="s3">) </span><span class="s2">throw new </span><span class="s1">Error</span><span
+    class="s3">(</span><span class="s4">'Erro ao buscar produtos'</span><span class="s3">);</span>
+    <span class="s2">const </span><span class="s1">data </span><span class="s3">= </span><span
+    class="s2">await </span><span class="s1">response</span><span class="s3">.</span><span class="s1">json</span><span
+    class="s3">();</span>
+    <span class="s1">produtosGrid</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">''</span><span class="s3">;</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">data</span><span class="s3">.</span><span
+    class="s1">data</span><span class="s3">.</span><span class="s1">length </span><span class="s3">=== </span><span
+    class="s5">0</span><span class="s3">) {</span>
+      <span class="s1">produtosGrid</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">'&lt;p&gt;Nenhum produto cadastrado.&lt;/p&gt;'</span><span class="s3">;</span>
+      <span class="s2">return</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s1">data</span><span class="s3">.</span><span class="s1">data</span><span class="s3">.</span><span
+    class="s1">forEach</span><span class="s3">(</span><span class="s1">produto </span><span class="s3">=&gt; {</span>
+      <span class="s2">const </span><span class="s1">btn </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">createElement</span><span
+    class="s3">(</span><span class="s4">'button'</span><span class="s3">);</span>
+      <span class="s1">btn</span><span class="s3">.</span><span class="s1">className </span><span
+    class="s3">= </span><span class="s4">'produto-btn'</span><span class="s3">;</span>
+      <span class="s1">btn</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">`</span><span class="s1">$</span><span class="s3">{</span><span class="s1">produto</span><span
+    class="s3">.</span><span class="s1">nome</span><span class="s3">}</span><span class="s4">&lt;span class=&quot;preco&quot;&gt;</span><span
+    class="s1">$</span><span class="s3">{</span><span class="s1">produto</span><span class="s3">.</span><span
+    class="s1">preco</span><span class="s3">.</span><span class="s1">toLocaleString</span><span class="s3">(</span><span
+    class="s4">'pt-BR'</span><span class="s3">, { </span><span class="s1">style</span><span class="s3">: </span><span
+    class="s4">'currency'</span><span class="s3">, </span><span class="s1">currency</span><span
+    class="s3">: </span><span class="s4">'BRL' </span><span class="s3">})}</span><span
+    class="s4">&lt;/span&gt;`</span><span class="s3">;</span>
+      <span class="s1">btn</span><span class="s3">.</span><span class="s1">onclick </span><span
+    class="s3">= () =&gt; </span><span class="s1">adicionarAoPedido</span><span class="s3">(</span><span class="s1">produto</span><span
+    class="s3">);</span>
+      <span class="s1">produtosGrid</span><span class="s3">.</span><span class="s1">appendChild</span><span
+    class="s3">(</span><span class="s1">btn</span><span class="s3">);</span>
+    <span class="s3">});</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">error</span><span
+    class="s3">) {</span>
+    <span class="s1">console</span><span class="s3">.</span><span class="s1">error</span><span class="s3">(</span><span
+    class="s4">'Falha ao carregar produtos:'</span><span class="s3">, </span><span class="s1">error</span><span
+    class="s3">);</span>
+    <span class="s1">produtosGrid</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">'&lt;p&gt;Não foi possível carregar os produtos. O servidor está rodando?&lt;/p&gt;'</span><span
+    class="s3">;</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">adicionarAoPedido</span><span class="s3">(</span><span class="s1">produto</span><span
+    class="s3">) {</span>
+  <span class="s1">pedidoAtual</span><span class="s3">.</span><span class="s1">push</span><span class="s3">(</span><span
+    class="s1">produto</span><span class="s3">);</span>
+  <span class="s1">atualizarPedido</span><span class="s3">();</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">atualizarPedido</span><span class="s3">() {</span>
+  <span class="s1">pedidoAtualItens</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">''</span><span class="s3">;</span>
+  <span class="s1">totalPedido </span><span class="s3">= </span><span class="s5">0</span><span class="s3">;</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">pedidoAtual</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">0</span><span class="s3">) {</span>
+    <span class="s1">pedidoAtualItens</span><span class="s3">.</span><span class="s1">innerHTML </span><span class="s3">= </span><span
+    class="s4">'&lt;p&gt;Nenhum item adicionado.&lt;/p&gt;'</span><span class="s3">;</span>
+    <span class="s1">totalValor</span><span class="s3">.</span><span class="s1">textContent </span><span
+    class="s3">= </span><span class="s4">'R$ 0,00'</span><span class="s3">;</span>
+    <span class="s2">return</span><span class="s3">;</span>
+  <span class="s3">}</span>
+  <span class="s1">pedidoAtual</span><span class="s3">.</span><span class="s1">forEach</span><span
+    class="s3">(</span><span class="s1">item </span><span class="s3">=&gt; {</span>
+    <span class="s2">const </span><span class="s1">itemElemento </span><span class="s3">= </span><span class="s1">document</span><span
+    class="s3">.</span><span class="s1">createElement</span><span class="s3">(</span><span class="s4">'div'</span><span
+    class="s3">);</span>
+    <span class="s1">itemElemento</span><span class="s3">.</span><span class="s1">className </span><span
+    class="s3">= </span><span class="s4">'item-pedido'</span><span class="s3">;</span>
+    <span class="s1">itemElemento</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">`&lt;span&gt;</span><span class="s1">$</span><span class="s3">{</span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">nome</span><span class="s3">}</span><span
+    class="s4">&lt;/span&gt;&lt;span&gt;</span><span class="s1">$</span><span class="s3">{</span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">preco</span><span class="s3">.</span><span
+    class="s1">toLocaleString</span><span class="s3">(</span><span class="s4">'pt-BR'</span><span class="s3">, { </span><span
+    class="s1">style</span><span class="s3">: </span><span class="s4">'currency'</span><span class="s3">, </span><span
+    class="s1">currency</span><span class="s3">: </span><span class="s4">'BRL' </span><span class="s3">})}</span><span
+    class="s4">&lt;/span&gt;`</span><span class="s3">;</span>
+    <span class="s1">pedidoAtualItens</span><span class="s3">.</span><span class="s1">appendChild</span><span
+    class="s3">(</span><span class="s1">itemElemento</span><span class="s3">);</span>
+    <span class="s1">totalPedido </span><span class="s3">+= </span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">preco</span><span class="s3">;</span>
+  <span class="s3">});</span>
+  <span class="s1">totalValor</span><span class="s3">.</span><span class="s1">textContent </span><span
+    class="s3">= </span><span class="s1">totalPedido</span><span class="s3">.</span><span
+    class="s1">toLocaleString</span><span class="s3">(</span><span class="s4">'pt-BR'</span><span class="s3">, { </span><span
+    class="s1">style</span><span class="s3">: </span><span class="s4">'currency'</span><span class="s3">, </span><span
+    class="s1">currency</span><span class="s3">: </span><span class="s4">'BRL' </span><span class="s3">});</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">cancelarPedido</span><span class="s3">() {</span>
+  <span class="s1">pedidoAtual </span><span class="s3">= [];</span>
+  <span class="s1">atualizarPedido</span><span class="s3">();</span>
+<span class="s3">}</span>
+
+<span class="s1">async </span><span class="s2">function </span><span class="s1">finalizarVenda</span><span
+    class="s3">(</span><span class="s1">formaPagamento</span><span class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">pedidoAtual</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">0</span><span class="s3">) </span><span
+    class="s2">return</span><span class="s3">;</span>
+  <span class="s2">const </span><span class="s1">vendaData </span><span class="s3">= {</span>
+    <span class="s1">total</span><span class="s3">: </span><span class="s1">totalPedido</span><span class="s3">,</span>
+    <span class="s1">forma_pagamento</span><span class="s3">: </span><span class="s1">formaPagamento</span><span
+    class="s3">,</span>
+    <span class="s1">id_caixa</span><span class="s3">: </span><span class="s1">ID_CAIXA</span><span class="s3">,</span>
+    <span class="s1">itens</span><span class="s3">: </span><span class="s1">pedidoAtual</span><span
+    class="s3">.</span><span class="s1">map</span><span class="s3">(</span><span class="s1">item </span><span
+    class="s3">=&gt; ({ </span><span class="s1">id</span><span class="s3">: </span><span class="s1">item</span><span
+    class="s3">.</span><span class="s1">id</span><span class="s3">, </span><span class="s1">nome</span><span class="s3">: </span><span
+    class="s1">item</span><span class="s3">.</span><span class="s1">nome</span><span class="s3">, </span><span
+    class="s1">preco</span><span class="s3">: </span><span class="s1">item</span><span class="s3">.</span><span
+    class="s1">preco </span><span class="s3">}))</span>
+  <span class="s3">};</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s2">const </span><span class="s1">response </span><span class="s3">= </span><span
+    class="s2">await </span><span class="s1">fetch</span><span class="s3">(</span><span class="s4">`</span><span
+    class="s1">$</span><span class="s3">{</span><span class="s1">API_URL</span><span class="s3">}</span><span
+    class="s4">/vendas`</span><span class="s3">, {</span>
+      <span class="s1">method</span><span class="s3">: </span><span class="s4">'POST'</span><span class="s3">,</span>
+      <span class="s1">headers</span><span class="s3">: { </span><span class="s4">'Content-Type'</span><span class="s3">: </span><span
+    class="s4">'application/json' </span><span class="s3">},</span>
+      <span class="s1">body</span><span class="s3">: </span><span class="s1">JSON</span><span class="s3">.</span><span
+    class="s1">stringify</span><span class="s3">(</span><span class="s1">vendaData</span><span class="s3">),</span>
+    <span class="s3">});</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">response</span><span class="s3">.</span><span
+    class="s1">ok</span><span class="s3">) </span><span class="s2">throw new </span><span class="s1">Error</span><span
+    class="s3">(</span><span class="s4">'Erro ao registrar a venda.'</span><span class="s3">);</span>
+    <span class="s2">const </span><span class="s1">result </span><span class="s3">= </span><span
+    class="s2">await </span><span class="s1">response</span><span class="s3">.</span><span class="s1">json</span><span
+    class="s3">();</span>
+    <span class="s1">alert</span><span class="s3">(</span><span class="s4">`Venda #</span><span class="s1">$</span><span
+    class="s3">{</span><span class="s1">result</span><span class="s3">.</span><span class="s1">id_venda</span><span
+    class="s3">} </span><span class="s4">registrada com sucesso!`</span><span class="s3">);</span>
+    <span class="s1">fecharModalPagamento</span><span class="s3">();</span>
+    <span class="s1">cancelarPedido</span><span class="s3">();</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">error</span><span
+    class="s3">) {</span>
+    <span class="s1">console</span><span class="s3">.</span><span class="s1">error</span><span class="s3">(</span><span
+    class="s4">'Falha ao finalizar venda:'</span><span class="s3">, </span><span class="s1">error</span><span
+    class="s3">);</span>
+    <span class="s1">alert</span><span class="s3">(</span><span class="s4">'Ocorreu um erro. A venda não foi registrada.'</span><span
+    class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s0">// --- FUNÇÕES DO MODAL DE PAGAMENTO E CÁLCULO DE TROCO ---</span>
+<span class="s2">function </span><span class="s1">abrirModalPagamento</span><span class="s3">() {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">pedidoAtual</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">=== </span><span class="s5">0</span><span class="s3">) {</span>
+    <span class="s1">alert</span><span class="s3">(</span><span class="s4">&quot;Adicione itens ao pedido antes de pagar!&quot;</span><span
+    class="s3">);</span>
+    <span class="s2">return</span><span class="s3">;</span>
+  <span class="s3">}</span>
+  <span class="s1">dinheiroSecao</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+  <span class="s1">metodosPagamentoContainer</span><span class="s3">.</span><span
+    class="s1">querySelectorAll</span><span class="s3">(</span><span class="s4">'.btn-metodo'</span><span
+    class="s3">).</span><span class="s1">forEach</span><span class="s3">(</span><span class="s1">btn </span><span
+    class="s3">=&gt; </span><span class="s1">btn</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">remove</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">));</span>
+  <span class="s1">btnConfirmarDinheiro</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+  <span class="s1">valorPagoInput</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s4">''</span><span class="s3">;</span>
+  <span class="s1">trocoValor</span><span class="s3">.</span><span class="s1">textContent </span><span
+    class="s3">= </span><span class="s4">'R$ 0,00'</span><span class="s3">;</span>
+  <span class="s1">totalModalValor</span><span class="s3">.</span><span class="s1">textContent </span><span
+    class="s3">= </span><span class="s1">totalValor</span><span class="s3">.</span><span
+    class="s1">textContent</span><span class="s3">;</span>
+  <span class="s1">modalPagamento</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">remove</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">fecharModalPagamento</span><span class="s3">() {</span>
+  <span class="s1">modalPagamento</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">calcularTroco</span><span class="s3">() {</span>
+  <span class="s2">const </span><span class="s1">valorPago </span><span class="s3">= </span><span
+    class="s1">parseFloat</span><span class="s3">(</span><span class="s1">valorPagoInput</span><span class="s3">.</span><span
+    class="s1">value</span><span class="s3">) || </span><span class="s5">0</span><span class="s3">;</span>
+  <span class="s1">btnConfirmarDinheiro</span><span class="s3">.</span><span class="s1">disabled </span><span
+    class="s3">= </span><span class="s1">valorPago </span><span class="s3">&lt; </span><span
+    class="s1">totalPedido</span><span class="s3">;</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">valorPago </span><span
+    class="s3">&lt; </span><span class="s1">totalPedido</span><span class="s3">) {</span>
+    <span class="s1">trocoValor</span><span class="s3">.</span><span class="s1">textContent </span><span
+    class="s3">= </span><span class="s4">'VALOR INSUFICIENTE'</span><span class="s3">;</span>
+    <span class="s2">return</span><span class="s3">;</span>
+  <span class="s3">}</span>
+  <span class="s2">const </span><span class="s1">troco </span><span class="s3">= </span><span
+    class="s1">valorPago </span><span class="s3">- </span><span class="s1">totalPedido</span><span class="s3">;</span>
+  <span class="s1">trocoValor</span><span class="s3">.</span><span class="s1">textContent </span><span
+    class="s3">= </span><span class="s1">troco</span><span class="s3">.</span><span
+    class="s1">toLocaleString</span><span class="s3">(</span><span class="s4">'pt-BR'</span><span class="s3">, { </span><span
+    class="s1">style</span><span class="s3">: </span><span class="s4">'currency'</span><span class="s3">, </span><span
+    class="s1">currency</span><span class="s3">: </span><span class="s4">'BRL' </span><span class="s3">});</span>
+<span class="s3">}</span>
+
+<span class="s0">// --- FUNÇÕES DA TELA DE ADMIN ---</span>
+<span class="s1">async </span><span class="s2">function </span><span class="s1">carregarProdutosAdmin</span><span
+    class="s3">() {</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s2">const </span><span class="s1">response </span><span class="s3">= </span><span
+    class="s2">await </span><span class="s1">fetch</span><span class="s3">(</span><span class="s4">`</span><span
+    class="s1">$</span><span class="s3">{</span><span class="s1">API_URL</span><span class="s3">}</span><span
+    class="s4">/produtos`</span><span class="s3">);</span>
+    <span class="s2">const </span><span class="s1">data </span><span class="s3">= </span><span
+    class="s2">await </span><span class="s1">response</span><span class="s3">.</span><span class="s1">json</span><span
+    class="s3">();</span>
+    <span class="s1">tabelaProdutosBody</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">''</span><span class="s3">;</span>
+    <span class="s1">data</span><span class="s3">.</span><span class="s1">data</span><span class="s3">.</span><span
+    class="s1">forEach</span><span class="s3">(</span><span class="s1">produto </span><span class="s3">=&gt; {</span>
+      <span class="s2">const </span><span class="s1">tr </span><span class="s3">= </span><span
+    class="s1">document</span><span class="s3">.</span><span class="s1">createElement</span><span
+    class="s3">(</span><span class="s4">'tr'</span><span class="s3">);</span>
+      <span class="s1">tr</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">`</span>
+                <span class="s4">&lt;td&gt;</span><span class="s1">$</span><span class="s3">{</span><span class="s1">produto</span><span
+    class="s3">.</span><span class="s1">nome</span><span class="s3">}</span><span class="s4">&lt;/td&gt;
+                &lt;td&gt;</span><span class="s1">$</span><span class="s3">{</span><span class="s1">produto</span><span
+    class="s3">.</span><span class="s1">preco</span><span class="s3">.</span><span class="s1">toLocaleString</span><span
+    class="s3">(</span><span class="s4">'pt-BR'</span><span class="s3">, { </span><span class="s1">style</span><span
+    class="s3">: </span><span class="s4">'currency'</span><span class="s3">, </span><span
+    class="s1">currency</span><span class="s3">: </span><span class="s4">'BRL' </span><span class="s3">})}</span><span
+    class="s4">&lt;/td&gt;
+                &lt;td&gt;</span><span class="s1">$</span><span class="s3">{</span><span class="s1">produto</span><span
+    class="s3">.</span><span class="s1">categoria</span><span class="s3">}</span><span class="s4">&lt;/td&gt;
+                &lt;td&gt;
+                    &lt;button class=&quot;btn-editar&quot;&gt;Editar&lt;/button&gt;
+                    &lt;button class=&quot;btn-excluir&quot;&gt;Excluir&lt;/button&gt;
+                &lt;/td&gt;
+            `</span><span class="s3">;</span>
+      <span class="s1">tr</span><span class="s3">.</span><span class="s1">dataset</span><span class="s3">.</span><span
+    class="s1">produto </span><span class="s3">= </span><span class="s1">JSON</span><span class="s3">.</span><span
+    class="s1">stringify</span><span class="s3">(</span><span class="s1">produto</span><span class="s3">);</span>
+      <span class="s1">tabelaProdutosBody</span><span class="s3">.</span><span class="s1">appendChild</span><span
+    class="s3">(</span><span class="s1">tr</span><span class="s3">);</span>
+    <span class="s3">});</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">error</span><span
+    class="s3">) {</span>
+    <span class="s1">console</span><span class="s3">.</span><span class="s1">error</span><span class="s3">(</span><span
+    class="s4">&quot;Erro ao carregar produtos:&quot;</span><span class="s3">, </span><span class="s1">error</span><span
+    class="s3">);</span>
+    <span class="s1">tabelaProdutosBody</span><span class="s3">.</span><span class="s1">innerHTML </span><span
+    class="s3">= </span><span class="s4">'&lt;tr&gt;&lt;td colspan=&quot;4&quot;&gt;Não foi possível carregar os produtos.&lt;/td&gt;&lt;/tr&gt;'</span><span
+    class="s3">;</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s1">async </span><span class="s2">function </span><span class="s1">salvarProduto</span><span
+    class="s3">(</span><span class="s1">event</span><span class="s3">) {</span>
+  <span class="s1">event</span><span class="s3">.</span><span class="s1">preventDefault</span><span
+    class="s3">();</span>
+  <span class="s2">const </span><span class="s1">id </span><span class="s3">= </span><span
+    class="s1">produtoIdInput</span><span class="s3">.</span><span class="s1">value</span><span class="s3">;</span>
+  <span class="s2">const </span><span class="s1">nome </span><span class="s3">= </span><span
+    class="s1">produtoNomeInput</span><span class="s3">.</span><span class="s1">value</span><span class="s3">;</span>
+  <span class="s2">const </span><span class="s1">preco </span><span class="s3">= </span><span
+    class="s1">parseFloat</span><span class="s3">(</span><span class="s1">produtoPrecoInput</span><span
+    class="s3">.</span><span class="s1">value</span><span class="s3">);</span>
+  <span class="s2">const </span><span class="s1">categoria </span><span class="s3">= </span><span class="s1">produtoCategoriaInput</span><span
+    class="s3">.</span><span class="s1">value</span><span class="s3">;</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">nome </span><span class="s3">|| </span><span
+    class="s1">isNaN</span><span class="s3">(</span><span class="s1">preco</span><span class="s3">) || !</span><span
+    class="s1">categoria</span><span class="s3">) {</span>
+    <span class="s1">alert</span><span class="s3">(</span><span class="s4">&quot;Por favor, preencha todos os campos corretamente.&quot;</span><span
+    class="s3">);</span>
+    <span class="s2">return</span><span class="s3">;</span>
+  <span class="s3">}</span>
+  <span class="s2">const </span><span class="s1">produtoData </span><span class="s3">= { </span><span
+    class="s1">nome</span><span class="s3">, </span><span class="s1">preco</span><span class="s3">, </span><span
+    class="s1">categoria </span><span class="s3">};</span>
+  <span class="s2">const </span><span class="s1">method </span><span class="s3">= </span><span
+    class="s1">id </span><span class="s3">? </span><span class="s4">'PUT' </span><span class="s3">: </span><span
+    class="s4">'POST'</span><span class="s3">;</span>
+  <span class="s2">const </span><span class="s1">url </span><span class="s3">= </span><span class="s1">id </span><span
+    class="s3">? </span><span class="s4">`</span><span class="s1">$</span><span class="s3">{</span><span class="s1">API_URL</span><span
+    class="s3">}</span><span class="s4">/produtos/</span><span class="s1">$</span><span class="s3">{</span><span
+    class="s1">id</span><span class="s3">}</span><span class="s4">` </span><span class="s3">: </span><span
+    class="s4">`</span><span class="s1">$</span><span class="s3">{</span><span class="s1">API_URL</span><span
+    class="s3">}</span><span class="s4">/produtos`</span><span class="s3">;</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s2">const </span><span class="s1">response </span><span class="s3">= </span><span
+    class="s2">await </span><span class="s1">fetch</span><span class="s3">(</span><span class="s1">url</span><span
+    class="s3">, {</span>
+      <span class="s1">method</span><span class="s3">: </span><span class="s1">method</span><span class="s3">,</span>
+      <span class="s1">headers</span><span class="s3">: { </span><span class="s4">'Content-Type'</span><span class="s3">: </span><span
+    class="s4">'application/json' </span><span class="s3">},</span>
+      <span class="s1">body</span><span class="s3">: </span><span class="s1">JSON</span><span class="s3">.</span><span
+    class="s1">stringify</span><span class="s3">(</span><span class="s1">produtoData</span><span class="s3">)</span>
+    <span class="s3">});</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">response</span><span class="s3">.</span><span
+    class="s1">ok</span><span class="s3">) </span><span class="s2">throw new </span><span class="s1">Error</span><span
+    class="s3">(</span><span class="s4">&quot;Erro ao salvar o produto.&quot;</span><span class="s3">);</span>
+    <span class="s1">limparFormulario</span><span class="s3">();</span>
+    <span class="s2">await </span><span class="s1">carregarProdutosAdmin</span><span class="s3">();</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">error</span><span
+    class="s3">) {</span>
+    <span class="s1">console</span><span class="s3">.</span><span class="s1">error</span><span class="s3">(</span><span
+    class="s4">&quot;Erro ao salvar:&quot;</span><span class="s3">, </span><span class="s1">error</span><span
+    class="s3">);</span>
+    <span class="s1">alert</span><span class="s3">(</span><span class="s4">&quot;Não foi possível salvar o produto.&quot;</span><span
+    class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">preencherFormularioParaEdicao</span><span class="s3">(</span><span
+    class="s1">produto</span><span class="s3">) {</span>
+  <span class="s1">produtoIdInput</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s1">produto</span><span class="s3">.</span><span class="s1">id</span><span
+    class="s3">;</span>
+  <span class="s1">produtoNomeInput</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s1">produto</span><span class="s3">.</span><span class="s1">nome</span><span
+    class="s3">;</span>
+  <span class="s1">produtoPrecoInput</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s1">produto</span><span class="s3">.</span><span class="s1">preco</span><span
+    class="s3">;</span>
+  <span class="s1">produtoCategoriaInput</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s1">produto</span><span class="s3">.</span><span class="s1">categoria</span><span
+    class="s3">;</span>
+  <span class="s1">btnCancelarEdicao</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">remove</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+  <span class="s1">produtoNomeInput</span><span class="s3">.</span><span class="s1">focus</span><span
+    class="s3">();</span>
+<span class="s3">}</span>
+
+<span class="s1">async </span><span class="s2">function </span><span class="s1">deletarProduto</span><span
+    class="s3">(</span><span class="s1">id</span><span class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">confirm</span><span class="s3">(</span><span
+    class="s4">&quot;Tem certeza que deseja excluir este produto?&quot;</span><span class="s3">)) </span><span
+    class="s2">return</span><span class="s3">;</span>
+  <span class="s2">try </span><span class="s3">{</span>
+    <span class="s2">const </span><span class="s1">response </span><span class="s3">= </span><span
+    class="s2">await </span><span class="s1">fetch</span><span class="s3">(</span><span class="s4">`</span><span
+    class="s1">$</span><span class="s3">{</span><span class="s1">API_URL</span><span class="s3">}</span><span
+    class="s4">/produtos/</span><span class="s1">$</span><span class="s3">{</span><span class="s1">id</span><span
+    class="s3">}</span><span class="s4">`</span><span class="s3">, { </span><span class="s1">method</span><span
+    class="s3">: </span><span class="s4">'DELETE' </span><span class="s3">});</span>
+    <span class="s2">if </span><span class="s3">(!</span><span class="s1">response</span><span class="s3">.</span><span
+    class="s1">ok</span><span class="s3">) </span><span class="s2">throw new </span><span class="s1">Error</span><span
+    class="s3">(</span><span class="s4">&quot;Erro ao deletar o produto.&quot;</span><span class="s3">);</span>
+    <span class="s2">await </span><span class="s1">carregarProdutosAdmin</span><span class="s3">();</span>
+  <span class="s3">} </span><span class="s2">catch </span><span class="s3">(</span><span class="s1">error</span><span
+    class="s3">) {</span>
+    <span class="s1">console</span><span class="s3">.</span><span class="s1">error</span><span class="s3">(</span><span
+    class="s4">&quot;Erro ao deletar:&quot;</span><span class="s3">, </span><span class="s1">error</span><span
+    class="s3">);</span>
+    <span class="s1">alert</span><span class="s3">(</span><span class="s4">&quot;Não foi possível deletar o produto.&quot;</span><span
+    class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s2">function </span><span class="s1">limparFormulario</span><span class="s3">() {</span>
+  <span class="s1">formProduto</span><span class="s3">.</span><span class="s1">reset</span><span
+    class="s3">(); </span><span class="s0">// Limpa todos os campos do formulário</span>
+  <span class="s1">produtoIdInput</span><span class="s3">.</span><span class="s1">value </span><span
+    class="s3">= </span><span class="s4">''</span><span class="s3">; </span><span class="s0">// Garante que o ID oculto seja limpo</span>
+  <span class="s1">btnCancelarEdicao</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+  <span class="s1">produtoNomeInput</span><span class="s3">.</span><span class="s1">focus</span><span
+    class="s3">();</span>
+<span class="s3">}</span>
+
+<span class="s0">// --- INICIALIZAÇÃO E EVENTOS ---</span>
+
+<span class="s0">// Eventos de Navegação</span>
+<span class="s1">navCaixa</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, () =&gt; </span><span
+    class="s1">navegarPara</span><span class="s3">(</span><span class="s4">'view-caixa'</span><span
+    class="s3">));</span>
+<span class="s1">navAdmin</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, () =&gt; </span><span
+    class="s1">navegarPara</span><span class="s3">(</span><span class="s4">'view-admin'</span><span
+    class="s3">));</span>
+
+<span class="s0">// Eventos da Tela do Caixa</span>
+<span class="s1">btnPagar</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, </span><span
+    class="s1">abrirModalPagamento</span><span class="s3">);</span>
+<span class="s1">btnCancelar</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, </span><span
+    class="s1">cancelarPedido</span><span class="s3">);</span>
+<span class="s1">btnFecharModal</span><span class="s3">.</span><span class="s1">addEventListener</span><span class="s3">(</span><span
+    class="s4">'click'</span><span class="s3">, </span><span class="s1">fecharModalPagamento</span><span
+    class="s3">);</span>
+<span class="s1">valorPagoInput</span><span class="s3">.</span><span class="s1">addEventListener</span><span class="s3">(</span><span
+    class="s4">'input'</span><span class="s3">, </span><span class="s1">calcularTroco</span><span class="s3">);</span>
+<span class="s1">btnConfirmarDinheiro</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, () =&gt; </span><span
+    class="s1">finalizarVenda</span><span class="s3">(</span><span class="s4">'Dinheiro'</span><span
+    class="s3">));</span>
+
+<span class="s0">// --- CORREÇÃO AQUI ---</span>
+<span class="s0">// Event Listener principal para os métodos de pagamento</span>
+<span class="s1">metodosPagamentoContainer</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, (</span><span class="s1">event</span><span
+    class="s3">) =&gt; {</span>
+  <span class="s2">const </span><span class="s1">target </span><span class="s3">= </span><span
+    class="s1">event</span><span class="s3">.</span><span class="s1">target</span><span class="s3">;</span>
+  <span class="s0">// Garante que o clique foi em um botão que é um método de pagamento e não o de confirmar</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">target</span><span class="s3">.</span><span
+    class="s1">classList</span><span class="s3">.</span><span class="s1">contains</span><span class="s3">(</span><span
+    class="s4">'btn-metodo'</span><span class="s3">) || </span><span class="s1">target</span><span
+    class="s3">.</span><span class="s1">id </span><span class="s3">=== </span><span
+    class="s4">'btn-confirmar-dinheiro'</span><span class="s3">) {</span>
+    <span class="s2">return</span><span class="s3">;</span>
+  <span class="s3">}</span>
+
+  <span class="s2">const </span><span class="s1">metodo </span><span class="s3">= </span><span
+    class="s1">target</span><span class="s3">.</span><span class="s1">dataset</span><span class="s3">.</span><span
+    class="s1">metodo</span><span class="s3">;</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">metodo </span><span class="s3">=== </span><span
+    class="s4">'Dinheiro'</span><span class="s3">) {</span>
+    <span class="s0">// Mostra a seção de cálculo de troco</span>
+    <span class="s1">dinheiroSecao</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">remove</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+    <span class="s0">// Esconde os botões de método de pagamento iniciais</span>
+    <span class="s1">metodosPagamentoContainer</span><span class="s3">.</span><span
+    class="s1">querySelectorAll</span><span class="s3">(</span><span class="s4">'.btn-metodo'</span><span
+    class="s3">).</span><span class="s1">forEach</span><span class="s3">(</span><span class="s1">btn </span><span
+    class="s3">=&gt; {</span>
+      <span class="s2">if</span><span class="s3">(</span><span class="s1">btn</span><span class="s3">.</span><span
+    class="s1">id </span><span class="s3">!== </span><span class="s4">'btn-confirmar-dinheiro'</span><span class="s3">) {</span>
+        <span class="s1">btn</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">add</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+      <span class="s3">}</span>
+    <span class="s3">});</span>
+    <span class="s0">// Mostra o botão final de confirmação</span>
+    <span class="s1">btnConfirmarDinheiro</span><span class="s3">.</span><span class="s1">classList</span><span
+    class="s3">.</span><span class="s1">remove</span><span class="s3">(</span><span class="s4">'hidden'</span><span
+    class="s3">);</span>
+    <span class="s1">valorPagoInput</span><span class="s3">.</span><span class="s1">focus</span><span
+    class="s3">();</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+    <span class="s0">// Para os outros métodos (Débito, Crédito, Pix), finaliza a venda diretamente</span>
+    <span class="s1">finalizarVenda</span><span class="s3">(</span><span class="s1">metodo</span><span
+    class="s3">);</span>
+  <span class="s3">}</span>
+<span class="s3">});</span>
+
+<span class="s0">// Eventos da Tela de Admin</span>
+<span class="s1">btnSalvar</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, </span><span
+    class="s1">salvarProduto</span><span class="s3">);</span>
+<span class="s1">btnCancelarEdicao</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, </span><span class="s1">limparFormulario</span><span
+    class="s3">);</span>
+<span class="s1">tabelaProdutosBody</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'click'</span><span class="s3">, (</span><span class="s1">event</span><span
+    class="s3">) =&gt; {</span>
+  <span class="s2">const </span><span class="s1">target </span><span class="s3">= </span><span
+    class="s1">event</span><span class="s3">.</span><span class="s1">target</span><span class="s3">;</span>
+  <span class="s2">const </span><span class="s1">tr </span><span class="s3">= </span><span class="s1">target</span><span
+    class="s3">.</span><span class="s1">closest</span><span class="s3">(</span><span class="s4">'tr'</span><span
+    class="s3">);</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">tr </span><span class="s3">|| !</span><span
+    class="s1">tr</span><span class="s3">.</span><span class="s1">dataset</span><span class="s3">.</span><span
+    class="s1">produto</span><span class="s3">) </span><span class="s2">return</span><span class="s3">;</span>
+  <span class="s2">const </span><span class="s1">produto </span><span class="s3">= </span><span
+    class="s1">JSON</span><span class="s3">.</span><span class="s1">parse</span><span class="s3">(</span><span
+    class="s1">tr</span><span class="s3">.</span><span class="s1">dataset</span><span class="s3">.</span><span
+    class="s1">produto</span><span class="s3">);</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">target</span><span class="s3">.</span><span
+    class="s1">classList</span><span class="s3">.</span><span class="s1">contains</span><span class="s3">(</span><span
+    class="s4">'btn-editar'</span><span class="s3">)) </span><span class="s1">preencherFormularioParaEdicao</span><span
+    class="s3">(</span><span class="s1">produto</span><span class="s3">);</span>
+  <span class="s2">else if </span><span class="s3">(</span><span class="s1">target</span><span class="s3">.</span><span
+    class="s1">classList</span><span class="s3">.</span><span class="s1">contains</span><span class="s3">(</span><span
+    class="s4">'btn-excluir'</span><span class="s3">)) </span><span class="s1">deletarProduto</span><span
+    class="s3">(</span><span class="s1">produto</span><span class="s3">.</span><span class="s1">id</span><span
+    class="s3">);</span>
+<span class="s3">});</span>
+
+<span class="s0">// Inicialização da aplicação</span>
+<span class="s1">document</span><span class="s3">.</span><span class="s1">addEventListener</span><span
+    class="s3">(</span><span class="s4">'DOMContentLoaded'</span><span class="s3">, () =&gt; {</span>
+  <span class="s1">navegarPara</span><span class="s3">(</span><span class="s4">'view-caixa'</span><span
+    class="s3">);</span>
+<span class="s3">});</span>
+</pre>
+</body>
+</html>

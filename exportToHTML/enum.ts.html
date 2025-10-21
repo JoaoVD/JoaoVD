@@ -1,0 +1,171 @@
+<html>
+<head>
+  <title>enum.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          enum.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">ErrorObject</span><span class="s2">, </span><span class="s1">KeywordErrorDefinition</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">or</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">, </span><span
+    class="s1">Code</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">useFunc</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/util&quot;</span>
+<span class="s0">import </span><span class="s1">equal from </span><span
+    class="s3">&quot;../../runtime/equal&quot;</span>
+
+<span class="s0">export </span><span class="s1">type EnumError </span><span class="s2">= </span><span class="s1">ErrorObject</span><span
+    class="s2">&lt;</span><span class="s3">&quot;enum&quot;</span><span class="s2">, {</span><span class="s1">allowedValues</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]}, </span><span class="s1">any</span><span
+    class="s2">[] | {</span><span class="s1">$data</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">}&gt;</span>
+
+<span class="s0">const </span><span class="s1">error</span><span class="s2">: </span><span class="s1">KeywordErrorDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">message</span><span class="s2">: </span><span class="s3">&quot;must be equal to one of the allowed values&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">params</span><span class="s2">: ({</span><span class="s1">schemaCode</span><span
+    class="s2">}) =&gt; </span><span class="s1">_</span><span class="s3">`{allowedValues: </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">schemaCode</span><span class="s2">}</span><span
+    class="s3">}`</span><span class="s2">,</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;enum&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s3">&quot;array&quot;</span><span class="s2">,</span>
+  <span class="s1">$data</span><span class="s2">: </span><span class="s0">true</span><span class="s2">,</span>
+  <span class="s1">error</span><span class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">$data</span><span class="s2">, </span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">schemaCode</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">$data </span><span
+    class="s2">&amp;&amp; </span><span class="s1">schema</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">=== </span><span class="s4">0</span><span class="s2">) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;enum must have non-empty array&quot;</span><span
+    class="s2">)</span>
+    <span class="s0">const </span><span class="s1">useLoop </span><span class="s2">= </span><span
+    class="s1">schema</span><span class="s2">.</span><span class="s1">length </span><span class="s2">&gt;= </span><span
+    class="s1">it</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">loopEnum</span>
+    <span class="s0">let </span><span class="s1">eql</span><span class="s2">: </span><span class="s1">Name </span><span
+    class="s2">| </span><span class="s1">undefined</span>
+    <span class="s0">const </span><span class="s1">getEql </span><span class="s2">= (): </span><span
+    class="s1">Name </span><span class="s2">=&gt; (</span><span class="s1">eql </span><span class="s2">??= </span><span
+    class="s1">useFunc</span><span class="s2">(</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">equal</span><span class="s2">))</span>
+
+    <span class="s0">let </span><span class="s1">valid</span><span class="s2">: </span><span class="s1">Code</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">useLoop </span><span class="s2">|| </span><span
+    class="s1">$data</span><span class="s2">) {</span>
+      <span class="s1">valid </span><span class="s2">= </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">let</span><span class="s2">(</span><span class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">block$data</span><span
+    class="s2">(</span><span class="s1">valid</span><span class="s2">, </span><span class="s1">loopEnum</span><span
+    class="s2">)</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s5">/* istanbul ignore if */</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">)) </span><span
+    class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;ajv implementation error&quot;</span><span
+    class="s2">)</span>
+      <span class="s0">const </span><span class="s1">vSchema </span><span class="s2">= </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">const</span><span class="s2">(</span><span
+    class="s3">&quot;vSchema&quot;</span><span class="s2">, </span><span class="s1">schemaCode</span><span
+    class="s2">)</span>
+      <span class="s1">valid </span><span class="s2">= </span><span class="s1">or</span><span class="s2">(</span><span
+    class="s1">...schema</span><span class="s2">.</span><span class="s1">map</span><span class="s2">((</span><span
+    class="s1">_x</span><span class="s2">: </span><span class="s1">unknown</span><span class="s2">, </span><span
+    class="s1">i</span><span class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span
+    class="s1">equalCode</span><span class="s2">(</span><span class="s1">vSchema</span><span class="s2">, </span><span
+    class="s1">i</span><span class="s2">)))</span>
+    <span class="s2">}</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">pass</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">)</span>
+
+    <span class="s0">function </span><span class="s1">loopEnum</span><span class="s2">(): </span><span
+    class="s0">void </span><span class="s2">{</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s0">false</span><span class="s2">)</span>
+      <span class="s1">gen</span><span class="s2">.</span><span class="s1">forOf</span><span class="s2">(</span><span
+    class="s3">&quot;v&quot;</span><span class="s2">, </span><span class="s1">schemaCode </span><span
+    class="s2">as </span><span class="s1">Code</span><span class="s2">, (</span><span class="s1">v</span><span
+    class="s2">) =&gt;</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">getEql</span><span
+    class="s2">()}</span><span class="s3">(</span><span class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span
+    class="s2">}</span><span class="s3">, </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">v</span><span class="s2">}</span><span class="s3">)`</span><span class="s2">, () =&gt; </span><span
+    class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s0">true</span><span class="s2">).</span><span
+    class="s1">break</span><span class="s2">())</span>
+      <span class="s2">)</span>
+    <span class="s2">}</span>
+
+    <span class="s0">function </span><span class="s1">equalCode</span><span class="s2">(</span><span
+    class="s1">vSchema</span><span class="s2">: </span><span class="s1">Name</span><span class="s2">, </span><span
+    class="s1">i</span><span class="s2">: </span><span class="s1">number</span><span class="s2">): </span><span
+    class="s1">Code </span><span class="s2">{</span>
+      <span class="s0">const </span><span class="s1">sch </span><span class="s2">= </span><span class="s1">schema</span><span
+    class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+      <span class="s0">return typeof </span><span class="s1">sch </span><span class="s2">=== </span><span class="s3">&quot;object&quot; </span><span
+    class="s2">&amp;&amp; </span><span class="s1">sch </span><span class="s2">!== </span><span class="s0">null</span>
+        <span class="s2">? </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">getEql</span><span class="s2">()}</span><span class="s3">(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span
+    class="s3">, </span><span class="s1">$</span><span class="s2">{</span><span class="s1">vSchema</span><span
+    class="s2">}</span><span class="s3">[</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">i</span><span class="s2">}</span><span class="s3">])`</span>
+        <span class="s2">: </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">sch</span><span class="s2">}</span><span
+    class="s3">`</span>
+    <span class="s2">}</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

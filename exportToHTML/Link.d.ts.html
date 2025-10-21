@@ -1,0 +1,114 @@
+<html>
+<head>
+  <title>Link.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          Link.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">FanOut </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'thingies/lib/fanout'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">Node </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./Node'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">Superblock </span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">'./Superblock'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type LinkEventChildAdd </span><span class="s2">= [</span><span
+    class="s1">type</span><span class="s2">: </span><span class="s3">'child:add'</span><span class="s2">, </span><span
+    class="s1">link</span><span class="s2">: </span><span class="s1">Link</span><span class="s2">, </span><span
+    class="s1">parent</span><span class="s2">: </span><span class="s1">Link</span><span class="s2">];</span>
+<span class="s0">export </span><span class="s1">type LinkEventChildDelete </span><span class="s2">= [</span><span
+    class="s1">type</span><span class="s2">: </span><span class="s3">'child:del'</span><span class="s2">, </span><span
+    class="s1">link</span><span class="s2">: </span><span class="s1">Link</span><span class="s2">, </span><span
+    class="s1">parent</span><span class="s2">: </span><span class="s1">Link</span><span class="s2">];</span>
+<span class="s0">export </span><span class="s1">type LinkEvent </span><span class="s2">= </span><span class="s1">LinkEventChildAdd </span><span
+    class="s2">| </span><span class="s1">LinkEventChildDelete</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* Represents a hard link that points to an i-node `node`.</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">Link </span><span class="s2">{</span>
+    <span class="s1">readonly changes</span><span class="s2">: </span><span class="s1">FanOut</span><span class="s2">&lt;</span><span
+    class="s1">LinkEvent</span><span class="s2">&gt;;</span>
+    <span class="s1">vol</span><span class="s2">: </span><span class="s1">Superblock</span><span class="s2">;</span>
+    <span class="s1">parent</span><span class="s2">: </span><span class="s1">Link </span><span class="s2">| </span><span
+    class="s1">undefined</span><span class="s2">;</span>
+    <span class="s1">children</span><span class="s2">: </span><span class="s1">Map</span><span
+    class="s2">&lt;</span><span class="s1">string</span><span class="s2">, </span><span class="s1">Link </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">&gt;;</span>
+    <span class="s0">private </span><span class="s1">_steps</span><span class="s2">;</span>
+    <span class="s1">node</span><span class="s2">: </span><span class="s1">Node</span><span class="s2">;</span>
+    <span class="s1">ino</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">length</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">name</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">get steps</span><span class="s2">(): </span><span class="s1">string</span><span
+    class="s2">[];</span>
+    <span class="s1">set steps</span><span class="s2">(</span><span class="s1">val</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">[]);</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">vol</span><span
+    class="s2">: </span><span class="s1">Superblock</span><span class="s2">, </span><span class="s1">parent</span><span
+    class="s2">: </span><span class="s1">Link </span><span class="s2">| </span><span class="s1">undefined</span><span
+    class="s2">, </span><span class="s1">name</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">);</span>
+    <span class="s1">setNode</span><span class="s2">(</span><span class="s1">node</span><span class="s2">: </span><span
+    class="s1">Node</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">getNode</span><span class="s2">(): </span><span class="s1">Node</span><span class="s2">;</span>
+    <span class="s1">createChild</span><span class="s2">(</span><span class="s1">name</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">node</span><span
+    class="s2">?: </span><span class="s1">Node</span><span class="s2">): </span><span class="s1">Link</span><span
+    class="s2">;</span>
+    <span class="s1">setChild</span><span class="s2">(</span><span class="s1">name</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">link</span><span class="s2">?: </span><span
+    class="s1">Link</span><span class="s2">): </span><span class="s1">Link</span><span class="s2">;</span>
+    <span class="s1">deleteChild</span><span class="s2">(</span><span class="s1">link</span><span
+    class="s2">: </span><span class="s1">Link</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">getChild</span><span class="s2">(</span><span class="s1">name</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Link </span><span class="s2">| </span><span
+    class="s1">undefined</span><span class="s2">;</span>
+    <span class="s1">getPath</span><span class="s2">(): </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">getParentPath</span><span class="s2">(): </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s1">getName</span><span class="s2">(): </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">toJSON</span><span class="s2">(): {</span>
+        <span class="s1">steps</span><span class="s2">: </span><span class="s1">string</span><span class="s2">[];</span>
+        <span class="s1">ino</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">children</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">[];</span>
+    <span class="s2">};</span>
+    <span class="s1">syncSteps</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

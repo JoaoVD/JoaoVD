@@ -1,0 +1,83 @@
+<html>
+<head>
+  <title>strip-absolute-path.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          strip-absolute-path.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// unix absolute paths are also absolute on win32, so we use this for both</span>
+<span class="s2">const </span><span class="s3">{ </span><span class="s1">isAbsolute</span><span
+    class="s3">, </span><span class="s1">parse </span><span class="s3">} = </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s4">'path'</span><span class="s3">).</span><span class="s1">win32</span>
+
+<span class="s0">// returns [root, stripped]</span>
+<span class="s0">// Note that windows will think that //x/y/z/a has a &quot;root&quot; of //x/y, and in</span>
+<span class="s0">// those cases, we want to sanitize it to x/y/z/a, not z/a, so we strip /</span>
+<span class="s0">// explicitly if it's the first character.</span>
+<span class="s0">// drive-specific relative paths on Windows get their root stripped off even</span>
+<span class="s0">// though they are not absolute, so `c:../foo` becomes ['c:', '../foo']</span>
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">path </span><span class="s3">=&gt; {</span>
+  <span class="s2">let </span><span class="s1">r </span><span class="s3">= </span><span class="s4">''</span>
+
+  <span class="s2">let </span><span class="s1">parsed </span><span class="s3">= </span><span
+    class="s1">parse</span><span class="s3">(</span><span class="s1">path</span><span class="s3">)</span>
+  <span class="s2">while </span><span class="s3">(</span><span class="s1">isAbsolute</span><span
+    class="s3">(</span><span class="s1">path</span><span class="s3">) || </span><span class="s1">parsed</span><span
+    class="s3">.</span><span class="s1">root</span><span class="s3">) {</span>
+    <span class="s0">// windows will think that //x/y/z has a &quot;root&quot; of //x/y/</span>
+    <span class="s0">// but strip the //?/C:/ off of //?/C:/path</span>
+    <span class="s2">const </span><span class="s1">root </span><span class="s3">= </span><span
+    class="s1">path</span><span class="s3">.</span><span class="s1">charAt</span><span class="s3">(</span><span
+    class="s5">0</span><span class="s3">) === </span><span class="s4">'/' </span><span
+    class="s3">&amp;&amp; </span><span class="s1">path</span><span class="s3">.</span><span class="s1">slice</span><span
+    class="s3">(</span><span class="s5">0</span><span class="s3">, </span><span class="s5">4</span><span class="s3">) !== </span><span
+    class="s4">'//?/' </span><span class="s3">? </span><span class="s4">'/'</span>
+      <span class="s3">: </span><span class="s1">parsed</span><span class="s3">.</span><span class="s1">root</span>
+    <span class="s1">path </span><span class="s3">= </span><span class="s1">path</span><span class="s3">.</span><span
+    class="s1">slice</span><span class="s3">(</span><span class="s1">root</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">)</span>
+    <span class="s1">r </span><span class="s3">+= </span><span class="s1">root</span>
+    <span class="s1">parsed </span><span class="s3">= </span><span class="s1">parse</span><span class="s3">(</span><span
+    class="s1">path</span><span class="s3">)</span>
+  <span class="s3">}</span>
+  <span class="s2">return </span><span class="s3">[</span><span class="s1">r</span><span class="s3">, </span><span
+    class="s1">path</span><span class="s3">]</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

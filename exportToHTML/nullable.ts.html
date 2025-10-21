@@ -1,0 +1,86 @@
+<html>
+<head>
+  <title>nullable.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          nullable.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+  class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">not</span><span class="s2">, </span><span class="s1">nil</span><span class="s2">, </span><span
+    class="s1">Code</span><span class="s2">, </span><span class="s1">Name</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+
+<span class="s0">export function </span><span class="s1">checkNullable</span><span class="s2">(</span>
+  <span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span class="s1">data</span><span
+    class="s2">, </span><span class="s1">parentSchema</span><span class="s2">}: </span><span
+    class="s1">KeywordCxt</span><span class="s2">,</span>
+  <span class="s1">cond</span><span class="s2">: </span><span class="s1">Code </span><span class="s2">= </span><span
+    class="s1">nil</span>
+<span class="s2">): [</span><span class="s1">Name</span><span class="s2">, </span><span class="s1">Code</span><span
+    class="s2">] {</span>
+  <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">parentSchema</span><span class="s2">.</span><span
+    class="s1">nullable</span><span class="s2">) {</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">data</span><span class="s2">} </span><span class="s3">=== null`</span><span
+    class="s2">)</span>
+    <span class="s1">cond </span><span class="s2">= </span><span class="s1">not</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">)</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s0">false</span><span class="s2">)</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s2">[</span><span class="s1">valid</span><span class="s2">, </span><span
+    class="s1">cond</span><span class="s2">]</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">checkNullableObject</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span
+    class="s1">cond</span><span class="s2">: </span><span class="s1">Code</span><span class="s2">): [</span><span
+    class="s1">Name</span><span class="s2">, </span><span class="s1">Code</span><span class="s2">] {</span>
+  <span class="s0">const </span><span class="s2">[</span><span class="s1">valid</span><span class="s2">, </span><span
+    class="s1">cond_</span><span class="s2">] = </span><span class="s1">checkNullable</span><span
+    class="s2">(</span><span class="s1">cxt</span><span class="s2">, </span><span class="s1">cond</span><span
+    class="s2">)</span>
+  <span class="s0">return </span><span class="s2">[</span><span class="s1">valid</span><span class="s2">, </span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">cond_</span><span class="s2">} </span><span class="s3">&amp;&amp; typeof </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">cxt</span><span class="s2">.</span><span class="s1">data</span><span class="s2">} </span><span
+    class="s3">== &quot;object&quot; &amp;&amp; !Array.isArray(</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">cxt</span><span class="s2">.</span><span class="s1">data</span><span class="s2">}</span><span class="s3">)`</span><span
+    class="s2">]</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

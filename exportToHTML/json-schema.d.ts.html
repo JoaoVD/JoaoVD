@@ -1,0 +1,329 @@
+<html>
+<head>
+  <title>json-schema.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          json-schema.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">type StrictNullChecksWrapper</span><span class="s1">&lt;</span><span class="s0">Name </span><span
+  class="s2">extends </span><span class="s0">string</span><span class="s1">, </span><span class="s0">Type</span><span
+  class="s1">&gt; = </span><span class="s0">undefined </span><span class="s2">extends null </span><span
+  class="s1">? </span><span class="s3">`strictNullChecks must be true in tsconfig to use </span><span
+  class="s0">$</span><span class="s1">{</span><span class="s0">Name</span><span class="s1">}</span><span
+  class="s3">` </span><span class="s1">: </span><span class="s0">Type</span><span class="s1">;</span>
+<span class="s0">type UnionToIntersection</span><span class="s1">&lt;</span><span class="s0">U</span><span class="s1">&gt; = (</span><span
+    class="s0">U </span><span class="s2">extends </span><span class="s0">any </span><span class="s1">? (</span><span
+    class="s0">_</span><span class="s1">: </span><span class="s0">U</span><span class="s1">) =&gt; </span><span
+    class="s2">void </span><span class="s1">: </span><span class="s0">never</span><span class="s1">) </span><span
+    class="s2">extends </span><span class="s1">(</span><span class="s0">_</span><span class="s1">: </span><span
+    class="s0">infer I</span><span class="s1">) =&gt; </span><span class="s2">void </span><span
+    class="s1">? </span><span class="s0">I </span><span class="s1">: </span><span class="s0">never</span><span
+    class="s1">;</span>
+<span class="s2">export </span><span class="s0">type SomeJSONSchema </span><span class="s1">= </span><span class="s0">UncheckedJSONSchemaType</span><span
+    class="s1">&lt;</span><span class="s0">Known</span><span class="s1">, </span><span class="s2">true</span><span
+    class="s1">&gt;;</span>
+<span class="s0">type UncheckedPartialSchema</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">&gt; = </span><span class="s0">Partial</span><span class="s1">&lt;</span><span class="s0">UncheckedJSONSchemaType</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">, </span><span class="s2">true</span><span
+    class="s1">&gt;&gt;;</span>
+<span class="s2">export </span><span class="s0">type PartialSchema</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">&gt; = </span><span class="s0">StrictNullChecksWrapper</span><span class="s1">&lt;</span><span
+    class="s3">&quot;PartialSchema&quot;</span><span class="s1">, </span><span
+    class="s0">UncheckedPartialSchema</span><span class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;&gt;;</span>
+<span class="s0">type JSONType</span><span class="s1">&lt;</span><span class="s0">T </span><span
+    class="s2">extends </span><span class="s0">string</span><span class="s1">, </span><span class="s0">IsPartial </span><span
+    class="s2">extends </span><span class="s0">boolean</span><span class="s1">&gt; = </span><span
+    class="s0">IsPartial </span><span class="s2">extends true </span><span class="s1">? </span><span
+    class="s0">T </span><span class="s1">| </span><span class="s0">undefined </span><span class="s1">: </span><span
+    class="s0">T</span><span class="s1">;</span>
+<span class="s2">interface </span><span class="s0">NumberKeywords </span><span class="s1">{</span>
+    <span class="s0">minimum</span><span class="s1">?: </span><span class="s0">number</span><span class="s1">;</span>
+    <span class="s0">maximum</span><span class="s1">?: </span><span class="s0">number</span><span class="s1">;</span>
+    <span class="s0">exclusiveMinimum</span><span class="s1">?: </span><span class="s0">number</span><span
+    class="s1">;</span>
+    <span class="s0">exclusiveMaximum</span><span class="s1">?: </span><span class="s0">number</span><span
+    class="s1">;</span>
+    <span class="s0">multipleOf</span><span class="s1">?: </span><span class="s0">number</span><span class="s1">;</span>
+    <span class="s0">format</span><span class="s1">?: </span><span class="s0">string</span><span class="s1">;</span>
+<span class="s1">}</span>
+<span class="s2">interface </span><span class="s0">StringKeywords </span><span class="s1">{</span>
+    <span class="s0">minLength</span><span class="s1">?: </span><span class="s0">number</span><span class="s1">;</span>
+    <span class="s0">maxLength</span><span class="s1">?: </span><span class="s0">number</span><span class="s1">;</span>
+    <span class="s0">pattern</span><span class="s1">?: </span><span class="s0">string</span><span class="s1">;</span>
+    <span class="s0">format</span><span class="s1">?: </span><span class="s0">string</span><span class="s1">;</span>
+<span class="s1">}</span>
+<span class="s0">type UncheckedJSONSchemaType</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">, </span><span class="s0">IsPartial </span><span class="s2">extends </span><span
+    class="s0">boolean</span><span class="s1">&gt; = (</span><span class="s4">// these two unions allow arbitrary unions of types</span>
+<span class="s1">{</span>
+    <span class="s0">anyOf</span><span class="s1">: </span><span class="s0">readonly UncheckedJSONSchemaType</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">, </span><span class="s0">IsPartial</span><span
+    class="s1">&gt;[];</span>
+<span class="s1">} | {</span>
+    <span class="s0">oneOf</span><span class="s1">: </span><span class="s0">readonly UncheckedJSONSchemaType</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">, </span><span class="s0">IsPartial</span><span
+    class="s1">&gt;[];</span>
+<span class="s1">} | ({</span>
+    <span class="s0">type</span><span class="s1">: </span><span class="s0">readonly </span><span
+    class="s1">(</span><span class="s0">T </span><span class="s2">extends </span><span class="s0">number </span><span
+    class="s1">? </span><span class="s0">JSONType</span><span class="s1">&lt;</span><span
+    class="s3">&quot;number&quot; </span><span class="s1">| </span><span class="s3">&quot;integer&quot;</span><span
+    class="s1">, </span><span class="s0">IsPartial</span><span class="s1">&gt; : </span><span class="s0">T </span><span
+    class="s2">extends </span><span class="s0">string </span><span class="s1">? </span><span
+    class="s0">JSONType</span><span class="s1">&lt;</span><span class="s3">&quot;string&quot;</span><span
+    class="s1">, </span><span class="s0">IsPartial</span><span class="s1">&gt; : </span><span class="s0">T </span><span
+    class="s2">extends </span><span class="s0">boolean </span><span class="s1">? </span><span class="s0">JSONType</span><span
+    class="s1">&lt;</span><span class="s3">&quot;boolean&quot;</span><span class="s1">, </span><span class="s0">IsPartial</span><span
+    class="s1">&gt; : </span><span class="s0">never</span><span class="s1">)[];</span>
+<span class="s1">} &amp; </span><span class="s0">UnionToIntersection</span><span class="s1">&lt;</span><span class="s0">T </span><span
+    class="s2">extends </span><span class="s0">number </span><span class="s1">? </span><span
+    class="s0">NumberKeywords </span><span class="s1">: </span><span class="s0">T </span><span
+    class="s2">extends </span><span class="s0">string </span><span class="s1">? </span><span
+    class="s0">StringKeywords </span><span class="s1">: </span><span class="s0">T </span><span
+    class="s2">extends </span><span class="s0">boolean </span><span class="s1">? {} : </span><span
+    class="s0">never</span><span class="s1">&gt;) | ((</span><span class="s0">T </span><span
+    class="s2">extends </span><span class="s0">number </span><span class="s1">? {</span>
+    <span class="s0">type</span><span class="s1">: </span><span class="s0">JSONType</span><span
+    class="s1">&lt;</span><span class="s3">&quot;number&quot; </span><span class="s1">| </span><span class="s3">&quot;integer&quot;</span><span
+    class="s1">, </span><span class="s0">IsPartial</span><span class="s1">&gt;;</span>
+<span class="s1">} &amp; </span><span class="s0">NumberKeywords </span><span class="s1">: </span><span
+    class="s0">T </span><span class="s2">extends </span><span class="s0">string </span><span class="s1">? {</span>
+    <span class="s0">type</span><span class="s1">: </span><span class="s0">JSONType</span><span
+    class="s1">&lt;</span><span class="s3">&quot;string&quot;</span><span class="s1">, </span><span
+    class="s0">IsPartial</span><span class="s1">&gt;;</span>
+<span class="s1">} &amp; </span><span class="s0">StringKeywords </span><span class="s1">: </span><span
+    class="s0">T </span><span class="s2">extends </span><span class="s0">boolean </span><span class="s1">? {</span>
+    <span class="s0">type</span><span class="s1">: </span><span class="s0">JSONType</span><span
+    class="s1">&lt;</span><span class="s3">&quot;boolean&quot;</span><span class="s1">, </span><span class="s0">IsPartial</span><span
+    class="s1">&gt;;</span>
+<span class="s1">} : </span><span class="s0">T </span><span class="s2">extends </span><span
+    class="s0">readonly </span><span class="s1">[</span><span class="s0">any</span><span class="s1">, </span><span
+    class="s0">...any</span><span class="s1">[]] ? {</span>
+    <span class="s0">type</span><span class="s1">: </span><span class="s0">JSONType</span><span
+    class="s1">&lt;</span><span class="s3">&quot;array&quot;</span><span class="s1">, </span><span
+    class="s0">IsPartial</span><span class="s1">&gt;;</span>
+    <span class="s0">items</span><span class="s1">: {</span>
+        <span class="s0">readonly </span><span class="s1">[</span><span class="s0">K </span><span
+    class="s2">in </span><span class="s0">keyof T</span><span class="s1">]-?: </span><span class="s0">UncheckedJSONSchemaType</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">[</span><span class="s0">K</span><span
+    class="s1">], </span><span class="s2">false</span><span class="s1">&gt; &amp; </span><span
+    class="s0">Nullable</span><span class="s1">&lt;</span><span class="s0">T</span><span class="s1">[</span><span
+    class="s0">K</span><span class="s1">]&gt;;</span>
+    <span class="s1">} &amp; {</span>
+        <span class="s0">length</span><span class="s1">: </span><span class="s0">T</span><span class="s1">[</span><span
+    class="s3">&quot;length&quot;</span><span class="s1">];</span>
+    <span class="s1">};</span>
+    <span class="s0">minItems</span><span class="s1">: </span><span class="s0">T</span><span class="s1">[</span><span
+    class="s3">&quot;length&quot;</span><span class="s1">];</span>
+<span class="s1">} &amp; ({</span>
+    <span class="s0">maxItems</span><span class="s1">: </span><span class="s0">T</span><span class="s1">[</span><span
+    class="s3">&quot;length&quot;</span><span class="s1">];</span>
+<span class="s1">} | {</span>
+    <span class="s0">additionalItems</span><span class="s1">: </span><span class="s2">false</span><span
+    class="s1">;</span>
+<span class="s1">}) : </span><span class="s0">T </span><span class="s2">extends </span><span
+    class="s0">readonly any</span><span class="s1">[] ? {</span>
+    <span class="s0">type</span><span class="s1">: </span><span class="s0">JSONType</span><span
+    class="s1">&lt;</span><span class="s3">&quot;array&quot;</span><span class="s1">, </span><span
+    class="s0">IsPartial</span><span class="s1">&gt;;</span>
+    <span class="s0">items</span><span class="s1">: </span><span class="s0">UncheckedJSONSchemaType</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">[</span><span class="s5">0</span><span
+    class="s1">], </span><span class="s2">false</span><span class="s1">&gt;;</span>
+    <span class="s0">contains</span><span class="s1">?: </span><span class="s0">UncheckedPartialSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">[</span><span class="s5">0</span><span class="s1">]&gt;;</span>
+    <span class="s0">minItems</span><span class="s1">?: </span><span class="s0">number</span><span class="s1">;</span>
+    <span class="s0">maxItems</span><span class="s1">?: </span><span class="s0">number</span><span class="s1">;</span>
+    <span class="s0">minContains</span><span class="s1">?: </span><span class="s0">number</span><span
+    class="s1">;</span>
+    <span class="s0">maxContains</span><span class="s1">?: </span><span class="s0">number</span><span
+    class="s1">;</span>
+    <span class="s0">uniqueItems</span><span class="s1">?: </span><span class="s2">true</span><span class="s1">;</span>
+    <span class="s0">additionalItems</span><span class="s1">?: </span><span class="s0">never</span><span
+    class="s1">;</span>
+<span class="s1">} : </span><span class="s0">T </span><span class="s2">extends </span><span
+    class="s0">Record</span><span class="s1">&lt;</span><span class="s0">string</span><span class="s1">, </span><span
+    class="s0">any</span><span class="s1">&gt; ? {</span>
+    <span class="s0">type</span><span class="s1">: </span><span class="s0">JSONType</span><span
+    class="s1">&lt;</span><span class="s3">&quot;object&quot;</span><span class="s1">, </span><span
+    class="s0">IsPartial</span><span class="s1">&gt;;</span>
+    <span class="s0">additionalProperties</span><span class="s1">?: </span><span class="s0">boolean </span><span
+    class="s1">| </span><span class="s0">UncheckedJSONSchemaType</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">[</span><span class="s0">string</span><span class="s1">], </span><span
+    class="s2">false</span><span class="s1">&gt;;</span>
+    <span class="s0">unevaluatedProperties</span><span class="s1">?: </span><span class="s0">boolean </span><span
+    class="s1">| </span><span class="s0">UncheckedJSONSchemaType</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">[</span><span class="s0">string</span><span class="s1">], </span><span
+    class="s2">false</span><span class="s1">&gt;;</span>
+    <span class="s0">properties</span><span class="s1">?: </span><span class="s0">IsPartial </span><span class="s2">extends true </span><span
+    class="s1">? </span><span class="s0">Partial</span><span class="s1">&lt;</span><span class="s0">UncheckedPropertiesSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;&gt; : </span><span class="s0">UncheckedPropertiesSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;;</span>
+    <span class="s0">patternProperties</span><span class="s1">?: </span><span class="s0">Record</span><span class="s1">&lt;</span><span
+    class="s0">string</span><span class="s1">, </span><span class="s0">UncheckedJSONSchemaType</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">[</span><span class="s0">string</span><span class="s1">], </span><span
+    class="s2">false</span><span class="s1">&gt;&gt;;</span>
+    <span class="s0">propertyNames</span><span class="s1">?: </span><span class="s0">Omit</span><span
+    class="s1">&lt;</span><span class="s0">UncheckedJSONSchemaType</span><span class="s1">&lt;</span><span class="s0">string</span><span
+    class="s1">, </span><span class="s2">false</span><span class="s1">&gt;, </span><span
+    class="s3">&quot;type&quot;</span><span class="s1">&gt; &amp; {</span>
+        <span class="s0">type</span><span class="s1">?: </span><span class="s3">&quot;string&quot;</span><span
+    class="s1">;</span>
+    <span class="s1">};</span>
+    <span class="s0">dependencies</span><span class="s1">?: {</span>
+        <span class="s1">[</span><span class="s0">K </span><span class="s2">in </span><span
+    class="s0">keyof T</span><span class="s1">]?: </span><span class="s0">readonly </span><span class="s1">(</span><span
+    class="s0">keyof T</span><span class="s1">)[] | </span><span class="s0">UncheckedPartialSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;;</span>
+    <span class="s1">};</span>
+    <span class="s0">dependentRequired</span><span class="s1">?: {</span>
+        <span class="s1">[</span><span class="s0">K </span><span class="s2">in </span><span
+    class="s0">keyof T</span><span class="s1">]?: </span><span class="s0">readonly </span><span class="s1">(</span><span
+    class="s0">keyof T</span><span class="s1">)[];</span>
+    <span class="s1">};</span>
+    <span class="s0">dependentSchemas</span><span class="s1">?: {</span>
+        <span class="s1">[</span><span class="s0">K </span><span class="s2">in </span><span
+    class="s0">keyof T</span><span class="s1">]?: </span><span class="s0">UncheckedPartialSchema</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">&gt;;</span>
+    <span class="s1">};</span>
+    <span class="s0">minProperties</span><span class="s1">?: </span><span class="s0">number</span><span
+    class="s1">;</span>
+    <span class="s0">maxProperties</span><span class="s1">?: </span><span class="s0">number</span><span
+    class="s1">;</span>
+<span class="s1">} &amp; (</span><span class="s0">IsPartial </span><span class="s2">extends true </span><span
+    class="s1">? {</span>
+    <span class="s0">required</span><span class="s1">: </span><span class="s0">readonly </span><span class="s1">(</span><span
+    class="s0">keyof T</span><span class="s1">)[];</span>
+<span class="s1">} : [</span><span class="s0">UncheckedRequiredMembers</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">&gt;] </span><span class="s2">extends </span><span class="s1">[</span><span
+    class="s0">never</span><span class="s1">] ? {</span>
+    <span class="s0">required</span><span class="s1">?: </span><span class="s0">readonly UncheckedRequiredMembers</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;[];</span>
+<span class="s1">} : {</span>
+    <span class="s0">required</span><span class="s1">: </span><span
+    class="s0">readonly UncheckedRequiredMembers</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">&gt;[];</span>
+<span class="s1">}) : </span><span class="s0">T </span><span class="s2">extends null </span><span class="s1">? {</span>
+    <span class="s0">type</span><span class="s1">: </span><span class="s0">JSONType</span><span
+    class="s1">&lt;</span><span class="s3">&quot;null&quot;</span><span class="s1">, </span><span
+    class="s0">IsPartial</span><span class="s1">&gt;;</span>
+    <span class="s0">nullable</span><span class="s1">: </span><span class="s2">true</span><span class="s1">;</span>
+<span class="s1">} : </span><span class="s0">never</span><span class="s1">) &amp; {</span>
+    <span class="s0">allOf</span><span class="s1">?: </span><span class="s0">readonly UncheckedPartialSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;[];</span>
+    <span class="s0">anyOf</span><span class="s1">?: </span><span class="s0">readonly UncheckedPartialSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;[];</span>
+    <span class="s0">oneOf</span><span class="s1">?: </span><span class="s0">readonly UncheckedPartialSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;[];</span>
+    <span class="s2">if</span><span class="s1">?: </span><span class="s0">UncheckedPartialSchema</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">&gt;;</span>
+    <span class="s0">then</span><span class="s1">?: </span><span class="s0">UncheckedPartialSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;;</span>
+    <span class="s2">else</span><span class="s1">?: </span><span class="s0">UncheckedPartialSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;;</span>
+    <span class="s0">not</span><span class="s1">?: </span><span class="s0">UncheckedPartialSchema</span><span
+    class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;;</span>
+<span class="s1">})) &amp; {</span>
+    <span class="s1">[</span><span class="s0">keyword</span><span class="s1">: </span><span
+    class="s0">string</span><span class="s1">]: </span><span class="s0">any</span><span class="s1">;</span>
+    <span class="s0">$id</span><span class="s1">?: </span><span class="s0">string</span><span class="s1">;</span>
+    <span class="s0">$ref</span><span class="s1">?: </span><span class="s0">string</span><span class="s1">;</span>
+    <span class="s0">$defs</span><span class="s1">?: </span><span class="s0">Record</span><span
+    class="s1">&lt;</span><span class="s0">string</span><span class="s1">, </span><span class="s0">UncheckedJSONSchemaType</span><span
+    class="s1">&lt;</span><span class="s0">Known</span><span class="s1">, </span><span class="s2">true</span><span
+    class="s1">&gt;&gt;;</span>
+    <span class="s0">definitions</span><span class="s1">?: </span><span class="s0">Record</span><span
+    class="s1">&lt;</span><span class="s0">string</span><span class="s1">, </span><span class="s0">UncheckedJSONSchemaType</span><span
+    class="s1">&lt;</span><span class="s0">Known</span><span class="s1">, </span><span class="s2">true</span><span
+    class="s1">&gt;&gt;;</span>
+<span class="s1">};</span>
+<span class="s2">export </span><span class="s0">type JSONSchemaType</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">&gt; = </span><span class="s0">StrictNullChecksWrapper</span><span class="s1">&lt;</span><span
+    class="s3">&quot;JSONSchemaType&quot;</span><span class="s1">, </span><span
+    class="s0">UncheckedJSONSchemaType</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">, </span><span class="s2">false</span><span class="s1">&gt;&gt;;</span>
+<span class="s0">type Known </span><span class="s1">= {</span>
+    <span class="s1">[</span><span class="s0">key</span><span class="s1">: </span><span class="s0">string</span><span
+    class="s1">]: </span><span class="s0">Known</span><span class="s1">;</span>
+<span class="s1">} | [</span><span class="s0">Known</span><span class="s1">, </span><span
+    class="s0">...Known</span><span class="s1">[]] | </span><span class="s0">Known</span><span
+    class="s1">[] | </span><span class="s0">number </span><span class="s1">| </span><span class="s0">string </span><span
+    class="s1">| </span><span class="s0">boolean </span><span class="s1">| </span><span class="s2">null</span><span
+    class="s1">;</span>
+<span class="s0">type UncheckedPropertiesSchema</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">&gt; = {</span>
+    <span class="s1">[</span><span class="s0">K </span><span class="s2">in </span><span class="s0">keyof T</span><span
+    class="s1">]-?: (</span><span class="s0">UncheckedJSONSchemaType</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">[</span><span class="s0">K</span><span class="s1">], </span><span class="s2">false</span><span
+    class="s1">&gt; &amp; </span><span class="s0">Nullable</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">[</span><span class="s0">K</span><span class="s1">]&gt;) | {</span>
+        <span class="s0">$ref</span><span class="s1">: </span><span class="s0">string</span><span class="s1">;</span>
+    <span class="s1">};</span>
+<span class="s1">};</span>
+<span class="s2">export </span><span class="s0">type PropertiesSchema</span><span class="s1">&lt;</span><span
+    class="s0">T</span><span class="s1">&gt; = </span><span class="s0">StrictNullChecksWrapper</span><span class="s1">&lt;</span><span
+    class="s3">&quot;PropertiesSchema&quot;</span><span class="s1">, </span><span
+    class="s0">UncheckedPropertiesSchema</span><span class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;&gt;;</span>
+<span class="s0">type UncheckedRequiredMembers</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">&gt; = {</span>
+    <span class="s1">[</span><span class="s0">K </span><span class="s2">in </span><span class="s0">keyof T</span><span
+    class="s1">]-?: </span><span class="s0">undefined </span><span class="s2">extends </span><span
+    class="s0">T</span><span class="s1">[</span><span class="s0">K</span><span class="s1">] ? </span><span class="s0">never </span><span
+    class="s1">: </span><span class="s0">K</span><span class="s1">;</span>
+<span class="s1">}[</span><span class="s0">keyof T</span><span class="s1">];</span>
+<span class="s2">export </span><span class="s0">type RequiredMembers</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">&gt; = </span><span class="s0">StrictNullChecksWrapper</span><span class="s1">&lt;</span><span
+    class="s3">&quot;RequiredMembers&quot;</span><span class="s1">, </span><span
+    class="s0">UncheckedRequiredMembers</span><span class="s1">&lt;</span><span class="s0">T</span><span class="s1">&gt;&gt;;</span>
+<span class="s0">type Nullable</span><span class="s1">&lt;</span><span class="s0">T</span><span
+    class="s1">&gt; = </span><span class="s0">undefined </span><span class="s2">extends </span><span
+    class="s0">T </span><span class="s1">? {</span>
+    <span class="s0">nullable</span><span class="s1">: </span><span class="s2">true</span><span class="s1">;</span>
+    <span class="s2">const</span><span class="s1">?: </span><span class="s2">null</span><span class="s1">;</span>
+    <span class="s2">enum</span><span class="s1">?: </span><span class="s0">readonly </span><span
+    class="s1">(</span><span class="s0">T </span><span class="s1">| </span><span class="s2">null</span><span class="s1">)[];</span>
+    <span class="s2">default</span><span class="s1">?: </span><span class="s0">T </span><span class="s1">| </span><span
+    class="s2">null</span><span class="s1">;</span>
+<span class="s1">} : {</span>
+    <span class="s0">nullable</span><span class="s1">?: </span><span class="s2">false</span><span class="s1">;</span>
+    <span class="s2">const</span><span class="s1">?: </span><span class="s0">T</span><span class="s1">;</span>
+    <span class="s2">enum</span><span class="s1">?: </span><span class="s0">readonly T</span><span class="s1">[];</span>
+    <span class="s2">default</span><span class="s1">?: </span><span class="s0">T</span><span class="s1">;</span>
+<span class="s1">};</span>
+<span class="s2">export </span><span class="s1">{};</span>
+</pre>
+</body>
+</html>

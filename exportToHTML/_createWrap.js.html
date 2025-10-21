@@ -1,0 +1,251 @@
+<html>
+<head>
+  <title>_createWrap.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _createWrap.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseSetData </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseSetData'</span><span class="s2">),</span>
+    <span class="s1">createBind </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createBind'</span><span class="s2">),</span>
+    <span class="s1">createCurry </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createCurry'</span><span class="s2">),</span>
+    <span class="s1">createHybrid </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createHybrid'</span><span class="s2">),</span>
+    <span class="s1">createPartial </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createPartial'</span><span class="s2">),</span>
+    <span class="s1">getData </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_getData'</span><span class="s2">),</span>
+    <span class="s1">mergeData </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_mergeData'</span><span class="s2">),</span>
+    <span class="s1">setData </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_setData'</span><span class="s2">),</span>
+    <span class="s1">setWrapToString </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_setWrapToString'</span><span class="s2">),</span>
+    <span class="s1">toInteger </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./toInteger'</span><span class="s2">);</span>
+
+<span class="s4">/** Error message constants. */</span>
+<span class="s0">var </span><span class="s1">FUNC_ERROR_TEXT </span><span class="s2">= </span><span class="s3">'Expected a function'</span><span
+    class="s2">;</span>
+
+<span class="s4">/** Used to compose bitmasks for function metadata. */</span>
+<span class="s0">var </span><span class="s1">WRAP_BIND_FLAG </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">,</span>
+    <span class="s1">WRAP_BIND_KEY_FLAG </span><span class="s2">= </span><span class="s5">2</span><span
+    class="s2">,</span>
+    <span class="s1">WRAP_CURRY_FLAG </span><span class="s2">= </span><span class="s5">8</span><span class="s2">,</span>
+    <span class="s1">WRAP_CURRY_RIGHT_FLAG </span><span class="s2">= </span><span class="s5">16</span><span
+    class="s2">,</span>
+    <span class="s1">WRAP_PARTIAL_FLAG </span><span class="s2">= </span><span class="s5">32</span><span
+    class="s2">,</span>
+    <span class="s1">WRAP_PARTIAL_RIGHT_FLAG </span><span class="s2">= </span><span class="s5">64</span><span
+    class="s2">;</span>
+
+<span class="s6">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMax </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">max</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a function that either curries or invokes `func` with optional</span>
+ <span class="s4">* `this` binding and partially applied arguments.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s7">@private</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{Function|string} func The function or method name to wrap.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{number} bitmask The bitmask flags.</span>
+ <span class="s4">*    1 - `_.bind`</span>
+ <span class="s4">*    2 - `_.bindKey`</span>
+ <span class="s4">*    4 - `_.curry` or `_.curryRight` of a bound function</span>
+ <span class="s4">*    8 - `_.curry`</span>
+ <span class="s4">*   16 - `_.curryRight`</span>
+ <span class="s4">*   32 - `_.partial`</span>
+ <span class="s4">*   64 - `_.partialRight`</span>
+ <span class="s4">*  128 - `_.rearg`</span>
+ <span class="s4">*  256 - `_.ary`</span>
+ <span class="s4">*  512 - `_.flip`</span>
+ <span class="s4">* </span><span class="s7">@param </span><span
+    class="s4">{*} [thisArg] The `this` binding of `func`.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{Array} [partials] The arguments to be partially applied.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{Array} [holders] The `partials` placeholder indexes.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{Array} [argPos] The argument positions of the new function.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span
+    class="s4">{number} [ary] The arity cap of `func`.</span>
+ <span class="s4">* </span><span class="s7">@param </span><span class="s4">{number} [arity] The arity of `func`.</span>
+ <span class="s4">* </span><span class="s7">@returns </span><span class="s4">{Function} Returns the new wrapped function.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">createWrap</span><span class="s2">(</span><span class="s1">func</span><span
+    class="s2">, </span><span class="s1">bitmask</span><span class="s2">, </span><span class="s1">thisArg</span><span
+    class="s2">, </span><span class="s1">partials</span><span class="s2">, </span><span class="s1">holders</span><span
+    class="s2">, </span><span class="s1">argPos</span><span class="s2">, </span><span class="s1">ary</span><span
+    class="s2">, </span><span class="s1">arity</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">isBindKey </span><span class="s2">= </span><span
+    class="s1">bitmask </span><span class="s2">&amp; </span><span class="s1">WRAP_BIND_KEY_FLAG</span><span
+    class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">isBindKey </span><span
+    class="s2">&amp;&amp; </span><span class="s0">typeof </span><span class="s1">func </span><span class="s2">!= </span><span
+    class="s3">'function'</span><span class="s2">) {</span>
+    <span class="s0">throw new </span><span class="s1">TypeError</span><span class="s2">(</span><span class="s1">FUNC_ERROR_TEXT</span><span
+    class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">length </span><span class="s2">= </span><span class="s1">partials </span><span
+    class="s2">? </span><span class="s1">partials</span><span class="s2">.</span><span class="s1">length </span><span
+    class="s2">: </span><span class="s5">0</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s1">bitmask </span><span class="s2">&amp;= ~(</span><span class="s1">WRAP_PARTIAL_FLAG </span><span
+    class="s2">| </span><span class="s1">WRAP_PARTIAL_RIGHT_FLAG</span><span class="s2">);</span>
+    <span class="s1">partials </span><span class="s2">= </span><span class="s1">holders </span><span
+    class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s1">ary </span><span class="s2">= </span><span class="s1">ary </span><span class="s2">=== </span><span
+    class="s1">undefined </span><span class="s2">? </span><span class="s1">ary </span><span class="s2">: </span><span
+    class="s1">nativeMax</span><span class="s2">(</span><span class="s1">toInteger</span><span class="s2">(</span><span
+    class="s1">ary</span><span class="s2">), </span><span class="s5">0</span><span class="s2">);</span>
+  <span class="s1">arity </span><span class="s2">= </span><span class="s1">arity </span><span
+    class="s2">=== </span><span class="s1">undefined </span><span class="s2">? </span><span
+    class="s1">arity </span><span class="s2">: </span><span class="s1">toInteger</span><span class="s2">(</span><span
+    class="s1">arity</span><span class="s2">);</span>
+  <span class="s1">length </span><span class="s2">-= </span><span class="s1">holders </span><span
+    class="s2">? </span><span class="s1">holders</span><span class="s2">.</span><span class="s1">length </span><span
+    class="s2">: </span><span class="s5">0</span><span class="s2">;</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">bitmask </span><span
+    class="s2">&amp; </span><span class="s1">WRAP_PARTIAL_RIGHT_FLAG</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">partialsRight </span><span class="s2">= </span><span class="s1">partials</span><span
+    class="s2">,</span>
+        <span class="s1">holdersRight </span><span class="s2">= </span><span class="s1">holders</span><span
+    class="s2">;</span>
+
+    <span class="s1">partials </span><span class="s2">= </span><span class="s1">holders </span><span
+    class="s2">= </span><span class="s1">undefined</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">data </span><span class="s2">= </span><span
+    class="s1">isBindKey </span><span class="s2">? </span><span class="s1">undefined </span><span
+    class="s2">: </span><span class="s1">getData</span><span class="s2">(</span><span class="s1">func</span><span
+    class="s2">);</span>
+
+  <span class="s0">var </span><span class="s1">newData </span><span class="s2">= [</span>
+    <span class="s1">func</span><span class="s2">, </span><span class="s1">bitmask</span><span class="s2">, </span><span
+    class="s1">thisArg</span><span class="s2">, </span><span class="s1">partials</span><span class="s2">, </span><span
+    class="s1">holders</span><span class="s2">, </span><span class="s1">partialsRight</span><span
+    class="s2">, </span><span class="s1">holdersRight</span><span class="s2">,</span>
+    <span class="s1">argPos</span><span class="s2">, </span><span class="s1">ary</span><span class="s2">, </span><span
+    class="s1">arity</span>
+  <span class="s2">];</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">data</span><span class="s2">) {</span>
+    <span class="s1">mergeData</span><span class="s2">(</span><span class="s1">newData</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s1">func </span><span class="s2">= </span><span class="s1">newData</span><span class="s2">[</span><span
+    class="s5">0</span><span class="s2">];</span>
+  <span class="s1">bitmask </span><span class="s2">= </span><span class="s1">newData</span><span
+    class="s2">[</span><span class="s5">1</span><span class="s2">];</span>
+  <span class="s1">thisArg </span><span class="s2">= </span><span class="s1">newData</span><span
+    class="s2">[</span><span class="s5">2</span><span class="s2">];</span>
+  <span class="s1">partials </span><span class="s2">= </span><span class="s1">newData</span><span
+    class="s2">[</span><span class="s5">3</span><span class="s2">];</span>
+  <span class="s1">holders </span><span class="s2">= </span><span class="s1">newData</span><span
+    class="s2">[</span><span class="s5">4</span><span class="s2">];</span>
+  <span class="s1">arity </span><span class="s2">= </span><span class="s1">newData</span><span class="s2">[</span><span
+    class="s5">9</span><span class="s2">] = </span><span class="s1">newData</span><span class="s2">[</span><span
+    class="s5">9</span><span class="s2">] === </span><span class="s1">undefined</span>
+    <span class="s2">? (</span><span class="s1">isBindKey </span><span class="s2">? </span><span
+    class="s5">0 </span><span class="s2">: </span><span class="s1">func</span><span class="s2">.</span><span class="s1">length</span><span
+    class="s2">)</span>
+    <span class="s2">: </span><span class="s1">nativeMax</span><span class="s2">(</span><span
+    class="s1">newData</span><span class="s2">[</span><span class="s5">9</span><span class="s2">] - </span><span
+    class="s1">length</span><span class="s2">, </span><span class="s5">0</span><span class="s2">);</span>
+
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">arity </span><span class="s2">&amp;&amp; </span><span
+    class="s1">bitmask </span><span class="s2">&amp; (</span><span class="s1">WRAP_CURRY_FLAG </span><span
+    class="s2">| </span><span class="s1">WRAP_CURRY_RIGHT_FLAG</span><span class="s2">)) {</span>
+    <span class="s1">bitmask </span><span class="s2">&amp;= ~(</span><span class="s1">WRAP_CURRY_FLAG </span><span
+    class="s2">| </span><span class="s1">WRAP_CURRY_RIGHT_FLAG</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">bitmask </span><span class="s2">|| </span><span
+    class="s1">bitmask </span><span class="s2">== </span><span class="s1">WRAP_BIND_FLAG</span><span
+    class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">result </span><span class="s2">= </span><span
+    class="s1">createBind</span><span class="s2">(</span><span class="s1">func</span><span class="s2">, </span><span
+    class="s1">bitmask</span><span class="s2">, </span><span class="s1">thisArg</span><span class="s2">);</span>
+  <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span
+    class="s1">bitmask </span><span class="s2">== </span><span class="s1">WRAP_CURRY_FLAG </span><span
+    class="s2">|| </span><span class="s1">bitmask </span><span class="s2">== </span><span class="s1">WRAP_CURRY_RIGHT_FLAG</span><span
+    class="s2">) {</span>
+    <span class="s1">result </span><span class="s2">= </span><span class="s1">createCurry</span><span
+    class="s2">(</span><span class="s1">func</span><span class="s2">, </span><span class="s1">bitmask</span><span
+    class="s2">, </span><span class="s1">arity</span><span class="s2">);</span>
+  <span class="s2">} </span><span class="s0">else if </span><span class="s2">((</span><span
+    class="s1">bitmask </span><span class="s2">== </span><span class="s1">WRAP_PARTIAL_FLAG </span><span
+    class="s2">|| </span><span class="s1">bitmask </span><span class="s2">== (</span><span
+    class="s1">WRAP_BIND_FLAG </span><span class="s2">| </span><span class="s1">WRAP_PARTIAL_FLAG</span><span
+    class="s2">)) &amp;&amp; !</span><span class="s1">holders</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">) {</span>
+    <span class="s1">result </span><span class="s2">= </span><span class="s1">createPartial</span><span
+    class="s2">(</span><span class="s1">func</span><span class="s2">, </span><span class="s1">bitmask</span><span
+    class="s2">, </span><span class="s1">thisArg</span><span class="s2">, </span><span class="s1">partials</span><span
+    class="s2">);</span>
+  <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">result </span><span class="s2">= </span><span class="s1">createHybrid</span><span
+    class="s2">.</span><span class="s1">apply</span><span class="s2">(</span><span class="s1">undefined</span><span
+    class="s2">, </span><span class="s1">newData</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">setter </span><span class="s2">= </span><span
+    class="s1">data </span><span class="s2">? </span><span class="s1">baseSetData </span><span class="s2">: </span><span
+    class="s1">setData</span><span class="s2">;</span>
+  <span class="s0">return </span><span class="s1">setWrapToString</span><span class="s2">(</span><span
+    class="s1">setter</span><span class="s2">(</span><span class="s1">result</span><span class="s2">, </span><span
+    class="s1">newData</span><span class="s2">), </span><span class="s1">func</span><span class="s2">, </span><span
+    class="s1">bitmask</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">createWrap</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

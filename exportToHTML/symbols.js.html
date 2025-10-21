@@ -1,0 +1,93 @@
+<html>
+<head>
+  <title>symbols.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          symbols.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span><span class="s1">;</span>
+
+<span class="s3">var </span><span class="s2">common </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'./common'</span><span class="s1">);</span>
+<span class="s3">var </span><span class="s2">EventEmitter </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'../'</span><span class="s1">);</span>
+<span class="s3">var </span><span class="s2">assert </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'assert'</span><span class="s1">);</span>
+
+<span class="s3">var </span><span class="s2">ee </span><span class="s1">= </span><span class="s3">new </span><span
+    class="s2">EventEmitter</span><span class="s1">();</span>
+<span class="s3">var </span><span class="s2">foo </span><span class="s1">= </span><span class="s2">Symbol</span><span
+    class="s1">(</span><span class="s0">'foo'</span><span class="s1">);</span>
+<span class="s3">var </span><span class="s2">listener </span><span class="s1">= </span><span
+    class="s2">common</span><span class="s1">.</span><span class="s2">mustCall</span><span class="s1">();</span>
+
+<span class="s2">ee</span><span class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s2">foo</span><span
+    class="s1">, </span><span class="s2">listener</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s2">foo</span><span class="s1">).</span><span class="s2">length</span><span class="s1">, </span><span
+    class="s4">1</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s2">foo</span><span class="s1">)[</span><span class="s4">0</span><span class="s1">], </span><span class="s2">listener</span><span
+    class="s1">);</span>
+
+<span class="s2">ee</span><span class="s1">.</span><span class="s2">emit</span><span class="s1">(</span><span
+    class="s2">foo</span><span class="s1">);</span>
+
+<span class="s2">ee</span><span class="s1">.</span><span class="s2">removeAllListeners</span><span class="s1">();</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s2">foo</span><span class="s1">).</span><span class="s2">length</span><span class="s1">, </span><span
+    class="s4">0</span><span class="s1">);</span>
+
+<span class="s2">ee</span><span class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s2">foo</span><span
+    class="s1">, </span><span class="s2">listener</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s2">foo</span><span class="s1">).</span><span class="s2">length</span><span class="s1">, </span><span
+    class="s4">1</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s2">foo</span><span class="s1">)[</span><span class="s4">0</span><span class="s1">], </span><span class="s2">listener</span><span
+    class="s1">);</span>
+
+<span class="s2">ee</span><span class="s1">.</span><span class="s2">removeListener</span><span class="s1">(</span><span
+    class="s2">foo</span><span class="s1">, </span><span class="s2">listener</span><span class="s1">);</span>
+<span class="s2">assert</span><span class="s1">.</span><span class="s2">strictEqual</span><span class="s1">(</span><span
+    class="s2">ee</span><span class="s1">.</span><span class="s2">listeners</span><span class="s1">(</span><span
+    class="s2">foo</span><span class="s1">).</span><span class="s2">length</span><span class="s1">, </span><span
+    class="s4">0</span><span class="s1">);</span>
+</pre>
+</body>
+</html>

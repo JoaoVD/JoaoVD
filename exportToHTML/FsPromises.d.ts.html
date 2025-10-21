@@ -1,0 +1,242 @@
+<html>
+<head>
+  <title>FsPromises.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          FsPromises.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">* as </span><span
+  class="s1">opts from </span><span class="s3">'./types/options'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">* as </span><span
+    class="s1">misc from </span><span class="s3">'./types/misc'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">FsCallbackApi</span><span class="s2">, </span><span class="s1">FsPromisesApi </span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">'./types'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">FsPromises </span><span class="s0">implements </span><span class="s1">FsPromisesApi </span><span
+    class="s2">{</span>
+    <span class="s0">protected </span><span class="s1">readonly fs</span><span class="s2">: </span><span class="s1">FsCallbackApi</span><span
+    class="s2">;</span>
+    <span class="s1">readonly FileHandle</span><span class="s2">: </span><span class="s0">new </span><span
+    class="s2">(</span><span class="s1">...args</span><span class="s2">: </span><span class="s1">unknown</span><span
+    class="s2">[]) =&gt; </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">IFileHandle</span><span
+    class="s2">;</span>
+    <span class="s1">readonly constants</span><span class="s2">: {</span>
+        <span class="s1">O_RDONLY</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_WRONLY</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_RDWR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFMT</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFREG</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFDIR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFCHR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFBLK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFIFO</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFLNK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IFSOCK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_CREAT</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">O_EXCL</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">O_NOCTTY</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_TRUNC</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">O_APPEND</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_DIRECTORY</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_NOATIME</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_NOFOLLOW</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_SYNC</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">O_SYMLINK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_DIRECT</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">O_NONBLOCK</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">S_IRWXU</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IRUSR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IWUSR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IXUSR</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IRWXG</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IRGRP</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IWGRP</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IXGRP</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IRWXO</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IROTH</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IWOTH</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">S_IXOTH</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">F_OK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">R_OK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">W_OK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">X_OK</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">UV_FS_SYMLINK_DIR</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">UV_FS_SYMLINK_JUNCTION</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">UV_FS_COPYFILE_EXCL</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">UV_FS_COPYFILE_FICLONE</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">UV_FS_COPYFILE_FICLONE_FORCE</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">;</span>
+        <span class="s1">COPYFILE_EXCL</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">COPYFILE_FICLONE</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+        <span class="s1">COPYFILE_FICLONE_FORCE</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">fs</span><span
+    class="s2">: </span><span class="s1">FsCallbackApi</span><span class="s2">, </span><span
+    class="s1">FileHandle</span><span class="s2">: </span><span class="s0">new </span><span class="s2">(</span><span
+    class="s1">...args</span><span class="s2">: </span><span class="s1">unknown</span><span class="s2">[]) =&gt; </span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">IFileHandle</span><span class="s2">);</span>
+    <span class="s1">readonly cp</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly opendir</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly statfs</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly lutimes</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly glob</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly access</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly chmod</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly chown</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly copyFile</span><span class="s2">: (</span><span class="s1">...args</span><span class="s2">: </span><span
+    class="s1">any</span><span class="s2">[]) =&gt; </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly lchmod</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly lchown</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly link</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly lstat</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly mkdir</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly mkdtemp</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly readdir</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly readlink</span><span class="s2">: (</span><span class="s1">...args</span><span class="s2">: </span><span
+    class="s1">any</span><span class="s2">[]) =&gt; </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly realpath</span><span class="s2">: (</span><span class="s1">...args</span><span class="s2">: </span><span
+    class="s1">any</span><span class="s2">[]) =&gt; </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly rename</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly rmdir</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly rm</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly stat</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly symlink</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly truncate</span><span class="s2">: (</span><span class="s1">...args</span><span class="s2">: </span><span
+    class="s1">any</span><span class="s2">[]) =&gt; </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly unlink</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly utimes</span><span class="s2">: (</span><span class="s1">...args</span><span
+    class="s2">: </span><span class="s1">any</span><span class="s2">[]) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly readFile</span><span class="s2">: (</span><span class="s1">id</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TFileHandle</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">IReadFileOptions </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">) =&gt; </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">misc</span><span class="s2">.</span><span class="s1">TDataOut</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly appendFile</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TFileHandle</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span class="s1">misc</span><span
+    class="s2">.</span><span class="s1">TData</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IAppendFileOptions </span><span class="s2">| </span><span class="s1">string</span><span class="s2">) =&gt; </span><span
+    class="s1">Promise</span><span class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly open</span><span class="s2">: (</span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">PathLike</span><span
+    class="s2">, </span><span class="s1">flags</span><span class="s2">?: </span><span class="s1">misc</span><span
+    class="s2">.</span><span class="s1">TFlags</span><span class="s2">, </span><span class="s1">mode</span><span
+    class="s2">?: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TMode</span><span
+    class="s2">) =&gt; </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s1">any</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly writeFile</span><span class="s2">: (</span><span class="s1">id</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">TFileHandle</span><span
+    class="s2">, </span><span class="s1">data</span><span class="s2">: </span><span class="s1">misc</span><span
+    class="s2">.</span><span class="s1">TPromisesData</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">?: </span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">IWriteFileOptions</span><span class="s2">) =&gt; </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">readonly watch</span><span class="s2">: (</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">misc</span><span class="s2">.</span><span class="s1">PathLike</span><span
+    class="s2">, </span><span class="s1">options</span><span class="s2">?: </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">IWatchOptions </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">) =&gt; </span><span class="s1">AsyncIterableIterator</span><span
+    class="s2">&lt;{</span>
+        <span class="s1">eventType</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+        <span class="s1">filename</span><span class="s2">: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">Buffer</span><span class="s2">;</span>
+    <span class="s2">}&gt;;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

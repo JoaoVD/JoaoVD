@@ -1,0 +1,409 @@
+<html>
+<head>
+  <title>keyword.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          keyword.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+  class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">&quot;.&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span>
+  <span class="s1">AnySchema</span><span class="s2">,</span>
+  <span class="s1">SchemaValidateFunction</span><span class="s2">,</span>
+  <span class="s1">AnyValidateFunction</span><span class="s2">,</span>
+  <span class="s1">AddedKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">MacroKeywordDefinition</span><span class="s2">,</span>
+  <span class="s1">FuncKeywordDefinition</span><span class="s2">,</span>
+<span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">SchemaObjCxt</span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">&quot;..&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">nil</span><span class="s2">, </span><span class="s1">not</span><span class="s2">, </span><span
+    class="s1">stringify</span><span class="s2">, </span><span class="s1">Code</span><span class="s2">, </span><span
+    class="s1">Name</span><span class="s2">, </span><span class="s1">CodeGen</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../codegen&quot;</span>
+<span class="s0">import </span><span class="s1">N from </span><span class="s3">&quot;../names&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">JSONType</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../rules&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">callValidateCode</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../vocabularies/code&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">extendErrors</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../errors&quot;</span>
+
+<span class="s1">type KeywordCompilationResult </span><span class="s2">= </span><span class="s1">AnySchema </span><span
+    class="s2">| </span><span class="s1">SchemaValidateFunction </span><span class="s2">| </span><span class="s1">AnyValidateFunction</span>
+
+<span class="s0">export function </span><span class="s1">macroKeywordCode</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span
+    class="s1">def</span><span class="s2">: </span><span class="s1">MacroKeywordDefinition</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">keyword</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">parentSchema</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+  <span class="s0">const </span><span class="s1">macroSchema </span><span class="s2">= </span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">macro</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s1">it</span><span class="s2">.</span><span class="s1">self</span><span
+    class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">parentSchema</span><span class="s2">, </span><span class="s1">it</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">schemaRef </span><span class="s2">= </span><span
+    class="s1">useKeyword</span><span class="s2">(</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">keyword</span><span class="s2">, </span><span class="s1">macroSchema</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">validateSchema </span><span
+    class="s2">!== </span><span class="s0">false</span><span class="s2">) </span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">self</span><span class="s2">.</span><span class="s1">validateSchema</span><span
+    class="s2">(</span><span class="s1">macroSchema</span><span class="s2">, </span><span class="s0">true</span><span
+    class="s2">)</span>
+
+  <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+  <span class="s1">cxt</span><span class="s2">.</span><span class="s1">subschema</span><span class="s2">(</span>
+    <span class="s2">{</span>
+      <span class="s1">schema</span><span class="s2">: </span><span class="s1">macroSchema</span><span
+    class="s2">,</span>
+      <span class="s1">schemaPath</span><span class="s2">: </span><span class="s1">nil</span><span class="s2">,</span>
+      <span class="s1">errSchemaPath</span><span class="s2">: </span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">it</span><span class="s2">.</span><span class="s1">errSchemaPath</span><span
+    class="s2">}</span><span class="s3">/</span><span class="s1">$</span><span class="s2">{</span><span class="s1">keyword</span><span
+    class="s2">}</span><span class="s3">`</span><span class="s2">,</span>
+      <span class="s1">topSchemaRef</span><span class="s2">: </span><span class="s1">schemaRef</span><span
+    class="s2">,</span>
+      <span class="s1">compositeRule</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">,</span>
+    <span class="s2">},</span>
+    <span class="s1">valid</span>
+  <span class="s2">)</span>
+  <span class="s1">cxt</span><span class="s2">.</span><span class="s1">pass</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, () =&gt; </span><span class="s1">cxt</span><span class="s2">.</span><span
+    class="s1">error</span><span class="s2">(</span><span class="s0">true</span><span class="s2">))</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">funcKeywordCode</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span
+    class="s1">def</span><span class="s2">: </span><span class="s1">FuncKeywordDefinition</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">keyword</span><span class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">parentSchema</span><span class="s2">, </span><span class="s1">$data</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+  <span class="s1">checkAsyncKeyword</span><span class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span
+    class="s1">def</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">validate </span><span class="s2">=</span>
+    <span class="s2">!</span><span class="s1">$data </span><span class="s2">&amp;&amp; </span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">compile </span><span class="s2">? </span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">compile</span><span class="s2">.</span><span
+    class="s1">call</span><span class="s2">(</span><span class="s1">it</span><span class="s2">.</span><span class="s1">self</span><span
+    class="s2">, </span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">parentSchema</span><span class="s2">, </span><span class="s1">it</span><span class="s2">) : </span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">validate</span>
+  <span class="s0">const </span><span class="s1">validateRef </span><span class="s2">= </span><span class="s1">useKeyword</span><span
+    class="s2">(</span><span class="s1">gen</span><span class="s2">, </span><span class="s1">keyword</span><span
+    class="s2">, </span><span class="s1">validate</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+  <span class="s1">cxt</span><span class="s2">.</span><span class="s1">block$data</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s1">validateKeyword</span><span class="s2">)</span>
+  <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">valid </span><span class="s2">?? </span><span
+    class="s1">valid</span><span class="s2">)</span>
+
+  <span class="s0">function </span><span class="s1">validateKeyword</span><span class="s2">(): </span><span class="s0">void </span><span
+    class="s2">{</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">errors </span><span class="s2">=== </span><span class="s0">false</span><span class="s2">) {</span>
+      <span class="s1">assignValid</span><span class="s2">()</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">modifying</span><span class="s2">) </span><span class="s1">modifyData</span><span
+    class="s2">(</span><span class="s1">cxt</span><span class="s2">)</span>
+      <span class="s1">reportErrs</span><span class="s2">(() =&gt; </span><span class="s1">cxt</span><span
+    class="s2">.</span><span class="s1">error</span><span class="s2">())</span>
+    <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+      <span class="s0">const </span><span class="s1">ruleErrs </span><span class="s2">= </span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">async </span><span class="s2">? </span><span
+    class="s1">validateAsync</span><span class="s2">() : </span><span class="s1">validateSync</span><span
+    class="s2">()</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">modifying</span><span class="s2">) </span><span class="s1">modifyData</span><span
+    class="s2">(</span><span class="s1">cxt</span><span class="s2">)</span>
+      <span class="s1">reportErrs</span><span class="s2">(() =&gt; </span><span class="s1">addErrs</span><span
+    class="s2">(</span><span class="s1">cxt</span><span class="s2">, </span><span class="s1">ruleErrs</span><span
+    class="s2">))</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">validateAsync</span><span class="s2">(): </span><span class="s1">Name </span><span
+    class="s2">{</span>
+    <span class="s0">const </span><span class="s1">ruleErrs </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">let</span><span class="s2">(</span><span
+    class="s3">&quot;ruleErrs&quot;</span><span class="s2">, </span><span class="s0">null</span><span
+    class="s2">)</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">try</span><span class="s2">(</span>
+      <span class="s2">() =&gt; </span><span class="s1">assignValid</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`await `</span><span class="s2">),</span>
+      <span class="s2">(</span><span class="s1">e</span><span class="s2">) =&gt;</span>
+        <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">, </span><span class="s0">false</span><span class="s2">).</span><span
+    class="s1">if</span><span class="s2">(</span>
+          <span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">e</span><span class="s2">} </span><span class="s3">instanceof </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">it</span><span class="s2">.</span><span class="s1">ValidationError </span><span
+    class="s2">as </span><span class="s1">Name</span><span class="s2">}</span><span class="s3">`</span><span class="s2">,</span>
+          <span class="s2">() =&gt; </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">assign</span><span class="s2">(</span><span class="s1">ruleErrs</span><span class="s2">, </span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">e</span><span class="s2">}</span><span class="s3">.errors`</span><span class="s2">),</span>
+          <span class="s2">() =&gt; </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">throw</span><span class="s2">(</span><span class="s1">e</span><span class="s2">)</span>
+        <span class="s2">)</span>
+    <span class="s2">)</span>
+    <span class="s0">return </span><span class="s1">ruleErrs</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">validateSync</span><span class="s2">(): </span><span
+    class="s1">Code </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">validateErrs </span><span class="s2">= </span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">validateRef</span><span
+    class="s2">}</span><span class="s3">.errors`</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s1">validateErrs</span><span class="s2">, </span><span class="s0">null</span><span class="s2">)</span>
+    <span class="s1">assignValid</span><span class="s2">(</span><span class="s1">nil</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s1">validateErrs</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">assignValid</span><span class="s2">(</span><span
+    class="s1">_await</span><span class="s2">: </span><span class="s1">Code </span><span class="s2">= </span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">async </span><span class="s2">? </span><span
+    class="s1">_</span><span class="s3">`await ` </span><span class="s2">: </span><span class="s1">nil</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">passCxt </span><span class="s2">= </span><span
+    class="s1">it</span><span class="s2">.</span><span class="s1">opts</span><span class="s2">.</span><span class="s1">passContext </span><span
+    class="s2">? </span><span class="s1">N</span><span class="s2">.</span><span class="s1">this </span><span class="s2">: </span><span
+    class="s1">N</span><span class="s2">.</span><span class="s1">self</span>
+    <span class="s0">const </span><span class="s1">passSchema </span><span class="s2">= !((</span><span class="s3">&quot;compile&quot; </span><span
+    class="s0">in </span><span class="s1">def </span><span class="s2">&amp;&amp; !</span><span
+    class="s1">$data</span><span class="s2">) || </span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">schema </span><span class="s2">=== </span><span class="s0">false</span><span class="s2">)</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span>
+      <span class="s1">valid</span><span class="s2">,</span>
+      <span class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">_await</span><span class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">callValidateCode</span><span
+    class="s2">(</span><span class="s1">cxt</span><span class="s2">, </span><span class="s1">validateRef</span><span
+    class="s2">, </span><span class="s1">passCxt</span><span class="s2">, </span><span class="s1">passSchema</span><span
+    class="s2">)}</span><span class="s3">`</span><span class="s2">,</span>
+      <span class="s1">def</span><span class="s2">.</span><span class="s1">modifying</span>
+    <span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">function </span><span class="s1">reportErrs</span><span class="s2">(</span><span
+    class="s1">errors</span><span class="s2">: () =&gt; </span><span class="s0">void</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">not</span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span class="s1">valid </span><span
+    class="s2">?? </span><span class="s1">valid</span><span class="s2">), </span><span class="s1">errors</span><span
+    class="s2">)</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">modifyData</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">data</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">.</span><span class="s1">parentData</span><span
+    class="s2">, () =&gt; </span><span class="s1">gen</span><span class="s2">.</span><span class="s1">assign</span><span
+    class="s2">(</span><span class="s1">data</span><span class="s2">, </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">parentData</span><span class="s2">}</span><span class="s3">[</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">it</span><span class="s2">.</span><span class="s1">parentDataProperty</span><span
+    class="s2">}</span><span class="s3">]`</span><span class="s2">))</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">addErrs</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">, </span><span
+    class="s1">errs</span><span class="s2">: </span><span class="s1">Code</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span>
+    <span class="s1">_</span><span class="s3">`Array.isArray(</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">errs</span><span class="s2">}</span><span class="s3">)`</span><span
+    class="s2">,</span>
+    <span class="s2">() =&gt; {</span>
+      <span class="s1">gen</span>
+        <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span class="s1">N</span><span
+    class="s2">.</span><span class="s1">vErrors</span><span class="s2">, </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">N</span><span
+    class="s2">.</span><span class="s1">vErrors</span><span class="s2">} </span><span class="s3">=== null ? </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">errs</span><span class="s2">} </span><span
+    class="s3">: </span><span class="s1">$</span><span class="s2">{</span><span class="s1">N</span><span
+    class="s2">.</span><span class="s1">vErrors</span><span class="s2">}</span><span class="s3">.concat(</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">errs</span><span class="s2">}</span><span
+    class="s3">)`</span><span class="s2">)</span>
+        <span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span class="s1">N</span><span
+    class="s2">.</span><span class="s1">errors</span><span class="s2">, </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">N</span><span
+    class="s2">.</span><span class="s1">vErrors</span><span class="s2">}</span><span class="s3">.length`</span><span
+    class="s2">)</span>
+      <span class="s1">extendErrors</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">)</span>
+    <span class="s2">},</span>
+    <span class="s2">() =&gt; </span><span class="s1">cxt</span><span class="s2">.</span><span
+    class="s1">error</span><span class="s2">()</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">checkAsyncKeyword</span><span class="s2">({</span><span class="s1">schemaEnv</span><span
+    class="s2">}: </span><span class="s1">SchemaObjCxt</span><span class="s2">, </span><span class="s1">def</span><span
+    class="s2">: </span><span class="s1">FuncKeywordDefinition</span><span class="s2">): </span><span
+    class="s0">void </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">async </span><span class="s2">&amp;&amp; !</span><span class="s1">schemaEnv</span><span
+    class="s2">.</span><span class="s1">$async</span><span class="s2">) </span><span class="s0">throw new </span><span
+    class="s1">Error</span><span class="s2">(</span><span
+    class="s3">&quot;async keyword in sync schema&quot;</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">useKeyword</span><span class="s2">(</span><span
+    class="s1">gen</span><span class="s2">: </span><span class="s1">CodeGen</span><span class="s2">, </span><span
+    class="s1">keyword</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">result</span><span class="s2">?: </span><span class="s1">KeywordCompilationResult</span><span class="s2">): </span><span
+    class="s1">Name </span><span class="s2">{</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">result </span><span class="s2">=== </span><span
+    class="s1">undefined</span><span class="s2">) </span><span class="s0">throw new </span><span class="s1">Error</span><span
+    class="s2">(</span><span class="s3">`keyword &quot;</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">keyword</span><span class="s2">}</span><span class="s3">&quot; failed to compile`</span><span class="s2">)</span>
+  <span class="s0">return </span><span class="s1">gen</span><span class="s2">.</span><span
+    class="s1">scopeValue</span><span class="s2">(</span>
+    <span class="s3">&quot;keyword&quot;</span><span class="s2">,</span>
+    <span class="s0">typeof </span><span class="s1">result </span><span class="s2">== </span><span class="s3">&quot;function&quot; </span><span
+    class="s2">? {</span><span class="s1">ref</span><span class="s2">: </span><span class="s1">result</span><span
+    class="s2">} : {</span><span class="s1">ref</span><span class="s2">: </span><span class="s1">result</span><span
+    class="s2">, </span><span class="s1">code</span><span class="s2">: </span><span class="s1">stringify</span><span
+    class="s2">(</span><span class="s1">result</span><span class="s2">)}</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">validSchemaType</span><span class="s2">(</span>
+  <span class="s1">schema</span><span class="s2">: </span><span class="s1">unknown</span><span class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: </span><span class="s1">JSONType</span><span
+    class="s2">[],</span>
+  <span class="s1">allowUndefined </span><span class="s2">= </span><span class="s0">false</span>
+<span class="s2">): </span><span class="s1">boolean </span><span class="s2">{</span>
+  <span class="s4">// TODO add tests</span>
+  <span class="s0">return </span><span class="s2">(</span>
+    <span class="s2">!</span><span class="s1">schemaType</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">||</span>
+    <span class="s1">schemaType</span><span class="s2">.</span><span class="s1">some</span><span
+    class="s2">((</span><span class="s1">st</span><span class="s2">) =&gt;</span>
+      <span class="s1">st </span><span class="s2">=== </span><span class="s3">&quot;array&quot;</span>
+        <span class="s2">? </span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">)</span>
+        <span class="s2">: </span><span class="s1">st </span><span class="s2">=== </span><span class="s3">&quot;object&quot;</span>
+        <span class="s2">? </span><span class="s1">schema </span><span class="s2">&amp;&amp; </span><span class="s0">typeof </span><span
+    class="s1">schema </span><span class="s2">== </span><span class="s3">&quot;object&quot; </span><span class="s2">&amp;&amp; !</span><span
+    class="s1">Array</span><span class="s2">.</span><span class="s1">isArray</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">)</span>
+        <span class="s2">: </span><span class="s0">typeof </span><span class="s1">schema </span><span
+    class="s2">== </span><span class="s1">st </span><span class="s2">|| (</span><span
+    class="s1">allowUndefined </span><span class="s2">&amp;&amp; </span><span class="s0">typeof </span><span class="s1">schema </span><span
+    class="s2">== </span><span class="s3">&quot;undefined&quot;</span><span class="s2">)</span>
+    <span class="s2">)</span>
+  <span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">validateKeywordUsage</span><span class="s2">(</span>
+  <span class="s2">{</span><span class="s1">schema</span><span class="s2">, </span><span class="s1">opts</span><span
+    class="s2">, </span><span class="s1">self</span><span class="s2">, </span><span class="s1">errSchemaPath</span><span
+    class="s2">}: </span><span class="s1">SchemaObjCxt</span><span class="s2">,</span>
+  <span class="s1">def</span><span class="s2">: </span><span class="s1">AddedKeywordDefinition</span><span
+    class="s2">,</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s1">string</span>
+<span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s4">/* istanbul ignore if */</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">keyword</span><span class="s2">) ? !</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">keyword</span><span class="s2">.</span><span class="s1">includes</span><span class="s2">(</span><span
+    class="s1">keyword</span><span class="s2">) : </span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">keyword </span><span class="s2">!== </span><span class="s1">keyword</span><span class="s2">) {</span>
+    <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">&quot;ajv implementation error&quot;</span><span
+    class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">const </span><span class="s1">deps </span><span class="s2">= </span><span class="s1">def</span><span
+    class="s2">.</span><span class="s1">dependencies</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">deps</span><span class="s2">?.</span><span
+    class="s1">some</span><span class="s2">((</span><span class="s1">kwd</span><span class="s2">) =&gt; !</span><span
+    class="s1">Object</span><span class="s2">.</span><span class="s1">prototype</span><span class="s2">.</span><span
+    class="s1">hasOwnProperty</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">, </span><span class="s1">kwd</span><span class="s2">))) {</span>
+    <span class="s0">throw new </span><span class="s1">Error</span><span class="s2">(</span><span class="s3">`parent schema must have dependencies of </span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">keyword</span><span class="s2">}</span><span
+    class="s3">: </span><span class="s1">$</span><span class="s2">{</span><span class="s1">deps</span><span
+    class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span class="s3">&quot;,&quot;</span><span
+    class="s2">)}</span><span class="s3">`</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">def</span><span class="s2">.</span><span
+    class="s1">validateSchema</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">validateSchema</span><span class="s2">(</span><span
+    class="s1">schema</span><span class="s2">[</span><span class="s1">keyword</span><span class="s2">])</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">valid</span><span class="s2">) {</span>
+      <span class="s0">const </span><span class="s1">msg </span><span class="s2">=</span>
+        <span class="s3">`keyword &quot;</span><span class="s1">$</span><span class="s2">{</span><span class="s1">keyword</span><span
+    class="s2">}</span><span class="s3">&quot; value is invalid at path &quot;</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">errSchemaPath</span><span class="s2">}</span><span
+    class="s3">&quot;: ` </span><span class="s2">+</span>
+        <span class="s1">self</span><span class="s2">.</span><span class="s1">errorsText</span><span class="s2">(</span><span
+    class="s1">def</span><span class="s2">.</span><span class="s1">validateSchema</span><span class="s2">.</span><span
+    class="s1">errors</span><span class="s2">)</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">validateSchema </span><span class="s2">=== </span><span class="s3">&quot;log&quot;</span><span
+    class="s2">) </span><span class="s1">self</span><span class="s2">.</span><span class="s1">logger</span><span
+    class="s2">.</span><span class="s1">error</span><span class="s2">(</span><span class="s1">msg</span><span
+    class="s2">)</span>
+      <span class="s0">else throw new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s1">msg</span><span class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

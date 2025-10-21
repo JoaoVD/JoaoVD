@@ -1,0 +1,243 @@
+<html>
+<head>
+  <title>promises.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          promises.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;readline/promises&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Abortable </span><span
+    class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:events&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">{</span>
+        <span class="s2">CompleterResult</span><span class="s4">,</span>
+        <span class="s2">Direction</span><span class="s4">,</span>
+        <span class="s2">Interface </span><span class="s4">as </span><span class="s2">_Interface</span><span class="s4">,</span>
+        <span class="s2">ReadLineOptions </span><span class="s4">as </span><span class="s2">_ReadLineOptions</span><span
+    class="s4">,</span>
+    <span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:readline&quot;</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Instances of the `readlinePromises.Interface` class are constructed using the `readlinePromises.createInterface()` method. Every instance is associated with a</span>
+     <span class="s0">* single `input` `Readable` stream and a single `output` `Writable` stream.</span>
+     <span class="s0">* The `output` stream is used to print prompts for user input that arrives on,</span>
+     <span class="s0">* and is read from, the `input` stream.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Interface </span><span class="s5">extends </span><span class="s2">_Interface </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.question()` method displays the `query` by writing it to the `output`,</span>
+         <span class="s0">* waits for user input to be provided on `input`, then invokes the `callback` function passing the provided input as the first argument.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When called, `rl.question()` will resume the `input` stream if it has been</span>
+         <span class="s0">* paused.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the `Interface` was created with `output` set to `null` or `undefined` the `query` is not written.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the question is called after `rl.close()`, it returns a rejected promise.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example usage:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const answer = await rl.question('What is your favorite food? ');</span>
+         <span class="s0">* console.log(`Oh, so your favorite food is ${answer}`);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Using an `AbortSignal` to cancel a question.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const signal = AbortSignal.timeout(10_000);</span>
+         <span class="s0">*</span>
+         <span class="s0">* signal.addEventListener('abort', () =&gt; {</span>
+         <span class="s0">*   console.log('The food question timed out');</span>
+         <span class="s0">* }, { once: true });</span>
+         <span class="s0">*</span>
+         <span class="s0">* const answer = await rl.question('What is your favorite food? ', { signal });</span>
+         <span class="s0">* console.log(`Oh, so your favorite food is ${answer}`);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">query A statement or query to write to `output`, prepended to the prompt.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">A promise that is fulfilled with the user's input in response to the `query`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">question</span><span class="s4">(</span><span class="s2">query</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s2">string</span><span class="s4">&gt;;</span>
+        <span class="s2">question</span><span class="s4">(</span><span class="s2">query</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span class="s4">: </span><span
+    class="s2">Abortable</span><span class="s4">): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">string</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Readline </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">stream A TTY stream.</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">(</span>
+            <span class="s2">stream</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">WritableStream</span><span class="s4">,</span>
+            <span class="s2">options</span><span class="s4">?: {</span>
+                <span class="s2">autoCommit</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+            <span class="s4">},</span>
+        <span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.clearLine()` method adds to the internal list of pending action an</span>
+         <span class="s0">* action that clears current line of the associated `stream` in a specified</span>
+         <span class="s0">* direction identified by `dir`.</span>
+         <span class="s0">* Call `rl.commit()` to see the effect of this method, unless `autoCommit: true` was passed to the constructor.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">this</span>
+         <span class="s0">*/</span>
+        <span class="s2">clearLine</span><span class="s4">(</span><span class="s2">dir</span><span
+    class="s4">: </span><span class="s2">Direction</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.clearScreenDown()` method adds to the internal list of pending action an</span>
+         <span class="s0">* action that clears the associated stream from the current position of the</span>
+         <span class="s0">* cursor down.</span>
+         <span class="s0">* Call `rl.commit()` to see the effect of this method, unless `autoCommit: true` was passed to the constructor.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">this</span>
+         <span class="s0">*/</span>
+        <span class="s2">clearScreenDown</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.commit()` method sends all the pending actions to the associated `stream` and clears the internal list of pending actions.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">commit</span><span class="s4">(): </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s5">void</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.cursorTo()` method adds to the internal list of pending action an action</span>
+         <span class="s0">* that moves cursor to the specified position in the associated `stream`.</span>
+         <span class="s0">* Call `rl.commit()` to see the effect of this method, unless `autoCommit: true` was passed to the constructor.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">this</span>
+         <span class="s0">*/</span>
+        <span class="s2">cursorTo</span><span class="s4">(</span><span class="s2">x</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">y</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.moveCursor()` method adds to the internal list of pending action an</span>
+         <span class="s0">* action that moves the cursor _relative_ to its current position in the</span>
+         <span class="s0">* associated `stream`.</span>
+         <span class="s0">* Call `rl.commit()` to see the effect of this method, unless `autoCommit: true` was passed to the constructor.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">this</span>
+         <span class="s0">*/</span>
+        <span class="s2">moveCursor</span><span class="s4">(</span><span class="s2">dx</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">dy</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.rollback` methods clears the internal list of pending actions without</span>
+         <span class="s0">* sending it to the associated `stream`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">this</span>
+         <span class="s0">*/</span>
+        <span class="s2">rollback</span><span class="s4">(): </span><span class="s5">this</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">type Completer </span><span class="s4">= (</span><span class="s2">line</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">) =&gt; </span><span
+    class="s2">CompleterResult </span><span class="s4">| </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">CompleterResult</span><span class="s4">&gt;;</span>
+    <span class="s5">interface </span><span class="s2">ReadLineOptions </span><span class="s5">extends </span><span
+    class="s2">Omit</span><span class="s4">&lt;</span><span class="s2">_ReadLineOptions</span><span class="s4">, </span><span
+    class="s3">&quot;completer&quot;</span><span class="s4">&gt; {</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An optional function used for Tab autocompletion.</span>
+         <span class="s0">*/</span>
+        <span class="s2">completer</span><span class="s4">?: </span><span class="s2">Completer </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `readlinePromises.createInterface()` method creates a new `readlinePromises.Interface` instance.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import readlinePromises from 'node:readline/promises';</span>
+     <span class="s0">* const rl = readlinePromises.createInterface({</span>
+     <span class="s0">*   input: process.stdin,</span>
+     <span class="s0">*   output: process.stdout,</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Once the `readlinePromises.Interface` instance is created, the most common case</span>
+     <span class="s0">* is to listen for the `'line'` event:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* rl.on('line', (line) =&gt; {</span>
+     <span class="s0">*   console.log(`Received: ${line}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `terminal` is `true` for this instance then the `output` stream will get</span>
+     <span class="s0">* the best compatibility if it defines an `output.columns` property and emits</span>
+     <span class="s0">* a `'resize'` event on the `output` if or when the columns ever change</span>
+     <span class="s0">* (`process.stdout` does this automatically when it is a TTY).</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createInterface</span><span class="s4">(</span>
+        <span class="s2">input</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ReadableStream</span><span class="s4">,</span>
+        <span class="s2">output</span><span class="s4">?: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">,</span>
+        <span class="s2">completer</span><span class="s4">?: </span><span class="s2">Completer</span><span
+    class="s4">,</span>
+        <span class="s2">terminal</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">Interface</span><span class="s4">;</span>
+    <span class="s5">function </span><span class="s2">createInterface</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">ReadLineOptions</span><span class="s4">): </span><span
+    class="s2">Interface</span><span class="s4">;</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:readline/promises&quot; </span><span
+    class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;readline/promises&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<html>
+<head>
+  <title>_baseUniq.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _baseUniq.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">SetCache </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_SetCache'</span><span class="s2">),</span>
+    <span class="s1">arrayIncludes </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_arrayIncludes'</span><span class="s2">),</span>
+    <span class="s1">arrayIncludesWith </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_arrayIncludesWith'</span><span class="s2">),</span>
+    <span class="s1">cacheHas </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_cacheHas'</span><span class="s2">),</span>
+    <span class="s1">createSet </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_createSet'</span><span class="s2">),</span>
+    <span class="s1">setToArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_setToArray'</span><span class="s2">);</span>
+
+<span class="s4">/** Used as the size to enable large array optimizations. */</span>
+<span class="s0">var </span><span class="s1">LARGE_ARRAY_SIZE </span><span class="s2">= </span><span
+    class="s5">200</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* The base implementation of `_.uniqBy` without support for iteratee shorthands.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@private</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Array} array The array to inspect.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Function} [iteratee] The iteratee invoked per element.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Function} [comparator] The comparator invoked per element.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{Array} Returns the new duplicate free array.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">baseUniq</span><span class="s2">(</span><span
+    class="s1">array</span><span class="s2">, </span><span class="s1">iteratee</span><span class="s2">, </span><span
+    class="s1">comparator</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">index </span><span class="s2">= -</span><span class="s5">1</span><span
+    class="s2">,</span>
+      <span class="s1">includes </span><span class="s2">= </span><span class="s1">arrayIncludes</span><span
+    class="s2">,</span>
+      <span class="s1">length </span><span class="s2">= </span><span class="s1">array</span><span
+    class="s2">.</span><span class="s1">length</span><span class="s2">,</span>
+      <span class="s1">isCommon </span><span class="s2">= </span><span class="s0">true</span><span class="s2">,</span>
+      <span class="s1">result </span><span class="s2">= [],</span>
+      <span class="s1">seen </span><span class="s2">= </span><span class="s1">result</span><span class="s2">;</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">comparator</span><span class="s2">) {</span>
+    <span class="s1">isCommon </span><span class="s2">= </span><span class="s0">false</span><span class="s2">;</span>
+    <span class="s1">includes </span><span class="s2">= </span><span class="s1">arrayIncludesWith</span><span
+    class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">else if </span><span class="s2">(</span><span class="s1">length </span><span class="s2">&gt;= </span><span
+    class="s1">LARGE_ARRAY_SIZE</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">set </span><span class="s2">= </span><span
+    class="s1">iteratee </span><span class="s2">? </span><span class="s0">null </span><span class="s2">: </span><span
+    class="s1">createSet</span><span class="s2">(</span><span class="s1">array</span><span class="s2">);</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">set</span><span class="s2">) {</span>
+      <span class="s0">return </span><span class="s1">setToArray</span><span class="s2">(</span><span
+    class="s1">set</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s1">isCommon </span><span class="s2">= </span><span class="s0">false</span><span class="s2">;</span>
+    <span class="s1">includes </span><span class="s2">= </span><span class="s1">cacheHas</span><span class="s2">;</span>
+    <span class="s1">seen </span><span class="s2">= </span><span class="s0">new </span><span
+    class="s1">SetCache</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">else </span><span class="s2">{</span>
+    <span class="s1">seen </span><span class="s2">= </span><span class="s1">iteratee </span><span
+    class="s2">? [] : </span><span class="s1">result</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s1">outer</span><span class="s2">:</span>
+  <span class="s0">while </span><span class="s2">(++</span><span class="s1">index </span><span
+    class="s2">&lt; </span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">value </span><span class="s2">= </span><span
+    class="s1">array</span><span class="s2">[</span><span class="s1">index</span><span class="s2">],</span>
+        <span class="s1">computed </span><span class="s2">= </span><span class="s1">iteratee </span><span
+    class="s2">? </span><span class="s1">iteratee</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">) : </span><span class="s1">value</span><span class="s2">;</span>
+
+    <span class="s1">value </span><span class="s2">= (</span><span class="s1">comparator </span><span
+    class="s2">|| </span><span class="s1">value </span><span class="s2">!== </span><span class="s5">0</span><span
+    class="s2">) ? </span><span class="s1">value </span><span class="s2">: </span><span class="s5">0</span><span
+    class="s2">;</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">isCommon </span><span
+    class="s2">&amp;&amp; </span><span class="s1">computed </span><span class="s2">=== </span><span
+    class="s1">computed</span><span class="s2">) {</span>
+      <span class="s0">var </span><span class="s1">seenIndex </span><span class="s2">= </span><span
+    class="s1">seen</span><span class="s2">.</span><span class="s1">length</span><span class="s2">;</span>
+      <span class="s0">while </span><span class="s2">(</span><span class="s1">seenIndex</span><span
+    class="s2">--) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">seen</span><span class="s2">[</span><span
+    class="s1">seenIndex</span><span class="s2">] === </span><span class="s1">computed</span><span class="s2">) {</span>
+          <span class="s0">continue </span><span class="s1">outer</span><span class="s2">;</span>
+        <span class="s2">}</span>
+      <span class="s2">}</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">iteratee</span><span class="s2">) {</span>
+        <span class="s1">seen</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s1">computed</span><span class="s2">);</span>
+      <span class="s2">}</span>
+      <span class="s1">result</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">);</span>
+    <span class="s2">}</span>
+    <span class="s0">else if </span><span class="s2">(!</span><span class="s1">includes</span><span
+    class="s2">(</span><span class="s1">seen</span><span class="s2">, </span><span class="s1">computed</span><span
+    class="s2">, </span><span class="s1">comparator</span><span class="s2">)) {</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">seen </span><span class="s2">!== </span><span
+    class="s1">result</span><span class="s2">) {</span>
+        <span class="s1">seen</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s1">computed</span><span class="s2">);</span>
+      <span class="s2">}</span>
+      <span class="s1">result</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">baseUniq</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

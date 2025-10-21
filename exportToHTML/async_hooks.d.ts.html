@@ -1,0 +1,805 @@
+<html>
+<head>
+  <title>async_hooks.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          async_hooks.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* We strongly discourage the use of the `async_hooks` API.</span>
+ <span class="s0">* Other APIs that can cover most of its use cases include:</span>
+ <span class="s0">*</span>
+ <span class="s0">* * [`AsyncLocalStorage`](https://nodejs.org/docs/latest-v24.x/api/async_context.html#class-asynclocalstorage) tracks async context</span>
+ <span class="s0">* * [`process.getActiveResourcesInfo()`](https://nodejs.org/docs/latest-v24.x/api/process.html#processgetactiveresourcesinfo) tracks active resources</span>
+ <span class="s0">*</span>
+ <span class="s0">* The `node:async_hooks` module provides an API to track asynchronous resources.</span>
+ <span class="s0">* It can be accessed using:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import async_hooks from 'node:async_hooks';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@experimental</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/async_hooks.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;async_hooks&quot; </span><span class="s4">{</span>
+    <span class="s0">/**</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { executionAsyncId } from 'node:async_hooks';</span>
+     <span class="s0">* import fs from 'node:fs';</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log(executionAsyncId());  // 1 - bootstrap</span>
+     <span class="s0">* const path = '.';</span>
+     <span class="s0">* fs.open(path, 'r', (err, fd) =&gt; {</span>
+     <span class="s0">*   console.log(executionAsyncId());  // 6 - open()</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* The ID returned from `executionAsyncId()` is related to execution timing, not</span>
+     <span class="s0">* causality (which is covered by `triggerAsyncId()`):</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const server = net.createServer((conn) =&gt; {</span>
+     <span class="s0">*   // Returns the ID of the server, not of the new connection, because the</span>
+     <span class="s0">*   // callback runs in the execution scope of the server's MakeCallback().</span>
+     <span class="s0">*   async_hooks.executionAsyncId();</span>
+     <span class="s0">*</span>
+     <span class="s0">* }).listen(port, () =&gt; {</span>
+     <span class="s0">*   // Returns the ID of a TickObject (process.nextTick()) because all</span>
+     <span class="s0">*   // callbacks passed to .listen() are wrapped in a nextTick().</span>
+     <span class="s0">*   async_hooks.executionAsyncId();</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Promise contexts may not get precise `executionAsyncIds` by default.</span>
+     <span class="s0">* See the section on [promise execution tracking](https://nodejs.org/docs/latest-v24.x/api/async_hooks.html#promise-execution-tracking).</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.1.0</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The `asyncId` of the current execution context. Useful to track when something calls.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">executionAsyncId</span><span class="s4">(): </span><span
+    class="s2">number</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Resource objects returned by `executionAsyncResource()` are most often internal</span>
+     <span class="s0">* Node.js handle objects with undocumented APIs. Using any functions or properties</span>
+     <span class="s0">* on the object is likely to crash your application and should be avoided.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Using `executionAsyncResource()` in the top-level execution context will</span>
+     <span class="s0">* return an empty object as there is no handle or request object to use,</span>
+     <span class="s0">* but having an object representing the top-level can be helpful.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { open } from 'node:fs';</span>
+     <span class="s0">* import { executionAsyncId, executionAsyncResource } from 'node:async_hooks';</span>
+     <span class="s0">*</span>
+     <span class="s0">* console.log(executionAsyncId(), executionAsyncResource());  // 1 {}</span>
+     <span class="s0">* open(new URL(import.meta.url), 'r', (err, fd) =&gt; {</span>
+     <span class="s0">*   console.log(executionAsyncId(), executionAsyncResource());  // 7 FSReqWrap</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* This can be used to implement continuation local storage without the</span>
+     <span class="s0">* use of a tracking `Map` to store the metadata:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { createServer } from 'node:http';</span>
+     <span class="s0">* import {</span>
+     <span class="s0">*   executionAsyncId,</span>
+     <span class="s0">*   executionAsyncResource,</span>
+     <span class="s0">*   createHook,</span>
+     <span class="s0">* } from 'node:async_hooks';</span>
+     <span class="s0">* const sym = Symbol('state'); // Private symbol to avoid pollution</span>
+     <span class="s0">*</span>
+     <span class="s0">* createHook({</span>
+     <span class="s0">*   init(asyncId, type, triggerAsyncId, resource) {</span>
+     <span class="s0">*     const cr = executionAsyncResource();</span>
+     <span class="s0">*     if (cr) {</span>
+     <span class="s0">*       resource[sym] = cr[sym];</span>
+     <span class="s0">*     }</span>
+     <span class="s0">*   },</span>
+     <span class="s0">* }).enable();</span>
+     <span class="s0">*</span>
+     <span class="s0">* const server = createServer((req, res) =&gt; {</span>
+     <span class="s0">*   executionAsyncResource()[sym] = { state: req.url };</span>
+     <span class="s0">*   setTimeout(function() {</span>
+     <span class="s0">*     res.end(JSON.stringify(executionAsyncResource()[sym]));</span>
+     <span class="s0">*   }, 100);</span>
+     <span class="s0">* }).listen(3000);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.9.0, v12.17.0</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The resource representing the current execution. Useful to store data within the resource.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">executionAsyncResource</span><span class="s4">(): </span><span
+    class="s2">object</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* const server = net.createServer((conn) =&gt; {</span>
+     <span class="s0">*   // The resource that caused (or triggered) this callback to be called</span>
+     <span class="s0">*   // was that of the new connection. Thus the return value of triggerAsyncId()</span>
+     <span class="s0">*   // is the asyncId of &quot;conn&quot;.</span>
+     <span class="s0">*   async_hooks.triggerAsyncId();</span>
+     <span class="s0">*</span>
+     <span class="s0">* }).listen(port, () =&gt; {</span>
+     <span class="s0">*   // Even though all callbacks passed to .listen() are wrapped in a nextTick()</span>
+     <span class="s0">*   // the callback itself exists because the call to the server's .listen()</span>
+     <span class="s0">*   // was made. So the return value would be the ID of the server.</span>
+     <span class="s0">*   async_hooks.triggerAsyncId();</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Promise contexts may not get valid `triggerAsyncId`s by default. See</span>
+     <span class="s0">* the section on [promise execution tracking](https://nodejs.org/docs/latest-v24.x/api/async_hooks.html#promise-execution-tracking).</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">The ID of the resource responsible for calling the callback that is currently being executed.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">triggerAsyncId</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">HookCallbacks </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Called when a class is constructed that has the possibility to emit an asynchronous event.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">asyncId A unique ID for the async resource</span>
+         <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">type The type of the async resource</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">triggerAsyncId The unique ID of the async resource in whose execution context this async resource was created</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">resource Reference to the resource representing the async operation, needs to be released during destroy</span>
+         <span class="s0">*/</span>
+        <span class="s2">init</span><span class="s4">?(</span><span class="s2">asyncId</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">, </span><span class="s2">type</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">triggerAsyncId</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">, </span><span class="s2">resource</span><span class="s4">: </span><span class="s2">object</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* When an asynchronous operation is initiated or completes a callback is called to notify the user.</span>
+         <span class="s0">* The before callback is called just before said callback is executed.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">asyncId the unique identifier assigned to the resource about to execute the callback.</span>
+         <span class="s0">*/</span>
+        <span class="s2">before</span><span class="s4">?(</span><span class="s2">asyncId</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Called immediately after the callback specified in `before` is completed.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If an uncaught exception occurs during execution of the callback, then `after` will run after the `'uncaughtException'` event is emitted or a `domain`'s handler runs.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">asyncId the unique identifier assigned to the resource which has executed the callback.</span>
+         <span class="s0">*/</span>
+        <span class="s2">after</span><span class="s4">?(</span><span class="s2">asyncId</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Called when a promise has resolve() called. This may not be in the same execution id</span>
+         <span class="s0">* as the promise itself.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">asyncId the unique id for the promise that was resolve()d.</span>
+         <span class="s0">*/</span>
+        <span class="s2">promiseResolve</span><span class="s4">?(</span><span class="s2">asyncId</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Called after the resource corresponding to asyncId is destroyed</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">asyncId a unique ID for the async resource</span>
+         <span class="s0">*/</span>
+        <span class="s2">destroy</span><span class="s4">?(</span><span class="s2">asyncId</span><span
+    class="s4">: </span><span class="s2">number</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">AsyncHook </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Enable the callbacks for a given AsyncHook instance. If no callbacks are provided enabling is a noop.</span>
+         <span class="s0">*/</span>
+        <span class="s2">enable</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Disable the callbacks for a given AsyncHook instance from the global pool of AsyncHook callbacks to be executed. Once a hook has been disabled it will not be called again until enabled.</span>
+         <span class="s0">*/</span>
+        <span class="s2">disable</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Registers functions to be called for different lifetime events of each async</span>
+     <span class="s0">* operation.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The callbacks `init()`/`before()`/`after()`/`destroy()` are called for the</span>
+     <span class="s0">* respective asynchronous event during a resource's lifetime.</span>
+     <span class="s0">*</span>
+     <span class="s0">* All callbacks are optional. For example, if only resource cleanup needs to</span>
+     <span class="s0">* be tracked, then only the `destroy` callback needs to be passed. The</span>
+     <span
+       class="s0">* specifics of all functions that can be passed to `callbacks` is in the `Hook Callbacks` section.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { createHook } from 'node:async_hooks';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const asyncHook = createHook({</span>
+     <span class="s0">*   init(asyncId, type, triggerAsyncId, resource) { },</span>
+     <span class="s0">*   destroy(asyncId) { },</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* The callbacks will be inherited via the prototype chain:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* class MyAsyncCallbacks {</span>
+     <span class="s0">*   init(asyncId, type, triggerAsyncId, resource) { }</span>
+     <span class="s0">*   destroy(asyncId) {}</span>
+     <span class="s0">* }</span>
+     <span class="s0">*</span>
+     <span class="s0">* class MyAddedCallbacks extends MyAsyncCallbacks {</span>
+     <span class="s0">*   before(asyncId) { }</span>
+     <span class="s0">*   after(asyncId) { }</span>
+     <span class="s0">* }</span>
+     <span class="s0">*</span>
+     <span class="s0">* const asyncHook = async_hooks.createHook(new MyAddedCallbacks());</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Because promises are asynchronous resources whose lifecycle is tracked</span>
+     <span class="s0">* via the async hooks mechanism, the `init()`, `before()`, `after()`, and`destroy()` callbacks _must not_ be async functions that return promises.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v8.1.0</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">callbacks The `Hook Callbacks` to register</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">Instance used for disabling and enabling hooks</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">createHook</span><span class="s4">(</span><span class="s2">callbacks</span><span
+    class="s4">: </span><span class="s2">HookCallbacks</span><span class="s4">): </span><span
+    class="s2">AsyncHook</span><span class="s4">;</span>
+    <span class="s5">interface </span><span class="s2">AsyncResourceOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The ID of the execution context that created this async event.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">executionAsyncId()</span>
+         <span class="s0">*/</span>
+        <span class="s2">triggerAsyncId</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Disables automatic `emitDestroy` when the object is garbage collected.</span>
+         <span class="s0">* This usually does not need to be set (even if `emitDestroy` is called</span>
+         <span class="s0">* manually), unless the resource's `asyncId` is retrieved and the</span>
+         <span class="s0">* sensitive API's `emitDestroy` is called with it.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">requireManualDestroy</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The class `AsyncResource` is designed to be extended by the embedder's async</span>
+     <span class="s0">* resources. Using this, users can easily trigger the lifetime events of their</span>
+     <span class="s0">* own resources.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The `init` hook will trigger when an `AsyncResource` is instantiated.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following is an overview of the `AsyncResource` API.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { AsyncResource, executionAsyncId } from 'node:async_hooks';</span>
+     <span class="s0">*</span>
+     <span class="s0">* // AsyncResource() is meant to be extended. Instantiating a</span>
+     <span class="s0">* // new AsyncResource() also triggers init. If triggerAsyncId is omitted then</span>
+     <span class="s0">* // async_hook.executionAsyncId() is used.</span>
+     <span class="s0">* const asyncResource = new AsyncResource(</span>
+     <span class="s0">*   type, { triggerAsyncId: executionAsyncId(), requireManualDestroy: false },</span>
+     <span class="s0">* );</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Run a function in the execution context of the resource. This will</span>
+     <span class="s0">* // * establish the context of the resource</span>
+     <span class="s0">* // * trigger the AsyncHooks before callbacks</span>
+     <span class="s0">* // * call the provided function `fn` with the supplied arguments</span>
+     <span class="s0">* // * trigger the AsyncHooks after callbacks</span>
+     <span class="s0">* // * restore the original execution context</span>
+     <span class="s0">* asyncResource.runInAsyncScope(fn, thisArg, ...args);</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Call AsyncHooks destroy callbacks.</span>
+     <span class="s0">* asyncResource.emitDestroy();</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Return the unique ID assigned to the AsyncResource instance.</span>
+     <span class="s0">* asyncResource.asyncId();</span>
+     <span class="s0">*</span>
+     <span class="s0">* // Return the trigger ID for the AsyncResource instance.</span>
+     <span class="s0">* asyncResource.triggerAsyncId();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">AsyncResource </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* AsyncResource() is meant to be extended. Instantiating a</span>
+         <span class="s0">* new AsyncResource() also triggers init. If triggerAsyncId is omitted then</span>
+         <span class="s0">* async_hook.executionAsyncId() is used.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">type The type of async event.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">triggerAsyncId The ID of the execution context that created</span>
+         <span class="s0">*   this async event (default: `executionAsyncId()`), or an</span>
+         <span class="s0">*   AsyncResourceOptions object (since v9.3.0)</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">type</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">triggerAsyncId</span><span class="s4">?: </span><span class="s2">number </span><span class="s4">| </span><span
+    class="s2">AsyncResourceOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Binds the given function to the current execution context.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.8.0, v12.19.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">fn The function to bind to the current execution context.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">type An optional name to associate with the underlying `AsyncResource`.</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">bind</span><span class="s4">&lt;</span><span
+    class="s2">Func </span><span class="s5">extends </span><span class="s4">(</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">ThisArg</span><span class="s4">, </span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s2">any</span><span
+    class="s4">, </span><span class="s2">ThisArg</span><span class="s4">&gt;(</span>
+            <span class="s2">fn</span><span class="s4">: </span><span class="s2">Func</span><span class="s4">,</span>
+            <span class="s2">type</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s2">thisArg</span><span class="s4">?: </span><span class="s2">ThisArg</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s2">Func</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Binds the given function to execute to this `AsyncResource`'s scope.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.8.0, v12.19.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">fn The function to bind to the current `AsyncResource`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">bind</span><span class="s4">&lt;</span><span class="s2">Func </span><span
+    class="s5">extends </span><span class="s4">(</span><span class="s2">...args</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s2">any</span><span class="s4">&gt;(</span><span
+    class="s2">fn</span><span class="s4">: </span><span class="s2">Func</span><span class="s4">): </span><span
+    class="s2">Func</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Call the provided function with the provided arguments in the execution context</span>
+         <span class="s0">* of the async resource. This will establish the context, trigger the AsyncHooks</span>
+         <span class="s0">* before callbacks, call the function, trigger the AsyncHooks after callbacks, and</span>
+         <span class="s0">* then restore the original execution context.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v9.6.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">fn The function to call in the execution context of this async resource.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">thisArg The receiver to be used for the function call.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">args Optional arguments to pass to the function.</span>
+         <span class="s0">*/</span>
+        <span class="s2">runInAsyncScope</span><span class="s4">&lt;</span><span class="s2">This</span><span class="s4">, </span><span
+    class="s2">Result</span><span class="s4">&gt;(</span>
+            <span class="s2">fn</span><span class="s4">: (</span><span class="s5">this</span><span
+    class="s4">: </span><span class="s2">This</span><span class="s4">, </span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s2">Result</span><span
+    class="s4">,</span>
+            <span class="s2">thisArg</span><span class="s4">?: </span><span class="s2">This</span><span
+    class="s4">,</span>
+            <span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]</span>
+        <span class="s4">): </span><span class="s2">Result</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Call all `destroy` hooks. This should only ever be called once. An error will</span>
+         <span class="s0">* be thrown if it is called more than once. This **must** be manually called. If</span>
+         <span class="s0">* the resource is left to be collected by the GC then the `destroy` hooks will</span>
+         <span class="s0">* never be called.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span
+    class="s0">A reference to `asyncResource`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">emitDestroy</span><span class="s4">(): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The unique `asyncId` assigned to the resource.</span>
+         <span class="s0">*/</span>
+        <span class="s2">asyncId</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">The same `triggerAsyncId` that is passed to the `AsyncResource` constructor.</span>
+         <span class="s0">*/</span>
+        <span class="s2">triggerAsyncId</span><span class="s4">(): </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">AsyncLocalStorageOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The default value to be used when no store is provided.</span>
+         <span class="s0">*/</span>
+        <span class="s2">defaultValue</span><span class="s4">?: </span><span class="s2">any</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* A name for the `AsyncLocalStorage` value.</span>
+         <span class="s0">*/</span>
+        <span class="s2">name</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* This class creates stores that stay coherent through asynchronous operations.</span>
+     <span class="s0">*</span>
+     <span class="s0">* While you can create your own implementation on top of the `node:async_hooks` module, `AsyncLocalStorage` should be preferred as it is a performant and memory</span>
+     <span class="s0">* safe implementation that involves significant optimizations that are non-obvious</span>
+     <span class="s0">* to implement.</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following example uses `AsyncLocalStorage` to build a simple logger</span>
+     <span class="s0">* that assigns IDs to incoming HTTP requests and includes them in messages</span>
+     <span class="s0">* logged within each request.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import http from 'node:http';</span>
+     <span class="s0">* import { AsyncLocalStorage } from 'node:async_hooks';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const asyncLocalStorage = new AsyncLocalStorage();</span>
+     <span class="s0">*</span>
+     <span class="s0">* function logWithId(msg) {</span>
+     <span class="s0">*   const id = asyncLocalStorage.getStore();</span>
+     <span class="s0">*   console.log(`${id !== undefined ? id : '-'}:`, msg);</span>
+     <span class="s0">* }</span>
+     <span class="s0">*</span>
+     <span class="s0">* let idSeq = 0;</span>
+     <span class="s0">* http.createServer((req, res) =&gt; {</span>
+     <span class="s0">*   asyncLocalStorage.run(idSeq++, () =&gt; {</span>
+     <span class="s0">*     logWithId('start');</span>
+     <span class="s0">*     // Imagine any chain of async operations here</span>
+     <span class="s0">*     setImmediate(() =&gt; {</span>
+     <span class="s0">*       logWithId('finish');</span>
+     <span class="s0">*       res.end();</span>
+     <span class="s0">*     });</span>
+     <span class="s0">*   });</span>
+     <span class="s0">* }).listen(8080);</span>
+     <span class="s0">*</span>
+     <span class="s0">* http.get('http://localhost:8080');</span>
+     <span class="s0">* http.get('http://localhost:8080');</span>
+     <span class="s0">* // Prints:</span>
+     <span class="s0">* //   0: start</span>
+     <span class="s0">* //   0: finish</span>
+     <span class="s0">* //   1: start</span>
+     <span class="s0">* //   1: finish</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Each instance of `AsyncLocalStorage` maintains an independent storage context.</span>
+     <span class="s0">* Multiple instances can safely exist simultaneously without risk of interfering</span>
+     <span class="s0">* with each other's data.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.10.0, v12.17.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">AsyncLocalStorage</span><span class="s4">&lt;</span><span class="s2">T</span><span
+    class="s4">&gt; {</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Creates a new instance of `AsyncLocalStorage`. Store is only provided within a</span>
+         <span class="s0">* `run()` call or after an `enterWith()` call.</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">AsyncLocalStorageOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Binds the given function to the current execution context.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.8.0</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">fn The function to bind to the current execution context.</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">A new function that calls `fn` within the captured execution context.</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">bind</span><span class="s4">&lt;</span><span
+    class="s2">Func </span><span class="s5">extends </span><span class="s4">(</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]) =&gt; </span><span class="s2">any</span><span
+    class="s4">&gt;(</span><span class="s2">fn</span><span class="s4">: </span><span class="s2">Func</span><span
+    class="s4">): </span><span class="s2">Func</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Captures the current execution context and returns a function that accepts a</span>
+         <span class="s0">* function as an argument. Whenever the returned function is called, it</span>
+         <span class="s0">* calls the function passed to it within the captured context.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const asyncLocalStorage = new AsyncLocalStorage();</span>
+         <span
+           class="s0">* const runInAsyncScope = asyncLocalStorage.run(123, () =&gt; AsyncLocalStorage.snapshot());</span>
+         <span class="s0">* const result = asyncLocalStorage.run(321, () =&gt; runInAsyncScope(() =&gt; asyncLocalStorage.getStore()));</span>
+         <span class="s0">* console.log(result);  // returns 123</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* AsyncLocalStorage.snapshot() can replace the use of AsyncResource for simple</span>
+         <span class="s0">* async context tracking purposes, for example:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* class Foo {</span>
+         <span class="s0">*   #runInAsyncScope = AsyncLocalStorage.snapshot();</span>
+         <span class="s0">*</span>
+         <span class="s0">*   get() { return this.#runInAsyncScope(() =&gt; asyncLocalStorage.getStore()); }</span>
+         <span class="s0">* }</span>
+         <span class="s0">*</span>
+         <span class="s0">* const foo = asyncLocalStorage.run(123, () =&gt; new Foo());</span>
+         <span class="s0">* console.log(asyncLocalStorage.run(321, () =&gt; foo.get())); // returns 123</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.8.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">A new function with the signature `(fn: (...args) : R, ...args) : R`.</span>
+         <span class="s0">*/</span>
+        <span class="s5">static </span><span class="s2">snapshot</span><span class="s4">(): &lt;</span><span class="s2">R</span><span
+    class="s4">, </span><span class="s2">TArgs </span><span class="s5">extends </span><span class="s2">any</span><span
+    class="s4">[]&gt;(</span><span class="s2">fn</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">TArgs</span><span class="s4">) =&gt; </span><span class="s2">R</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">TArgs</span><span
+    class="s4">) =&gt; </span><span class="s2">R</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Disables the instance of `AsyncLocalStorage`. All subsequent calls</span>
+         <span class="s0">* to `asyncLocalStorage.getStore()` will return `undefined` until `asyncLocalStorage.run()` or `asyncLocalStorage.enterWith()` is called again.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When calling `asyncLocalStorage.disable()`, all current contexts linked to the</span>
+         <span class="s0">* instance will be exited.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Calling `asyncLocalStorage.disable()` is required before the `asyncLocalStorage` can be garbage collected. This does not apply to stores</span>
+         <span class="s0">* provided by the `asyncLocalStorage`, as those objects are garbage collected</span>
+         <span class="s0">* along with the corresponding async resources.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Use this method when the `asyncLocalStorage` is not in use anymore</span>
+         <span class="s0">* in the current process.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.10.0, v12.17.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">disable</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the current store.</span>
+         <span class="s0">* If called outside of an asynchronous context initialized by</span>
+         <span class="s0">* calling `asyncLocalStorage.run()` or `asyncLocalStorage.enterWith()`, it</span>
+         <span class="s0">* returns `undefined`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.10.0, v12.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getStore</span><span class="s4">(): </span><span class="s2">T </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The name of the `AsyncLocalStorage` instance if provided.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly name</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Runs a function synchronously within a context and returns its</span>
+         <span class="s0">* return value. The store is not accessible outside of the callback function.</span>
+         <span class="s0">* The store is accessible to any asynchronous operations created within the</span>
+         <span class="s0">* callback.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The optional `args` are passed to the callback function.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the callback function throws an error, the error is thrown by `run()` too.</span>
+         <span class="s0">* The stacktrace is not impacted by this call and the context is exited.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const store = { id: 2 };</span>
+         <span class="s0">* try {</span>
+         <span class="s0">*   asyncLocalStorage.run(store, () =&gt; {</span>
+         <span class="s0">*     asyncLocalStorage.getStore(); // Returns the store object</span>
+         <span class="s0">*     setTimeout(() =&gt; {</span>
+         <span class="s0">*       asyncLocalStorage.getStore(); // Returns the store object</span>
+         <span class="s0">*     }, 200);</span>
+         <span class="s0">*     throw new Error();</span>
+         <span class="s0">*   });</span>
+         <span class="s0">* } catch (e) {</span>
+         <span class="s0">*   asyncLocalStorage.getStore(); // Returns undefined</span>
+         <span class="s0">*   // The error will be caught here</span>
+         <span class="s0">* }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.10.0, v12.17.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">run</span><span class="s4">&lt;</span><span class="s2">R</span><span
+    class="s4">&gt;(</span><span class="s2">store</span><span class="s4">: </span><span class="s2">T</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: () =&gt; </span><span
+    class="s2">R</span><span class="s4">): </span><span class="s2">R</span><span class="s4">;</span>
+        <span class="s2">run</span><span class="s4">&lt;</span><span class="s2">R</span><span class="s4">, </span><span
+    class="s2">TArgs </span><span class="s5">extends </span><span class="s2">any</span><span
+    class="s4">[]&gt;(</span><span class="s2">store</span><span class="s4">: </span><span class="s2">T</span><span
+    class="s4">, </span><span class="s2">callback</span><span class="s4">: (</span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">TArgs</span><span class="s4">) =&gt; </span><span class="s2">R</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">TArgs</span><span
+    class="s4">): </span><span class="s2">R</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Runs a function synchronously outside of a context and returns its</span>
+         <span class="s0">* return value. The store is not accessible within the callback function or</span>
+         <span class="s0">* the asynchronous operations created within the callback. Any `getStore()` call done within the callback function will always return `undefined`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The optional `args` are passed to the callback function.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the callback function throws an error, the error is thrown by `exit()` too.</span>
+         <span class="s0">* The stacktrace is not impacted by this call and the context is re-entered.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* // Within a call to run</span>
+         <span class="s0">* try {</span>
+         <span class="s0">*   asyncLocalStorage.getStore(); // Returns the store object or value</span>
+         <span class="s0">*   asyncLocalStorage.exit(() =&gt; {</span>
+         <span class="s0">*     asyncLocalStorage.getStore(); // Returns undefined</span>
+         <span class="s0">*     throw new Error();</span>
+         <span class="s0">*   });</span>
+         <span class="s0">* } catch (e) {</span>
+         <span class="s0">*   asyncLocalStorage.getStore(); // Returns the same object or value</span>
+         <span class="s0">*   // The error will be caught here</span>
+         <span class="s0">* }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.10.0, v12.17.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">exit</span><span class="s4">&lt;</span><span class="s2">R</span><span class="s4">, </span><span
+    class="s2">TArgs </span><span class="s5">extends </span><span class="s2">any</span><span
+    class="s4">[]&gt;(</span><span class="s2">callback</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">TArgs</span><span
+    class="s4">) =&gt; </span><span class="s2">R</span><span class="s4">, </span><span class="s2">...args</span><span
+    class="s4">: </span><span class="s2">TArgs</span><span class="s4">): </span><span class="s2">R</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Transitions into the context for the remainder of the current</span>
+         <span class="s0">* synchronous execution and then persists the store through any following</span>
+         <span class="s0">* asynchronous calls.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const store = { id: 1 };</span>
+         <span class="s0">* // Replaces previous store with the given store object</span>
+         <span class="s0">* asyncLocalStorage.enterWith(store);</span>
+         <span class="s0">* asyncLocalStorage.getStore(); // Returns the store object</span>
+         <span class="s0">* someAsyncOperation(() =&gt; {</span>
+         <span class="s0">*   asyncLocalStorage.getStore(); // Returns the same object</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* This transition will continue for the _entire_ synchronous execution.</span>
+         <span class="s0">* This means that if, for example, the context is entered within an event</span>
+         <span class="s0">* handler subsequent event handlers will also run within that context unless</span>
+         <span class="s0">* specifically bound to another context with an `AsyncResource`. That is why `run()` should be preferred over `enterWith()` unless there are strong reasons</span>
+         <span class="s0">* to use the latter method.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const store = { id: 1 };</span>
+         <span class="s0">*</span>
+         <span class="s0">* emitter.on('my-event', () =&gt; {</span>
+         <span class="s0">*   asyncLocalStorage.enterWith(store);</span>
+         <span class="s0">* });</span>
+         <span class="s0">* emitter.on('my-event', () =&gt; {</span>
+         <span class="s0">*   asyncLocalStorage.getStore(); // Returns the same object</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* asyncLocalStorage.getStore(); // Returns undefined</span>
+         <span class="s0">* emitter.emit('my-event');</span>
+         <span class="s0">* asyncLocalStorage.getStore(); // Returns the same object</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.11.0, v12.17.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s2">enterWith</span><span class="s4">(</span><span class="s2">store</span><span
+    class="s4">: </span><span class="s2">T</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v17.2.0, v16.14.0</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">A map of provider types to the corresponding numeric id.</span>
+     <span
+       class="s0">* This map contains all the event types that might be emitted by the `async_hooks.init()` event.</span>
+     <span class="s0">*/</span>
+    <span class="s2">namespace asyncWrapProviders </span><span class="s4">{</span>
+        <span class="s5">const </span><span class="s2">NONE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">DIRHANDLE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">DNSCHANNEL</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ELDHISTOGRAM</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">FILEHANDLE</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">FILEHANDLECLOSEREQ</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">FIXEDSIZEBLOBCOPY</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">FSEVENTWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">FSREQCALLBACK</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">FSREQPROMISE</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">GETADDRINFOREQWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">GETNAMEINFOREQWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">HEAPSNAPSHOT</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">HTTP2SESSION</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">HTTP2STREAM</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">HTTP2PING</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">HTTP2SETTINGS</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">HTTPINCOMINGMESSAGE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">HTTPCLIENTREQUEST</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">JSSTREAM</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">JSUDPWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">MESSAGEPORT</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">PIPECONNECTWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">PIPESERVERWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">PIPEWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">PROCESSWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">PROMISE</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">QUERYWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">SHUTDOWNWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">SIGNALWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">STATWATCHER</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">STREAMPIPE</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">TCPCONNECTWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">TCPSERVERWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">TCPWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">TTYWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">UDPSENDWRAP</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">UDPWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">SIGINTWATCHDOG</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">WORKER</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">WORKERHEAPSNAPSHOT</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">WRITEWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">ZLIB</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">CHECKPRIMEREQUEST</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">PBKDF2REQUEST</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">KEYPAIRGENREQUEST</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">KEYGENREQUEST</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">KEYEXPORTREQUEST</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">CIPHERREQUEST</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">DERIVEBITSREQUEST</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">HASHREQUEST</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">RANDOMBYTESREQUEST</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">RANDOMPRIMEREQUEST</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">SCRYPTREQUEST</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">SIGNREQUEST</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+        <span class="s5">const </span><span class="s2">TLSWRAP</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">;</span>
+        <span class="s5">const </span><span class="s2">VERIFYREQUEST</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:async_hooks&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;async_hooks&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

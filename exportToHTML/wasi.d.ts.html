@@ -1,0 +1,277 @@
+<html>
+<head>
+  <title>wasi.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          wasi.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* **The `node:wasi` module does not currently provide the**</span>
+ <span class="s0">* **comprehensive file system security properties provided by some WASI runtimes.**</span>
+ <span class="s0">* **Full support for secure file system sandboxing may or may not be implemented in**</span>
+ <span class="s0">* **future. In the mean time, do not rely on it to run untrusted code.**</span>
+ <span class="s0">*</span>
+ <span class="s0">* The WASI API provides an implementation of the [WebAssembly System Interface](https://wasi.dev/) specification. WASI gives WebAssembly applications access to the underlying</span>
+ <span class="s0">* operating system via a collection of POSIX-like functions.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import { readFile } from 'node:fs/promises';</span>
+ <span class="s0">* import { WASI } from 'node:wasi';</span>
+ <span class="s0">* import { argv, env } from 'node:process';</span>
+ <span class="s0">*</span>
+ <span class="s0">* const wasi = new WASI({</span>
+ <span class="s0">*   version: 'preview1',</span>
+ <span class="s0">*   args: argv,</span>
+ <span class="s0">*   env,</span>
+ <span class="s0">*   preopens: {</span>
+ <span class="s0">*     '/local': '/some/real/path/that/wasm/can/access',</span>
+ <span class="s0">*   },</span>
+ <span class="s0">* });</span>
+ <span class="s0">*</span>
+ <span class="s0">* const wasm = await WebAssembly.compile(</span>
+ <span class="s0">*   await readFile(new URL('./demo.wasm', import.meta.url)),</span>
+ <span class="s0">* );</span>
+ <span class="s0">* const instance = await WebAssembly.instantiate(wasm, wasi.getImportObject());</span>
+ <span class="s0">*</span>
+ <span class="s0">* wasi.start(instance);</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* To run the above example, create a new WebAssembly text format file named `demo.wat`:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```text</span>
+ <span class="s0">* (module</span>
+ <span
+   class="s0">*     ;; Import the required fd_write WASI function which will write the given io vectors to stdout</span>
+ <span class="s0">*     ;; The function signature for fd_write is:</span>
+ <span class="s0">*     ;; (File Descriptor, *iovs, iovs_len, nwritten) -&gt; Returns number of bytes written</span>
+ <span class="s0">*     (import &quot;wasi_snapshot_preview1&quot; &quot;fd_write&quot; (func $fd_write (param i32 i32 i32 i32) (result i32)))</span>
+ <span class="s0">*</span>
+ <span class="s0">*     (memory 1)</span>
+ <span class="s0">*     (export &quot;memory&quot; (memory 0))</span>
+ <span class="s0">*</span>
+ <span class="s0">*     ;; Write 'hello world\n' to memory at an offset of 8 bytes</span>
+ <span class="s0">*     ;; Note the trailing newline which is required for the text to appear</span>
+ <span class="s0">*     (data (i32.const 8) &quot;hello world\n&quot;)</span>
+ <span class="s0">*</span>
+ <span class="s0">*     (func $main (export &quot;_start&quot;)</span>
+ <span class="s0">*         ;; Creating a new io vector within linear memory</span>
+ <span class="s0">*         (i32.store (i32.const 0) (i32.const 8))  ;; iov.iov_base - This is a pointer to the start of the 'hello world\n' string</span>
+ <span class="s0">*         (i32.store (i32.const 4) (i32.const 12))  ;; iov.iov_len - The length of the 'hello world\n' string</span>
+ <span class="s0">*</span>
+ <span class="s0">*         (call $fd_write</span>
+ <span class="s0">*             (i32.const 1) ;; file_descriptor - 1 for stdout</span>
+ <span class="s0">*             (i32.const 0) ;; *iovs - The pointer to the iov array, which is stored at memory location 0</span>
+ <span class="s0">*             (i32.const 1) ;; iovs_len - We're printing 1 string stored in an iov - so one.</span>
+ <span
+   class="s0">*             (i32.const 20) ;; nwritten - A place in memory to store the number of bytes written</span>
+ <span class="s0">*         )</span>
+ <span class="s0">*         drop ;; Discard the number of bytes written from the top of the stack</span>
+ <span class="s0">*     )</span>
+ <span class="s0">* )</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* Use [wabt](https://github.com/WebAssembly/wabt) to compile `.wat` to `.wasm`</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```bash</span>
+ <span class="s0">* wat2wasm demo.wat</span>
+ <span class="s0">* ```</span>
+ <span class="s0">* </span><span class="s1">@experimental</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/wasi.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;wasi&quot; </span><span class="s4">{</span>
+    <span class="s5">interface </span><span class="s2">WASIOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An array of strings that the WebAssembly application will</span>
+         <span class="s0">* see as command line arguments. The first argument is the virtual path to the</span>
+         <span class="s0">* WASI command itself.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">[]</span>
+         <span class="s0">*/</span>
+        <span class="s2">args</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">[] | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An object similar to `process.env` that the WebAssembly</span>
+         <span class="s0">* application will see as its environment.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">{}</span>
+         <span class="s0">*/</span>
+        <span class="s2">env</span><span class="s4">?: </span><span class="s2">object </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This object represents the WebAssembly application's</span>
+         <span class="s0">* sandbox directory structure. The string keys of `preopens` are treated as</span>
+         <span class="s0">* directories within the sandbox. The corresponding values in `preopens` are</span>
+         <span class="s0">* the real paths to those directories on the host machine.</span>
+         <span class="s0">*/</span>
+        <span class="s2">preopens</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Dict</span><span class="s4">&lt;</span><span class="s2">string</span><span
+    class="s4">&gt; | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* By default, when WASI applications call `__wasi_proc_exit()`</span>
+         <span
+           class="s0">* `wasi.start()` will return with the exit code specified rather than terminatng the process.</span>
+         <span class="s0">* Setting this option to `false` will cause the Node.js process to exit with</span>
+         <span class="s0">* the specified exit code instead.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+         <span class="s0">*/</span>
+        <span class="s2">returnOnExit</span><span class="s4">?: </span><span class="s2">boolean </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The file descriptor used as standard input in the WebAssembly application.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">0</span>
+         <span class="s0">*/</span>
+        <span class="s2">stdin</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The file descriptor used as standard output in the WebAssembly application.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">1</span>
+         <span class="s0">*/</span>
+        <span class="s2">stdout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The file descriptor used as standard error in the WebAssembly application.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">2</span>
+         <span class="s0">*/</span>
+        <span class="s2">stderr</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The version of WASI requested.</span>
+         <span class="s0">* Currently the only supported versions are `'unstable'` and `'preview1'`. This option is mandatory.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.8.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">version</span><span class="s4">: </span><span class="s3">&quot;unstable&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;preview1&quot;</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s5">interface </span><span class="s2">FinalizeBindingsOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">instance.exports.memory</span>
+         <span class="s0">*/</span>
+        <span class="s2">memory</span><span class="s4">?: </span><span class="s2">object </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `WASI` class provides the WASI system call API and additional convenience</span>
+     <span class="s0">* methods for working with WASI-based applications. Each `WASI` instance</span>
+     <span class="s0">* represents a distinct environment.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.3.0, v12.16.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">WASI </span><span class="s4">{</span>
+        <span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">WASIOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Return an import object that can be passed to `WebAssembly.instantiate()` if no other WASM imports are needed beyond those provided by WASI.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If version `unstable` was passed into the constructor it will return:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* { wasi_unstable: wasi.wasiImport }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If version `preview1` was passed into the constructor or no version was specified it will return:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* { wasi_snapshot_preview1: wasi.wasiImport }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.8.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getImportObject</span><span class="s4">(): </span><span class="s2">object</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Attempt to begin execution of `instance` as a WASI command by invoking its `_start()` export. If `instance` does not contain a `_start()` export, or if `instance` contains an `_initialize()`</span>
+         <span class="s0">* export, then an exception is thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `start()` requires that `instance` exports a [`WebAssembly.Memory`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Memory) named `memory`. If</span>
+         <span class="s0">* `instance` does not have a `memory` export an exception is thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `start()` is called more than once, an exception is thrown.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.3.0, v12.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">start</span><span class="s4">(</span><span class="s2">instance</span><span class="s4">: </span><span
+    class="s2">object</span><span class="s4">): </span><span class="s2">number</span><span class="s4">; </span><span
+    class="s6">// TODO: avoid DOM dependency until WASM moved to own lib.</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Attempt to initialize `instance` as a WASI reactor by invoking its `_initialize()` export, if it is present. If `instance` contains a `_start()` export, then an exception is thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `initialize()` requires that `instance` exports a [`WebAssembly.Memory`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Memory) named `memory`.</span>
+         <span class="s0">* If `instance` does not have a `memory` export an exception is thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `initialize()` is called more than once, an exception is thrown.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.6.0, v12.19.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">initialize</span><span class="s4">(</span><span class="s2">instance</span><span
+    class="s4">: </span><span class="s2">object</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">; </span><span class="s6">// TODO: avoid DOM dependency until WASM moved to own lib.</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Set up WASI host bindings to `instance` without calling `initialize()`</span>
+         <span class="s0">* or `start()`. This method is useful when the WASI module is instantiated in</span>
+         <span class="s0">* child threads for sharing the memory across threads.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `finalizeBindings()` requires that either `instance` exports a</span>
+         <span class="s0">* [`WebAssembly.Memory`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Memory) named `memory` or user specify a</span>
+         <span class="s0">* [`WebAssembly.Memory`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Memory) object in `options.memory`. If the `memory` is invalid</span>
+         <span class="s0">* an exception is thrown.</span>
+         <span class="s0">*</span>
+         <span class="s0">* `start()` and `initialize()` will call `finalizeBindings()` internally.</span>
+         <span class="s0">* If `finalizeBindings()` is called more than once, an exception is thrown.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.4.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">finalizeBindings</span><span class="s4">(</span><span class="s2">instance</span><span
+    class="s4">: </span><span class="s2">object</span><span class="s4">, </span><span class="s2">options</span><span
+    class="s4">?: </span><span class="s2">FinalizeBindingsOptions</span><span class="s4">): </span><span
+    class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `wasiImport` is an object that implements the WASI system call API. This object</span>
+         <span class="s0">* should be passed as the `wasi_snapshot_preview1` import during the instantiation</span>
+         <span class="s0">* of a [`WebAssembly.Instance`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Instance).</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.3.0, v12.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly wasiImport</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">Dict</span><span class="s4">&lt;</span><span class="s2">any</span><span
+    class="s4">&gt;; </span><span class="s6">// TODO: Narrow to DOM types</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:wasi&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;wasi&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

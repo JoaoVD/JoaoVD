@@ -1,0 +1,127 @@
+<html>
+<head>
+  <title>assign.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          assign.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">assignValue </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_assignValue'</span><span class="s2">),</span>
+    <span class="s1">copyObject </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_copyObject'</span><span class="s2">),</span>
+    <span class="s1">createAssigner </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_createAssigner'</span><span class="s2">),</span>
+    <span class="s1">isArrayLike </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArrayLike'</span><span class="s2">),</span>
+    <span class="s1">isPrototype </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_isPrototype'</span><span class="s2">),</span>
+    <span class="s1">keys </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./keys'</span><span class="s2">);</span>
+
+<span class="s4">/** Used for built-in method references. */</span>
+<span class="s0">var </span><span class="s1">objectProto </span><span class="s2">= </span><span class="s1">Object</span><span
+    class="s2">.</span><span class="s1">prototype</span><span class="s2">;</span>
+
+<span class="s4">/** Used to check objects for own properties. */</span>
+<span class="s0">var </span><span class="s1">hasOwnProperty </span><span class="s2">= </span><span class="s1">objectProto</span><span
+    class="s2">.</span><span class="s1">hasOwnProperty</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Assigns own enumerable string keyed properties of source objects to the</span>
+ <span class="s4">* destination object. Source objects are applied from left to right.</span>
+ <span class="s4">* Subsequent sources overwrite property assignments of previous sources.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This method mutates `object` and is loosely based on</span>
+ <span class="s4">* [`Object.assign`](https://mdn.io/Object/assign).</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.10.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Object</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Object} object The destination object.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{...Object} [sources] The source objects.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Object} Returns `object`.</span>
+ <span class="s4">* </span><span class="s5">@see </span><span class="s4">_.assignIn</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* function Foo() {</span>
+ <span class="s4">*   this.a = 1;</span>
+ <span class="s4">* }</span>
+ <span class="s4">*</span>
+ <span class="s4">* function Bar() {</span>
+ <span class="s4">*   this.c = 3;</span>
+ <span class="s4">* }</span>
+ <span class="s4">*</span>
+ <span class="s4">* Foo.prototype.b = 2;</span>
+ <span class="s4">* Bar.prototype.d = 4;</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.assign({ 'a': 0 }, new Foo, new Bar);</span>
+ <span class="s4">* // =&gt; { 'a': 1, 'c': 3 }</span>
+ <span class="s4">*/</span>
+<span class="s0">var </span><span class="s1">assign </span><span class="s2">= </span><span
+    class="s1">createAssigner</span><span class="s2">(</span><span class="s0">function</span><span
+    class="s2">(</span><span class="s1">object</span><span class="s2">, </span><span class="s1">source</span><span
+    class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isPrototype</span><span class="s2">(</span><span
+    class="s1">source</span><span class="s2">) || </span><span class="s1">isArrayLike</span><span
+    class="s2">(</span><span class="s1">source</span><span class="s2">)) {</span>
+    <span class="s1">copyObject</span><span class="s2">(</span><span class="s1">source</span><span
+    class="s2">, </span><span class="s1">keys</span><span class="s2">(</span><span class="s1">source</span><span
+    class="s2">), </span><span class="s1">object</span><span class="s2">);</span>
+    <span class="s0">return</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">var </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">source</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">hasOwnProperty</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s1">source</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">)) {</span>
+      <span class="s1">assignValue</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">, </span><span class="s1">key</span><span class="s2">, </span><span class="s1">source</span><span
+    class="s2">[</span><span class="s1">key</span><span class="s2">]);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">assign</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<html>
+<head>
+  <title>map.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          map.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">arrayMap </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_arrayMap'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">),</span>
+    <span class="s1">baseMap </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseMap'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates an array of values by running each element in `collection` thru</span>
+ <span class="s4">* `iteratee`. The iteratee is invoked with three arguments:</span>
+ <span class="s4">* (value, index|key, collection).</span>
+ <span class="s4">*</span>
+ <span class="s4">* Many lodash methods are guarded to work as iteratees for methods like</span>
+ <span class="s4">* `_.every`, `_.filter`, `_.map`, `_.mapValues`, `_.reject`, and `_.some`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* The guarded methods are:</span>
+ <span class="s4">* `ary`, `chunk`, `curry`, `curryRight`, `drop`, `dropRight`, `every`,</span>
+ <span class="s4">* `fill`, `invert`, `parseInt`, `random`, `range`, `rangeRight`, `repeat`,</span>
+ <span class="s4">* `sampleSize`, `slice`, `some`, `sortBy`, `split`, `take`, `takeRight`,</span>
+ <span class="s4">* `template`, `trim`, `trimEnd`, `trimStart`, and `words`</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.1.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Collection</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Array|Object} collection The collection to iterate over.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Function} [iteratee=_.identity] The function invoked per iteration.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span
+    class="s4">{Array} Returns the new mapped array.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* function square(n) {</span>
+ <span class="s4">*   return n * n;</span>
+ <span class="s4">* }</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.map([4, 8], square);</span>
+ <span class="s4">* // =&gt; [16, 64]</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.map({ 'a': 4, 'b': 8 }, square);</span>
+ <span class="s4">* // =&gt; [16, 64] (iteration order is not guaranteed)</span>
+ <span class="s4">*</span>
+ <span class="s4">* var users = [</span>
+ <span class="s4">*   { 'user': 'barney' },</span>
+ <span class="s4">*   { 'user': 'fred' }</span>
+ <span class="s4">* ];</span>
+ <span class="s4">*</span>
+ <span class="s4">* // The `_.property` iteratee shorthand.</span>
+ <span class="s4">* _.map(users, 'user');</span>
+ <span class="s4">* // =&gt; ['barney', 'fred']</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">map</span><span class="s2">(</span><span
+    class="s1">collection</span><span class="s2">, </span><span class="s1">iteratee</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">func </span><span class="s2">= </span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">) ? </span><span class="s1">arrayMap </span><span class="s2">: </span><span
+    class="s1">baseMap</span><span class="s2">;</span>
+  <span class="s0">return </span><span class="s1">func</span><span class="s2">(</span><span class="s1">collection</span><span
+    class="s2">, </span><span class="s1">baseIteratee</span><span class="s2">(</span><span
+    class="s1">iteratee</span><span class="s2">, </span><span class="s6">3</span><span class="s2">));</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">map</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

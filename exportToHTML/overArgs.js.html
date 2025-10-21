@@ -1,0 +1,147 @@
+<html>
+<head>
+  <title>overArgs.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          overArgs.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">apply </span><span class="s2">= </span><span class="s1">require</span><span
+  class="s2">(</span><span class="s3">'./_apply'</span><span class="s2">),</span>
+    <span class="s1">arrayMap </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_arrayMap'</span><span class="s2">),</span>
+    <span class="s1">baseFlatten </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseFlatten'</span><span class="s2">),</span>
+    <span class="s1">baseIteratee </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseIteratee'</span><span class="s2">),</span>
+    <span class="s1">baseRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseRest'</span><span class="s2">),</span>
+    <span class="s1">baseUnary </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_baseUnary'</span><span class="s2">),</span>
+    <span class="s1">castRest </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_castRest'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">);</span>
+
+<span class="s4">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMin </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">min</span><span class="s2">;</span>
+
+<span class="s5">/**</span>
+ <span class="s5">* Creates a function that invokes `func` with its arguments transformed.</span>
+ <span class="s5">*</span>
+ <span class="s5">* </span><span class="s6">@static</span>
+ <span class="s5">* </span><span class="s6">@since </span><span class="s5">4.0.0</span>
+ <span class="s5">* </span><span class="s6">@memberOf </span><span class="s5">_</span>
+ <span class="s5">* </span><span class="s6">@category </span><span class="s5">Function</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{Function} func The function to wrap.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{...(Function|Function[])} [transforms=[_.identity]]</span>
+ <span class="s5">*  The argument transforms.</span>
+ <span class="s5">* </span><span class="s6">@returns </span><span class="s5">{Function} Returns the new function.</span>
+ <span class="s5">* </span><span class="s6">@example</span>
+ <span class="s5">*</span>
+ <span class="s5">* function doubled(n) {</span>
+ <span class="s5">*   return n * 2;</span>
+ <span class="s5">* }</span>
+ <span class="s5">*</span>
+ <span class="s5">* function square(n) {</span>
+ <span class="s5">*   return n * n;</span>
+ <span class="s5">* }</span>
+ <span class="s5">*</span>
+ <span class="s5">* var func = _.overArgs(function(x, y) {</span>
+ <span class="s5">*   return [x, y];</span>
+ <span class="s5">* }, [square, doubled]);</span>
+ <span class="s5">*</span>
+ <span class="s5">* func(9, 3);</span>
+ <span class="s5">* // =&gt; [81, 6]</span>
+ <span class="s5">*</span>
+ <span class="s5">* func(10, 5);</span>
+ <span class="s5">* // =&gt; [100, 10]</span>
+ <span class="s5">*/</span>
+<span class="s0">var </span><span class="s1">overArgs </span><span class="s2">= </span><span
+    class="s1">castRest</span><span class="s2">(</span><span class="s0">function</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s1">transforms</span><span class="s2">) {</span>
+  <span class="s1">transforms </span><span class="s2">= (</span><span class="s1">transforms</span><span
+    class="s2">.</span><span class="s1">length </span><span class="s2">== </span><span class="s7">1 </span><span
+    class="s2">&amp;&amp; </span><span class="s1">isArray</span><span class="s2">(</span><span
+    class="s1">transforms</span><span class="s2">[</span><span class="s7">0</span><span class="s2">]))</span>
+    <span class="s2">? </span><span class="s1">arrayMap</span><span class="s2">(</span><span
+    class="s1">transforms</span><span class="s2">[</span><span class="s7">0</span><span class="s2">], </span><span
+    class="s1">baseUnary</span><span class="s2">(</span><span class="s1">baseIteratee</span><span class="s2">))</span>
+    <span class="s2">: </span><span class="s1">arrayMap</span><span class="s2">(</span><span
+    class="s1">baseFlatten</span><span class="s2">(</span><span class="s1">transforms</span><span
+    class="s2">, </span><span class="s7">1</span><span class="s2">), </span><span class="s1">baseUnary</span><span
+    class="s2">(</span><span class="s1">baseIteratee</span><span class="s2">));</span>
+
+  <span class="s0">var </span><span class="s1">funcsLength </span><span class="s2">= </span><span
+    class="s1">transforms</span><span class="s2">.</span><span class="s1">length</span><span class="s2">;</span>
+  <span class="s0">return </span><span class="s1">baseRest</span><span class="s2">(</span><span
+    class="s0">function</span><span class="s2">(</span><span class="s1">args</span><span class="s2">) {</span>
+    <span class="s0">var </span><span class="s1">index </span><span class="s2">= -</span><span class="s7">1</span><span
+    class="s2">,</span>
+        <span class="s1">length </span><span class="s2">= </span><span class="s1">nativeMin</span><span
+    class="s2">(</span><span class="s1">args</span><span class="s2">.</span><span class="s1">length</span><span
+    class="s2">, </span><span class="s1">funcsLength</span><span class="s2">);</span>
+
+    <span class="s0">while </span><span class="s2">(++</span><span class="s1">index </span><span class="s2">&lt; </span><span
+    class="s1">length</span><span class="s2">) {</span>
+      <span class="s1">args</span><span class="s2">[</span><span class="s1">index</span><span
+    class="s2">] = </span><span class="s1">transforms</span><span class="s2">[</span><span class="s1">index</span><span
+    class="s2">].</span><span class="s1">call</span><span class="s2">(</span><span class="s0">this</span><span
+    class="s2">, </span><span class="s1">args</span><span class="s2">[</span><span class="s1">index</span><span
+    class="s2">]);</span>
+    <span class="s2">}</span>
+    <span class="s0">return </span><span class="s1">apply</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">, </span><span class="s0">this</span><span class="s2">, </span><span
+    class="s1">args</span><span class="s2">);</span>
+  <span class="s2">});</span>
+<span class="s2">});</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">overArgs</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

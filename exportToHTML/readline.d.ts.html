@@ -1,0 +1,909 @@
+<html>
+<head>
+  <title>readline.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          readline.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:readline` module provides an interface for reading data from a [Readable](https://nodejs.org/docs/latest-v24.x/api/stream.html#readable-streams) stream</span>
+ <span class="s0">* (such as [`process.stdin`](https://nodejs.org/docs/latest-v24.x/api/process.html#processstdin)) one line at a time.</span>
+ <span class="s0">*</span>
+ <span class="s0">* To use the promise-based APIs:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import * as readline from 'node:readline/promises';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* To use the callback and sync APIs:</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import * as readline from 'node:readline';</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* The following simple example illustrates the basic use of the `node:readline` module.</span>
+ <span class="s0">*</span>
+ <span class="s0">* ```js</span>
+ <span class="s0">* import * as readline from 'node:readline/promises';</span>
+ <span class="s0">* import { stdin as input, stdout as output } from 'node:process';</span>
+ <span class="s0">*</span>
+ <span class="s0">* const rl = readline.createInterface({ input, output });</span>
+ <span class="s0">*</span>
+ <span class="s0">* const answer = await rl.question('What do you think of Node.js? ');</span>
+ <span class="s0">*</span>
+ <span class="s0">* console.log(`Thank you for your valuable feedback: ${answer}`);</span>
+ <span class="s0">*</span>
+ <span class="s0">* rl.close();</span>
+ <span class="s0">* ```</span>
+ <span class="s0">*</span>
+ <span class="s0">* Once this code is invoked, the Node.js application will not terminate until the `readline.Interface` is closed because the interface waits for data to be</span>
+ <span class="s0">* received on the `input` stream.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/readline.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;readline&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s4">{ </span><span class="s2">Abortable</span><span class="s4">, </span><span
+    class="s2">EventEmitter </span><span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;node:events&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">import </span><span class="s4">* as </span><span class="s2">promises from </span><span class="s3">&quot;node:readline/promises&quot;</span><span
+    class="s4">;</span>
+    <span class="s5">export </span><span class="s4">{ </span><span class="s2">promises </span><span class="s4">};</span>
+    <span class="s5">export interface </span><span class="s2">Key </span><span class="s4">{</span>
+        <span class="s2">sequence</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">name</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">ctrl</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">meta</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s2">shift</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Instances of the `readline.Interface` class are constructed using the `readline.createInterface()` method. Every instance is associated with a</span>
+     <span class="s0">* single `input` [Readable](https://nodejs.org/docs/latest-v24.x/api/stream.html#readable-streams) stream and a single `output` [Writable](https://nodejs.org/docs/latest-v24.x/api/stream.html#writable-streams) stream.</span>
+     <span class="s0">* The `output` stream is used to print prompts for user input that arrives on,</span>
+     <span class="s0">* and is read from, the `input` stream.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.104</span>
+     <span class="s0">*/</span>
+    <span class="s5">export class </span><span class="s2">Interface </span><span class="s5">extends </span><span
+    class="s2">EventEmitter </span><span class="s5">implements </span><span class="s2">Disposable </span><span
+    class="s4">{</span>
+        <span class="s2">readonly terminal</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The current input data being processed by node.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This can be used when collecting input from a TTY stream to retrieve the</span>
+         <span class="s0">* current value that has been processed thus far, prior to the `line` event</span>
+         <span class="s0">* being emitted. Once the `line` event has been emitted, this property will</span>
+         <span class="s0">* be an empty string.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Be aware that modifying the value during the instance runtime may have</span>
+         <span class="s0">* unintended consequences if `rl.cursor` is not also controlled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* **If not using a TTY stream for input, use the `'line'` event.**</span>
+         <span class="s0">*</span>
+         <span class="s0">* One possible use case would be as follows:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const values = ['lorem ipsum', 'dolor sit amet'];</span>
+         <span class="s0">* const rl = readline.createInterface(process.stdin);</span>
+         <span class="s0">* const showResults = debounce(() =&gt; {</span>
+         <span class="s0">*   console.log(</span>
+         <span class="s0">*     '\n',</span>
+         <span class="s0">*     values.filter((val) =&gt; val.startsWith(rl.line)).join(' '),</span>
+         <span class="s0">*   );</span>
+         <span class="s0">* }, 300);</span>
+         <span class="s0">* process.stdin.on('keypress', (c, k) =&gt; {</span>
+         <span class="s0">*   showResults();</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.98</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly line</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The cursor position relative to `rl.line`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This will track where the current cursor lands in the input string, when</span>
+         <span class="s0">* reading input from a TTY stream. The position of cursor determines the</span>
+         <span class="s0">* portion of the input string that will be modified as input is processed,</span>
+         <span class="s0">* as well as the column where the terminal caret will be rendered.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.98</span>
+         <span class="s0">*/</span>
+        <span class="s2">readonly cursor</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* NOTE: According to the documentation:</span>
+         <span class="s0">*</span>
+         <span class="s0">* &gt; Instances of the `readline.Interface` class are constructed using the</span>
+         <span class="s0">* &gt; `readline.createInterface()` method.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/readline.html#class-interfaceconstructor</span>
+         <span class="s0">*/</span>
+        <span class="s5">protected </span><span class="s2">constructor</span><span class="s4">(</span>
+            <span class="s2">input</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ReadableStream</span><span class="s4">,</span>
+            <span class="s2">output</span><span class="s4">?: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">WritableStream</span><span class="s4">,</span>
+            <span class="s2">completer</span><span class="s4">?: </span><span class="s2">Completer </span><span
+    class="s4">| </span><span class="s2">AsyncCompleter</span><span class="s4">,</span>
+            <span class="s2">terminal</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">,</span>
+        <span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* NOTE: According to the documentation:</span>
+         <span class="s0">*</span>
+         <span class="s0">* &gt; Instances of the `readline.Interface` class are constructed using the</span>
+         <span class="s0">* &gt; `readline.createInterface()` method.</span>
+         <span class="s0">*</span>
+         <span class="s0">* </span><span class="s1">@see </span><span class="s0">https://nodejs.org/dist/latest-v24.x/docs/api/readline.html#class-interfaceconstructor</span>
+         <span class="s0">*/</span>
+        <span class="s5">protected </span><span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span
+    class="s4">: </span><span class="s2">ReadLineOptions</span><span class="s4">);</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.getPrompt()` method returns the current prompt used by `rl.prompt()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v15.3.0, v14.17.0</span>
+         <span class="s0">* </span><span class="s1">@return </span><span class="s0">the current prompt string</span>
+         <span class="s0">*/</span>
+        <span class="s2">getPrompt</span><span class="s4">(): </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.setPrompt()` method sets the prompt that will be written to `output` whenever `rl.prompt()` is called.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.98</span>
+         <span class="s0">*/</span>
+        <span class="s2">setPrompt</span><span class="s4">(</span><span class="s2">prompt</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.prompt()` method writes the `Interface` instances configured`prompt` to a new line in `output` in order to provide a user with a new</span>
+         <span class="s0">* location at which to provide input.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When called, `rl.prompt()` will resume the `input` stream if it has been</span>
+         <span class="s0">* paused.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the `Interface` was created with `output` set to `null` or `undefined` the prompt is not written.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.98</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">preserveCursor If `true`, prevents the cursor placement from being reset to `0`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">prompt</span><span class="s4">(</span><span class="s2">preserveCursor</span><span
+    class="s4">?: </span><span class="s2">boolean</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.question()` method displays the `query` by writing it to the `output`,</span>
+         <span class="s0">* waits for user input to be provided on `input`, then invokes the `callback` function passing the provided input as the first argument.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When called, `rl.question()` will resume the `input` stream if it has been</span>
+         <span class="s0">* paused.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the `Interface` was created with `output` set to `null` or `undefined` the `query` is not written.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `callback` function passed to `rl.question()` does not follow the typical</span>
+         <span class="s0">* pattern of accepting an `Error` object or `null` as the first argument.</span>
+         <span class="s0">* The `callback` is called with the provided answer as the only argument.</span>
+         <span class="s0">*</span>
+         <span class="s0">* An error will be thrown if calling `rl.question()` after `rl.close()`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Example usage:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* rl.question('What is your favorite food? ', (answer) =&gt; {</span>
+         <span class="s0">*   console.log(`Oh, so your favorite food is ${answer}`);</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Using an `AbortController` to cancel a question.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const ac = new AbortController();</span>
+         <span class="s0">* const signal = ac.signal;</span>
+         <span class="s0">*</span>
+         <span class="s0">* rl.question('What is your favorite food? ', { signal }, (answer) =&gt; {</span>
+         <span class="s0">*   console.log(`Oh, so your favorite food is ${answer}`);</span>
+         <span class="s0">* });</span>
+         <span class="s0">*</span>
+         <span class="s0">* signal.addEventListener('abort', () =&gt; {</span>
+         <span class="s0">*   console.log('The food question timed out');</span>
+         <span class="s0">* }, { once: true });</span>
+         <span class="s0">*</span>
+         <span class="s0">* setTimeout(() =&gt; ac.abort(), 10000);</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.3</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">query A statement or query to write to `output`, prepended to the prompt.</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback A callback function that is invoked with the user's input in response to the `query`.</span>
+         <span class="s0">*/</span>
+        <span class="s2">question</span><span class="s4">(</span><span class="s2">query</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">callback</span><span class="s4">: (</span><span
+    class="s2">answer</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">question</span><span class="s4">(</span><span class="s2">query</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">options</span><span class="s4">: </span><span
+    class="s2">Abortable</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">: (</span><span class="s2">answer</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.pause()` method pauses the `input` stream, allowing it to be resumed</span>
+         <span class="s0">* later if necessary.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Calling `rl.pause()` does not immediately pause other events (including `'line'`) from being emitted by the `Interface` instance.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">pause</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.resume()` method resumes the `input` stream if it has been paused.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.3.4</span>
+         <span class="s0">*/</span>
+        <span class="s2">resume</span><span class="s4">(): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.close()` method closes the `Interface` instance and</span>
+         <span class="s0">* relinquishes control over the `input` and `output` streams. When called,</span>
+         <span class="s0">* the `'close'` event will be emitted.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Calling `rl.close()` does not immediately stop other events (including `'line'`)</span>
+         <span class="s0">* from being emitted by the `Interface` instance.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.98</span>
+         <span class="s0">*/</span>
+        <span class="s2">close</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Alias for `rl.close()`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.15.0</span>
+         <span class="s0">*/</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">dispose</span><span class="s4">](): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The `rl.write()` method will write either `data` or a key sequence identified</span>
+         <span class="s0">* by `key` to the `output`. The `key` argument is supported only if `output` is</span>
+         <span class="s0">* a `TTY` text terminal. See `TTY keybindings` for a list of key</span>
+         <span class="s0">* combinations.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `key` is specified, `data` is ignored.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When called, `rl.write()` will resume the `input` stream if it has been</span>
+         <span class="s0">* paused.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the `Interface` was created with `output` set to `null` or `undefined` the `data` and `key` are not written.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* rl.write('Delete this!');</span>
+         <span class="s0">* // Simulate Ctrl+U to delete the line written previously</span>
+         <span class="s0">* rl.write(null, { ctrl: true, name: 'u' });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* The `rl.write()` method will write the data to the `readline` `Interface`'s `input` _as if it were provided by the user_.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.98</span>
+         <span class="s0">*/</span>
+        <span class="s2">write</span><span class="s4">(</span><span class="s2">data</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">, </span><span class="s2">key</span><span class="s4">?: </span><span class="s2">Key</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">write</span><span class="s4">(</span><span class="s2">data</span><span
+    class="s4">: </span><span class="s2">undefined </span><span class="s4">| </span><span class="s5">null </span><span
+    class="s4">| </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Buffer</span><span
+    class="s4">, </span><span class="s2">key</span><span class="s4">: </span><span class="s2">Key</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Returns the real position of the cursor in relation to the input</span>
+         <span class="s0">* prompt + string. Long input (wrapping) strings, as well as multiple</span>
+         <span class="s0">* line prompts are included in the calculations.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.5.0, v12.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">getCursorPos</span><span class="s4">(): </span><span class="s2">CursorPos</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* events.EventEmitter</span>
+         <span class="s0">* 1. close</span>
+         <span class="s0">* 2. line</span>
+         <span class="s0">* 3. pause</span>
+         <span class="s0">* 4. resume</span>
+         <span class="s0">* 5. SIGCONT</span>
+         <span class="s0">* 6. SIGINT</span>
+         <span class="s0">* 7. SIGTSTP</span>
+         <span class="s0">* 8. history</span>
+         <span class="s0">*/</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">addListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;history&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">history</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">symbol</span><span
+    class="s4">, </span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]): </span><span class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">emit</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;history&quot;</span><span class="s4">, </span><span
+    class="s2">history</span><span class="s4">: </span><span class="s2">string</span><span class="s4">[]): </span><span
+    class="s2">boolean</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: (</span><span
+    class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;close&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;line&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;pause&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;resume&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span class="s2">listener</span><span class="s4">: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">on</span><span class="s4">(</span><span class="s2">event</span><span class="s4">: </span><span
+    class="s3">&quot;history&quot;</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">history</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">once</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;history&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">history</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;history&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">history</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">listener</span><span
+    class="s4">: (</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s5">this</span><span
+    class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;close&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;line&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">input</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;pause&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;resume&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGCONT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGINT&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;SIGTSTP&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span
+    class="s5">this</span><span class="s4">;</span>
+        <span class="s2">prependOnceListener</span><span class="s4">(</span><span class="s2">event</span><span
+    class="s4">: </span><span class="s3">&quot;history&quot;</span><span class="s4">, </span><span
+    class="s2">listener</span><span class="s4">: (</span><span class="s2">history</span><span class="s4">: </span><span
+    class="s2">string</span><span class="s4">[]) =&gt; </span><span class="s5">void</span><span
+    class="s4">): </span><span class="s5">this</span><span class="s4">;</span>
+        <span class="s4">[</span><span class="s2">Symbol</span><span class="s4">.</span><span
+    class="s2">asyncIterator</span><span class="s4">](): </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">AsyncIterator</span><span class="s4">&lt;</span><span
+    class="s2">string</span><span class="s4">&gt;;</span>
+    <span class="s4">}</span>
+    <span class="s5">export </span><span class="s2">type ReadLine </span><span class="s4">= </span><span class="s2">Interface</span><span
+    class="s4">; </span><span class="s6">// type forwarded for backwards compatibility</span>
+    <span class="s5">export </span><span class="s2">type Completer </span><span class="s4">= (</span><span class="s2">line</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">) =&gt; </span><span
+    class="s2">CompleterResult</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">type AsyncCompleter </span><span class="s4">= (</span>
+        <span class="s2">line</span><span class="s4">: </span><span class="s2">string</span><span class="s4">,</span>
+        <span class="s2">callback</span><span class="s4">: (</span><span class="s2">err</span><span
+    class="s4">?: </span><span class="s5">null </span><span class="s4">| </span><span class="s2">Error</span><span
+    class="s4">, </span><span class="s2">result</span><span class="s4">?: </span><span class="s2">CompleterResult</span><span
+    class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">,</span>
+    <span class="s4">) =&gt; </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">type CompleterResult </span><span class="s4">= [</span><span
+    class="s2">string</span><span class="s4">[], </span><span class="s2">string</span><span class="s4">];</span>
+    <span class="s5">export interface </span><span class="s2">ReadLineOptions </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The [`Readable`](https://nodejs.org/docs/latest-v24.x/api/stream.html#readable-streams) stream to listen to</span>
+         <span class="s0">*/</span>
+        <span class="s2">input</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ReadableStream</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The [`Writable`](https://nodejs.org/docs/latest-v24.x/api/stream.html#writable-streams) stream to write readline data to.</span>
+         <span class="s0">*/</span>
+        <span class="s2">output</span><span class="s4">?: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream </span><span class="s4">| </span><span class="s2">undefined</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* An optional function used for Tab autocompletion.</span>
+         <span class="s0">*/</span>
+        <span class="s2">completer</span><span class="s4">?: </span><span class="s2">Completer </span><span
+    class="s4">| </span><span class="s2">AsyncCompleter </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* `true` if the `input` and `output` streams should be treated like a TTY,</span>
+         <span class="s0">* and have ANSI/VT100 escape codes written to it.</span>
+         <span class="s0">* Default: checking `isTTY` on the `output` stream upon instantiation.</span>
+         <span class="s0">*/</span>
+        <span class="s2">terminal</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Initial list of history lines.</span>
+         <span class="s0">* This option makes sense only if `terminal` is set to `true` by the user or by an internal `output` check,</span>
+         <span class="s0">* otherwise the history caching mechanism is not initialized at all.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">[]</span>
+         <span class="s0">*/</span>
+        <span class="s2">history</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">[] | </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Maximum number of history lines retained.</span>
+         <span class="s0">* To disable the history set this value to `0`.</span>
+         <span class="s0">* This option makes sense only if `terminal` is set to `true` by the user or by an internal `output` check,</span>
+         <span class="s0">* otherwise the history caching mechanism is not initialized at all.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">30</span>
+         <span class="s0">*/</span>
+        <span class="s2">historySize</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If `true`, when a new input line added to the history list duplicates an older one,</span>
+         <span class="s0">* this removes the older line from the list.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">false</span>
+         <span class="s0">*/</span>
+        <span class="s2">removeHistoryDuplicates</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The prompt string to use.</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">&quot;&gt; &quot;</span>
+         <span class="s0">*/</span>
+        <span class="s2">prompt</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* If the delay between `\r` and `\n` exceeds `crlfDelay` milliseconds,</span>
+         <span class="s0">* both `\r` and `\n` will be treated as separate end-of-line input.</span>
+         <span class="s0">* `crlfDelay` will be coerced to a number no less than `100`.</span>
+         <span class="s0">* It can be set to `Infinity`, in which case</span>
+         <span class="s0">* `\r` followed by `\n` will always be considered a single newline</span>
+         <span class="s0">* (which may be reasonable for [reading files](https://nodejs.org/docs/latest-v24.x/api/readline.html#example-read-file-stream-line-by-line) with `\r\n` line delimiter).</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">100</span>
+         <span class="s0">*/</span>
+        <span class="s2">crlfDelay</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The duration `readline` will wait for a character</span>
+         <span class="s0">* (when reading an ambiguous key sequence in milliseconds</span>
+         <span class="s0">* one that can both form a complete key sequence using the input read so far</span>
+         <span class="s0">* and can take additional input to complete a longer key sequence).</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">500</span>
+         <span class="s0">*/</span>
+        <span class="s2">escapeCodeTimeout</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* The number of spaces a tab is equal to (minimum 1).</span>
+         <span class="s0">* </span><span class="s1">@default </span><span class="s0">8</span>
+         <span class="s0">*/</span>
+        <span class="s2">tabSize</span><span class="s4">?: </span><span class="s2">number </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Allows closing the interface using an AbortSignal.</span>
+         <span class="s0">* Aborting the signal will internally call `close` on the interface.</span>
+         <span class="s0">*/</span>
+        <span class="s2">signal</span><span class="s4">?: </span><span class="s2">AbortSignal </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `readline.createInterface()` method creates a new `readline.Interface` instance.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import readline from 'node:readline';</span>
+     <span class="s0">* const rl = readline.createInterface({</span>
+     <span class="s0">*   input: process.stdin,</span>
+     <span class="s0">*   output: process.stdout,</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Once the `readline.Interface` instance is created, the most common case is to</span>
+     <span class="s0">* listen for the `'line'` event:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* rl.on('line', (line) =&gt; {</span>
+     <span class="s0">*   console.log(`Received: ${line}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* If `terminal` is `true` for this instance then the `output` stream will get</span>
+     <span class="s0">* the best compatibility if it defines an `output.columns` property and emits</span>
+     <span class="s0">* a `'resize'` event on the `output` if or when the columns ever change</span>
+     <span class="s0">* (`process.stdout` does this automatically when it is a TTY).</span>
+     <span class="s0">*</span>
+     <span class="s0">* When creating a `readline.Interface` using `stdin` as input, the program</span>
+     <span class="s0">* will not terminate until it receives an [EOF character](https://en.wikipedia.org/wiki/End-of-file#EOF_character). To exit without</span>
+     <span class="s0">* waiting for user input, call `process.stdin.unref()`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.98</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">createInterface</span><span class="s4">(</span>
+        <span class="s2">input</span><span class="s4">: </span><span class="s2">NodeJS</span><span
+    class="s4">.</span><span class="s2">ReadableStream</span><span class="s4">,</span>
+        <span class="s2">output</span><span class="s4">?: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">,</span>
+        <span class="s2">completer</span><span class="s4">?: </span><span class="s2">Completer </span><span
+    class="s4">| </span><span class="s2">AsyncCompleter</span><span class="s4">,</span>
+        <span class="s2">terminal</span><span class="s4">?: </span><span class="s2">boolean</span><span
+    class="s4">,</span>
+    <span class="s4">): </span><span class="s2">Interface</span><span class="s4">;</span>
+    <span class="s5">export function </span><span class="s2">createInterface</span><span class="s4">(</span><span
+    class="s2">options</span><span class="s4">: </span><span class="s2">ReadLineOptions</span><span
+    class="s4">): </span><span class="s2">Interface</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `readline.emitKeypressEvents()` method causes the given `Readable` stream to begin emitting `'keypress'` events corresponding to received input.</span>
+     <span class="s0">*</span>
+     <span class="s0">* Optionally, `interface` specifies a `readline.Interface` instance for which</span>
+     <span class="s0">* autocompletion is disabled when copy-pasted input is detected.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If the `stream` is a `TTY`, then it must be in raw mode.</span>
+     <span class="s0">*</span>
+     <span class="s0">* This is automatically called by any readline instance on its `input` if the `input` is a terminal. Closing the `readline` instance does not stop</span>
+     <span class="s0">* the `input` from emitting `'keypress'` events.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* readline.emitKeypressEvents(process.stdin);</span>
+     <span class="s0">* if (process.stdin.isTTY)</span>
+     <span class="s0">*   process.stdin.setRawMode(true);</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* ## Example: Tiny CLI</span>
+     <span class="s0">*</span>
+     <span class="s0">* The following example illustrates the use of `readline.Interface` class to</span>
+     <span class="s0">* implement a small command-line interface:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import readline from 'node:readline';</span>
+     <span class="s0">* const rl = readline.createInterface({</span>
+     <span class="s0">*   input: process.stdin,</span>
+     <span class="s0">*   output: process.stdout,</span>
+     <span class="s0">*   prompt: 'OHAI&gt; ',</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* rl.prompt();</span>
+     <span class="s0">*</span>
+     <span class="s0">* rl.on('line', (line) =&gt; {</span>
+     <span class="s0">*   switch (line.trim()) {</span>
+     <span class="s0">*     case 'hello':</span>
+     <span class="s0">*       console.log('world!');</span>
+     <span class="s0">*       break;</span>
+     <span class="s0">*     default:</span>
+     <span class="s0">*       console.log(`Say what? I might have heard '${line.trim()}'`);</span>
+     <span class="s0">*       break;</span>
+     <span class="s0">*   }</span>
+     <span class="s0">*   rl.prompt();</span>
+     <span class="s0">* }).on('close', () =&gt; {</span>
+     <span class="s0">*   console.log('Have a great day!');</span>
+     <span class="s0">*   process.exit(0);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* ## Example: Read file stream line-by-Line</span>
+     <span class="s0">*</span>
+     <span class="s0">* A common use case for `readline` is to consume an input file one line at a</span>
+     <span class="s0">* time. The easiest way to do so is leveraging the `fs.ReadStream` API as</span>
+     <span class="s0">* well as a `for await...of` loop:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import fs from 'node:fs';</span>
+     <span class="s0">* import readline from 'node:readline';</span>
+     <span class="s0">*</span>
+     <span class="s0">* async function processLineByLine() {</span>
+     <span class="s0">*   const fileStream = fs.createReadStream('input.txt');</span>
+     <span class="s0">*</span>
+     <span class="s0">*   const rl = readline.createInterface({</span>
+     <span class="s0">*     input: fileStream,</span>
+     <span class="s0">*     crlfDelay: Infinity,</span>
+     <span class="s0">*   });</span>
+     <span class="s0">*   // Note: we use the crlfDelay option to recognize all instances of CR LF</span>
+     <span class="s0">*   // ('\r\n') in input.txt as a single line break.</span>
+     <span class="s0">*</span>
+     <span class="s0">*   for await (const line of rl) {</span>
+     <span class="s0">*     // Each line in input.txt will be successively available here as `line`.</span>
+     <span class="s0">*     console.log(`Line from file: ${line}`);</span>
+     <span class="s0">*   }</span>
+     <span class="s0">* }</span>
+     <span class="s0">*</span>
+     <span class="s0">* processLineByLine();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Alternatively, one could use the `'line'` event:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import fs from 'node:fs';</span>
+     <span class="s0">* import readline from 'node:readline';</span>
+     <span class="s0">*</span>
+     <span class="s0">* const rl = readline.createInterface({</span>
+     <span class="s0">*   input: fs.createReadStream('sample.txt'),</span>
+     <span class="s0">*   crlfDelay: Infinity,</span>
+     <span class="s0">* });</span>
+     <span class="s0">*</span>
+     <span class="s0">* rl.on('line', (line) =&gt; {</span>
+     <span class="s0">*   console.log(`Line from file: ${line}`);</span>
+     <span class="s0">* });</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*</span>
+     <span class="s0">* Currently, `for await...of` loop can be a bit slower. If `async` / `await` flow and speed are both essential, a mixed approach can be applied:</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```js</span>
+     <span class="s0">* import { once } from 'node:events';</span>
+     <span class="s0">* import { createReadStream } from 'node:fs';</span>
+     <span class="s0">* import { createInterface } from 'node:readline';</span>
+     <span class="s0">*</span>
+     <span class="s0">* (async function processLineByLine() {</span>
+     <span class="s0">*   try {</span>
+     <span class="s0">*     const rl = createInterface({</span>
+     <span class="s0">*       input: createReadStream('big-file.txt'),</span>
+     <span class="s0">*       crlfDelay: Infinity,</span>
+     <span class="s0">*     });</span>
+     <span class="s0">*</span>
+     <span class="s0">*     rl.on('line', (line) =&gt; {</span>
+     <span class="s0">*       // Process the line.</span>
+     <span class="s0">*     });</span>
+     <span class="s0">*</span>
+     <span class="s0">*     await once(rl, 'close');</span>
+     <span class="s0">*</span>
+     <span class="s0">*     console.log('File processed.');</span>
+     <span class="s0">*   } catch (err) {</span>
+     <span class="s0">*     console.error(err);</span>
+     <span class="s0">*   }</span>
+     <span class="s0">* })();</span>
+     <span class="s0">* ```</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">emitKeypressEvents</span><span class="s4">(</span><span
+    class="s2">stream</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">ReadableStream</span><span class="s4">, </span><span class="s2">readlineInterface</span><span class="s4">?: </span><span
+    class="s2">Interface</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s5">export </span><span class="s2">type Direction </span><span class="s4">= -</span><span
+    class="s7">1 </span><span class="s4">| </span><span class="s7">0 </span><span class="s4">| </span><span
+    class="s7">1</span><span class="s4">;</span>
+    <span class="s5">export interface </span><span class="s2">CursorPos </span><span class="s4">{</span>
+        <span class="s2">rows</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+        <span class="s2">cols</span><span class="s4">: </span><span class="s2">number</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `readline.clearLine()` method clears current line of given [TTY](https://nodejs.org/docs/latest-v24.x/api/tty.html) stream</span>
+     <span class="s0">* in a specified direction identified by `dir`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Invoked once the operation completes.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">`false` if `stream` wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">clearLine</span><span class="s4">(</span><span class="s2">stream</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">, </span><span class="s2">dir</span><span class="s4">: </span><span
+    class="s2">Direction</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `readline.clearScreenDown()` method clears the given [TTY](https://nodejs.org/docs/latest-v24.x/api/tty.html) stream from</span>
+     <span class="s0">* the current position of the cursor down.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Invoked once the operation completes.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">`false` if `stream` wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">clearScreenDown</span><span class="s4">(</span><span
+    class="s2">stream</span><span class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">, </span><span class="s2">callback</span><span class="s4">?: () =&gt; </span><span
+    class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `readline.cursorTo()` method moves cursor to the specified position in a</span>
+     <span class="s0">* given [TTY](https://nodejs.org/docs/latest-v24.x/api/tty.html) `stream`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Invoked once the operation completes.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">`false` if `stream` wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">cursorTo</span><span class="s4">(</span><span class="s2">stream</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">, </span><span class="s2">x</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">y</span><span class="s4">?: </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `readline.moveCursor()` method moves the cursor _relative_ to its current</span>
+     <span class="s0">* position in a given [TTY](https://nodejs.org/docs/latest-v24.x/api/tty.html) `stream`.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.7.7</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">callback Invoked once the operation completes.</span>
+     <span class="s0">* </span><span class="s1">@return </span><span class="s0">`false` if `stream` wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">export function </span><span class="s2">moveCursor</span><span class="s4">(</span><span class="s2">stream</span><span
+    class="s4">: </span><span class="s2">NodeJS</span><span class="s4">.</span><span
+    class="s2">WritableStream</span><span class="s4">, </span><span class="s2">dx</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">dy</span><span class="s4">: </span><span
+    class="s2">number</span><span class="s4">, </span><span class="s2">callback</span><span
+    class="s4">?: () =&gt; </span><span class="s5">void</span><span class="s4">): </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:readline&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;readline&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

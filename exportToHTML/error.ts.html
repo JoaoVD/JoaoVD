@@ -1,0 +1,86 @@
+<html>
+<head>
+  <title>error.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          error.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">KeywordErrorDefinition</span><span
+  class="s2">, </span><span class="s1">KeywordErrorCxt</span><span class="s2">, </span><span
+  class="s1">ErrorObject</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">Code</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+
+<span class="s0">export </span><span class="s1">type _JTDTypeError</span><span class="s2">&lt;</span><span
+    class="s1">K </span><span class="s0">extends </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">T </span><span class="s0">extends </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">S</span><span class="s2">&gt; = </span><span class="s1">ErrorObject</span><span class="s2">&lt;</span>
+  <span class="s1">K</span><span class="s2">,</span>
+  <span class="s2">{</span><span class="s1">type</span><span class="s2">: </span><span class="s1">T</span><span
+    class="s2">; </span><span class="s1">nullable</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">},</span>
+  <span class="s1">S</span>
+<span class="s2">&gt;</span>
+
+<span class="s0">export function </span><span class="s1">typeError</span><span class="s2">(</span><span
+    class="s1">t</span><span class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">KeywordErrorDefinition </span><span class="s2">{</span>
+  <span class="s0">return </span><span class="s2">{</span>
+    <span class="s1">message</span><span class="s2">: (</span><span class="s1">cxt</span><span
+    class="s2">) =&gt; </span><span class="s1">typeErrorMessage</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">, </span><span class="s1">t</span><span class="s2">),</span>
+    <span class="s1">params</span><span class="s2">: (</span><span class="s1">cxt</span><span class="s2">) =&gt; </span><span
+    class="s1">typeErrorParams</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">, </span><span
+    class="s1">t</span><span class="s2">),</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">typeErrorMessage</span><span class="s2">({</span><span
+    class="s1">parentSchema</span><span class="s2">}: </span><span class="s1">KeywordErrorCxt</span><span
+    class="s2">, </span><span class="s1">t</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">string </span><span class="s2">{</span>
+  <span class="s0">return </span><span class="s1">parentSchema</span><span class="s2">?.</span><span
+    class="s1">nullable </span><span class="s2">? </span><span class="s3">`must be </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">t</span><span class="s2">} </span><span class="s3">or null` </span><span
+    class="s2">: </span><span class="s3">`must be </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">t</span><span class="s2">}</span><span class="s3">`</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">typeErrorParams</span><span class="s2">({</span><span
+    class="s1">parentSchema</span><span class="s2">}: </span><span class="s1">KeywordErrorCxt</span><span
+    class="s2">, </span><span class="s1">t</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Code </span><span class="s2">{</span>
+  <span class="s0">return </span><span class="s1">_</span><span class="s3">`{type: </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">t</span><span class="s2">}</span><span class="s3">, nullable: </span><span
+    class="s1">$</span><span class="s2">{!!</span><span class="s1">parentSchema</span><span class="s2">?.</span><span
+    class="s1">nullable</span><span class="s2">}</span><span class="s3">}`</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

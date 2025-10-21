@@ -1,0 +1,132 @@
+<html>
+<head>
+  <title>rules.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          rules.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">AddedKeywordDefinition</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../types&quot;</span>
+
+<span class="s0">const </span><span class="s1">_jsonTypes </span><span class="s2">= [</span><span class="s3">&quot;string&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;number&quot;</span><span class="s2">, </span><span class="s3">&quot;integer&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;boolean&quot;</span><span class="s2">, </span><span class="s3">&quot;null&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;object&quot;</span><span class="s2">, </span><span class="s3">&quot;array&quot;</span><span
+    class="s2">] as </span><span class="s0">const</span>
+
+<span class="s0">export </span><span class="s1">type JSONType </span><span class="s2">= (</span><span
+    class="s0">typeof </span><span class="s1">_jsonTypes</span><span class="s2">)[</span><span
+    class="s1">number</span><span class="s2">]</span>
+
+<span class="s0">const </span><span class="s1">jsonTypes</span><span class="s2">: </span><span
+    class="s1">Set</span><span class="s2">&lt;</span><span class="s1">string</span><span class="s2">&gt; = </span><span
+    class="s0">new </span><span class="s1">Set</span><span class="s2">(</span><span class="s1">_jsonTypes</span><span
+    class="s2">)</span>
+
+<span class="s0">export function </span><span class="s1">isJSONType</span><span class="s2">(</span><span
+    class="s1">x</span><span class="s2">: </span><span class="s1">unknown</span><span class="s2">): </span><span
+    class="s1">x </span><span class="s2">is </span><span class="s1">JSONType </span><span class="s2">{</span>
+  <span class="s0">return typeof </span><span class="s1">x </span><span class="s2">== </span><span class="s3">&quot;string&quot; </span><span
+    class="s2">&amp;&amp; </span><span class="s1">jsonTypes</span><span class="s2">.</span><span
+    class="s1">has</span><span class="s2">(</span><span class="s1">x</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s1">type ValidationTypes </span><span class="s2">= {</span>
+  <span class="s2">[</span><span class="s1">K </span><span class="s0">in </span><span class="s1">JSONType</span><span
+    class="s2">]: </span><span class="s1">boolean </span><span class="s2">| </span><span
+    class="s1">RuleGroup </span><span class="s2">| </span><span class="s1">undefined</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ValidationRules </span><span class="s2">{</span>
+  <span class="s1">rules</span><span class="s2">: </span><span class="s1">RuleGroup</span><span class="s2">[]</span>
+  <span class="s1">post</span><span class="s2">: </span><span class="s1">RuleGroup</span>
+  <span class="s1">all</span><span class="s2">: {[</span><span class="s1">Key </span><span class="s0">in </span><span
+    class="s1">string</span><span class="s2">]?: </span><span class="s1">boolean </span><span class="s2">| </span><span
+    class="s1">Rule</span><span class="s2">} </span><span class="s4">// rules that have to be validated</span>
+  <span class="s1">keywords</span><span class="s2">: {[</span><span class="s1">Key </span><span
+    class="s0">in </span><span class="s1">string</span><span class="s2">]?: </span><span class="s1">boolean</span><span
+    class="s2">} </span><span class="s4">// all known keywords (superset of &quot;all&quot;)</span>
+  <span class="s1">types</span><span class="s2">: </span><span class="s1">ValidationTypes</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">RuleGroup </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">?: </span><span class="s1">JSONType</span>
+  <span class="s1">rules</span><span class="s2">: </span><span class="s1">Rule</span><span class="s2">[]</span>
+<span class="s2">}</span>
+
+<span class="s4">// This interface wraps KeywordDefinition because definition can have multiple keywords</span>
+<span class="s0">export interface </span><span class="s1">Rule </span><span class="s2">{</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">definition</span><span class="s2">: </span><span class="s1">AddedKeywordDefinition</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">getRules</span><span class="s2">(): </span><span class="s1">ValidationRules </span><span
+    class="s2">{</span>
+  <span class="s0">const </span><span class="s1">groups</span><span class="s2">: </span><span
+    class="s1">Record</span><span class="s2">&lt;</span><span class="s3">&quot;number&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;string&quot; </span><span class="s2">| </span><span class="s3">&quot;array&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;object&quot;</span><span class="s2">, </span><span
+    class="s1">RuleGroup</span><span class="s2">&gt; = {</span>
+    <span class="s1">number</span><span class="s2">: {</span><span class="s1">type</span><span class="s2">: </span><span
+    class="s3">&quot;number&quot;</span><span class="s2">, </span><span class="s1">rules</span><span
+    class="s2">: []},</span>
+    <span class="s1">string</span><span class="s2">: {</span><span class="s1">type</span><span class="s2">: </span><span
+    class="s3">&quot;string&quot;</span><span class="s2">, </span><span class="s1">rules</span><span
+    class="s2">: []},</span>
+    <span class="s1">array</span><span class="s2">: {</span><span class="s1">type</span><span class="s2">: </span><span
+    class="s3">&quot;array&quot;</span><span class="s2">, </span><span class="s1">rules</span><span
+    class="s2">: []},</span>
+    <span class="s1">object</span><span class="s2">: {</span><span class="s1">type</span><span class="s2">: </span><span
+    class="s3">&quot;object&quot;</span><span class="s2">, </span><span class="s1">rules</span><span
+    class="s2">: []},</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s2">{</span>
+    <span class="s1">types</span><span class="s2">: {</span><span class="s1">...groups</span><span
+    class="s2">, </span><span class="s1">integer</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">, </span><span class="s1">boolean</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">, </span><span class="s0">null</span><span class="s2">: </span><span class="s0">true</span><span
+    class="s2">},</span>
+    <span class="s1">rules</span><span class="s2">: [{</span><span class="s1">rules</span><span
+    class="s2">: []}, </span><span class="s1">groups</span><span class="s2">.</span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">groups</span><span class="s2">.</span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">groups</span><span class="s2">.</span><span class="s1">array</span><span
+    class="s2">, </span><span class="s1">groups</span><span class="s2">.</span><span class="s1">object</span><span
+    class="s2">],</span>
+    <span class="s1">post</span><span class="s2">: {</span><span class="s1">rules</span><span class="s2">: []},</span>
+    <span class="s1">all</span><span class="s2">: {},</span>
+    <span class="s1">keywords</span><span class="s2">: {},</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

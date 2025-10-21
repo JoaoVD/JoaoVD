@@ -1,0 +1,119 @@
+<html>
+<head>
+  <title>defaults.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          defaults.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+  class="s1">SchemaObjCxt</span><span class="s2">} </span><span class="s1">from </span><span
+  class="s3">&quot;..&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">, </span><span
+    class="s1">getProperty</span><span class="s2">, </span><span class="s1">stringify</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">checkStrictMode</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../util&quot;</span>
+
+<span class="s0">export function </span><span class="s1">assignDefaults</span><span class="s2">(</span><span class="s1">it</span><span
+    class="s2">: </span><span class="s1">SchemaObjCxt</span><span class="s2">, </span><span class="s1">ty</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">properties</span><span
+    class="s2">, </span><span class="s1">items</span><span class="s2">} = </span><span class="s1">it</span><span
+    class="s2">.</span><span class="s1">schema</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">ty </span><span class="s2">=== </span><span
+    class="s3">&quot;object&quot; </span><span class="s2">&amp;&amp; </span><span class="s1">properties</span><span
+    class="s2">) {</span>
+    <span class="s0">for </span><span class="s2">(</span><span class="s0">const </span><span class="s1">key </span><span
+    class="s0">in </span><span class="s1">properties</span><span class="s2">) {</span>
+      <span class="s1">assignDefault</span><span class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span
+    class="s1">key</span><span class="s2">, </span><span class="s1">properties</span><span class="s2">[</span><span
+    class="s1">key</span><span class="s2">].</span><span class="s1">default</span><span class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">} </span><span class="s0">else if </span><span class="s2">(</span><span class="s1">ty </span><span
+    class="s2">=== </span><span class="s3">&quot;array&quot; </span><span class="s2">&amp;&amp; </span><span class="s1">Array</span><span
+    class="s2">.</span><span class="s1">isArray</span><span class="s2">(</span><span class="s1">items</span><span
+    class="s2">)) {</span>
+    <span class="s1">items</span><span class="s2">.</span><span class="s1">forEach</span><span class="s2">((</span><span
+    class="s1">sch</span><span class="s2">, </span><span class="s1">i</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">) =&gt; </span><span class="s1">assignDefault</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">, </span><span class="s1">i</span><span class="s2">, </span><span class="s1">sch</span><span
+    class="s2">.</span><span class="s1">default</span><span class="s2">))</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">function </span><span class="s1">assignDefault</span><span class="s2">(</span><span
+    class="s1">it</span><span class="s2">: </span><span class="s1">SchemaObjCxt</span><span class="s2">, </span><span
+    class="s1">prop</span><span class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">defaultValue</span><span
+    class="s2">: </span><span class="s1">unknown</span><span class="s2">): </span><span class="s0">void </span><span
+    class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">compositeRule</span><span class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span
+    class="s1">opts</span><span class="s2">} = </span><span class="s1">it</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">defaultValue </span><span
+    class="s2">=== </span><span class="s1">undefined</span><span class="s2">) </span><span class="s0">return</span>
+  <span class="s0">const </span><span class="s1">childData </span><span class="s2">= </span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">data</span><span class="s2">}</span><span class="s1">$</span><span class="s2">{</span><span class="s1">getProperty</span><span
+    class="s2">(</span><span class="s1">prop</span><span class="s2">)}</span><span class="s3">`</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">compositeRule</span><span class="s2">) {</span>
+    <span class="s1">checkStrictMode</span><span class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span
+    class="s3">`default is ignored for: </span><span class="s1">$</span><span class="s2">{</span><span class="s1">childData</span><span
+    class="s2">}</span><span class="s3">`</span><span class="s2">)</span>
+    <span class="s0">return</span>
+  <span class="s2">}</span>
+
+  <span class="s0">let </span><span class="s1">condition </span><span class="s2">= </span><span class="s1">_</span><span
+    class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span class="s1">childData</span><span
+    class="s2">} </span><span class="s3">=== undefined`</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">useDefaults </span><span class="s2">=== </span><span class="s3">&quot;empty&quot;</span><span class="s2">) {</span>
+    <span class="s1">condition </span><span class="s2">= </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">condition</span><span class="s2">} </span><span
+    class="s3">|| </span><span class="s1">$</span><span class="s2">{</span><span class="s1">childData</span><span
+    class="s2">} </span><span class="s3">=== null || </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">childData</span><span class="s2">} </span><span class="s3">=== &quot;&quot;`</span>
+  <span class="s2">}</span>
+  <span class="s4">// `${childData} === undefined` +</span>
+  <span class="s4">// (opts.useDefaults === &quot;empty&quot; ? ` || ${childData} === null || ${childData} === &quot;&quot;` : &quot;&quot;)</span>
+  <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">condition</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">childData</span><span class="s2">} </span><span
+    class="s3">= </span><span class="s1">$</span><span class="s2">{</span><span class="s1">stringify</span><span
+    class="s2">(</span><span class="s1">defaultValue</span><span class="s2">)}</span><span class="s3">`</span><span
+    class="s2">)</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

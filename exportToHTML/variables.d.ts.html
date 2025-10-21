@@ -1,0 +1,282 @@
+<html>
+<head>
+  <title>variables.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          variables.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">Linter </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../index&quot;</span><span class="s2">;</span>
+
+<span class="s0">export interface </span><span class="s1">Variables </span><span class="s0">extends </span><span
+    class="s1">Linter</span><span class="s2">.</span><span class="s1">RulesRecord </span><span class="s2">{</span>
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to require or disallow initialization in variable declarations.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">1.0.0-rc-1</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://eslint.org/docs/rules/init-declarations</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;init-declarations&quot;</span><span class="s2">:</span>
+        <span class="s2">| </span><span class="s1">Linter</span><span class="s2">.</span><span
+    class="s1">RuleEntry</span><span class="s2">&lt;[</span><span class="s3">&quot;always&quot;</span><span class="s2">]&gt;</span>
+        <span class="s2">| </span><span class="s1">Linter</span><span class="s2">.</span><span
+    class="s1">RuleEntry</span><span class="s2">&lt;</span>
+            <span class="s2">[</span>
+                <span class="s3">&quot;never&quot;</span><span class="s2">,</span>
+                <span class="s1">Partial</span><span class="s2">&lt;{</span>
+                    <span class="s1">ignoreForLoopInit</span><span class="s2">: </span><span
+    class="s1">boolean</span><span class="s2">;</span>
+                <span class="s2">}&gt;,</span>
+            <span class="s2">]</span>
+        <span class="s2">&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow deleting variables.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@remarks</span>
+     <span class="s4">* Recommended by ESLint, the rule was enabled in `eslint:recommended`.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.0.9</span>
+     <span class="s4">* </span><span class="s5">@see </span><span
+    class="s4">https://eslint.org/docs/rules/no-delete-var</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-delete-var&quot;</span><span class="s2">: </span><span class="s1">Linter</span><span
+    class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;[]&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow labels that share a name with a variable.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.0.9</span>
+     <span class="s4">* </span><span class="s5">@see </span><span
+    class="s4">https://eslint.org/docs/rules/no-label-var</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-label-var&quot;</span><span class="s2">: </span><span class="s1">Linter</span><span
+    class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;[]&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow specified global variables.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">2.3.0</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://eslint.org/docs/rules/no-restricted-globals</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-restricted-globals&quot;</span><span class="s2">: </span><span
+    class="s1">Linter</span><span class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;</span>
+        <span class="s2">[</span>
+            <span class="s1">...Array</span><span class="s2">&lt;</span>
+                <span class="s2">| </span><span class="s1">string</span>
+                <span class="s2">| {</span>
+                    <span class="s1">name</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+                    <span class="s1">message</span><span class="s2">?: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">undefined</span><span class="s2">;</span>
+                <span class="s2">}</span>
+            <span class="s2">&gt;,</span>
+        <span class="s2">]</span>
+    <span class="s2">&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span
+       class="s4">* Rule to disallow variable declarations from shadowing variables declared in the outer scope.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.0.9</span>
+     <span class="s4">* </span><span class="s5">@see </span><span
+    class="s4">https://eslint.org/docs/rules/no-shadow</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-shadow&quot;</span><span class="s2">: </span><span class="s1">Linter</span><span
+    class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;</span>
+        <span class="s2">[</span>
+            <span class="s1">Partial</span><span class="s2">&lt;{</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">false</span>
+                 <span class="s4">*/</span>
+                <span class="s1">builtinGlobals</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">'functions'</span>
+                 <span class="s4">*/</span>
+                <span class="s1">hoist</span><span class="s2">: </span><span
+    class="s3">&quot;functions&quot; </span><span class="s2">| </span><span class="s3">&quot;all&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;never&quot;</span><span class="s2">;</span>
+                <span class="s1">allow</span><span class="s2">: </span><span class="s1">string</span><span class="s2">[];</span>
+            <span class="s2">}&gt;,</span>
+        <span class="s2">]</span>
+    <span class="s2">&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow identifiers from shadowing restricted names.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@remarks</span>
+     <span class="s4">* Recommended by ESLint, the rule was enabled in `eslint:recommended`.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.1.4</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://eslint.org/docs/rules/no-shadow-restricted-names</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-shadow-restricted-names&quot;</span><span class="s2">: </span><span
+    class="s1">Linter</span><span class="s2">.</span><span class="s1">RuleEntry</span><span
+    class="s2">&lt;[]&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow the use of undeclared variables unless mentioned in `global` comments.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@remarks</span>
+     <span class="s4">* Recommended by ESLint, the rule was enabled in `eslint:recommended`.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.0.9</span>
+     <span class="s4">* </span><span class="s5">@see </span><span
+    class="s4">https://eslint.org/docs/rules/no-undef</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-undef&quot;</span><span class="s2">: </span><span class="s1">Linter</span><span
+    class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;</span>
+        <span class="s2">[</span>
+            <span class="s1">Partial</span><span class="s2">&lt;{</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">false</span>
+                 <span class="s4">*/</span>
+                <span class="s0">typeof</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">;</span>
+            <span class="s2">}&gt;,</span>
+        <span class="s2">]</span>
+    <span class="s2">&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow initializing variables to `undefined`.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.0.6</span>
+     <span class="s4">* </span><span class="s5">@see </span><span
+    class="s4">https://eslint.org/docs/rules/no-undef-init</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-undef-init&quot;</span><span class="s2">: </span><span class="s1">Linter</span><span
+    class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;[]&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow the use of `undefined` as an identifier.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.7.1</span>
+     <span class="s4">* </span><span class="s5">@see </span><span
+    class="s4">https://eslint.org/docs/rules/no-undefined</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-undefined&quot;</span><span class="s2">: </span><span class="s1">Linter</span><span
+    class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;[]&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow unused variables.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@remarks</span>
+     <span class="s4">* Recommended by ESLint, the rule was enabled in `eslint:recommended`.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.0.9</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://eslint.org/docs/rules/no-unused-vars</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-unused-vars&quot;</span><span class="s2">: </span><span class="s1">Linter</span><span
+    class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;</span>
+        <span class="s2">[</span>
+            <span class="s2">| </span><span class="s3">&quot;all&quot;</span>
+            <span class="s2">| </span><span class="s3">&quot;local&quot;</span>
+            <span class="s2">| </span><span class="s1">Partial</span><span class="s2">&lt;{</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">'all'</span>
+                 <span class="s4">*/</span>
+                <span class="s1">vars</span><span class="s2">: </span><span class="s3">&quot;all&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;local&quot;</span><span class="s2">;</span>
+                <span class="s1">varsIgnorePattern</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">'after-used'</span>
+                 <span class="s4">*/</span>
+                <span class="s1">args</span><span class="s2">: </span><span
+    class="s3">&quot;after-used&quot; </span><span class="s2">| </span><span class="s3">&quot;all&quot; </span><span
+    class="s2">| </span><span class="s3">&quot;none&quot;</span><span class="s2">;</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">false</span>
+                 <span class="s4">*/</span>
+                <span class="s1">ignoreRestSiblings</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+                <span class="s1">argsIgnorePattern</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">'none'</span>
+                 <span class="s4">*/</span>
+                <span class="s1">caughtErrors</span><span class="s2">: </span><span
+    class="s3">&quot;none&quot; </span><span class="s2">| </span><span class="s3">&quot;all&quot;</span><span
+    class="s2">;</span>
+                <span class="s1">caughtErrorsIgnorePattern</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">;</span>
+                <span class="s1">destructuredArrayIgnorePattern</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">;</span>
+            <span class="s2">}&gt;,</span>
+        <span class="s2">]</span>
+    <span class="s2">&gt;;</span>
+
+    <span class="s4">/**</span>
+     <span class="s4">* Rule to disallow the use of variables before they are defined.</span>
+     <span class="s4">*</span>
+     <span class="s4">* </span><span class="s5">@since </span><span class="s4">0.0.9</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://eslint.org/docs/rules/no-use-before-define</span>
+     <span class="s4">*/</span>
+    <span class="s3">&quot;no-use-before-define&quot;</span><span class="s2">: </span><span
+    class="s1">Linter</span><span class="s2">.</span><span class="s1">RuleEntry</span><span class="s2">&lt;</span>
+        <span class="s2">[</span>
+            <span class="s2">| </span><span class="s1">Partial</span><span class="s2">&lt;{</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">true</span>
+                 <span class="s4">*/</span>
+                <span class="s1">functions</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">true</span>
+                 <span class="s4">*/</span>
+                <span class="s1">classes</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">true</span>
+                 <span class="s4">*/</span>
+                <span class="s1">variables</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+                <span class="s4">/**</span>
+                 <span class="s4">* </span><span class="s5">@default </span><span class="s4">false</span>
+                 <span class="s4">*/</span>
+                <span class="s1">allowNamedExports</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+            <span class="s2">}&gt;</span>
+            <span class="s2">| </span><span class="s3">&quot;nofunc&quot;</span><span class="s2">,</span>
+        <span class="s2">]</span>
+    <span class="s2">&gt;;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

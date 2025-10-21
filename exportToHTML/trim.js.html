@@ -1,0 +1,123 @@
+<html>
+<head>
+  <title>trim.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          trim.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseToString </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseToString'</span><span class="s2">),</span>
+    <span class="s1">baseTrim </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseTrim'</span><span class="s2">),</span>
+    <span class="s1">castSlice </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_castSlice'</span><span class="s2">),</span>
+    <span class="s1">charsEndIndex </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_charsEndIndex'</span><span class="s2">),</span>
+    <span class="s1">charsStartIndex </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_charsStartIndex'</span><span class="s2">),</span>
+    <span class="s1">stringToArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_stringToArray'</span><span class="s2">),</span>
+    <span class="s1">toString </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./toString'</span><span class="s2">);</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Removes leading and trailing whitespace or specified characters from `string`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@static</span>
+ <span class="s4">* </span><span class="s5">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@since </span><span class="s4">3.0.0</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">String</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{string} [string=''] The string to trim.</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{string} [chars=whitespace] The characters to trim.</span>
+ <span class="s4">* </span><span class="s5">@param- </span><span class="s4">{Object} [guard] Enables use as an iteratee for methods like `_.map`.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{string} Returns the trimmed string.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.trim('  abc  ');</span>
+ <span class="s4">* // =&gt; 'abc'</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.trim('-_-abc-_-', '_-');</span>
+ <span class="s4">* // =&gt; 'abc'</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.map(['  foo  ', '  bar  '], _.trim);</span>
+ <span class="s4">* // =&gt; ['foo', 'bar']</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">trim</span><span class="s2">(</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">chars</span><span class="s2">, </span><span
+    class="s1">guard</span><span class="s2">) {</span>
+  <span class="s1">string </span><span class="s2">= </span><span class="s1">toString</span><span
+    class="s2">(</span><span class="s1">string</span><span class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">string </span><span
+    class="s2">&amp;&amp; (</span><span class="s1">guard </span><span class="s2">|| </span><span
+    class="s1">chars </span><span class="s2">=== </span><span class="s1">undefined</span><span class="s2">)) {</span>
+    <span class="s0">return </span><span class="s1">baseTrim</span><span class="s2">(</span><span
+    class="s1">string</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">string </span><span class="s2">|| !(</span><span
+    class="s1">chars </span><span class="s2">= </span><span class="s1">baseToString</span><span class="s2">(</span><span
+    class="s1">chars</span><span class="s2">))) {</span>
+    <span class="s0">return </span><span class="s1">string</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">strSymbols </span><span class="s2">= </span><span class="s1">stringToArray</span><span
+    class="s2">(</span><span class="s1">string</span><span class="s2">),</span>
+      <span class="s1">chrSymbols </span><span class="s2">= </span><span class="s1">stringToArray</span><span
+    class="s2">(</span><span class="s1">chars</span><span class="s2">),</span>
+      <span class="s1">start </span><span class="s2">= </span><span class="s1">charsStartIndex</span><span
+    class="s2">(</span><span class="s1">strSymbols</span><span class="s2">, </span><span
+    class="s1">chrSymbols</span><span class="s2">),</span>
+      <span class="s1">end </span><span class="s2">= </span><span class="s1">charsEndIndex</span><span
+    class="s2">(</span><span class="s1">strSymbols</span><span class="s2">, </span><span
+    class="s1">chrSymbols</span><span class="s2">) + </span><span class="s6">1</span><span class="s2">;</span>
+
+  <span class="s0">return </span><span class="s1">castSlice</span><span class="s2">(</span><span
+    class="s1">strSymbols</span><span class="s2">, </span><span class="s1">start</span><span class="s2">, </span><span
+    class="s1">end</span><span class="s2">).</span><span class="s1">join</span><span class="s2">(</span><span
+    class="s3">''</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">trim</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

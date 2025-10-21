@@ -1,0 +1,174 @@
+<html>
+<head>
+  <title>example.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          example.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">* as </span><span class="s1">fastq from </span><span class="s3">'../'</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">promise </span><span
+    class="s2">as </span><span class="s1">queueAsPromised </span><span class="s2">} </span><span class="s1">from </span><span
+    class="s3">'../'</span>
+
+<span class="s4">// Basic example</span>
+
+<span class="s0">const </span><span class="s1">queue </span><span class="s2">= </span><span class="s1">fastq</span><span
+    class="s2">(</span><span class="s1">worker</span><span class="s2">, </span><span class="s5">1</span><span
+    class="s2">)</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s3">'world'</span><span class="s2">, (</span><span class="s1">err</span><span class="s2">, </span><span
+    class="s1">result</span><span class="s2">) =&gt; {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">err</span><span class="s2">) </span><span
+    class="s0">throw </span><span class="s1">err</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s3">'the result is'</span><span class="s2">, </span><span class="s1">result</span><span class="s2">)</span>
+<span class="s2">})</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s3">'push without cb'</span><span class="s2">)</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">concurrency</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">drain</span><span class="s2">()</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">empty </span><span
+    class="s2">= () =&gt; </span><span class="s1">undefined</span>
+
+<span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s3">'the queue tasks are'</span><span class="s2">, </span><span class="s1">queue</span><span
+    class="s2">.</span><span class="s1">getQueue</span><span class="s2">())</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">idle</span><span class="s2">()</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">kill</span><span class="s2">()</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">killAndDrain</span><span class="s2">()</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">length</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">pause</span><span class="s2">()</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">resume</span><span class="s2">()</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">running</span><span class="s2">()</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">saturated </span><span
+    class="s2">= () =&gt; </span><span class="s1">undefined</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">unshift</span><span class="s2">(</span><span
+    class="s3">'world'</span><span class="s2">, (</span><span class="s1">err</span><span class="s2">, </span><span
+    class="s1">result</span><span class="s2">) =&gt; {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">err</span><span class="s2">) </span><span
+    class="s0">throw </span><span class="s1">err</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s3">'the result is'</span><span class="s2">, </span><span class="s1">result</span><span class="s2">)</span>
+<span class="s2">})</span>
+
+<span class="s1">queue</span><span class="s2">.</span><span class="s1">unshift</span><span class="s2">(</span><span
+    class="s3">'unshift without cb'</span><span class="s2">)</span>
+
+<span class="s0">function </span><span class="s1">worker</span><span class="s2">(</span><span
+    class="s1">task</span><span class="s2">: </span><span class="s1">any</span><span class="s2">, </span><span
+    class="s1">cb</span><span class="s2">: </span><span class="s1">fastq</span><span class="s2">.</span><span
+    class="s1">done</span><span class="s2">) {</span>
+  <span class="s1">cb</span><span class="s2">(</span><span class="s0">null</span><span class="s2">, </span><span
+    class="s3">'hello ' </span><span class="s2">+ </span><span class="s1">task</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s4">// Generics example</span>
+
+<span class="s0">interface </span><span class="s1">GenericsContext </span><span class="s2">{</span>
+  <span class="s1">base</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">genericsQueue </span><span class="s2">= </span><span
+    class="s1">fastq</span><span class="s2">&lt;</span><span class="s1">GenericsContext</span><span class="s2">, </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">string</span><span class="s2">&gt;({ </span><span
+    class="s1">base</span><span class="s2">: </span><span class="s5">6 </span><span class="s2">}, </span><span
+    class="s1">genericsWorker</span><span class="s2">, </span><span class="s5">1</span><span class="s2">)</span>
+
+<span class="s1">genericsQueue</span><span class="s2">.</span><span class="s1">push</span><span class="s2">(</span><span
+    class="s5">7</span><span class="s2">, (</span><span class="s1">err</span><span class="s2">, </span><span class="s1">done</span><span
+    class="s2">) =&gt; {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">err</span><span class="s2">) </span><span
+    class="s0">throw </span><span class="s1">err</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s3">'the result is'</span><span class="s2">, </span><span class="s1">done</span><span class="s2">)</span>
+<span class="s2">})</span>
+
+<span class="s1">genericsQueue</span><span class="s2">.</span><span class="s1">unshift</span><span
+    class="s2">(</span><span class="s5">7</span><span class="s2">, (</span><span class="s1">err</span><span
+    class="s2">, </span><span class="s1">done</span><span class="s2">) =&gt; {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">err</span><span class="s2">) </span><span
+    class="s0">throw </span><span class="s1">err</span>
+  <span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span class="s2">(</span><span
+    class="s3">'the result is'</span><span class="s2">, </span><span class="s1">done</span><span class="s2">)</span>
+<span class="s2">})</span>
+
+<span class="s0">function </span><span class="s1">genericsWorker</span><span class="s2">(</span><span
+    class="s0">this</span><span class="s2">: </span><span class="s1">GenericsContext</span><span
+    class="s2">, </span><span class="s1">task</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">cb</span><span class="s2">: </span><span class="s1">fastq</span><span
+    class="s2">.</span><span class="s1">done</span><span class="s2">&lt;</span><span class="s1">string</span><span
+    class="s2">&gt;) {</span>
+  <span class="s1">cb</span><span class="s2">(</span><span class="s0">null</span><span class="s2">, </span><span
+    class="s3">'the meaning of life is ' </span><span class="s2">+ (</span><span class="s0">this</span><span class="s2">.</span><span
+    class="s1">base </span><span class="s2">* </span><span class="s1">task</span><span class="s2">))</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">queue2 </span><span class="s2">= </span><span
+    class="s1">queueAsPromised</span><span class="s2">(</span><span class="s1">asyncWorker</span><span
+    class="s2">, </span><span class="s5">1</span><span class="s2">)</span>
+
+<span class="s1">async </span><span class="s0">function </span><span class="s1">asyncWorker</span><span
+    class="s2">(</span><span class="s1">task</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">) {</span>
+  <span class="s0">return </span><span class="s3">'hello ' </span><span class="s2">+ </span><span class="s1">task</span>
+<span class="s2">}</span>
+
+<span class="s1">async </span><span class="s0">function </span><span class="s1">run </span><span class="s2">() {</span>
+  <span class="s0">await </span><span class="s1">queue</span><span class="s2">.</span><span class="s1">push</span><span
+    class="s2">(</span><span class="s5">42</span><span class="s2">)</span>
+  <span class="s0">await </span><span class="s1">queue</span><span class="s2">.</span><span
+    class="s1">unshift</span><span class="s2">(</span><span class="s5">42</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s1">run</span><span class="s2">()</span>
+</pre>
+</body>
+</html>

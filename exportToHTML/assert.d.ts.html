@@ -1,0 +1,1312 @@
+<html>
+<head>
+  <title>assert.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          assert.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:assert` module provides a set of assertion functions for verifying</span>
+ <span class="s0">* invariants.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/assert.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;assert&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s2">strict </span><span class="s4">= </span><span
+    class="s2">require</span><span class="s4">(</span><span class="s3">&quot;assert/strict&quot;</span><span class="s4">);</span>
+    <span class="s0">/**</span>
+     <span class="s0">* An alias of {</span><span class="s1">@link </span><span class="s0">assert.ok}.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.5.9</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">value The input that is checked for being truthy.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">assert</span><span class="s4">(</span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s2">asserts value</span><span class="s4">;</span>
+    <span class="s5">const </span><span class="s2">kOptions</span><span class="s4">: </span><span class="s2">unique symbol</span><span
+    class="s4">;</span>
+    <span class="s2">namespace assert </span><span class="s4">{</span>
+        <span class="s2">type AssertMethodNames </span><span class="s4">=</span>
+            <span class="s4">| </span><span class="s3">&quot;deepEqual&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;deepStrictEqual&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;doesNotMatch&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;doesNotReject&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;doesNotThrow&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;equal&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;fail&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;ifError&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;match&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;notDeepEqual&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;notDeepStrictEqual&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;notEqual&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;notStrictEqual&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;ok&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;partialDeepStrictEqual&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;rejects&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;strictEqual&quot;</span>
+            <span class="s4">| </span><span class="s3">&quot;throws&quot;</span><span class="s4">;</span>
+        <span class="s5">interface </span><span class="s2">AssertOptions </span><span class="s4">{</span>
+            <span class="s0">/**</span>
+             <span class="s0">* If set to `'full'`, shows the full diff in assertion errors.</span>
+             <span class="s0">* </span><span class="s1">@default </span><span class="s0">'simple'</span>
+             <span class="s0">*/</span>
+            <span class="s2">diff</span><span class="s4">?: </span><span class="s3">&quot;simple&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;full&quot; </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* If set to `true`, non-strict methods behave like their</span>
+             <span class="s0">* corresponding strict methods.</span>
+             <span class="s0">* </span><span class="s1">@default </span><span class="s0">true</span>
+             <span class="s0">*/</span>
+            <span class="s2">strict</span><span class="s4">?: </span><span class="s2">boolean </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s4">}</span>
+        <span class="s5">interface </span><span class="s2">Assert </span><span class="s5">extends </span><span
+    class="s2">Pick</span><span class="s4">&lt;</span><span class="s5">typeof </span><span class="s2">assert</span><span
+    class="s4">, </span><span class="s2">AssertMethodNames</span><span class="s4">&gt; {</span>
+            <span class="s2">readonly </span><span class="s4">[</span><span class="s2">kOptions</span><span class="s4">]: </span><span
+    class="s2">AssertOptions </span><span class="s4">&amp; { </span><span class="s2">strict</span><span
+    class="s4">: </span><span class="s5">false </span><span class="s4">};</span>
+        <span class="s4">}</span>
+        <span class="s5">interface </span><span class="s2">AssertStrict </span><span class="s5">extends </span><span
+    class="s2">Pick</span><span class="s4">&lt;</span><span class="s5">typeof </span><span class="s2">strict</span><span
+    class="s4">, </span><span class="s2">AssertMethodNames</span><span class="s4">&gt; {</span>
+            <span class="s2">readonly </span><span class="s4">[</span><span class="s2">kOptions</span><span class="s4">]: </span><span
+    class="s2">AssertOptions </span><span class="s4">&amp; { </span><span class="s2">strict</span><span
+    class="s4">: </span><span class="s5">true </span><span class="s4">};</span>
+        <span class="s4">}</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* The `Assert` class allows creating independent assertion instances with custom options.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">var </span><span class="s2">Assert</span><span class="s4">: {</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Creates a new assertion instance. The `diff` option controls the verbosity of diffs in assertion error messages.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* const { Assert } = require('node:assert');</span>
+             <span class="s0">* const assertInstance = new Assert({ diff: 'full' });</span>
+             <span class="s0">* assertInstance.deepStrictEqual({ a: 1 }, { a: 2 });</span>
+             <span class="s0">* // Shows a full diff in the error message.</span>
+             <span class="s0">* ```</span>
+             <span class="s0">*</span>
+             <span class="s0">* **Important**: When destructuring assertion methods from an `Assert` instance,</span>
+             <span class="s0">* the methods lose their connection to the instance's configuration options (such as `diff` and `strict` settings).</span>
+             <span class="s0">* The destructured methods will fall back to default behavior instead.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* const myAssert = new Assert({ diff: 'full' });</span>
+             <span class="s0">*</span>
+             <span class="s0">* // This works as expected - uses 'full' diff</span>
+             <span class="s0">* myAssert.strictEqual({ a: 1 }, { b: { c: 1 } });</span>
+             <span class="s0">*</span>
+             <span class="s0">* // This loses the 'full' diff setting - falls back to default 'simple' diff</span>
+             <span class="s0">* const { strictEqual } = myAssert;</span>
+             <span class="s0">* strictEqual({ a: 1 }, { b: { c: 1 } });</span>
+             <span class="s0">* ```</span>
+             <span class="s0">*</span>
+             <span class="s0">* When destructured, methods lose access to the instance's `this` context and revert to default assertion behavior</span>
+             <span class="s0">* (diff: 'simple', non-strict mode).</span>
+             <span class="s0">* To maintain custom options when using destructured methods, avoid</span>
+             <span class="s0">* destructuring and call methods directly on the instance.</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.6.0</span>
+             <span class="s0">*/</span>
+            <span class="s5">new</span><span class="s4">(</span>
+                <span class="s2">options</span><span class="s4">?: </span><span class="s2">AssertOptions </span><span
+    class="s4">&amp; { </span><span class="s2">strict</span><span class="s4">?: </span><span
+    class="s5">true </span><span class="s4">},</span>
+            <span class="s4">): </span><span class="s2">AssertStrict</span><span class="s4">;</span>
+            <span class="s5">new</span><span class="s4">(</span>
+                <span class="s2">options</span><span class="s4">: </span><span class="s2">AssertOptions</span><span
+    class="s4">,</span>
+            <span class="s4">): </span><span class="s2">Assert</span><span class="s4">;</span>
+        <span class="s4">};</span>
+        <span class="s5">interface </span><span class="s2">AssertionErrorOptions </span><span class="s4">{</span>
+            <span class="s0">/**</span>
+             <span class="s0">* If provided, the error message is set to this value.</span>
+             <span class="s0">*/</span>
+            <span class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* The `actual` property on the error instance.</span>
+             <span class="s0">*/</span>
+            <span class="s2">actual</span><span class="s4">?: </span><span class="s2">unknown</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* The `expected` property on the error instance.</span>
+             <span class="s0">*/</span>
+            <span class="s2">expected</span><span class="s4">?: </span><span class="s2">unknown</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* The `operator` property on the error instance.</span>
+             <span class="s0">*/</span>
+            <span class="s2">operator</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* If provided, the generated stack trace omits frames before this function.</span>
+             <span class="s0">*/</span>
+            <span class="s2">stackStartFn</span><span class="s4">?: </span><span class="s2">Function </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* If set to `'full'`, shows the full diff in assertion errors.</span>
+             <span class="s0">* </span><span class="s1">@default </span><span class="s0">'simple'</span>
+             <span class="s0">*/</span>
+            <span class="s2">diff</span><span class="s4">?: </span><span class="s3">&quot;simple&quot; </span><span
+    class="s4">| </span><span class="s3">&quot;full&quot; </span><span class="s4">| </span><span
+    class="s2">undefined</span><span class="s4">;</span>
+        <span class="s4">}</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Indicates the failure of an assertion. All errors thrown by the `node:assert` module will be instances of the `AssertionError` class.</span>
+         <span class="s0">*/</span>
+        <span class="s5">class </span><span class="s2">AssertionError </span><span class="s5">extends </span><span
+    class="s2">Error </span><span class="s4">{</span>
+            <span class="s2">constructor</span><span class="s4">(</span><span class="s2">options</span><span class="s4">: </span><span
+    class="s2">AssertionErrorOptions</span><span class="s4">);</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Set to the `actual` argument for methods such as {</span><span
+    class="s1">@link </span><span class="s0">assert.strictEqual()}.</span>
+             <span class="s0">*/</span>
+            <span class="s2">actual</span><span class="s4">: </span><span class="s2">unknown</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Set to the `expected` argument for methods such as {</span><span
+    class="s1">@link </span><span class="s0">assert.strictEqual()}.</span>
+             <span class="s0">*/</span>
+            <span class="s2">expected</span><span class="s4">: </span><span class="s2">unknown</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Indicates if the message was auto-generated (`true`) or not.</span>
+             <span class="s0">*/</span>
+            <span class="s2">generatedMessage</span><span class="s4">: </span><span class="s2">boolean</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Value is always `ERR_ASSERTION` to show that the error is an assertion error.</span>
+             <span class="s0">*/</span>
+            <span class="s2">code</span><span class="s4">: </span><span class="s3">&quot;ERR_ASSERTION&quot;</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Set to the passed in operator value.</span>
+             <span class="s0">*/</span>
+            <span class="s2">operator</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+        <span class="s4">}</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This feature is deprecated and will be removed in a future version.</span>
+         <span class="s0">* Please consider using alternatives such as the `mock` helper function.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.2.0, v12.19.0</span>
+         <span class="s0">* </span><span class="s1">@deprecated </span><span class="s0">Deprecated</span>
+         <span class="s0">*/</span>
+        <span class="s5">class </span><span class="s2">CallTracker </span><span class="s4">{</span>
+            <span class="s0">/**</span>
+             <span class="s0">* The wrapper function is expected to be called exactly `exact` times. If the</span>
+             <span class="s0">* function has not been called exactly `exact` times when `tracker.verify()` is called, then `tracker.verify()` will throw an</span>
+             <span class="s0">* error.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* import assert from 'node:assert';</span>
+             <span class="s0">*</span>
+             <span class="s0">* // Creates call tracker.</span>
+             <span class="s0">* const tracker = new assert.CallTracker();</span>
+             <span class="s0">*</span>
+             <span class="s0">* function func() {}</span>
+             <span class="s0">*</span>
+             <span class="s0">* // Returns a function that wraps func() that must be called exact times</span>
+             <span class="s0">* // before tracker.verify().</span>
+             <span class="s0">* const callsfunc = tracker.calls(func);</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.2.0, v12.19.0</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">[fn='A no-op function']</span>
+             <span class="s0">* </span><span class="s1">@param </span><span class="s0">[exact=1]</span>
+             <span class="s0">* </span><span class="s1">@return </span><span
+    class="s0">A function that wraps `fn`.</span>
+             <span class="s0">*/</span>
+            <span class="s2">calls</span><span class="s4">(</span><span class="s2">exact</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): () =&gt; </span><span
+    class="s5">void</span><span class="s4">;</span>
+            <span class="s2">calls</span><span class="s4">(</span><span class="s2">fn</span><span
+    class="s4">: </span><span class="s2">undefined</span><span class="s4">, </span><span class="s2">exact</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): () =&gt; </span><span
+    class="s5">void</span><span class="s4">;</span>
+            <span class="s2">calls</span><span class="s4">&lt;</span><span class="s2">Func </span><span class="s5">extends </span><span
+    class="s4">(</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s2">any</span><span class="s4">&gt;(</span><span class="s2">fn</span><span
+    class="s4">: </span><span class="s2">Func</span><span class="s4">, </span><span class="s2">exact</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">Func</span><span
+    class="s4">;</span>
+            <span class="s2">calls</span><span class="s4">&lt;</span><span class="s2">Func </span><span class="s5">extends </span><span
+    class="s4">(</span><span class="s2">...args</span><span class="s4">: </span><span class="s2">any</span><span
+    class="s4">[]) =&gt; </span><span class="s2">any</span><span class="s4">&gt;(</span><span class="s2">fn</span><span
+    class="s4">?: </span><span class="s2">Func</span><span class="s4">, </span><span class="s2">exact</span><span
+    class="s4">?: </span><span class="s2">number</span><span class="s4">): </span><span class="s2">Func </span><span
+    class="s4">| (() =&gt; </span><span class="s5">void</span><span class="s4">);</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Example:</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* import assert from 'node:assert';</span>
+             <span class="s0">*</span>
+             <span class="s0">* const tracker = new assert.CallTracker();</span>
+             <span class="s0">*</span>
+             <span class="s0">* function func() {}</span>
+             <span class="s0">* const callsfunc = tracker.calls(func);</span>
+             <span class="s0">* callsfunc(1, 2, 3);</span>
+             <span class="s0">*</span>
+             <span class="s0">* assert.deepStrictEqual(tracker.getCalls(callsfunc),</span>
+             <span class="s0">*                        [{ thisArg: undefined, arguments: [1, 2, 3] }]);</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.8.0, v16.18.0</span>
+             <span class="s0">* </span><span class="s1">@return </span><span class="s0">An array with all the calls to a tracked function.</span>
+             <span class="s0">*/</span>
+            <span class="s2">getCalls</span><span class="s4">(</span><span class="s2">fn</span><span
+    class="s4">: </span><span class="s2">Function</span><span class="s4">): </span><span
+    class="s2">CallTrackerCall</span><span class="s4">[];</span>
+            <span class="s0">/**</span>
+             <span class="s0">* The arrays contains information about the expected and actual number of calls of</span>
+             <span class="s0">* the functions that have not been called the expected number of times.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* import assert from 'node:assert';</span>
+             <span class="s0">*</span>
+             <span class="s0">* // Creates call tracker.</span>
+             <span class="s0">* const tracker = new assert.CallTracker();</span>
+             <span class="s0">*</span>
+             <span class="s0">* function func() {}</span>
+             <span class="s0">*</span>
+             <span class="s0">* // Returns a function that wraps func() that must be called exact times</span>
+             <span class="s0">* // before tracker.verify().</span>
+             <span class="s0">* const callsfunc = tracker.calls(func, 2);</span>
+             <span class="s0">*</span>
+             <span class="s0">* // Returns an array containing information on callsfunc()</span>
+             <span class="s0">* console.log(tracker.report());</span>
+             <span class="s0">* // [</span>
+             <span class="s0">* //  {</span>
+             <span class="s0">* //    message: 'Expected the func function to be executed 2 time(s) but was</span>
+             <span class="s0">* //    executed 0 time(s).',</span>
+             <span class="s0">* //    actual: 0,</span>
+             <span class="s0">* //    expected: 2,</span>
+             <span class="s0">* //    operator: 'func',</span>
+             <span class="s0">* //    stack: stack trace</span>
+             <span class="s0">* //  }</span>
+             <span class="s0">* // ]</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.2.0, v12.19.0</span>
+             <span class="s0">* </span><span class="s1">@return </span><span class="s0">An array of objects containing information about the wrapper functions returned by {</span><span
+    class="s1">@link </span><span class="s0">tracker.calls()}.</span>
+             <span class="s0">*/</span>
+            <span class="s2">report</span><span class="s4">(): </span><span
+    class="s2">CallTrackerReportInformation</span><span class="s4">[];</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Reset calls of the call tracker. If a tracked function is passed as an argument, the calls will be reset for it.</span>
+             <span class="s0">* If no arguments are passed, all tracked functions will be reset.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* import assert from 'node:assert';</span>
+             <span class="s0">*</span>
+             <span class="s0">* const tracker = new assert.CallTracker();</span>
+             <span class="s0">*</span>
+             <span class="s0">* function func() {}</span>
+             <span class="s0">* const callsfunc = tracker.calls(func);</span>
+             <span class="s0">*</span>
+             <span class="s0">* callsfunc();</span>
+             <span class="s0">* // Tracker was called once</span>
+             <span class="s0">* assert.strictEqual(tracker.getCalls(callsfunc).length, 1);</span>
+             <span class="s0">*</span>
+             <span class="s0">* tracker.reset(callsfunc);</span>
+             <span class="s0">* assert.strictEqual(tracker.getCalls(callsfunc).length, 0);</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v18.8.0, v16.18.0</span>
+             <span class="s0">* </span><span class="s1">@param </span><span
+    class="s0">fn a tracked function to reset.</span>
+             <span class="s0">*/</span>
+            <span class="s2">reset</span><span class="s4">(</span><span class="s2">fn</span><span
+    class="s4">?: </span><span class="s2">Function</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+            <span class="s0">/**</span>
+             <span class="s0">* Iterates through the list of functions passed to {</span><span
+    class="s1">@link </span><span class="s0">tracker.calls()} and will throw an error for functions that</span>
+             <span class="s0">* have not been called the expected number of times.</span>
+             <span class="s0">*</span>
+             <span class="s0">* ```js</span>
+             <span class="s0">* import assert from 'node:assert';</span>
+             <span class="s0">*</span>
+             <span class="s0">* // Creates call tracker.</span>
+             <span class="s0">* const tracker = new assert.CallTracker();</span>
+             <span class="s0">*</span>
+             <span class="s0">* function func() {}</span>
+             <span class="s0">*</span>
+             <span class="s0">* // Returns a function that wraps func() that must be called exact times</span>
+             <span class="s0">* // before tracker.verify().</span>
+             <span class="s0">* const callsfunc = tracker.calls(func, 2);</span>
+             <span class="s0">*</span>
+             <span class="s0">* callsfunc();</span>
+             <span class="s0">*</span>
+             <span class="s0">* // Will throw an error since callsfunc() was only called once.</span>
+             <span class="s0">* tracker.verify();</span>
+             <span class="s0">* ```</span>
+             <span class="s0">* </span><span class="s1">@since </span><span class="s0">v14.2.0, v12.19.0</span>
+             <span class="s0">*/</span>
+            <span class="s2">verify</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s4">}</span>
+        <span class="s5">interface </span><span class="s2">CallTrackerCall </span><span class="s4">{</span>
+            <span class="s2">thisArg</span><span class="s4">: </span><span class="s2">object</span><span
+    class="s4">;</span>
+            <span class="s2">arguments</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">[];</span>
+        <span class="s4">}</span>
+        <span class="s5">interface </span><span class="s2">CallTrackerReportInformation </span><span class="s4">{</span>
+            <span class="s2">message</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s0">/** The actual number of times the function was called. */</span>
+            <span class="s2">actual</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+            <span class="s0">/** The number of times the function was expected to be called. */</span>
+            <span class="s2">expected</span><span class="s4">: </span><span class="s2">number</span><span
+    class="s4">;</span>
+            <span class="s0">/** The name of the function that is wrapped. */</span>
+            <span class="s2">operator</span><span class="s4">: </span><span class="s2">string</span><span
+    class="s4">;</span>
+            <span class="s0">/** A stack trace of the function. */</span>
+            <span class="s2">stack</span><span class="s4">: </span><span class="s2">object</span><span
+    class="s4">;</span>
+        <span class="s4">}</span>
+        <span class="s2">type AssertPredicate </span><span class="s4">= </span><span class="s2">RegExp </span><span
+    class="s4">| (</span><span class="s5">new</span><span class="s4">() =&gt; </span><span class="s2">object</span><span
+    class="s4">) | ((</span><span class="s2">thrown</span><span class="s4">: </span><span class="s2">unknown</span><span
+    class="s4">) =&gt; </span><span class="s2">boolean</span><span class="s4">) | </span><span class="s2">object </span><span
+    class="s4">| </span><span class="s2">Error</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Throws an `AssertionError` with the provided error message or a default</span>
+         <span class="s0">* error message. If the `message` parameter is an instance of an `Error` then</span>
+         <span class="s0">* it will be thrown instead of the `AssertionError`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.fail();</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: Failed</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.fail('boom');</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: boom</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.fail(new TypeError('need array'));</span>
+         <span class="s0">* // TypeError: need array</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Using `assert.fail()` with more than two arguments is possible but deprecated.</span>
+         <span class="s0">* See below for further details.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">* </span><span class="s1">@param </span><span class="s0">[message='Failed']</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">fail</span><span class="s4">(</span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s2">never</span><span class="s4">;</span>
+        <span class="s0">/** </span><span class="s1">@deprecated </span><span class="s0">since v10.0.0 - use fail([message]) or other assert functions instead. */</span>
+        <span class="s5">function </span><span class="s2">fail</span><span class="s4">(</span>
+            <span class="s2">actual</span><span class="s4">: </span><span class="s2">unknown</span><span
+    class="s4">,</span>
+            <span class="s2">expected</span><span class="s4">: </span><span class="s2">unknown</span><span
+    class="s4">,</span>
+            <span class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Error</span><span class="s4">,</span>
+            <span class="s2">operator</span><span class="s4">?: </span><span class="s2">string</span><span
+    class="s4">,</span>
+            <span class="s6">// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type</span>
+            <span class="s2">stackStartFn</span><span class="s4">?: </span><span class="s2">Function</span><span
+    class="s4">,</span>
+        <span class="s4">): </span><span class="s2">never</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Tests if `value` is truthy. It is equivalent to `assert.equal(!!value, true, message)`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `value` is not truthy, an `AssertionError` is thrown with a `message` property set equal to the value of the `message` parameter. If the `message` parameter is `undefined`, a default</span>
+         <span class="s0">* error message is assigned. If the `message` parameter is an instance of an `Error` then it will be thrown instead of the `AssertionError`.</span>
+         <span class="s0">* If no arguments are passed in at all `message` will be set to the string:`` 'No value argument passed to `assert.ok()`' ``.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Be aware that in the `repl` the error message will be different to the one</span>
+         <span class="s0">* thrown in a file! See below for further details.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.ok(true);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">* assert.ok(1);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.ok();</span>
+         <span class="s0">* // AssertionError: No value argument passed to `assert.ok()`</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.ok(false, 'it\'s false');</span>
+         <span class="s0">* // AssertionError: it's false</span>
+         <span class="s0">*</span>
+         <span class="s0">* // In the repl:</span>
+         <span class="s0">* assert.ok(typeof 123 === 'string');</span>
+         <span class="s0">* // AssertionError: false == true</span>
+         <span class="s0">*</span>
+         <span class="s0">* // In a file (e.g. test.js):</span>
+         <span class="s0">* assert.ok(typeof 123 === 'string');</span>
+         <span class="s0">* // AssertionError: The expression evaluated to a falsy value:</span>
+         <span class="s0">* //</span>
+         <span class="s0">* //   assert.ok(typeof 123 === 'string')</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.ok(false);</span>
+         <span class="s0">* // AssertionError: The expression evaluated to a falsy value:</span>
+         <span class="s0">* //</span>
+         <span class="s0">* //   assert.ok(false)</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.ok(0);</span>
+         <span class="s0">* // AssertionError: The expression evaluated to a falsy value:</span>
+         <span class="s0">* //</span>
+         <span class="s0">* //   assert.ok(0)</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Using `assert()` works the same:</span>
+         <span class="s0">* assert(0);</span>
+         <span class="s0">* // AssertionError: The expression evaluated to a falsy value:</span>
+         <span class="s0">* //</span>
+         <span class="s0">* //   assert(0)</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">ok</span><span class="s4">(</span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s2">asserts value</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* **Strict assertion mode**</span>
+         <span class="s0">*</span>
+         <span class="s0">* An alias of {</span><span class="s1">@link </span><span class="s0">strictEqual}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* **Legacy assertion mode**</span>
+         <span class="s0">*</span>
+         <span class="s0">* &gt; Stability: 3 - Legacy: Use {</span><span class="s1">@link </span><span class="s0">strictEqual} instead.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Tests shallow, coercive equality between the `actual` and `expected` parameters</span>
+         <span class="s0">* using the [`==` operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Equality). `NaN` is specially handled</span>
+         <span class="s0">* and treated as being identical if both sides are `NaN`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.equal(1, 1);</span>
+         <span class="s0">* // OK, 1 == 1</span>
+         <span class="s0">* assert.equal(1, '1');</span>
+         <span class="s0">* // OK, 1 == '1'</span>
+         <span class="s0">* assert.equal(NaN, NaN);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.equal(1, 2);</span>
+         <span class="s0">* // AssertionError: 1 == 2</span>
+         <span class="s0">* assert.equal({ a: { b: 1 } }, { a: { b: 1 } });</span>
+         <span class="s0">* // AssertionError: { a: { b: 1 } } == { a: { b: 1 } }</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the values are not equal, an `AssertionError` is thrown with a `message` property set equal to the value of the `message` parameter. If the `message` parameter is undefined, a default</span>
+         <span class="s0">* error message is assigned. If the `message` parameter is an instance of an `Error` then it will be thrown instead of the `AssertionError`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">equal</span><span class="s4">(</span><span
+    class="s2">actual</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">expected</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* **Strict assertion mode**</span>
+         <span class="s0">*</span>
+         <span class="s0">* An alias of {</span><span class="s1">@link </span><span class="s0">notStrictEqual}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* **Legacy assertion mode**</span>
+         <span class="s0">*</span>
+         <span class="s0">* &gt; Stability: 3 - Legacy: Use {</span><span class="s1">@link </span><span class="s0">notStrictEqual} instead.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Tests shallow, coercive inequality with the [`!=` operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Inequality). `NaN` is</span>
+         <span class="s0">* specially handled and treated as being identical if both sides are `NaN`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notEqual(1, 2);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notEqual(1, 1);</span>
+         <span class="s0">* // AssertionError: 1 != 1</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notEqual(1, '1');</span>
+         <span class="s0">* // AssertionError: 1 != '1'</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the values are equal, an `AssertionError` is thrown with a `message` property set equal to the value of the `message` parameter. If the `message` parameter is undefined, a default error</span>
+         <span class="s0">* message is assigned. If the `message` parameter is an instance of an `Error` then it will be thrown instead of the `AssertionError`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">notEqual</span><span class="s4">(</span><span class="s2">actual</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span class="s2">expected</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Error</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* **Strict assertion mode**</span>
+         <span class="s0">*</span>
+         <span class="s0">* An alias of {</span><span class="s1">@link </span><span class="s0">deepStrictEqual}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* **Legacy assertion mode**</span>
+         <span class="s0">*</span>
+         <span class="s0">* &gt; Stability: 3 - Legacy: Use {</span><span class="s1">@link </span><span class="s0">deepStrictEqual} instead.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Tests for deep equality between the `actual` and `expected` parameters. Consider</span>
+         <span class="s0">* using {</span><span class="s1">@link </span><span
+    class="s0">deepStrictEqual} instead. {</span><span class="s1">@link </span><span
+    class="s0">deepEqual} can have</span>
+         <span class="s0">* surprising results.</span>
+         <span class="s0">*</span>
+         <span class="s0">* _Deep equality_ means that the enumerable &quot;own&quot; properties of child objects</span>
+         <span class="s0">* are also recursively evaluated by the following rules.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">deepEqual</span><span class="s4">(</span><span class="s2">actual</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span class="s2">expected</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Error</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* **Strict assertion mode**</span>
+         <span class="s0">*</span>
+         <span class="s0">* An alias of {</span><span class="s1">@link </span><span
+    class="s0">notDeepStrictEqual}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* **Legacy assertion mode**</span>
+         <span class="s0">*</span>
+         <span class="s0">* &gt; Stability: 3 - Legacy: Use {</span><span class="s1">@link </span><span class="s0">notDeepStrictEqual} instead.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Tests for any deep inequality. Opposite of {</span><span class="s1">@link </span><span
+    class="s0">deepEqual}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const obj1 = {</span>
+         <span class="s0">*   a: {</span>
+         <span class="s0">*     b: 1,</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* };</span>
+         <span class="s0">* const obj2 = {</span>
+         <span class="s0">*   a: {</span>
+         <span class="s0">*     b: 2,</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* };</span>
+         <span class="s0">* const obj3 = {</span>
+         <span class="s0">*   a: {</span>
+         <span class="s0">*     b: 1,</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* };</span>
+         <span class="s0">* const obj4 = { __proto__: obj1 };</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notDeepEqual(obj1, obj1);</span>
+         <span class="s0">* // AssertionError: { a: { b: 1 } } notDeepEqual { a: { b: 1 } }</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notDeepEqual(obj1, obj2);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notDeepEqual(obj1, obj3);</span>
+         <span class="s0">* // AssertionError: { a: { b: 1 } } notDeepEqual { a: { b: 1 } }</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notDeepEqual(obj1, obj4);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the values are deeply equal, an `AssertionError` is thrown with a `message` property set equal to the value of the `message` parameter. If the `message` parameter is undefined, a default</span>
+         <span class="s0">* error message is assigned. If the `message` parameter is an instance of an `Error` then it will be thrown</span>
+         <span class="s0">* instead of the `AssertionError`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">notDeepEqual</span><span class="s4">(</span><span class="s2">actual</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span class="s2">expected</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Error</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Tests strict equality between the `actual` and `expected` parameters as</span>
+         <span class="s0">* determined by [`Object.is()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is).</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.strictEqual(1, 2);</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: Expected inputs to be strictly equal:</span>
+         <span class="s0">* //</span>
+         <span class="s0">* // 1 !== 2</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.strictEqual(1, 1);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.strictEqual('Hello foobar', 'Hello World!');</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: Expected inputs to be strictly equal:</span>
+         <span class="s0">* // + actual - expected</span>
+         <span class="s0">* //</span>
+         <span class="s0">* // + 'Hello foobar'</span>
+         <span class="s0">* // - 'Hello World!'</span>
+         <span class="s0">* //          ^</span>
+         <span class="s0">*</span>
+         <span class="s0">* const apples = 1;</span>
+         <span class="s0">* const oranges = 2;</span>
+         <span class="s0">* assert.strictEqual(apples, oranges, `apples ${apples} !== oranges ${oranges}`);</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: apples 1 !== oranges 2</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.strictEqual(1, '1', new TypeError('Inputs are not identical'));</span>
+         <span class="s0">* // TypeError: Inputs are not identical</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the values are not strictly equal, an `AssertionError` is thrown with a `message` property set equal to the value of the `message` parameter. If the `message` parameter is undefined, a</span>
+         <span class="s0">* default error message is assigned. If the `message` parameter is an instance of an `Error` then it will be thrown</span>
+         <span class="s0">* instead of the `AssertionError`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">strictEqual</span><span class="s4">&lt;</span><span
+    class="s2">T</span><span class="s4">&gt;(</span><span class="s2">actual</span><span class="s4">: </span><span
+    class="s2">unknown</span><span class="s4">, </span><span class="s2">expected</span><span class="s4">: </span><span
+    class="s2">T</span><span class="s4">, </span><span class="s2">message</span><span class="s4">?: </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">asserts actual </span><span class="s4">is </span><span class="s2">T</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Tests strict inequality between the `actual` and `expected` parameters as</span>
+         <span class="s0">* determined by [`Object.is()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is).</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notStrictEqual(1, 2);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notStrictEqual(1, 1);</span>
+         <span
+           class="s0">* // AssertionError [ERR_ASSERTION]: Expected &quot;actual&quot; to be strictly unequal to:</span>
+         <span class="s0">* //</span>
+         <span class="s0">* // 1</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notStrictEqual(1, '1');</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the values are strictly equal, an `AssertionError` is thrown with a `message` property set equal to the value of the `message` parameter. If the `message` parameter is undefined, a</span>
+         <span class="s0">* default error message is assigned. If the `message` parameter is an instance of an `Error` then it will be thrown</span>
+         <span class="s0">* instead of the `AssertionError`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">notStrictEqual</span><span class="s4">(</span><span
+    class="s2">actual</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">expected</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Tests for deep equality between the `actual` and `expected` parameters.</span>
+         <span class="s0">* &quot;Deep&quot; equality means that the enumerable &quot;own&quot; properties of child objects</span>
+         <span class="s0">* are recursively evaluated also by the following rules.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v1.2.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">deepStrictEqual</span><span class="s4">&lt;</span><span
+    class="s2">T</span><span class="s4">&gt;(</span><span class="s2">actual</span><span class="s4">: </span><span
+    class="s2">unknown</span><span class="s4">, </span><span class="s2">expected</span><span class="s4">: </span><span
+    class="s2">T</span><span class="s4">, </span><span class="s2">message</span><span class="s4">?: </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">Error</span><span class="s4">): </span><span
+    class="s2">asserts actual </span><span class="s4">is </span><span class="s2">T</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Tests for deep strict inequality. Opposite of {</span><span class="s1">@link </span><span
+    class="s0">deepStrictEqual}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.notDeepStrictEqual({ a: 1 }, { a: '1' });</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the values are deeply and strictly equal, an `AssertionError` is thrown</span>
+         <span class="s0">* with a `message` property set equal to the value of the `message` parameter. If</span>
+         <span class="s0">* the `message` parameter is undefined, a default error message is assigned. If</span>
+         <span class="s0">* the `message` parameter is an instance of an `Error` then it will be thrown</span>
+         <span class="s0">* instead of the `AssertionError`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v1.2.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">notDeepStrictEqual</span><span class="s4">(</span><span
+    class="s2">actual</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">expected</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Expects the function `fn` to throw an error.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If specified, `error` can be a [`Class`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes),</span>
+         <span class="s0">* [`RegExp`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions), a validation function,</span>
+         <span class="s0">* a validation object where each property will be tested for strict deep equality,</span>
+         <span class="s0">* or an instance of error where each property will be tested for strict deep</span>
+         <span class="s0">* equality including the non-enumerable `message` and `name` properties. When</span>
+         <span class="s0">* using an object, it is also possible to use a regular expression, when</span>
+         <span class="s0">* validating against a string property. See below for examples.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If specified, `message` will be appended to the message provided by the `AssertionError` if the `fn` call fails to throw or in case the error validation</span>
+         <span class="s0">* fails.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Custom validation object/error instance:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* const err = new TypeError('Wrong value');</span>
+         <span class="s0">* err.code = 404;</span>
+         <span class="s0">* err.foo = 'bar';</span>
+         <span class="s0">* err.info = {</span>
+         <span class="s0">*   nested: true,</span>
+         <span class="s0">*   baz: 'text',</span>
+         <span class="s0">* };</span>
+         <span class="s0">* err.reg = /abc/i;</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.throws(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     throw err;</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   {</span>
+         <span class="s0">*     name: 'TypeError',</span>
+         <span class="s0">*     message: 'Wrong value',</span>
+         <span class="s0">*     info: {</span>
+         <span class="s0">*       nested: true,</span>
+         <span class="s0">*       baz: 'text',</span>
+         <span class="s0">*     },</span>
+         <span class="s0">*     // Only properties on the validation object will be tested for.</span>
+         <span class="s0">*     // Using nested objects requires all properties to be present. Otherwise</span>
+         <span class="s0">*     // the validation is going to fail.</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* );</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Using regular expressions to validate error properties:</span>
+         <span class="s0">* assert.throws(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     throw err;</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   {</span>
+         <span class="s0">*     // The `name` and `message` properties are strings and using regular</span>
+         <span class="s0">*     // expressions on those will match against the string. If they fail, an</span>
+         <span class="s0">*     // error is thrown.</span>
+         <span class="s0">*     name: /^TypeError$/,</span>
+         <span class="s0">*     message: /Wrong/,</span>
+         <span class="s0">*     foo: 'bar',</span>
+         <span class="s0">*     info: {</span>
+         <span class="s0">*       nested: true,</span>
+         <span class="s0">*       // It is not possible to use regular expressions for nested properties!</span>
+         <span class="s0">*       baz: 'text',</span>
+         <span class="s0">*     },</span>
+         <span class="s0">*     // The `reg` property contains a regular expression and only if the</span>
+         <span class="s0">*     // validation object contains an identical regular expression, it is going</span>
+         <span class="s0">*     // to pass.</span>
+         <span class="s0">*     reg: /abc/i,</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* );</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Fails due to the different `message` and `name` properties:</span>
+         <span class="s0">* assert.throws(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     const otherErr = new Error('Not found');</span>
+         <span class="s0">*     // Copy all enumerable properties from `err` to `otherErr`.</span>
+         <span class="s0">*     for (const [key, value] of Object.entries(err)) {</span>
+         <span class="s0">*       otherErr[key] = value;</span>
+         <span class="s0">*     }</span>
+         <span class="s0">*     throw otherErr;</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   // The error's `message` and `name` properties will also be checked when using</span>
+         <span class="s0">*   // an error as validation object.</span>
+         <span class="s0">*   err,</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Validate instanceof using constructor:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.throws(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     throw new Error('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   Error,</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Validate error message using [`RegExp`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions):</span>
+         <span class="s0">*</span>
+         <span class="s0">* Using a regular expression runs `.toString` on the error object, and will</span>
+         <span class="s0">* therefore also include the error name.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.throws(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     throw new Error('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   /^Error: Wrong value$/,</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Custom error validation:</span>
+         <span class="s0">*</span>
+         <span class="s0">* The function must return `true` to indicate all internal validations passed.</span>
+         <span class="s0">* It will otherwise fail with an `AssertionError`.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.throws(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     throw new Error('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   (err) =&gt; {</span>
+         <span class="s0">*     assert(err instanceof Error);</span>
+         <span class="s0">*     assert(/value/.test(err));</span>
+         <span class="s0">*     // Avoid returning anything from validation functions besides `true`.</span>
+         <span class="s0">*     // Otherwise, it's not clear what part of the validation failed. Instead,</span>
+         <span class="s0">*     // throw an error about the specific validation that failed (as done in this</span>
+         <span class="s0">*     // example) and add as much helpful debugging information to that error as</span>
+         <span class="s0">*     // possible.</span>
+         <span class="s0">*     return true;</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   'unexpected error',</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* `error` cannot be a string. If a string is provided as the second</span>
+         <span class="s0">* argument, then `error` is assumed to be omitted and the string will be used for `message` instead. This can lead to easy-to-miss mistakes. Using the same</span>
+         <span class="s0">* message as the thrown error message is going to result in an `ERR_AMBIGUOUS_ARGUMENT` error. Please read the example below carefully if using</span>
+         <span class="s0">* a string as the second argument gets considered:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* function throwingFirst() {</span>
+         <span class="s0">*   throw new Error('First');</span>
+         <span class="s0">* }</span>
+         <span class="s0">*</span>
+         <span class="s0">* function throwingSecond() {</span>
+         <span class="s0">*   throw new Error('Second');</span>
+         <span class="s0">* }</span>
+         <span class="s0">*</span>
+         <span class="s0">* function notThrowing() {}</span>
+         <span class="s0">*</span>
+         <span class="s0">* // The second argument is a string and the input function threw an Error.</span>
+         <span class="s0">* // The first case will not throw as it does not match for the error message</span>
+         <span class="s0">* // thrown by the input function!</span>
+         <span class="s0">* assert.throws(throwingFirst, 'Second');</span>
+         <span class="s0">* // In the next example the message has no benefit over the message from the</span>
+         <span class="s0">* // error and since it is not clear if the user intended to actually match</span>
+         <span class="s0">* // against the error message, Node.js throws an `ERR_AMBIGUOUS_ARGUMENT` error.</span>
+         <span class="s0">* assert.throws(throwingSecond, 'Second');</span>
+         <span class="s0">* // TypeError [ERR_AMBIGUOUS_ARGUMENT]</span>
+         <span class="s0">*</span>
+         <span class="s0">* // The string is only used (as message) in case the function does not throw:</span>
+         <span class="s0">* assert.throws(notThrowing, 'Second');</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: Missing expected exception: Second</span>
+         <span class="s0">*</span>
+         <span class="s0">* // If it was intended to match for the error message do this instead:</span>
+         <span class="s0">* // It does not throw because the error messages match.</span>
+         <span class="s0">* assert.throws(throwingSecond, /Second$/);</span>
+         <span class="s0">*</span>
+         <span class="s0">* // If the error message does not match, an AssertionError is thrown.</span>
+         <span class="s0">* assert.throws(throwingFirst, /Second$/);</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* Due to the confusing error-prone notation, avoid a string as the second</span>
+         <span class="s0">* argument.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">throws</span><span class="s4">(</span><span
+    class="s2">block</span><span class="s4">: () =&gt; </span><span class="s2">unknown</span><span
+    class="s4">, </span><span class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Error</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s5">function </span><span class="s2">throws</span><span class="s4">(</span><span
+    class="s2">block</span><span class="s4">: () =&gt; </span><span class="s2">unknown</span><span
+    class="s4">, </span><span class="s2">error</span><span class="s4">: </span><span
+    class="s2">AssertPredicate</span><span class="s4">, </span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Error</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Asserts that the function `fn` does not throw an error.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Using `assert.doesNotThrow()` is actually not useful because there</span>
+         <span class="s0">* is no benefit in catching an error and then rethrowing it. Instead, consider</span>
+         <span class="s0">* adding a comment next to the specific code path that should not throw and keep</span>
+         <span class="s0">* error messages as expressive as possible.</span>
+         <span class="s0">*</span>
+         <span class="s0">* When `assert.doesNotThrow()` is called, it will immediately call the `fn` function.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If an error is thrown and it is the same type as that specified by the `error` parameter, then an `AssertionError` is thrown. If the error is of a</span>
+         <span class="s0">* different type, or if the `error` parameter is undefined, the error is</span>
+         <span class="s0">* propagated back to the caller.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If specified, `error` can be a [`Class`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes),</span>
+         <span class="s0">* [`RegExp`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions), or a validation</span>
+         <span class="s0">* function. See {</span><span class="s1">@link </span><span class="s0">throws} for more details.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The following, for instance, will throw the `TypeError` because there is no</span>
+         <span class="s0">* matching error type in the assertion:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.doesNotThrow(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     throw new TypeError('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   SyntaxError,</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* However, the following will result in an `AssertionError` with the message</span>
+         <span class="s0">* 'Got unwanted exception...':</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.doesNotThrow(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     throw new TypeError('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   TypeError,</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If an `AssertionError` is thrown and a value is provided for the `message` parameter, the value of `message` will be appended to the `AssertionError` message:</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.doesNotThrow(</span>
+         <span class="s0">*   () =&gt; {</span>
+         <span class="s0">*     throw new TypeError('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   /Wrong value/,</span>
+         <span class="s0">*   'Whoops',</span>
+         <span class="s0">* );</span>
+         <span class="s0">* // Throws: AssertionError: Got unwanted exception: Whoops</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.21</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">doesNotThrow</span><span class="s4">(</span><span class="s2">block</span><span
+    class="s4">: () =&gt; </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s5">function </span><span class="s2">doesNotThrow</span><span class="s4">(</span><span class="s2">block</span><span
+    class="s4">: () =&gt; </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">error</span><span class="s4">: </span><span class="s2">AssertPredicate</span><span
+    class="s4">, </span><span class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Error</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Throws `value` if `value` is not `undefined` or `null`. This is useful when</span>
+         <span class="s0">* testing the `error` argument in callbacks. The stack trace contains all frames</span>
+         <span class="s0">* from the error passed to `ifError()` including the potential new frames for `ifError()` itself.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.ifError(null);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">* assert.ifError(0);</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: ifError got unwanted exception: 0</span>
+         <span class="s0">* assert.ifError('error');</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: ifError got unwanted exception: 'error'</span>
+         <span class="s0">* assert.ifError(new Error());</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: ifError got unwanted exception: Error</span>
+         <span class="s0">*</span>
+         <span class="s0">* // Create some random error frames.</span>
+         <span class="s0">* let err;</span>
+         <span class="s0">* (function errorFrame() {</span>
+         <span class="s0">*   err = new Error('test error');</span>
+         <span class="s0">* })();</span>
+         <span class="s0">*</span>
+         <span class="s0">* (function ifErrorFrame() {</span>
+         <span class="s0">*   assert.ifError(err);</span>
+         <span class="s0">* })();</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: ifError got unwanted exception: test error</span>
+         <span class="s0">* //     at ifErrorFrame</span>
+         <span class="s0">* //     at errorFrame</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v0.1.97</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">ifError</span><span class="s4">(</span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">): </span><span
+    class="s2">asserts value </span><span class="s4">is </span><span class="s5">null </span><span
+    class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Awaits the `asyncFn` promise or, if `asyncFn` is a function, immediately</span>
+         <span class="s0">* calls the function and awaits the returned promise to complete. It will then</span>
+         <span class="s0">* check that the promise is rejected.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `asyncFn` is a function and it throws an error synchronously, `assert.rejects()` will return a rejected `Promise` with that error. If the</span>
+         <span class="s0">* function does not return a promise, `assert.rejects()` will return a rejected `Promise` with an [ERR_INVALID_RETURN_VALUE](https://nodejs.org/docs/latest-v24.x/api/errors.html#err_invalid_return_value)</span>
+         <span class="s0">* error. In both cases the error handler is skipped.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Besides the async nature to await the completion behaves identically to {</span><span
+    class="s1">@link </span><span class="s0">throws}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If specified, `error` can be a [`Class`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes),</span>
+         <span class="s0">* [`RegExp`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions), a validation function,</span>
+         <span class="s0">* an object where each property will be tested for, or an instance of error where</span>
+         <span class="s0">* each property will be tested for including the non-enumerable `message` and `name` properties.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If specified, `message` will be the message provided by the `{@link AssertionError}` if the `asyncFn` fails to reject.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* await assert.rejects(</span>
+         <span class="s0">*   async () =&gt; {</span>
+         <span class="s0">*     throw new TypeError('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   {</span>
+         <span class="s0">*     name: 'TypeError',</span>
+         <span class="s0">*     message: 'Wrong value',</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* await assert.rejects(</span>
+         <span class="s0">*   async () =&gt; {</span>
+         <span class="s0">*     throw new TypeError('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   (err) =&gt; {</span>
+         <span class="s0">*     assert.strictEqual(err.name, 'TypeError');</span>
+         <span class="s0">*     assert.strictEqual(err.message, 'Wrong value');</span>
+         <span class="s0">*     return true;</span>
+         <span class="s0">*   },</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.rejects(</span>
+         <span class="s0">*   Promise.reject(new Error('Wrong value')),</span>
+         <span class="s0">*   Error,</span>
+         <span class="s0">* ).then(() =&gt; {</span>
+         <span class="s0">*   // ...</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* `error` cannot be a string. If a string is provided as the second argument, then `error` is assumed to</span>
+         <span class="s0">* be omitted and the string will be used for `message` instead. This can lead to easy-to-miss mistakes. Please read the</span>
+         <span class="s0">* example in {</span><span class="s1">@link </span><span class="s0">throws} carefully if using a string as the second argument gets considered.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">rejects</span><span class="s4">(</span><span
+    class="s2">block</span><span class="s4">: (() =&gt; </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;) | </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s5">void</span><span class="s4">&gt;;</span>
+        <span class="s5">function </span><span class="s2">rejects</span><span class="s4">(</span>
+            <span class="s2">block</span><span class="s4">: (() =&gt; </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;) | </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;,</span>
+            <span class="s2">error</span><span class="s4">: </span><span class="s2">AssertPredicate</span><span
+    class="s4">,</span>
+            <span class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Error</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s5">void</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Awaits the `asyncFn` promise or, if `asyncFn` is a function, immediately</span>
+         <span class="s0">* calls the function and awaits the returned promise to complete. It will then</span>
+         <span class="s0">* check that the promise is not rejected.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If `asyncFn` is a function and it throws an error synchronously, `assert.doesNotReject()` will return a rejected `Promise` with that error. If</span>
+         <span class="s0">* the function does not return a promise, `assert.doesNotReject()` will return a</span>
+         <span class="s0">* rejected `Promise` with an [ERR_INVALID_RETURN_VALUE](https://nodejs.org/docs/latest-v24.x/api/errors.html#err_invalid_return_value) error. In both cases</span>
+         <span class="s0">* the error handler is skipped.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Using `assert.doesNotReject()` is actually not useful because there is little</span>
+         <span class="s0">* benefit in catching a rejection and then rejecting it again. Instead, consider</span>
+         <span class="s0">* adding a comment next to the specific code path that should not reject and keep</span>
+         <span class="s0">* error messages as expressive as possible.</span>
+         <span class="s0">*</span>
+         <span class="s0">* If specified, `error` can be a [`Class`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes),</span>
+         <span class="s0">* [`RegExp`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions), or a validation</span>
+         <span class="s0">* function. See {</span><span class="s1">@link </span><span class="s0">throws} for more details.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Besides the async nature to await the completion behaves identically to {</span><span
+    class="s1">@link </span><span class="s0">doesNotThrow}.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* await assert.doesNotReject(</span>
+         <span class="s0">*   async () =&gt; {</span>
+         <span class="s0">*     throw new TypeError('Wrong value');</span>
+         <span class="s0">*   },</span>
+         <span class="s0">*   SyntaxError,</span>
+         <span class="s0">* );</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.doesNotReject(Promise.reject(new TypeError('Wrong value')))</span>
+         <span class="s0">*   .then(() =&gt; {</span>
+         <span class="s0">*     // ...</span>
+         <span class="s0">*   });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v10.0.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">doesNotReject</span><span class="s4">(</span>
+            <span class="s2">block</span><span class="s4">: (() =&gt; </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;) | </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;,</span>
+            <span class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Error</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s5">void</span><span class="s4">&gt;;</span>
+        <span class="s5">function </span><span class="s2">doesNotReject</span><span class="s4">(</span>
+            <span class="s2">block</span><span class="s4">: (() =&gt; </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;) | </span><span class="s2">Promise</span><span
+    class="s4">&lt;</span><span class="s2">unknown</span><span class="s4">&gt;,</span>
+            <span class="s2">error</span><span class="s4">: </span><span class="s2">AssertPredicate</span><span
+    class="s4">,</span>
+            <span class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span
+    class="s4">| </span><span class="s2">Error</span><span class="s4">,</span>
+        <span class="s4">): </span><span class="s2">Promise</span><span class="s4">&lt;</span><span
+    class="s5">void</span><span class="s4">&gt;;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Expects the `string` input to match the regular expression.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.match('I will fail', /pass/);</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: The input did not match the regular ...</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.match(123, /pass/);</span>
+         <span
+           class="s0">* // AssertionError [ERR_ASSERTION]: The &quot;string&quot; argument must be of type string.</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.match('I will pass', /pass/);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the values do not match, or if the `string` argument is of another type than `string`, an `{@link AssertionError}` is thrown with a `message` property set equal</span>
+         <span class="s0">* to the value of the `message` parameter. If the `message` parameter is</span>
+         <span class="s0">* undefined, a default error message is assigned. If the `message` parameter is an</span>
+         <span class="s0">* instance of an [Error](https://nodejs.org/docs/latest-v24.x/api/errors.html#class-error) then it will be thrown instead of the `{@link AssertionError}`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.6.0, v12.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">match</span><span class="s4">(</span><span
+    class="s2">value</span><span class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">regExp</span><span class="s4">: </span><span class="s2">RegExp</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Expects the `string` input not to match the regular expression.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* import assert from 'node:assert/strict';</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.doesNotMatch('I will fail', /fail/);</span>
+         <span class="s0">* // AssertionError [ERR_ASSERTION]: The input was expected to not match the ...</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.doesNotMatch(123, /pass/);</span>
+         <span
+           class="s0">* // AssertionError [ERR_ASSERTION]: The &quot;string&quot; argument must be of type string.</span>
+         <span class="s0">*</span>
+         <span class="s0">* assert.doesNotMatch('I will pass', /different/);</span>
+         <span class="s0">* // OK</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* If the values do match, or if the `string` argument is of another type than `string`, an `{@link AssertionError}` is thrown with a `message` property set equal</span>
+         <span class="s0">* to the value of the `message` parameter. If the `message` parameter is</span>
+         <span class="s0">* undefined, a default error message is assigned. If the `message` parameter is an</span>
+         <span class="s0">* instance of an [Error](https://nodejs.org/docs/latest-v24.x/api/errors.html#class-error) then it will be thrown instead of the `{@link AssertionError}`.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v13.6.0, v12.16.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">doesNotMatch</span><span class="s4">(</span><span class="s2">value</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">regExp</span><span
+    class="s4">: </span><span class="s2">RegExp</span><span class="s4">, </span><span class="s2">message</span><span
+    class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span class="s2">Error</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Tests for partial deep equality between the `actual` and `expected` parameters.</span>
+         <span class="s0">* &quot;Deep&quot; equality means that the enumerable &quot;own&quot; properties of child objects</span>
+         <span
+           class="s0">* are recursively evaluated also by the following rules. &quot;Partial&quot; equality means</span>
+         <span class="s0">* that only properties that exist on the `expected` parameter are going to be</span>
+         <span class="s0">* compared.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method always passes the same test cases as `assert.deepStrictEqual()`,</span>
+         <span class="s0">* behaving as a super set of it.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.13.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">partialDeepStrictEqual</span><span class="s4">(</span><span
+    class="s2">actual</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">expected</span><span class="s4">: </span><span class="s2">unknown</span><span class="s4">, </span><span
+    class="s2">message</span><span class="s4">?: </span><span class="s2">string </span><span class="s4">| </span><span
+    class="s2">Error</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">namespace assert </span><span class="s4">{</span>
+        <span class="s5">export </span><span class="s4">{ </span><span class="s2">strict </span><span
+    class="s4">};</span>
+    <span class="s4">}</span>
+    <span class="s5">export </span><span class="s4">= </span><span class="s2">assert</span><span class="s4">;</span>
+<span class="s4">}</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:assert&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s2">assert </span><span class="s4">= </span><span
+    class="s2">require</span><span class="s4">(</span><span class="s3">&quot;assert&quot;</span><span
+    class="s4">);</span>
+    <span class="s5">export </span><span class="s4">= </span><span class="s2">assert</span><span class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

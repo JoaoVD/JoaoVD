@@ -1,0 +1,113 @@
+<html>
+<head>
+  <title>_createPadding.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _createPadding.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseRepeat </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseRepeat'</span><span class="s2">),</span>
+    <span class="s1">baseToString </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseToString'</span><span class="s2">),</span>
+    <span class="s1">castSlice </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_castSlice'</span><span class="s2">),</span>
+    <span class="s1">hasUnicode </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_hasUnicode'</span><span class="s2">),</span>
+    <span class="s1">stringSize </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_stringSize'</span><span class="s2">),</span>
+    <span class="s1">stringToArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_stringToArray'</span><span class="s2">);</span>
+
+<span class="s4">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeCeil </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">ceil</span><span class="s2">;</span>
+
+<span class="s5">/**</span>
+ <span class="s5">* Creates the padding for `string` based on `length`. The `chars` string</span>
+ <span class="s5">* is truncated if the number of characters exceeds `length`.</span>
+ <span class="s5">*</span>
+ <span class="s5">* </span><span class="s6">@private</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{number} length The padding length.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{string} [chars=' '] The string used as padding.</span>
+ <span class="s5">* </span><span class="s6">@returns </span><span
+    class="s5">{string} Returns the padding for `string`.</span>
+ <span class="s5">*/</span>
+<span class="s0">function </span><span class="s1">createPadding</span><span class="s2">(</span><span
+    class="s1">length</span><span class="s2">, </span><span class="s1">chars</span><span class="s2">) {</span>
+  <span class="s1">chars </span><span class="s2">= </span><span class="s1">chars </span><span
+    class="s2">=== </span><span class="s1">undefined </span><span class="s2">? </span><span class="s3">' ' </span><span
+    class="s2">: </span><span class="s1">baseToString</span><span class="s2">(</span><span class="s1">chars</span><span
+    class="s2">);</span>
+
+  <span class="s0">var </span><span class="s1">charsLength </span><span class="s2">= </span><span
+    class="s1">chars</span><span class="s2">.</span><span class="s1">length</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">charsLength </span><span
+    class="s2">&lt; </span><span class="s7">2</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s1">charsLength </span><span class="s2">? </span><span class="s1">baseRepeat</span><span
+    class="s2">(</span><span class="s1">chars</span><span class="s2">, </span><span class="s1">length</span><span
+    class="s2">) : </span><span class="s1">chars</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">result </span><span class="s2">= </span><span
+    class="s1">baseRepeat</span><span class="s2">(</span><span class="s1">chars</span><span class="s2">, </span><span
+    class="s1">nativeCeil</span><span class="s2">(</span><span class="s1">length </span><span class="s2">/ </span><span
+    class="s1">stringSize</span><span class="s2">(</span><span class="s1">chars</span><span class="s2">)));</span>
+  <span class="s0">return </span><span class="s1">hasUnicode</span><span class="s2">(</span><span
+    class="s1">chars</span><span class="s2">)</span>
+    <span class="s2">? </span><span class="s1">castSlice</span><span class="s2">(</span><span
+    class="s1">stringToArray</span><span class="s2">(</span><span class="s1">result</span><span
+    class="s2">), </span><span class="s7">0</span><span class="s2">, </span><span class="s1">length</span><span
+    class="s2">).</span><span class="s1">join</span><span class="s2">(</span><span class="s3">''</span><span class="s2">)</span>
+    <span class="s2">: </span><span class="s1">result</span><span class="s2">.</span><span class="s1">slice</span><span
+    class="s2">(</span><span class="s7">0</span><span class="s2">, </span><span class="s1">length</span><span
+    class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">createPadding</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

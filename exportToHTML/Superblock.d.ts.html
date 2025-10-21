@@ -1,0 +1,307 @@
+<html>
+<head>
+  <title>Superblock.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          Superblock.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">Node </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'./Node'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">Link </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'./Link'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">File </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'./File'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">Buffer </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'../vendor/node/internal/buffer'</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">DirectoryJSON</span><span class="s2">, </span><span
+    class="s1">NestedDirectoryJSON </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'./json'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">PathLike </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../node/types/misc'</span><span
+    class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">TFileId </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'./types'</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* Represents a filesystem superblock, which is the root of a virtual</span>
+ <span class="s4">* filesystem in Linux.</span>
+ <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://lxr.linux.no/linux+v3.11.2/include/linux/fs.h#L1242</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">Superblock </span><span class="s2">{</span>
+    <span class="s0">static </span><span class="s1">fromJSON</span><span class="s2">(</span><span class="s1">json</span><span
+    class="s2">: </span><span class="s1">DirectoryJSON</span><span class="s2">, </span><span class="s1">cwd</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span
+    class="s1">Superblock</span><span class="s2">;</span>
+    <span class="s0">static </span><span class="s1">fromNestedJSON</span><span class="s2">(</span><span
+    class="s1">json</span><span class="s2">: </span><span class="s1">NestedDirectoryJSON</span><span
+    class="s2">, </span><span class="s1">cwd</span><span class="s2">?: </span><span class="s1">string</span><span
+    class="s2">): </span><span class="s1">Superblock</span><span class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* Global file descriptor counter. UNIX file descriptors start from 0 and go sequentially</span>
+     <span class="s4">* up, so here, in order not to conflict with them, we choose some big number and descrease</span>
+     <span class="s4">* the file descriptor of every new opened file.</span>
+     <span class="s4">* </span><span class="s5">@type </span><span class="s4">{number}</span>
+     <span class="s4">* </span><span class="s5">@todo </span><span class="s4">This should not be static, right?</span>
+     <span class="s4">*/</span>
+    <span class="s0">static </span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">;</span>
+    <span class="s1">root</span><span class="s2">: </span><span class="s1">Link</span><span class="s2">;</span>
+    <span class="s1">ino</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">inodes</span><span class="s2">: {</span>
+        <span class="s2">[</span><span class="s1">ino</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">]: </span><span class="s1">Node</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">releasedInos</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">[];</span>
+    <span class="s1">fds</span><span class="s2">: {</span>
+        <span class="s2">[</span><span class="s1">fd</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">]: </span><span class="s1">File</span><span class="s2">;</span>
+    <span class="s2">};</span>
+    <span class="s1">releasedFds</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">[];</span>
+    <span class="s1">maxFiles</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">openFiles</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">props</span><span
+    class="s2">?: {});</span>
+    <span class="s1">createLink</span><span class="s2">(): </span><span class="s1">Link</span><span class="s2">;</span>
+    <span class="s1">createLink</span><span class="s2">(</span><span class="s1">parent</span><span
+    class="s2">: </span><span class="s1">Link</span><span class="s2">, </span><span class="s1">name</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">isDirectory</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">, </span><span class="s1">mode</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">): </span><span class="s1">Link</span><span
+    class="s2">;</span>
+    <span class="s1">deleteLink</span><span class="s2">(</span><span class="s1">link</span><span
+    class="s2">: </span><span class="s1">Link</span><span class="s2">): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s0">private </span><span class="s1">newInoNumber</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">newFdNumber</span><span class="s2">;</span>
+    <span class="s1">createNode</span><span class="s2">(</span><span class="s1">mode</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">): </span><span class="s1">Node</span><span
+    class="s2">;</span>
+    <span class="s1">deleteNode</span><span class="s2">(</span><span class="s1">node</span><span
+    class="s2">: </span><span class="s1">Node</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">walk</span><span class="s2">(</span><span class="s1">steps</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">[], </span><span class="s1">resolveSymlinks</span><span
+    class="s2">: </span><span class="s1">boolean</span><span class="s2">, </span><span
+    class="s1">checkExistence</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">, </span><span class="s1">checkAccess</span><span class="s2">: </span><span
+    class="s1">boolean</span><span class="s2">, </span><span class="s1">funcName</span><span class="s2">?: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Link </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">;</span>
+    <span class="s1">walk</span><span class="s2">(</span><span class="s1">filename</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">resolveSymlinks</span><span
+    class="s2">: </span><span class="s1">boolean</span><span class="s2">, </span><span
+    class="s1">checkExistence</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">, </span><span class="s1">checkAccess</span><span class="s2">: </span><span
+    class="s1">boolean</span><span class="s2">, </span><span class="s1">funcName</span><span class="s2">?: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Link </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">;</span>
+    <span class="s1">walk</span><span class="s2">(</span><span class="s1">link</span><span class="s2">: </span><span
+    class="s1">Link</span><span class="s2">, </span><span class="s1">resolveSymlinks</span><span
+    class="s2">: </span><span class="s1">boolean</span><span class="s2">, </span><span
+    class="s1">checkExistence</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">, </span><span class="s1">checkAccess</span><span class="s2">: </span><span
+    class="s1">boolean</span><span class="s2">, </span><span class="s1">funcName</span><span class="s2">?: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Link </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">;</span>
+    <span class="s1">walk</span><span class="s2">(</span><span class="s1">stepsOrFilenameOrLink</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">[] | </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">Link</span><span class="s2">, </span><span
+    class="s1">resolveSymlinks</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">, </span><span
+    class="s1">checkExistence</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">, </span><span class="s1">checkAccess</span><span class="s2">: </span><span
+    class="s1">boolean</span><span class="s2">, </span><span class="s1">funcName</span><span class="s2">?: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Link </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">;</span>
+    <span class="s1">getLink</span><span class="s2">(</span><span class="s1">steps</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">[]): </span><span class="s1">Link </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">;</span>
+    <span class="s1">getLinkOrThrow</span><span class="s2">(</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">funcName</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">Link</span><span
+    class="s2">;</span>
+    <span class="s1">getResolvedLink</span><span class="s2">(</span><span class="s1">filenameOrSteps</span><span
+    class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span class="s1">string</span><span
+    class="s2">[]): </span><span class="s1">Link </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* Just like `getLinkOrThrow`, but also dereference/resolves symbolic links.</span>
+     <span class="s4">*/</span>
+    <span class="s1">getResolvedLinkOrThrow</span><span class="s2">(</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">funcName</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">Link</span><span
+    class="s2">;</span>
+    <span class="s1">resolveSymlinks</span><span class="s2">(</span><span class="s1">link</span><span
+    class="s2">: </span><span class="s1">Link</span><span class="s2">): </span><span class="s1">Link </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* Just like `getLinkOrThrow`, but also verifies that the link is a directory.</span>
+     <span class="s4">*/</span>
+    <span class="s1">getLinkAsDirOrThrow</span><span class="s2">(</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">funcName</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">Link</span><span
+    class="s2">;</span>
+    <span class="s1">getLinkParent</span><span class="s2">(</span><span class="s1">steps</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">[]): </span><span class="s1">Link </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">;</span>
+    <span class="s1">getLinkParentAsDirOrThrow</span><span class="s2">(</span><span
+    class="s1">filenameOrSteps</span><span class="s2">: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">string</span><span class="s2">[], </span><span class="s1">funcName</span><span class="s2">?: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s1">Link</span><span class="s2">;</span>
+    <span class="s1">getFileByFd</span><span class="s2">(</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">): </span><span class="s1">File</span><span
+    class="s2">;</span>
+    <span class="s1">getFileByFdOrThrow</span><span class="s2">(</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">funcName</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span class="s1">File</span><span
+    class="s2">;</span>
+    <span class="s1">_toJSON</span><span class="s2">(</span><span class="s1">link</span><span class="s2">?: </span><span
+    class="s1">Link</span><span class="s2">, </span><span class="s1">json</span><span class="s2">?: {}, </span><span
+    class="s1">path</span><span class="s2">?: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">asBuffer</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">): </span><span
+    class="s1">DirectoryJSON</span><span class="s2">&lt;</span><span class="s1">string </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">&gt;;</span>
+    <span class="s1">toJSON</span><span class="s2">(</span><span class="s1">paths</span><span class="s2">?: </span><span
+    class="s1">PathLike </span><span class="s2">| </span><span class="s1">PathLike</span><span
+    class="s2">[], </span><span class="s1">json</span><span class="s2">?: {}, </span><span
+    class="s1">isRelative</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">, </span><span class="s1">asBuffer</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">): </span><span class="s1">DirectoryJSON</span><span class="s2">&lt;</span><span
+    class="s1">string </span><span class="s2">| </span><span class="s0">null</span><span class="s2">&gt;;</span>
+    <span class="s1">fromJSON</span><span class="s2">(</span><span class="s1">json</span><span class="s2">: </span><span
+    class="s1">DirectoryJSON</span><span class="s2">, </span><span class="s1">cwd</span><span class="s2">?: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">fromNestedJSON</span><span class="s2">(</span><span class="s1">json</span><span
+    class="s2">: </span><span class="s1">NestedDirectoryJSON</span><span class="s2">, </span><span class="s1">cwd</span><span
+    class="s2">?: </span><span class="s1">string</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">reset</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">mountSync</span><span class="s2">(</span><span class="s1">mountpoint</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">json</span><span
+    class="s2">: </span><span class="s1">DirectoryJSON</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">openLink</span><span class="s2">(</span><span class="s1">link</span><span class="s2">: </span><span
+    class="s1">Link</span><span class="s2">, </span><span class="s1">flagsNum</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">resolveSymlinks</span><span class="s2">?: </span><span
+    class="s1">boolean</span><span class="s2">): </span><span class="s1">File</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">openFile</span><span class="s2">(</span><span
+    class="s1">filename</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">flagsNum</span><span class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">modeNum</span><span class="s2">: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s1">undefined</span><span class="s2">, </span><span class="s1">resolveSymlinks</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">): </span><span class="s1">File</span><span
+    class="s2">;</span>
+    <span class="s1">readonly open</span><span class="s2">: (</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">flagsNum</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">modeNum</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">resolveSymlinks</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">) =&gt; </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">readonly writeFile</span><span class="s2">: (</span><span class="s1">id</span><span
+    class="s2">: </span><span class="s1">TFileId</span><span class="s2">, </span><span class="s1">buf</span><span
+    class="s2">: </span><span class="s1">Buffer</span><span class="s2">, </span><span class="s1">flagsNum</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">modeNum</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">readonly read</span><span class="s2">: (</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">buffer</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">ArrayBufferView </span><span
+    class="s2">| </span><span class="s1">DataView</span><span class="s2">, </span><span class="s1">offset</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span
+    class="s2">: </span><span class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">) =&gt; </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">readonly readv</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">buffers</span><span
+    class="s2">: </span><span class="s1">ArrayBufferView</span><span class="s2">[], </span><span
+    class="s1">position</span><span class="s2">: </span><span class="s1">number </span><span class="s2">| </span><span
+    class="s0">null</span><span class="s2">) =&gt; </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">readonly link</span><span class="s2">: (</span><span class="s1">filename1</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">filename2</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">readonly unlink</span><span class="s2">: (</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">readonly symlink</span><span class="s2">: (</span><span class="s1">targetFilename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">pathFilename</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">) =&gt; </span><span class="s1">Link</span><span class="s2">;</span>
+    <span class="s1">readonly rename</span><span class="s2">: (</span><span class="s1">oldPathFilename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">newPathFilename</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">readonly mkdir</span><span class="s2">: (</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">modeNum</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* Creates directory tree recursively.</span>
+     <span class="s4">*/</span>
+    <span class="s1">readonly mkdirp</span><span class="s2">: (</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">modeNum</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span
+    class="s1">string </span><span class="s2">| </span><span class="s1">undefined</span><span class="s2">;</span>
+    <span class="s1">readonly rmdir</span><span class="s2">: (</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">recursive</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">readonly rm</span><span class="s2">: (</span><span class="s1">filename</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">force</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">, </span><span class="s1">recursive</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">) =&gt; </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s0">protected </span><span class="s1">closeFile</span><span class="s2">(</span><span
+    class="s1">file</span><span class="s2">: </span><span class="s1">File</span><span class="s2">): </span><span
+    class="s0">void</span><span class="s2">;</span>
+    <span class="s1">readonly close</span><span class="s2">: (</span><span class="s1">fd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">fd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">buf</span><span class="s2">: </span><span
+    class="s1">Buffer</span><span class="s2">, </span><span class="s1">offset</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">length</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">position</span><span class="s2">?: </span><span
+    class="s1">number </span><span class="s2">| </span><span class="s0">null</span><span class="s2">): </span><span
+    class="s1">number</span><span class="s2">;</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

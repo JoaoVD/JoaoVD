@@ -1,0 +1,101 @@
+<html>
+<head>
+  <title>_baseRepeat.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _baseRepeat.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/** Used as references for various `Number` constants. */</span>
+<span class="s2">var </span><span class="s1">MAX_SAFE_INTEGER </span><span class="s3">= </span><span class="s4">9007199254740991</span><span
+    class="s3">;</span>
+
+<span class="s5">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s2">var </span><span class="s1">nativeFloor </span><span class="s3">= </span><span
+    class="s1">Math</span><span class="s3">.</span><span class="s1">floor</span><span class="s3">;</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* The base implementation of `_.repeat` which doesn't coerce arguments.</span>
+ <span class="s0">*</span>
+ <span class="s0">* </span><span class="s6">@private</span>
+ <span class="s0">* </span><span class="s6">@param </span><span class="s0">{string} string The string to repeat.</span>
+ <span class="s0">* </span><span class="s6">@param </span><span class="s0">{number} n The number of times to repeat the string.</span>
+ <span class="s0">* </span><span class="s6">@returns </span><span
+    class="s0">{string} Returns the repeated string.</span>
+ <span class="s0">*/</span>
+<span class="s2">function </span><span class="s1">baseRepeat</span><span class="s3">(</span><span
+    class="s1">string</span><span class="s3">, </span><span class="s1">n</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">result </span><span class="s3">= </span><span class="s7">''</span><span
+    class="s3">;</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">string </span><span class="s3">|| </span><span
+    class="s1">n </span><span class="s3">&lt; </span><span class="s4">1 </span><span class="s3">|| </span><span
+    class="s1">n </span><span class="s3">&gt; </span><span class="s1">MAX_SAFE_INTEGER</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">result</span><span class="s3">;</span>
+  <span class="s3">}</span>
+  <span class="s5">// Leverage the exponentiation by squaring algorithm for a faster repeat.</span>
+  <span class="s5">// See https://en.wikipedia.org/wiki/Exponentiation_by_squaring for more details.</span>
+  <span class="s2">do </span><span class="s3">{</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">n </span><span class="s3">% </span><span
+    class="s4">2</span><span class="s3">) {</span>
+      <span class="s1">result </span><span class="s3">+= </span><span class="s1">string</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s1">n </span><span class="s3">= </span><span class="s1">nativeFloor</span><span
+    class="s3">(</span><span class="s1">n </span><span class="s3">/ </span><span class="s4">2</span><span
+    class="s3">);</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">n</span><span class="s3">) {</span>
+      <span class="s1">string </span><span class="s3">+= </span><span class="s1">string</span><span class="s3">;</span>
+    <span class="s3">}</span>
+  <span class="s3">} </span><span class="s2">while </span><span class="s3">(</span><span class="s1">n</span><span
+    class="s3">);</span>
+
+  <span class="s2">return </span><span class="s1">result</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s1">module</span><span class="s3">.</span><span class="s1">exports </span><span class="s3">= </span><span
+    class="s1">baseRepeat</span><span class="s3">;</span>
+</pre>
+</body>
+</html>

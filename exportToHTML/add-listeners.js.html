@@ -1,0 +1,251 @@
+<html>
+<head>
+  <title>add-listeners.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #7a7e85;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          add-listeners.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">// Copyright Joyent, Inc. and other Node contributors.</span>
+<span class="s0">//</span>
+<span class="s0">// Permission is hereby granted, free of charge, to any person obtaining a</span>
+<span class="s0">// copy of this software and associated documentation files (the</span>
+<span class="s0">// &quot;Software&quot;), to deal in the Software without restriction, including</span>
+<span class="s0">// without limitation the rights to use, copy, modify, merge, publish,</span>
+<span class="s0">// distribute, sublicense, and/or sell copies of the Software, and to permit</span>
+<span class="s0">// persons to whom the Software is furnished to do so, subject to the</span>
+<span class="s0">// following conditions:</span>
+<span class="s0">//</span>
+<span class="s0">// The above copyright notice and this permission notice shall be included</span>
+<span class="s0">// in all copies or substantial portions of the Software.</span>
+<span class="s0">//</span>
+<span class="s0">// THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS</span>
+<span class="s0">// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF</span>
+<span class="s0">// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN</span>
+<span class="s0">// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,</span>
+<span class="s0">// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR</span>
+<span class="s0">// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE</span>
+<span class="s0">// USE OR OTHER DEALINGS IN THE SOFTWARE.</span>
+
+<span class="s2">var </span><span class="s1">common </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'./common'</span><span class="s3">);</span>
+<span class="s2">var </span><span class="s1">assert </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'assert'</span><span class="s3">);</span>
+<span class="s2">var </span><span class="s1">EventEmitter </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s4">'../'</span><span class="s3">);</span>
+
+<span class="s3">{</span>
+  <span class="s2">var </span><span class="s1">ee </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">EventEmitter</span><span class="s3">();</span>
+  <span class="s2">var </span><span class="s1">events_new_listener_emitted </span><span class="s3">= [];</span>
+  <span class="s2">var </span><span class="s1">listeners_new_listener_emitted </span><span class="s3">= [];</span>
+
+  <span class="s0">// Sanity check</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">ee</span><span class="s3">.</span><span class="s1">addListener</span><span
+    class="s3">, </span><span class="s1">ee</span><span class="s3">.</span><span class="s1">on</span><span
+    class="s3">);</span>
+
+  <span class="s1">ee</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'newListener'</span><span class="s3">, </span><span class="s2">function</span><span
+    class="s3">(</span><span class="s1">event</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">) {</span>
+    <span class="s0">// Don't track newListener listeners.</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">event </span><span class="s3">=== </span><span
+    class="s4">'newListener'</span><span class="s3">)</span>
+      <span class="s2">return</span><span class="s3">;</span>
+
+    <span class="s1">events_new_listener_emitted</span><span class="s3">.</span><span class="s1">push</span><span
+    class="s3">(</span><span class="s1">event</span><span class="s3">);</span>
+    <span class="s1">listeners_new_listener_emitted</span><span class="s3">.</span><span class="s1">push</span><span
+    class="s3">(</span><span class="s1">listener</span><span class="s3">);</span>
+  <span class="s3">});</span>
+
+  <span class="s2">var </span><span class="s1">hello </span><span class="s3">= </span><span
+    class="s1">common</span><span class="s3">.</span><span class="s1">mustCall</span><span class="s3">(</span><span
+    class="s2">function</span><span class="s3">(</span><span class="s1">a</span><span class="s3">, </span><span
+    class="s1">b</span><span class="s3">) {</span>
+    <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s4">'a'</span><span class="s3">, </span><span class="s1">a</span><span
+    class="s3">);</span>
+    <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s4">'b'</span><span class="s3">, </span><span class="s1">b</span><span
+    class="s3">);</span>
+  <span class="s3">});</span>
+
+  <span class="s1">ee</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s4">'newListener'</span><span class="s3">, </span><span class="s2">function</span><span
+    class="s3">(</span><span class="s1">name</span><span class="s3">, </span><span class="s1">listener</span><span
+    class="s3">) {</span>
+    <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">name</span><span class="s3">, </span><span class="s4">'hello'</span><span
+    class="s3">);</span>
+    <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listener</span><span class="s3">, </span><span class="s1">hello</span><span
+    class="s3">);</span>
+
+    <span class="s2">var </span><span class="s1">listeners </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">listeners</span><span class="s3">(</span><span class="s4">'hello'</span><span
+    class="s3">);</span>
+    <span class="s1">assert</span><span class="s3">.</span><span class="s1">ok</span><span class="s3">(</span><span
+    class="s1">Array</span><span class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span
+    class="s1">listeners</span><span class="s3">));</span>
+    <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">, </span><span class="s5">0</span><span class="s3">);</span>
+  <span class="s3">});</span>
+
+  <span class="s1">ee</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'hello'</span><span class="s3">, </span><span class="s1">hello</span><span class="s3">);</span>
+  <span class="s1">ee</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s4">'foo'</span><span class="s3">, </span><span class="s1">assert</span><span class="s3">.</span><span
+    class="s1">fail</span><span class="s3">);</span>
+
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">ok</span><span class="s3">(</span><span
+    class="s1">Array</span><span class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span
+    class="s1">events_new_listener_emitted</span><span class="s3">));</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">events_new_listener_emitted</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">, </span><span class="s5">2</span><span class="s3">);</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">events_new_listener_emitted</span><span class="s3">[</span><span
+    class="s5">0</span><span class="s3">], </span><span class="s4">'hello'</span><span class="s3">);</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">events_new_listener_emitted</span><span class="s3">[</span><span
+    class="s5">1</span><span class="s3">], </span><span class="s4">'foo'</span><span class="s3">);</span>
+
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">ok</span><span class="s3">(</span><span
+    class="s1">Array</span><span class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span
+    class="s1">listeners_new_listener_emitted</span><span class="s3">));</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners_new_listener_emitted</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">, </span><span class="s5">2</span><span class="s3">);</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners_new_listener_emitted</span><span class="s3">[</span><span
+    class="s5">0</span><span class="s3">], </span><span class="s1">hello</span><span class="s3">);</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners_new_listener_emitted</span><span class="s3">[</span><span
+    class="s5">1</span><span class="s3">], </span><span class="s1">assert</span><span class="s3">.</span><span
+    class="s1">fail</span><span class="s3">);</span>
+
+  <span class="s1">ee</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s4">'hello'</span><span class="s3">, </span><span class="s4">'a'</span><span class="s3">, </span><span
+    class="s4">'b'</span><span class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s0">// just make sure that this doesn't throw:</span>
+<span class="s3">{</span>
+  <span class="s2">var </span><span class="s1">f </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">EventEmitter</span><span class="s3">();</span>
+
+  <span class="s1">f</span><span class="s3">.</span><span class="s1">setMaxListeners</span><span
+    class="s3">(</span><span class="s5">0</span><span class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s3">{</span>
+  <span class="s2">var </span><span class="s1">listen1 </span><span class="s3">= </span><span class="s2">function</span><span
+    class="s3">() {};</span>
+  <span class="s2">var </span><span class="s1">listen2 </span><span class="s3">= </span><span class="s2">function</span><span
+    class="s3">() {};</span>
+  <span class="s2">var </span><span class="s1">ee </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">EventEmitter</span><span class="s3">();</span>
+
+  <span class="s1">ee</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s4">'newListener'</span><span class="s3">, </span><span class="s2">function</span><span
+    class="s3">() {</span>
+    <span class="s2">var </span><span class="s1">listeners </span><span class="s3">= </span><span
+    class="s1">ee</span><span class="s3">.</span><span class="s1">listeners</span><span class="s3">(</span><span
+    class="s4">'hello'</span><span class="s3">);</span>
+    <span class="s1">assert</span><span class="s3">.</span><span class="s1">ok</span><span class="s3">(</span><span
+    class="s1">Array</span><span class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span
+    class="s1">listeners</span><span class="s3">));</span>
+    <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">, </span><span class="s5">0</span><span class="s3">);</span>
+    <span class="s1">ee</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s4">'newListener'</span><span class="s3">, </span><span class="s2">function</span><span
+    class="s3">() {</span>
+      <span class="s2">var </span><span class="s1">listeners </span><span class="s3">= </span><span class="s1">ee</span><span
+    class="s3">.</span><span class="s1">listeners</span><span class="s3">(</span><span class="s4">'hello'</span><span
+    class="s3">);</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">ok</span><span class="s3">(</span><span
+    class="s1">Array</span><span class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span
+    class="s1">listeners</span><span class="s3">));</span>
+      <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">, </span><span class="s5">0</span><span class="s3">);</span>
+    <span class="s3">});</span>
+    <span class="s1">ee</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'hello'</span><span class="s3">, </span><span class="s1">listen2</span><span class="s3">);</span>
+  <span class="s3">});</span>
+  <span class="s1">ee</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'hello'</span><span class="s3">, </span><span class="s1">listen1</span><span class="s3">);</span>
+  <span class="s0">// The order of listeners on an event is not always the order in which the</span>
+  <span class="s0">// listeners were added.</span>
+  <span class="s2">var </span><span class="s1">listeners </span><span class="s3">= </span><span
+    class="s1">ee</span><span class="s3">.</span><span class="s1">listeners</span><span class="s3">(</span><span
+    class="s4">'hello'</span><span class="s3">);</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">ok</span><span class="s3">(</span><span
+    class="s1">Array</span><span class="s3">.</span><span class="s1">isArray</span><span class="s3">(</span><span
+    class="s1">listeners</span><span class="s3">));</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">, </span><span class="s5">2</span><span class="s3">);</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners</span><span class="s3">[</span><span class="s5">0</span><span
+    class="s3">], </span><span class="s1">listen2</span><span class="s3">);</span>
+  <span class="s1">assert</span><span class="s3">.</span><span class="s1">strictEqual</span><span
+    class="s3">(</span><span class="s1">listeners</span><span class="s3">[</span><span class="s5">1</span><span
+    class="s3">], </span><span class="s1">listen1</span><span class="s3">);</span>
+<span class="s3">}</span>
+
+<span class="s0">// Verify that the listener must be a function</span>
+<span class="s1">assert</span><span class="s3">.</span><span class="s1">throws</span><span class="s3">(</span><span
+    class="s2">function</span><span class="s3">() {</span>
+  <span class="s2">var </span><span class="s1">ee </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">EventEmitter</span><span class="s3">();</span>
+
+  <span class="s1">ee</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s4">'foo'</span><span class="s3">, </span><span class="s2">null</span><span class="s3">);</span>
+<span class="s3">}, </span><span class="s6">/^TypeError: The &quot;listener&quot; argument must be of type Function. Received type object$/</span><span
+    class="s3">);</span>
+</pre>
+</body>
+</html>

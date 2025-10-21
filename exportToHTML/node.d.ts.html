@@ -1,0 +1,161 @@
+<html>
+<head>
+  <title>Node.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          Node.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s2">{ </span><span class="s1">FanOut </span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">'thingies/lib/fanout'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s2">{ </span><span class="s1">Buffer </span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">'../vendor/node/internal/buffer'</span><span class="s2">;</span>
+<span class="s0">export </span><span class="s1">type NodeEventModify </span><span class="s2">= [</span><span class="s1">type</span><span
+    class="s2">: </span><span class="s3">'modify'</span><span class="s2">];</span>
+<span class="s0">export </span><span class="s1">type NodeEventDelete </span><span class="s2">= [</span><span class="s1">type</span><span
+    class="s2">: </span><span class="s3">'delete'</span><span class="s2">];</span>
+<span class="s0">export </span><span class="s1">type NodeEvent </span><span class="s2">= </span><span class="s1">NodeEventModify </span><span
+    class="s2">| </span><span class="s1">NodeEventDelete</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* Node in a file system (like i-node, v-node).</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span
+    class="s1">Node </span><span class="s2">{</span>
+    <span class="s1">readonly changes</span><span class="s2">: </span><span class="s1">FanOut</span><span class="s2">&lt;</span><span
+    class="s1">NodeEvent</span><span class="s2">&gt;;</span>
+    <span class="s1">ino</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_uid</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_gid</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_atime</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_mtime</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_ctime</span><span class="s2">;</span>
+    <span class="s1">buf</span><span class="s2">: </span><span class="s1">Buffer</span><span class="s2">;</span>
+    <span class="s1">rdev</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">mode</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_nlink</span><span class="s2">;</span>
+    <span class="s1">symlink</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">ino</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">mode</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">);</span>
+    <span class="s1">set ctime</span><span class="s2">(</span><span class="s1">ctime</span><span
+    class="s2">: </span><span class="s1">Date</span><span class="s2">);</span>
+    <span class="s1">get ctime</span><span class="s2">(): </span><span class="s1">Date</span><span class="s2">;</span>
+    <span class="s1">set uid</span><span class="s2">(</span><span class="s1">uid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">);</span>
+    <span class="s1">get uid</span><span class="s2">(): </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">set gid</span><span class="s2">(</span><span class="s1">gid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">);</span>
+    <span class="s1">get gid</span><span class="s2">(): </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">set atime</span><span class="s2">(</span><span class="s1">atime</span><span
+    class="s2">: </span><span class="s1">Date</span><span class="s2">);</span>
+    <span class="s1">get atime</span><span class="s2">(): </span><span class="s1">Date</span><span class="s2">;</span>
+    <span class="s1">set mtime</span><span class="s2">(</span><span class="s1">mtime</span><span
+    class="s2">: </span><span class="s1">Date</span><span class="s2">);</span>
+    <span class="s1">get mtime</span><span class="s2">(): </span><span class="s1">Date</span><span class="s2">;</span>
+    <span class="s1">get perm</span><span class="s2">(): </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">set perm</span><span class="s2">(</span><span class="s1">perm</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">);</span>
+    <span class="s1">set nlink</span><span class="s2">(</span><span class="s1">nlink</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">);</span>
+    <span class="s1">get nlink</span><span class="s2">(): </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">getString</span><span class="s2">(</span><span class="s1">encoding</span><span
+    class="s2">?: </span><span class="s1">BufferEncoding</span><span class="s2">): </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s1">setString</span><span class="s2">(</span><span class="s1">str</span><span class="s2">: </span><span
+    class="s1">string</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">getBuffer</span><span class="s2">(): </span><span class="s1">Buffer</span><span class="s2">;</span>
+    <span class="s1">setBuffer</span><span class="s2">(</span><span class="s1">buf</span><span class="s2">: </span><span
+    class="s1">Buffer</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">getSize</span><span class="s2">(): </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">setModeProperty</span><span class="s2">(</span><span class="s1">property</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">isFile</span><span class="s2">(): </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">isDirectory</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isSymlink</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">isCharacterDevice</span><span class="s2">(): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">makeSymlink</span><span class="s2">(</span><span class="s1">symlink</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">buf</span><span class="s2">: </span><span
+    class="s1">Buffer</span><span class="s2">, </span><span class="s1">off</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">len</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">pos</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">number</span><span class="s2">;</span>
+    <span class="s1">read</span><span class="s2">(</span><span class="s1">buf</span><span class="s2">: </span><span
+    class="s1">Buffer </span><span class="s2">| </span><span class="s1">ArrayBufferView </span><span
+    class="s2">| </span><span class="s1">DataView</span><span class="s2">, </span><span class="s1">off</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">len</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">pos</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">): </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">truncate</span><span class="s2">(</span><span class="s1">len</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">chmod</span><span class="s2">(</span><span class="s1">perm</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">chown</span><span class="s2">(</span><span class="s1">uid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">touch</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">canRead</span><span class="s2">(</span><span class="s1">uid</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">canWrite</span><span class="s2">(</span><span class="s1">uid</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span class="s2">?: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">canExecute</span><span class="s2">(</span><span class="s1">uid</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">gid</span><span
+    class="s2">?: </span><span class="s1">number</span><span class="s2">): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">del</span><span class="s2">(): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">toJSON</span><span class="s2">(): {</span>
+        <span class="s1">ino</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">uid</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">gid</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">atime</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">mtime</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">ctime</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">perm</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">mode</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">nlink</span><span class="s2">: </span><span class="s1">number</span><span class="s2">;</span>
+        <span class="s1">symlink</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+        <span class="s1">data</span><span class="s2">: </span><span class="s1">string</span><span class="s2">;</span>
+    <span class="s2">};</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

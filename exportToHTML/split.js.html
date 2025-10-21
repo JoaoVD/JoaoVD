@@ -1,0 +1,134 @@
+<html>
+<head>
+  <title>split.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          split.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseToString </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseToString'</span><span class="s2">),</span>
+    <span class="s1">castSlice </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./_castSlice'</span><span class="s2">),</span>
+    <span class="s1">hasUnicode </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_hasUnicode'</span><span class="s2">),</span>
+    <span class="s1">isIterateeCall </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_isIterateeCall'</span><span class="s2">),</span>
+    <span class="s1">isRegExp </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isRegExp'</span><span class="s2">),</span>
+    <span class="s1">stringToArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_stringToArray'</span><span class="s2">),</span>
+    <span class="s1">toString </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./toString'</span><span class="s2">);</span>
+
+<span class="s4">/** Used as references for the maximum length and index of an array. */</span>
+<span class="s0">var </span><span class="s1">MAX_ARRAY_LENGTH </span><span class="s2">= </span><span class="s5">4294967295</span><span
+    class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Splits `string` by `separator`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This method is based on</span>
+ <span class="s4">* [`String#split`](https://mdn.io/String/split).</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">4.0.0</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">String</span>
+ <span class="s4">* </span><span class="s6">@param </span><span
+    class="s4">{string} [string=''] The string to split.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{RegExp|string} separator The separator pattern to split by.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{number} [limit] The length to truncate results to.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{Array} Returns the string segments.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.split('a-b-c', '-', 2);</span>
+ <span class="s4">* // =&gt; ['a', 'b']</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">split</span><span class="s2">(</span><span
+    class="s1">string</span><span class="s2">, </span><span class="s1">separator</span><span class="s2">, </span><span
+    class="s1">limit</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">limit </span><span
+    class="s2">&amp;&amp; </span><span class="s0">typeof </span><span class="s1">limit </span><span
+    class="s2">!= </span><span class="s3">'number' </span><span class="s2">&amp;&amp; </span><span class="s1">isIterateeCall</span><span
+    class="s2">(</span><span class="s1">string</span><span class="s2">, </span><span class="s1">separator</span><span
+    class="s2">, </span><span class="s1">limit</span><span class="s2">)) {</span>
+    <span class="s1">separator </span><span class="s2">= </span><span class="s1">limit </span><span class="s2">= </span><span
+    class="s1">undefined</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s1">limit </span><span class="s2">= </span><span class="s1">limit </span><span
+    class="s2">=== </span><span class="s1">undefined </span><span class="s2">? </span><span
+    class="s1">MAX_ARRAY_LENGTH </span><span class="s2">: </span><span class="s1">limit </span><span class="s2">&gt;&gt;&gt; </span><span
+    class="s5">0</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">limit</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s2">[];</span>
+  <span class="s2">}</span>
+  <span class="s1">string </span><span class="s2">= </span><span class="s1">toString</span><span
+    class="s2">(</span><span class="s1">string</span><span class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">string </span><span
+    class="s2">&amp;&amp; (</span>
+        <span class="s0">typeof </span><span class="s1">separator </span><span class="s2">== </span><span class="s3">'string' </span><span
+    class="s2">||</span>
+        <span class="s2">(</span><span class="s1">separator </span><span class="s2">!= </span><span
+    class="s0">null </span><span class="s2">&amp;&amp; !</span><span class="s1">isRegExp</span><span class="s2">(</span><span
+    class="s1">separator</span><span class="s2">))</span>
+      <span class="s2">)) {</span>
+    <span class="s1">separator </span><span class="s2">= </span><span class="s1">baseToString</span><span
+    class="s2">(</span><span class="s1">separator</span><span class="s2">);</span>
+    <span class="s0">if </span><span class="s2">(!</span><span class="s1">separator </span><span
+    class="s2">&amp;&amp; </span><span class="s1">hasUnicode</span><span class="s2">(</span><span
+    class="s1">string</span><span class="s2">)) {</span>
+      <span class="s0">return </span><span class="s1">castSlice</span><span class="s2">(</span><span class="s1">stringToArray</span><span
+    class="s2">(</span><span class="s1">string</span><span class="s2">), </span><span class="s5">0</span><span
+    class="s2">, </span><span class="s1">limit</span><span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">string</span><span class="s2">.</span><span
+    class="s1">split</span><span class="s2">(</span><span class="s1">separator</span><span class="s2">, </span><span
+    class="s1">limit</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">split</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

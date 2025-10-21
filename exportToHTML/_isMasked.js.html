@@ -1,0 +1,82 @@
+<html>
+<head>
+  <title>_isMasked.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _isMasked.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">coreJsData </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_coreJsData'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to detect methods masquerading as native. */</span>
+<span class="s0">var </span><span class="s1">maskSrcKey </span><span class="s2">= (</span><span
+    class="s0">function</span><span class="s2">() {</span>
+  <span class="s0">var </span><span class="s1">uid </span><span class="s2">= </span><span
+    class="s5">/[^.]+$/</span><span class="s2">.</span><span class="s1">exec</span><span class="s2">(</span><span
+    class="s1">coreJsData </span><span class="s2">&amp;&amp; </span><span class="s1">coreJsData</span><span
+    class="s2">.</span><span class="s1">keys </span><span class="s2">&amp;&amp; </span><span
+    class="s1">coreJsData</span><span class="s2">.</span><span class="s1">keys</span><span class="s2">.</span><span
+    class="s1">IE_PROTO </span><span class="s2">|| </span><span class="s3">''</span><span class="s2">);</span>
+  <span class="s0">return </span><span class="s1">uid </span><span class="s2">? (</span><span class="s3">'Symbol(src)_1.' </span><span
+    class="s2">+ </span><span class="s1">uid</span><span class="s2">) : </span><span class="s3">''</span><span
+    class="s2">;</span>
+<span class="s2">}());</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Checks if `func` has its source masked.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@private</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Function} func The function to check.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{boolean} Returns `true` if `func` is masked, else `false`.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">isMasked</span><span class="s2">(</span><span
+    class="s1">func</span><span class="s2">) {</span>
+  <span class="s0">return </span><span class="s2">!!</span><span class="s1">maskSrcKey </span><span class="s2">&amp;&amp; (</span><span
+    class="s1">maskSrcKey </span><span class="s0">in </span><span class="s1">func</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">isMasked</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<html>
+<head>
+  <title>flow.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          flow.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">declare namespace ESTree </span><span class="s1">{</span>
+    <span class="s2">interface </span><span class="s0">FlowTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">Node </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">FlowBaseTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">FlowLiteralTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowTypeAnnotation</span><span class="s1">, </span><span class="s0">Literal </span><span
+    class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">FlowDeclaration </span><span class="s2">extends </span><span
+    class="s0">Declaration </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">AnyTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowBaseTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">ArrayTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">elementType</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">BooleanLiteralTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowLiteralTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">BooleanTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowBaseTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">ClassImplements </span><span class="s2">extends </span><span
+    class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier</span><span class="s1">;</span>
+        <span class="s0">typeParameters</span><span class="s1">?: </span><span
+    class="s0">TypeParameterInstantiation </span><span class="s1">| </span><span class="s2">null</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">ClassProperty </span><span class="s1">{</span>
+        <span class="s0">key</span><span class="s1">: </span><span class="s0">Expression</span><span class="s1">;</span>
+        <span class="s0">value</span><span class="s1">?: </span><span class="s0">Expression </span><span
+    class="s1">| </span><span class="s2">null</span><span class="s1">;</span>
+        <span class="s0">typeAnnotation</span><span class="s1">?: </span><span class="s0">TypeAnnotation </span><span
+    class="s1">| </span><span class="s2">null</span><span class="s1">;</span>
+        <span class="s0">computed</span><span class="s1">: </span><span class="s0">boolean</span><span
+    class="s1">;</span>
+        <span class="s2">static</span><span class="s1">: </span><span class="s0">boolean</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">DeclareClass </span><span class="s2">extends </span><span
+    class="s0">FlowDeclaration </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier</span><span class="s1">;</span>
+        <span class="s0">typeParameters</span><span class="s1">?: </span><span
+    class="s0">TypeParameterDeclaration </span><span class="s1">| </span><span class="s2">null</span><span
+    class="s1">;</span>
+        <span class="s0">body</span><span class="s1">: </span><span class="s0">ObjectTypeAnnotation</span><span
+    class="s1">;</span>
+        <span class="s2">extends</span><span class="s1">: </span><span class="s0">InterfaceExtends</span><span
+    class="s1">[];</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">DeclareFunction </span><span class="s2">extends </span><span
+    class="s0">FlowDeclaration </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">DeclareModule </span><span class="s2">extends </span><span
+    class="s0">FlowDeclaration </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Literal </span><span
+    class="s1">| </span><span class="s0">Identifier</span><span class="s1">;</span>
+        <span class="s0">body</span><span class="s1">: </span><span class="s0">BlockStatement</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">DeclareVariable </span><span class="s2">extends </span><span
+    class="s0">FlowDeclaration </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">FunctionTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">params</span><span class="s1">: </span><span class="s0">FunctionTypeParam</span><span
+    class="s1">[];</span>
+        <span class="s0">returnType</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">;</span>
+        <span class="s0">rest</span><span class="s1">?: </span><span class="s0">FunctionTypeParam </span><span
+    class="s1">| </span><span class="s2">null</span><span class="s1">;</span>
+        <span class="s0">typeParameters</span><span class="s1">?: </span><span
+    class="s0">TypeParameterDeclaration </span><span class="s1">| </span><span class="s2">null</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">FunctionTypeParam </span><span class="s1">{</span>
+        <span class="s0">name</span><span class="s1">: </span><span class="s0">Identifier</span><span
+    class="s1">;</span>
+        <span class="s0">typeAnnotation</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">;</span>
+        <span class="s0">optional</span><span class="s1">: </span><span class="s0">boolean</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">GenericTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier </span><span
+    class="s1">| </span><span class="s0">QualifiedTypeIdentifier</span><span class="s1">;</span>
+        <span class="s0">typeParameters</span><span class="s1">?: </span><span
+    class="s0">TypeParameterInstantiation </span><span class="s1">| </span><span class="s2">null</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">InterfaceExtends </span><span class="s2">extends </span><span
+    class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier </span><span
+    class="s1">| </span><span class="s0">QualifiedTypeIdentifier</span><span class="s1">;</span>
+        <span class="s0">typeParameters</span><span class="s1">?: </span><span
+    class="s0">TypeParameterInstantiation </span><span class="s1">| </span><span class="s2">null</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">InterfaceDeclaration </span><span class="s2">extends </span><span
+    class="s0">FlowDeclaration </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier</span><span class="s1">;</span>
+        <span class="s0">typeParameters</span><span class="s1">?: </span><span
+    class="s0">TypeParameterDeclaration </span><span class="s1">| </span><span class="s2">null</span><span
+    class="s1">;</span>
+        <span class="s2">extends</span><span class="s1">: </span><span class="s0">InterfaceExtends</span><span
+    class="s1">[];</span>
+        <span class="s0">body</span><span class="s1">: </span><span class="s0">ObjectTypeAnnotation</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">IntersectionTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">types</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">[];</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">MixedTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowBaseTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">NullableTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">typeAnnotation</span><span class="s1">: </span><span class="s0">TypeAnnotation</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">NumberLiteralTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowLiteralTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">NumberTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowBaseTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">StringLiteralTypeAnnotation </span><span
+    class="s2">extends </span><span class="s0">FlowLiteralTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">StringTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowBaseTypeAnnotation </span><span class="s1">{}</span>
+
+    <span class="s2">interface </span><span class="s0">TupleTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">types</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">[];</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">TypeofTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">argument</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">TypeAlias </span><span class="s2">extends </span><span
+    class="s0">FlowDeclaration </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier</span><span class="s1">;</span>
+        <span class="s0">typeParameters</span><span class="s1">?: </span><span
+    class="s0">TypeParameterDeclaration </span><span class="s1">| </span><span class="s2">null</span><span
+    class="s1">;</span>
+        <span class="s0">right</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">TypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">typeAnnotation</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">TypeCastExpression </span><span class="s2">extends </span><span
+    class="s0">Expression </span><span class="s1">{</span>
+        <span class="s0">expression</span><span class="s1">: </span><span class="s0">Expression</span><span
+    class="s1">;</span>
+        <span class="s0">typeAnnotation</span><span class="s1">: </span><span class="s0">TypeAnnotation</span><span
+    class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">TypeParameterDeclaration </span><span
+    class="s2">extends </span><span class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">params</span><span class="s1">: </span><span class="s0">Identifier</span><span
+    class="s1">[];</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">TypeParameterInstantiation </span><span
+    class="s2">extends </span><span class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">params</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">[];</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">ObjectTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">properties</span><span class="s1">: </span><span class="s0">ObjectTypeProperty</span><span
+    class="s1">[];</span>
+        <span class="s0">indexers</span><span class="s1">: </span><span class="s0">ObjectTypeIndexer</span><span
+    class="s1">[];</span>
+        <span class="s0">callProperties</span><span class="s1">: </span><span
+    class="s0">ObjectTypeCallProperty</span><span class="s1">[];</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">ObjectTypeCallProperty </span><span
+    class="s2">extends </span><span class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">value</span><span class="s1">: </span><span class="s0">FunctionTypeAnnotation</span><span
+    class="s1">;</span>
+        <span class="s2">static</span><span class="s1">: </span><span class="s0">boolean</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">ObjectTypeIndexer </span><span class="s2">extends </span><span
+    class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier</span><span class="s1">;</span>
+        <span class="s0">key</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span class="s1">;</span>
+        <span class="s0">value</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">;</span>
+        <span class="s2">static</span><span class="s1">: </span><span class="s0">boolean</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">ObjectTypeProperty </span><span class="s2">extends </span><span
+    class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">key</span><span class="s1">: </span><span class="s0">Expression</span><span class="s1">;</span>
+        <span class="s0">value</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">;</span>
+        <span class="s0">optional</span><span class="s1">: </span><span class="s0">boolean</span><span
+    class="s1">;</span>
+        <span class="s2">static</span><span class="s1">: </span><span class="s0">boolean</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">QualifiedTypeIdentifier </span><span
+    class="s2">extends </span><span class="s0">Node </span><span class="s1">{</span>
+        <span class="s0">qualification</span><span class="s1">: </span><span class="s0">Identifier </span><span
+    class="s1">| </span><span class="s0">QualifiedTypeIdentifier</span><span class="s1">;</span>
+        <span class="s0">id</span><span class="s1">: </span><span class="s0">Identifier</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">UnionTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowTypeAnnotation </span><span class="s1">{</span>
+        <span class="s0">types</span><span class="s1">: </span><span class="s0">FlowTypeAnnotation</span><span
+    class="s1">[];</span>
+    <span class="s1">}</span>
+
+    <span class="s2">interface </span><span class="s0">VoidTypeAnnotation </span><span class="s2">extends </span><span
+    class="s0">FlowBaseTypeAnnotation </span><span class="s1">{}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<html>
+<head>
+  <title>items.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          items.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span class="s1">CodeKeywordDefinition</span><span
+  class="s2">, </span><span class="s1">AnySchema</span><span class="s2">, </span><span class="s1">AnySchemaObject</span><span
+  class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../types&quot;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{</span><span
+    class="s1">KeywordCxt</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/validate&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">_</span><span class="s2">} </span><span
+    class="s1">from </span><span class="s3">&quot;../../compile/codegen&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">, </span><span class="s1">mergeEvaluated</span><span class="s2">, </span><span
+    class="s1">checkStrictMode</span><span class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../../compile/util&quot;</span>
+<span class="s0">import </span><span class="s2">{</span><span class="s1">validateArray</span><span
+    class="s2">} </span><span class="s1">from </span><span class="s3">&quot;../code&quot;</span>
+
+<span class="s0">const </span><span class="s1">def</span><span class="s2">: </span><span class="s1">CodeKeywordDefinition </span><span
+    class="s2">= {</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s3">&quot;items&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s3">&quot;array&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">schemaType</span><span class="s2">: [</span><span class="s3">&quot;object&quot;</span><span
+    class="s2">, </span><span class="s3">&quot;array&quot;</span><span class="s2">, </span><span class="s3">&quot;boolean&quot;</span><span
+    class="s2">],</span>
+  <span class="s1">before</span><span class="s2">: </span><span class="s3">&quot;uniqueItems&quot;</span><span
+    class="s2">,</span>
+  <span class="s1">code</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">: </span><span
+    class="s1">KeywordCxt</span><span class="s2">) {</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">schema</span><span class="s2">, </span><span
+    class="s1">it</span><span class="s2">} = </span><span class="s1">cxt</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">Array</span><span class="s2">.</span><span
+    class="s1">isArray</span><span class="s2">(</span><span class="s1">schema</span><span class="s2">)) </span><span
+    class="s0">return </span><span class="s1">validateTuple</span><span class="s2">(</span><span
+    class="s1">cxt</span><span class="s2">, </span><span class="s3">&quot;additionalItems&quot;</span><span
+    class="s2">, </span><span class="s1">schema</span><span class="s2">)</span>
+    <span class="s1">it</span><span class="s2">.</span><span class="s1">items </span><span class="s2">= </span><span
+    class="s0">true</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span class="s1">schema</span><span
+    class="s2">)) </span><span class="s0">return</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">validateArray</span><span class="s2">(</span><span class="s1">cxt</span><span class="s2">))</span>
+  <span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s0">export function </span><span class="s1">validateTuple</span><span class="s2">(</span>
+  <span class="s1">cxt</span><span class="s2">: </span><span class="s1">KeywordCxt</span><span class="s2">,</span>
+  <span class="s1">extraItems</span><span class="s2">: </span><span class="s1">string</span><span class="s2">,</span>
+  <span class="s1">schArr</span><span class="s2">: </span><span class="s1">AnySchema</span><span class="s2">[] = </span><span
+    class="s1">cxt</span><span class="s2">.</span><span class="s1">schema</span>
+<span class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+  <span class="s0">const </span><span class="s2">{</span><span class="s1">gen</span><span class="s2">, </span><span
+    class="s1">parentSchema</span><span class="s2">, </span><span class="s1">data</span><span class="s2">, </span><span
+    class="s1">keyword</span><span class="s2">, </span><span class="s1">it</span><span class="s2">} = </span><span
+    class="s1">cxt</span>
+  <span class="s1">checkStrictTuple</span><span class="s2">(</span><span class="s1">parentSchema</span><span class="s2">)</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">opts</span><span class="s2">.</span><span class="s1">unevaluated </span><span
+    class="s2">&amp;&amp; </span><span class="s1">schArr</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">&amp;&amp; </span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">items </span><span class="s2">!== </span><span class="s0">true</span><span class="s2">) {</span>
+    <span class="s1">it</span><span class="s2">.</span><span class="s1">items </span><span class="s2">= </span><span
+    class="s1">mergeEvaluated</span><span class="s2">.</span><span class="s1">items</span><span class="s2">(</span><span
+    class="s1">gen</span><span class="s2">, </span><span class="s1">schArr</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">, </span><span class="s1">it</span><span class="s2">.</span><span
+    class="s1">items</span><span class="s2">)</span>
+  <span class="s2">}</span>
+  <span class="s0">const </span><span class="s1">valid </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">name</span><span class="s2">(</span><span
+    class="s3">&quot;valid&quot;</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">len </span><span class="s2">= </span><span class="s1">gen</span><span
+    class="s2">.</span><span class="s1">const</span><span class="s2">(</span><span
+    class="s3">&quot;len&quot;</span><span class="s2">, </span><span class="s1">_</span><span class="s3">`</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">data</span><span class="s2">}</span><span class="s3">.length`</span><span
+    class="s2">)</span>
+  <span class="s1">schArr</span><span class="s2">.</span><span class="s1">forEach</span><span class="s2">((</span><span
+    class="s1">sch</span><span class="s2">: </span><span class="s1">AnySchema</span><span class="s2">, </span><span
+    class="s1">i</span><span class="s2">: </span><span class="s1">number</span><span class="s2">) =&gt; {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">alwaysValidSchema</span><span
+    class="s2">(</span><span class="s1">it</span><span class="s2">, </span><span class="s1">sch</span><span class="s2">)) </span><span
+    class="s0">return</span>
+    <span class="s1">gen</span><span class="s2">.</span><span class="s1">if</span><span class="s2">(</span><span
+    class="s1">_</span><span class="s3">`</span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">len</span><span class="s2">} </span><span class="s3">&gt; </span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">i</span><span class="s2">}</span><span class="s3">`</span><span class="s2">, () =&gt;</span>
+      <span class="s1">cxt</span><span class="s2">.</span><span class="s1">subschema</span><span class="s2">(</span>
+        <span class="s2">{</span>
+          <span class="s1">keyword</span><span class="s2">,</span>
+          <span class="s1">schemaProp</span><span class="s2">: </span><span class="s1">i</span><span class="s2">,</span>
+          <span class="s1">dataProp</span><span class="s2">: </span><span class="s1">i</span><span class="s2">,</span>
+        <span class="s2">},</span>
+        <span class="s1">valid</span>
+      <span class="s2">)</span>
+    <span class="s2">)</span>
+    <span class="s1">cxt</span><span class="s2">.</span><span class="s1">ok</span><span class="s2">(</span><span
+    class="s1">valid</span><span class="s2">)</span>
+  <span class="s2">})</span>
+
+  <span class="s0">function </span><span class="s1">checkStrictTuple</span><span class="s2">(</span><span
+    class="s1">sch</span><span class="s2">: </span><span class="s1">AnySchemaObject</span><span
+    class="s2">): </span><span class="s0">void </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s2">{</span><span class="s1">opts</span><span class="s2">, </span><span
+    class="s1">errSchemaPath</span><span class="s2">} = </span><span class="s1">it</span>
+    <span class="s0">const </span><span class="s1">l </span><span class="s2">= </span><span
+    class="s1">schArr</span><span class="s2">.</span><span class="s1">length</span>
+    <span class="s0">const </span><span class="s1">fullTuple </span><span class="s2">= </span><span class="s1">l </span><span
+    class="s2">=== </span><span class="s1">sch</span><span class="s2">.</span><span class="s1">minItems </span><span
+    class="s2">&amp;&amp; (</span><span class="s1">l </span><span class="s2">=== </span><span class="s1">sch</span><span
+    class="s2">.</span><span class="s1">maxItems </span><span class="s2">|| </span><span class="s1">sch</span><span
+    class="s2">[</span><span class="s1">extraItems</span><span class="s2">] === </span><span
+    class="s0">false</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">opts</span><span class="s2">.</span><span
+    class="s1">strictTuples </span><span class="s2">&amp;&amp; !</span><span class="s1">fullTuple</span><span
+    class="s2">) {</span>
+      <span class="s0">const </span><span class="s1">msg </span><span class="s2">= </span><span
+    class="s3">`&quot;</span><span class="s1">$</span><span class="s2">{</span><span class="s1">keyword</span><span
+    class="s2">}</span><span class="s3">&quot; is </span><span class="s1">$</span><span class="s2">{</span><span
+    class="s1">l</span><span class="s2">}</span><span class="s3">-tuple, but minItems or maxItems/</span><span
+    class="s1">$</span><span class="s2">{</span><span class="s1">extraItems</span><span class="s2">} </span><span
+    class="s3">are not specified or different at path &quot;</span><span class="s1">$</span><span
+    class="s2">{</span><span class="s1">errSchemaPath</span><span class="s2">}</span><span class="s3">&quot;`</span>
+      <span class="s1">checkStrictMode</span><span class="s2">(</span><span class="s1">it</span><span
+    class="s2">, </span><span class="s1">msg</span><span class="s2">, </span><span class="s1">opts</span><span
+    class="s2">.</span><span class="s1">strictTuples</span><span class="s2">)</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export default </span><span class="s1">def</span>
+</pre>
+</body>
+</html>

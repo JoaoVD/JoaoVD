@@ -1,0 +1,336 @@
+<html>
+<head>
+  <title>browser.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #cf8e6d;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+
+    .s8 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          browser.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* This is the web browser implementation of `debug()`.</span>
+ <span class="s0">*</span>
+ <span class="s0">* Expose `debug()` as the module.</span>
+ <span class="s0">*/</span>
+
+<span class="s1">exports </span><span class="s2">= </span><span class="s1">module</span><span class="s2">.</span><span
+    class="s1">exports </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./debug'</span><span class="s2">);</span>
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">log </span><span class="s2">= </span><span
+    class="s1">log</span><span class="s2">;</span>
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">formatArgs </span><span
+    class="s2">= </span><span class="s1">formatArgs</span><span class="s2">;</span>
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">save </span><span class="s2">= </span><span
+    class="s1">save</span><span class="s2">;</span>
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">load </span><span class="s2">= </span><span
+    class="s1">load</span><span class="s2">;</span>
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">useColors </span><span
+    class="s2">= </span><span class="s1">useColors</span><span class="s2">;</span>
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">storage </span><span class="s2">= </span><span
+    class="s3">'undefined' </span><span class="s2">!= </span><span class="s4">typeof </span><span
+    class="s1">chrome</span>
+               <span class="s2">&amp;&amp; </span><span class="s3">'undefined' </span><span class="s2">!= </span><span
+    class="s4">typeof </span><span class="s1">chrome</span><span class="s2">.</span><span class="s1">storage</span>
+                  <span class="s2">? </span><span class="s1">chrome</span><span class="s2">.</span><span class="s1">storage</span><span
+    class="s2">.</span><span class="s1">local</span>
+                  <span class="s2">: </span><span class="s1">localstorage</span><span class="s2">();</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Colors.</span>
+ <span class="s0">*/</span>
+
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">colors </span><span class="s2">= [</span>
+  <span class="s3">'lightseagreen'</span><span class="s2">,</span>
+  <span class="s3">'forestgreen'</span><span class="s2">,</span>
+  <span class="s3">'goldenrod'</span><span class="s2">,</span>
+  <span class="s3">'dodgerblue'</span><span class="s2">,</span>
+  <span class="s3">'darkorchid'</span><span class="s2">,</span>
+  <span class="s3">'crimson'</span>
+<span class="s2">];</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Currently only WebKit-based Web Inspectors, Firefox &gt;= v31,</span>
+ <span class="s0">* and the Firebug extension (any Firefox version) are known</span>
+ <span class="s0">* to support &quot;%c&quot; CSS customizations.</span>
+ <span class="s0">*</span>
+ <span class="s0">* TODO: add a `localStorage` variable to explicitly enable/disable colors</span>
+ <span class="s0">*/</span>
+
+<span class="s4">function </span><span class="s1">useColors</span><span class="s2">() {</span>
+  <span class="s5">// NB: In an Electron preload script, document will be defined but not fully</span>
+  <span class="s5">// initialized. Since we know we're in Chrome, we'll just detect this case</span>
+  <span class="s5">// explicitly</span>
+  <span class="s4">if </span><span class="s2">(</span><span class="s4">typeof </span><span
+    class="s1">window </span><span class="s2">!== </span><span class="s3">'undefined' </span><span
+    class="s2">&amp;&amp; </span><span class="s1">window</span><span class="s2">.</span><span class="s1">process </span><span
+    class="s2">&amp;&amp; </span><span class="s1">window</span><span class="s2">.</span><span
+    class="s1">process</span><span class="s2">.</span><span class="s1">type </span><span class="s2">=== </span><span
+    class="s3">'renderer'</span><span class="s2">) {</span>
+    <span class="s4">return true</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s5">// is webkit? http://stackoverflow.com/a/16459606/376773</span>
+  <span class="s5">// document is undefined in react-native: https://github.com/facebook/react-native/pull/1632</span>
+  <span class="s4">return </span><span class="s2">(</span><span class="s4">typeof </span><span
+    class="s1">document </span><span class="s2">!== </span><span class="s3">'undefined' </span><span class="s2">&amp;&amp; </span><span
+    class="s1">document</span><span class="s2">.</span><span class="s1">documentElement </span><span class="s2">&amp;&amp; </span><span
+    class="s1">document</span><span class="s2">.</span><span class="s1">documentElement</span><span
+    class="s2">.</span><span class="s1">style </span><span class="s2">&amp;&amp; </span><span class="s1">document</span><span
+    class="s2">.</span><span class="s1">documentElement</span><span class="s2">.</span><span
+    class="s1">style</span><span class="s2">.</span><span class="s1">WebkitAppearance</span><span class="s2">) ||</span>
+    <span class="s5">// is firebug? http://stackoverflow.com/a/398120/376773</span>
+    <span class="s2">(</span><span class="s4">typeof </span><span class="s1">window </span><span
+    class="s2">!== </span><span class="s3">'undefined' </span><span class="s2">&amp;&amp; </span><span
+    class="s1">window</span><span class="s2">.</span><span class="s1">console </span><span
+    class="s2">&amp;&amp; (</span><span class="s1">window</span><span class="s2">.</span><span class="s1">console</span><span
+    class="s2">.</span><span class="s1">firebug </span><span class="s2">|| (</span><span class="s1">window</span><span
+    class="s2">.</span><span class="s1">console</span><span class="s2">.</span><span class="s1">exception </span><span
+    class="s2">&amp;&amp; </span><span class="s1">window</span><span class="s2">.</span><span
+    class="s1">console</span><span class="s2">.</span><span class="s1">table</span><span class="s2">))) ||</span>
+    <span class="s5">// is firefox &gt;= v31?</span>
+    <span class="s5">// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages</span>
+    <span class="s2">(</span><span class="s4">typeof </span><span class="s1">navigator </span><span
+    class="s2">!== </span><span class="s3">'undefined' </span><span class="s2">&amp;&amp; </span><span class="s1">navigator</span><span
+    class="s2">.</span><span class="s1">userAgent </span><span class="s2">&amp;&amp; </span><span
+    class="s1">navigator</span><span class="s2">.</span><span class="s1">userAgent</span><span class="s2">.</span><span
+    class="s1">toLowerCase</span><span class="s2">().</span><span class="s1">match</span><span class="s2">(</span><span
+    class="s6">/firefox\/(\d+)/</span><span class="s2">) &amp;&amp; </span><span class="s1">parseInt</span><span
+    class="s2">(</span><span class="s1">RegExp</span><span class="s2">.</span><span class="s1">$1</span><span
+    class="s2">, </span><span class="s7">10</span><span class="s2">) &gt;= </span><span class="s7">31</span><span
+    class="s2">) ||</span>
+    <span class="s5">// double check webkit in userAgent just in case we are in a worker</span>
+    <span class="s2">(</span><span class="s4">typeof </span><span class="s1">navigator </span><span
+    class="s2">!== </span><span class="s3">'undefined' </span><span class="s2">&amp;&amp; </span><span class="s1">navigator</span><span
+    class="s2">.</span><span class="s1">userAgent </span><span class="s2">&amp;&amp; </span><span
+    class="s1">navigator</span><span class="s2">.</span><span class="s1">userAgent</span><span class="s2">.</span><span
+    class="s1">toLowerCase</span><span class="s2">().</span><span class="s1">match</span><span class="s2">(</span><span
+    class="s6">/applewebkit\/(\d+)/</span><span class="s2">));</span>
+<span class="s2">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.</span>
+ <span class="s0">*/</span>
+
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">formatters</span><span class="s2">.</span><span
+    class="s1">j </span><span class="s2">= </span><span class="s4">function</span><span class="s2">(</span><span
+    class="s1">v</span><span class="s2">) {</span>
+  <span class="s4">try </span><span class="s2">{</span>
+    <span class="s4">return </span><span class="s1">JSON</span><span class="s2">.</span><span
+    class="s1">stringify</span><span class="s2">(</span><span class="s1">v</span><span class="s2">);</span>
+  <span class="s2">} </span><span class="s4">catch </span><span class="s2">(</span><span class="s1">err</span><span
+    class="s2">) {</span>
+    <span class="s4">return </span><span class="s3">'[UnexpectedJSONParseError]: ' </span><span
+    class="s2">+ </span><span class="s1">err</span><span class="s2">.</span><span class="s1">message</span><span
+    class="s2">;</span>
+  <span class="s2">}</span>
+<span class="s2">};</span>
+
+
+<span class="s0">/**</span>
+ <span class="s0">* Colorize log arguments if enabled.</span>
+ <span class="s0">*</span>
+ <span class="s0">* </span><span class="s8">@api </span><span class="s0">public</span>
+ <span class="s0">*/</span>
+
+<span class="s4">function </span><span class="s1">formatArgs</span><span class="s2">(</span><span class="s1">args</span><span
+    class="s2">) {</span>
+  <span class="s4">var </span><span class="s1">useColors </span><span class="s2">= </span><span
+    class="s4">this</span><span class="s2">.</span><span class="s1">useColors</span><span class="s2">;</span>
+
+  <span class="s1">args</span><span class="s2">[</span><span class="s7">0</span><span class="s2">] = (</span><span
+    class="s1">useColors </span><span class="s2">? </span><span class="s3">'%c' </span><span class="s2">: </span><span
+    class="s3">''</span><span class="s2">)</span>
+    <span class="s2">+ </span><span class="s4">this</span><span class="s2">.</span><span class="s1">namespace</span>
+    <span class="s2">+ (</span><span class="s1">useColors </span><span class="s2">? </span><span
+    class="s3">' %c' </span><span class="s2">: </span><span class="s3">' '</span><span class="s2">)</span>
+    <span class="s2">+ </span><span class="s1">args</span><span class="s2">[</span><span class="s7">0</span><span
+    class="s2">]</span>
+    <span class="s2">+ (</span><span class="s1">useColors </span><span class="s2">? </span><span
+    class="s3">'%c ' </span><span class="s2">: </span><span class="s3">' '</span><span class="s2">)</span>
+    <span class="s2">+ </span><span class="s3">'+' </span><span class="s2">+ </span><span class="s1">exports</span><span
+    class="s2">.</span><span class="s1">humanize</span><span class="s2">(</span><span class="s4">this</span><span
+    class="s2">.</span><span class="s1">diff</span><span class="s2">);</span>
+
+  <span class="s4">if </span><span class="s2">(!</span><span class="s1">useColors</span><span class="s2">) </span><span
+    class="s4">return</span><span class="s2">;</span>
+
+  <span class="s4">var </span><span class="s1">c </span><span class="s2">= </span><span
+    class="s3">'color: ' </span><span class="s2">+ </span><span class="s4">this</span><span class="s2">.</span><span
+    class="s1">color</span><span class="s2">;</span>
+  <span class="s1">args</span><span class="s2">.</span><span class="s1">splice</span><span class="s2">(</span><span
+    class="s7">1</span><span class="s2">, </span><span class="s7">0</span><span class="s2">, </span><span
+    class="s1">c</span><span class="s2">, </span><span class="s3">'color: inherit'</span><span class="s2">)</span>
+
+  <span class="s5">// the final &quot;%c&quot; is somewhat tricky, because there could be other</span>
+  <span class="s5">// arguments passed either before or after the %c, so we need to</span>
+  <span class="s5">// figure out the correct index to insert the CSS into</span>
+  <span class="s4">var </span><span class="s1">index </span><span class="s2">= </span><span class="s7">0</span><span
+    class="s2">;</span>
+  <span class="s4">var </span><span class="s1">lastC </span><span class="s2">= </span><span class="s7">0</span><span
+    class="s2">;</span>
+  <span class="s1">args</span><span class="s2">[</span><span class="s7">0</span><span class="s2">].</span><span
+    class="s1">replace</span><span class="s2">(</span><span class="s6">/%[a-zA-Z%]/g</span><span
+    class="s2">, </span><span class="s4">function</span><span class="s2">(</span><span class="s1">match</span><span
+    class="s2">) {</span>
+    <span class="s4">if </span><span class="s2">(</span><span class="s3">'%%' </span><span class="s2">=== </span><span
+    class="s1">match</span><span class="s2">) </span><span class="s4">return</span><span class="s2">;</span>
+    <span class="s1">index</span><span class="s2">++;</span>
+    <span class="s4">if </span><span class="s2">(</span><span class="s3">'%c' </span><span class="s2">=== </span><span
+    class="s1">match</span><span class="s2">) {</span>
+      <span class="s5">// we only are interested in the *last* %c</span>
+      <span class="s5">// (the user may have provided their own)</span>
+      <span class="s1">lastC </span><span class="s2">= </span><span class="s1">index</span><span class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">});</span>
+
+  <span class="s1">args</span><span class="s2">.</span><span class="s1">splice</span><span class="s2">(</span><span
+    class="s1">lastC</span><span class="s2">, </span><span class="s7">0</span><span class="s2">, </span><span
+    class="s1">c</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Invokes `console.log()` when available.</span>
+ <span class="s0">* No-op when `console.log` is not a &quot;function&quot;.</span>
+ <span class="s0">*</span>
+ <span class="s0">* </span><span class="s8">@api </span><span class="s0">public</span>
+ <span class="s0">*/</span>
+
+<span class="s4">function </span><span class="s1">log</span><span class="s2">() {</span>
+  <span class="s5">// this hackery is required for IE8/9, where</span>
+  <span class="s5">// the `console.log` function doesn't have 'apply'</span>
+  <span class="s4">return </span><span class="s3">'object' </span><span class="s2">=== </span><span
+    class="s4">typeof </span><span class="s1">console</span>
+    <span class="s2">&amp;&amp; </span><span class="s1">console</span><span class="s2">.</span><span
+    class="s1">log</span>
+    <span class="s2">&amp;&amp; </span><span class="s1">Function</span><span class="s2">.</span><span class="s1">prototype</span><span
+    class="s2">.</span><span class="s1">apply</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s1">console</span><span class="s2">.</span><span class="s1">log</span><span
+    class="s2">, </span><span class="s1">console</span><span class="s2">, </span><span class="s1">arguments</span><span
+    class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Save `namespaces`.</span>
+ <span class="s0">*</span>
+ <span class="s0">* </span><span class="s8">@param </span><span class="s0">{String} namespaces</span>
+ <span class="s0">* </span><span class="s8">@api </span><span class="s0">private</span>
+ <span class="s0">*/</span>
+
+<span class="s4">function </span><span class="s1">save</span><span class="s2">(</span><span class="s1">namespaces</span><span
+    class="s2">) {</span>
+  <span class="s4">try </span><span class="s2">{</span>
+    <span class="s4">if </span><span class="s2">(</span><span class="s4">null </span><span class="s2">== </span><span
+    class="s1">namespaces</span><span class="s2">) {</span>
+      <span class="s1">exports</span><span class="s2">.</span><span class="s1">storage</span><span
+    class="s2">.</span><span class="s1">removeItem</span><span class="s2">(</span><span class="s3">'debug'</span><span
+    class="s2">);</span>
+    <span class="s2">} </span><span class="s4">else </span><span class="s2">{</span>
+      <span class="s1">exports</span><span class="s2">.</span><span class="s1">storage</span><span
+    class="s2">.</span><span class="s1">debug </span><span class="s2">= </span><span class="s1">namespaces</span><span
+    class="s2">;</span>
+    <span class="s2">}</span>
+  <span class="s2">} </span><span class="s4">catch</span><span class="s2">(</span><span class="s1">e</span><span
+    class="s2">) {}</span>
+<span class="s2">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Load `namespaces`.</span>
+ <span class="s0">*</span>
+ <span class="s0">* </span><span class="s8">@return </span><span class="s0">{String} returns the previously persisted debug modes</span>
+ <span class="s0">* </span><span class="s8">@api </span><span class="s0">private</span>
+ <span class="s0">*/</span>
+
+<span class="s4">function </span><span class="s1">load</span><span class="s2">() {</span>
+  <span class="s4">var </span><span class="s1">r</span><span class="s2">;</span>
+  <span class="s4">try </span><span class="s2">{</span>
+    <span class="s1">r </span><span class="s2">= </span><span class="s1">exports</span><span class="s2">.</span><span
+    class="s1">storage</span><span class="s2">.</span><span class="s1">debug</span><span class="s2">;</span>
+  <span class="s2">} </span><span class="s4">catch</span><span class="s2">(</span><span class="s1">e</span><span
+    class="s2">) {}</span>
+
+  <span class="s5">// If debug isn't set in LS, and we're in Electron, try to load $DEBUG</span>
+  <span class="s4">if </span><span class="s2">(!</span><span class="s1">r </span><span
+    class="s2">&amp;&amp; </span><span class="s4">typeof </span><span class="s1">process </span><span
+    class="s2">!== </span><span class="s3">'undefined' </span><span class="s2">&amp;&amp; </span><span
+    class="s3">'env' </span><span class="s4">in </span><span class="s1">process</span><span class="s2">) {</span>
+    <span class="s1">r </span><span class="s2">= </span><span class="s1">process</span><span class="s2">.</span><span
+    class="s1">env</span><span class="s2">.</span><span class="s1">DEBUG</span><span class="s2">;</span>
+  <span class="s2">}</span>
+
+  <span class="s4">return </span><span class="s1">r</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Enable namespaces listed in `localStorage.debug` initially.</span>
+ <span class="s0">*/</span>
+
+<span class="s1">exports</span><span class="s2">.</span><span class="s1">enable</span><span class="s2">(</span><span
+    class="s1">load</span><span class="s2">());</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* Localstorage attempts to return the localstorage.</span>
+ <span class="s0">*</span>
+ <span class="s0">* This is necessary because safari throws</span>
+ <span class="s0">* when a user disables cookies/localstorage</span>
+ <span class="s0">* and you attempt to access it.</span>
+ <span class="s0">*</span>
+ <span class="s0">* </span><span class="s8">@return </span><span class="s0">{LocalStorage}</span>
+ <span class="s0">* </span><span class="s8">@api </span><span class="s0">private</span>
+ <span class="s0">*/</span>
+
+<span class="s4">function </span><span class="s1">localstorage</span><span class="s2">() {</span>
+  <span class="s4">try </span><span class="s2">{</span>
+    <span class="s4">return </span><span class="s1">window</span><span class="s2">.</span><span
+    class="s1">localStorage</span><span class="s2">;</span>
+  <span class="s2">} </span><span class="s4">catch </span><span class="s2">(</span><span class="s1">e</span><span
+    class="s2">) {}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,1682 @@
+<html>
+<head>
+  <title>socksclient.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #2aacb8;
+    }
+
+    .s5 {
+      color: #7a7e85;
+    }
+
+    .s6 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          socksclient.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">&quot;use strict&quot;</span><span class="s1">;</span>
+<span class="s3">var </span><span class="s2">__awaiter </span><span class="s1">= (</span><span
+    class="s3">this </span><span class="s1">&amp;&amp; </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">__awaiter</span><span class="s1">) || </span><span class="s3">function </span><span
+    class="s1">(</span><span class="s2">thisArg</span><span class="s1">, </span><span class="s2">_arguments</span><span
+    class="s1">, </span><span class="s2">P</span><span class="s1">, </span><span class="s2">generator</span><span
+    class="s1">) {</span>
+    <span class="s3">function </span><span class="s2">adopt</span><span class="s1">(</span><span class="s2">value</span><span
+    class="s1">) { </span><span class="s3">return </span><span class="s2">value </span><span
+    class="s3">instanceof </span><span class="s2">P </span><span class="s1">? </span><span class="s2">value </span><span
+    class="s1">: </span><span class="s3">new </span><span class="s2">P</span><span class="s1">(</span><span class="s3">function </span><span
+    class="s1">(</span><span class="s2">resolve</span><span class="s1">) { </span><span class="s2">resolve</span><span
+    class="s1">(</span><span class="s2">value</span><span class="s1">); }); }</span>
+    <span class="s3">return new </span><span class="s1">(</span><span class="s2">P </span><span
+    class="s1">|| (</span><span class="s2">P </span><span class="s1">= </span><span class="s2">Promise</span><span
+    class="s1">))(</span><span class="s3">function </span><span class="s1">(</span><span class="s2">resolve</span><span
+    class="s1">, </span><span class="s2">reject</span><span class="s1">) {</span>
+        <span class="s3">function </span><span class="s2">fulfilled</span><span class="s1">(</span><span class="s2">value</span><span
+    class="s1">) { </span><span class="s3">try </span><span class="s1">{ </span><span class="s2">step</span><span
+    class="s1">(</span><span class="s2">generator</span><span class="s1">.</span><span class="s2">next</span><span
+    class="s1">(</span><span class="s2">value</span><span class="s1">)); } </span><span class="s3">catch </span><span
+    class="s1">(</span><span class="s2">e</span><span class="s1">) { </span><span class="s2">reject</span><span
+    class="s1">(</span><span class="s2">e</span><span class="s1">); } }</span>
+        <span class="s3">function </span><span class="s2">rejected</span><span class="s1">(</span><span
+    class="s2">value</span><span class="s1">) { </span><span class="s3">try </span><span class="s1">{ </span><span
+    class="s2">step</span><span class="s1">(</span><span class="s2">generator</span><span class="s1">[</span><span
+    class="s0">&quot;throw&quot;</span><span class="s1">](</span><span class="s2">value</span><span
+    class="s1">)); } </span><span class="s3">catch </span><span class="s1">(</span><span class="s2">e</span><span
+    class="s1">) { </span><span class="s2">reject</span><span class="s1">(</span><span class="s2">e</span><span
+    class="s1">); } }</span>
+        <span class="s3">function </span><span class="s2">step</span><span class="s1">(</span><span
+    class="s2">result</span><span class="s1">) { </span><span class="s2">result</span><span class="s1">.</span><span
+    class="s2">done </span><span class="s1">? </span><span class="s2">resolve</span><span class="s1">(</span><span
+    class="s2">result</span><span class="s1">.</span><span class="s2">value</span><span class="s1">) : </span><span
+    class="s2">adopt</span><span class="s1">(</span><span class="s2">result</span><span class="s1">.</span><span
+    class="s2">value</span><span class="s1">).</span><span class="s2">then</span><span class="s1">(</span><span
+    class="s2">fulfilled</span><span class="s1">, </span><span class="s2">rejected</span><span class="s1">); }</span>
+        <span class="s2">step</span><span class="s1">((</span><span class="s2">generator </span><span
+    class="s1">= </span><span class="s2">generator</span><span class="s1">.</span><span class="s2">apply</span><span
+    class="s1">(</span><span class="s2">thisArg</span><span class="s1">, </span><span class="s2">_arguments </span><span
+    class="s1">|| [])).</span><span class="s2">next</span><span class="s1">());</span>
+    <span class="s1">});</span>
+<span class="s1">};</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span
+    class="s0">&quot;__esModule&quot;</span><span class="s1">, { </span><span class="s2">value</span><span
+    class="s1">: </span><span class="s3">true </span><span class="s1">});</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">SocksClientError </span><span
+    class="s1">= </span><span class="s2">exports</span><span class="s1">.</span><span
+    class="s2">SocksClient </span><span class="s1">= </span><span class="s3">void </span><span class="s4">0</span><span
+    class="s1">;</span>
+<span class="s3">const </span><span class="s2">events_1 </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;events&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">net </span><span class="s1">= </span><span class="s2">require</span><span
+    class="s1">(</span><span class="s0">&quot;net&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">smart_buffer_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;smart-buffer&quot;</span><span class="s1">);</span>
+<span class="s3">const </span><span class="s2">constants_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../common/constants&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">helpers_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../common/helpers&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">receivebuffer_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../common/receivebuffer&quot;</span><span
+    class="s1">);</span>
+<span class="s3">const </span><span class="s2">util_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;../common/util&quot;</span><span
+    class="s1">);</span>
+<span class="s2">Object</span><span class="s1">.</span><span class="s2">defineProperty</span><span
+    class="s1">(</span><span class="s2">exports</span><span class="s1">, </span><span class="s0">&quot;SocksClientError&quot;</span><span
+    class="s1">, { </span><span class="s2">enumerable</span><span class="s1">: </span><span class="s3">true</span><span
+    class="s1">, </span><span class="s2">get</span><span class="s1">: </span><span class="s3">function </span><span
+    class="s1">() { </span><span class="s3">return </span><span class="s2">util_1</span><span class="s1">.</span><span
+    class="s2">SocksClientError</span><span class="s1">; } });</span>
+<span class="s3">const </span><span class="s2">ip_address_1 </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">&quot;ip-address&quot;</span><span
+    class="s1">);</span>
+<span class="s3">class </span><span class="s2">SocksClient </span><span class="s3">extends </span><span class="s2">events_1</span><span
+    class="s1">.</span><span class="s2">EventEmitter </span><span class="s1">{</span>
+    <span class="s2">constructor</span><span class="s1">(</span><span class="s2">options</span><span
+    class="s1">) {</span>
+        <span class="s3">super</span><span class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">options </span><span
+    class="s1">= </span><span class="s2">Object</span><span class="s1">.</span><span class="s2">assign</span><span
+    class="s1">({}, </span><span class="s2">options</span><span class="s1">);</span>
+        <span class="s5">// Validate SocksClientOptions</span>
+        <span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">helpers_1</span><span class="s1">.</span><span class="s2">validateSocksClientOptions</span><span
+    class="s1">)(</span><span class="s2">options</span><span class="s1">);</span>
+        <span class="s5">// Default state</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Created</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Creates a new SOCKS connection.</span>
+     <span class="s6">*</span>
+     <span class="s6">* Note: Supports callbacks and promises. Only supports the connect command.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span
+    class="s6">options { SocksClientOptions } Options.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">callback { Function } An optional callback function.</span>
+     <span class="s6">* </span><span class="s7">@returns </span><span class="s6">{ Promise }</span>
+     <span class="s6">*/</span>
+    <span class="s3">static </span><span class="s2">createConnection</span><span class="s1">(</span><span class="s2">options</span><span
+    class="s1">, </span><span class="s2">callback</span><span class="s1">) {</span>
+        <span class="s3">return new </span><span class="s2">Promise</span><span class="s1">((</span><span class="s2">resolve</span><span
+    class="s1">, </span><span class="s2">reject</span><span class="s1">) =&gt; {</span>
+            <span class="s5">// Validate SocksClientOptions</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">helpers_1</span><span class="s1">.</span><span class="s2">validateSocksClientOptions</span><span
+    class="s1">)(</span><span class="s2">options</span><span class="s1">, [</span><span class="s0">'connect'</span><span
+    class="s1">]);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">callback </span><span
+    class="s1">=== </span><span class="s0">'function'</span><span class="s1">) {</span>
+                    <span class="s2">callback</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">);</span>
+                    <span class="s5">// eslint-disable-next-line @typescript-eslint/no-explicit-any</span>
+                    <span class="s3">return </span><span class="s2">resolve</span><span class="s1">(</span><span
+    class="s2">err</span><span class="s1">); </span><span class="s5">// Resolves pending promise (prevents memory leaks).</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s3">return </span><span class="s2">reject</span><span class="s1">(</span><span
+    class="s2">err</span><span class="s1">);</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s3">const </span><span class="s2">client </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">SocksClient</span><span class="s1">(</span><span
+    class="s2">options</span><span class="s1">);</span>
+            <span class="s2">client</span><span class="s1">.</span><span class="s2">connect</span><span
+    class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">existing_socket</span><span class="s1">);</span>
+            <span class="s2">client</span><span class="s1">.</span><span class="s2">once</span><span class="s1">(</span><span
+    class="s0">'established'</span><span class="s1">, (</span><span class="s2">info</span><span
+    class="s1">) =&gt; {</span>
+                <span class="s2">client</span><span class="s1">.</span><span class="s2">removeAllListeners</span><span
+    class="s1">();</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">callback </span><span
+    class="s1">=== </span><span class="s0">'function'</span><span class="s1">) {</span>
+                    <span class="s2">callback</span><span class="s1">(</span><span class="s3">null</span><span
+    class="s1">, </span><span class="s2">info</span><span class="s1">);</span>
+                    <span class="s2">resolve</span><span class="s1">(</span><span class="s2">info</span><span
+    class="s1">); </span><span class="s5">// Resolves pending promise (prevents memory leaks).</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s2">resolve</span><span class="s1">(</span><span class="s2">info</span><span
+    class="s1">);</span>
+                <span class="s1">}</span>
+            <span class="s1">});</span>
+            <span class="s5">// Error occurred, failed to establish connection.</span>
+            <span class="s2">client</span><span class="s1">.</span><span class="s2">once</span><span class="s1">(</span><span
+    class="s0">'error'</span><span class="s1">, (</span><span class="s2">err</span><span class="s1">) =&gt; {</span>
+                <span class="s2">client</span><span class="s1">.</span><span class="s2">removeAllListeners</span><span
+    class="s1">();</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">callback </span><span
+    class="s1">=== </span><span class="s0">'function'</span><span class="s1">) {</span>
+                    <span class="s2">callback</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">);</span>
+                    <span class="s5">// eslint-disable-next-line @typescript-eslint/no-explicit-any</span>
+                    <span class="s2">resolve</span><span class="s1">(</span><span class="s2">err</span><span class="s1">); </span><span
+    class="s5">// Resolves pending promise (prevents memory leaks).</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s2">reject</span><span class="s1">(</span><span class="s2">err</span><span class="s1">);</span>
+                <span class="s1">}</span>
+            <span class="s1">});</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span
+       class="s6">* Creates a new SOCKS connection chain to a destination host through 2 or more SOCKS proxies.</span>
+     <span class="s6">*</span>
+     <span class="s6">* Note: Supports callbacks and promises. Only supports the connect method.</span>
+     <span class="s6">* Note: Implemented via createConnection() factory function.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">options { SocksClientChainOptions } Options</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">callback { Function } An optional callback function.</span>
+     <span class="s6">* </span><span class="s7">@returns </span><span class="s6">{ Promise }</span>
+     <span class="s6">*/</span>
+    <span class="s3">static </span><span class="s2">createConnectionChain</span><span class="s1">(</span><span
+    class="s2">options</span><span class="s1">, </span><span class="s2">callback</span><span class="s1">) {</span>
+        <span class="s5">// eslint-disable-next-line no-async-promise-executor</span>
+        <span class="s3">return new </span><span class="s2">Promise</span><span class="s1">((</span><span class="s2">resolve</span><span
+    class="s1">, </span><span class="s2">reject</span><span class="s1">) =&gt; </span><span
+    class="s2">__awaiter</span><span class="s1">(</span><span class="s3">this</span><span class="s1">, </span><span
+    class="s3">void </span><span class="s4">0</span><span class="s1">, </span><span class="s3">void </span><span
+    class="s4">0</span><span class="s1">, </span><span class="s3">function</span><span class="s1">* () {</span>
+            <span class="s5">// Validate SocksClientChainOptions</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">helpers_1</span><span class="s1">.</span><span class="s2">validateSocksClientChainOptions</span><span
+    class="s1">)(</span><span class="s2">options</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">callback </span><span
+    class="s1">=== </span><span class="s0">'function'</span><span class="s1">) {</span>
+                    <span class="s2">callback</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">);</span>
+                    <span class="s5">// eslint-disable-next-line @typescript-eslint/no-explicit-any</span>
+                    <span class="s3">return </span><span class="s2">resolve</span><span class="s1">(</span><span
+    class="s2">err</span><span class="s1">); </span><span class="s5">// Resolves pending promise (prevents memory leaks).</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s3">return </span><span class="s2">reject</span><span class="s1">(</span><span
+    class="s2">err</span><span class="s1">);</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s5">// Shuffle proxies</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">randomizeChain</span><span class="s1">) {</span>
+                <span class="s1">(</span><span class="s4">0</span><span class="s1">, </span><span
+    class="s2">util_1</span><span class="s1">.</span><span class="s2">shuffleArray</span><span class="s1">)(</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">proxies</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">try </span><span class="s1">{</span>
+                <span class="s3">let </span><span class="s2">sock</span><span class="s1">;</span>
+                <span class="s3">for </span><span class="s1">(</span><span class="s3">let </span><span
+    class="s2">i </span><span class="s1">= </span><span class="s4">0</span><span class="s1">; </span><span
+    class="s2">i </span><span class="s1">&lt; </span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">proxies</span><span class="s1">.</span><span class="s2">length</span><span class="s1">; </span><span
+    class="s2">i</span><span class="s1">++) {</span>
+                    <span class="s3">const </span><span class="s2">nextProxy </span><span class="s1">= </span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">proxies</span><span class="s1">[</span><span
+    class="s2">i</span><span class="s1">];</span>
+                    <span class="s5">// If we've reached the last proxy in the chain, the destination is the actual destination, otherwise it's the next proxy.</span>
+                    <span class="s3">const </span><span class="s2">nextDestination </span><span
+    class="s1">= </span><span class="s2">i </span><span class="s1">=== </span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxies</span><span class="s1">.</span><span class="s2">length </span><span
+    class="s1">- </span><span class="s4">1</span>
+                        <span class="s1">? </span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">destination</span>
+                        <span class="s1">: {</span>
+                            <span class="s2">host</span><span class="s1">: </span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxies</span><span class="s1">[</span><span class="s2">i </span><span
+    class="s1">+ </span><span class="s4">1</span><span class="s1">].</span><span class="s2">host </span><span
+    class="s1">||</span>
+                                <span class="s2">options</span><span class="s1">.</span><span
+    class="s2">proxies</span><span class="s1">[</span><span class="s2">i </span><span class="s1">+ </span><span
+    class="s4">1</span><span class="s1">].</span><span class="s2">ipaddress</span><span class="s1">,</span>
+                            <span class="s2">port</span><span class="s1">: </span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxies</span><span class="s1">[</span><span class="s2">i </span><span
+    class="s1">+ </span><span class="s4">1</span><span class="s1">].</span><span class="s2">port</span><span class="s1">,</span>
+                        <span class="s1">};</span>
+                    <span class="s5">// Creates the next connection in the chain.</span>
+                    <span class="s3">const </span><span class="s2">result </span><span class="s1">= </span><span
+    class="s3">yield </span><span class="s2">SocksClient</span><span class="s1">.</span><span class="s2">createConnection</span><span
+    class="s1">({</span>
+                        <span class="s2">command</span><span class="s1">: </span><span class="s0">'connect'</span><span
+    class="s1">,</span>
+                        <span class="s2">proxy</span><span class="s1">: </span><span class="s2">nextProxy</span><span
+    class="s1">,</span>
+                        <span class="s2">destination</span><span class="s1">: </span><span
+    class="s2">nextDestination</span><span class="s1">,</span>
+                        <span class="s2">existing_socket</span><span class="s1">: </span><span
+    class="s2">sock</span><span class="s1">,</span>
+                    <span class="s1">});</span>
+                    <span class="s5">// If sock is undefined, assign it here.</span>
+                    <span class="s2">sock </span><span class="s1">= </span><span class="s2">sock </span><span
+    class="s1">|| </span><span class="s2">result</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">callback </span><span
+    class="s1">=== </span><span class="s0">'function'</span><span class="s1">) {</span>
+                    <span class="s2">callback</span><span class="s1">(</span><span class="s3">null</span><span
+    class="s1">, { </span><span class="s2">socket</span><span class="s1">: </span><span class="s2">sock </span><span
+    class="s1">});</span>
+                    <span class="s2">resolve</span><span class="s1">({ </span><span class="s2">socket</span><span
+    class="s1">: </span><span class="s2">sock </span><span class="s1">}); </span><span class="s5">// Resolves pending promise (prevents memory leaks).</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s2">resolve</span><span class="s1">({ </span><span class="s2">socket</span><span
+    class="s1">: </span><span class="s2">sock </span><span class="s1">});</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s3">catch </span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">typeof </span><span class="s2">callback </span><span
+    class="s1">=== </span><span class="s0">'function'</span><span class="s1">) {</span>
+                    <span class="s2">callback</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">);</span>
+                    <span class="s5">// eslint-disable-next-line @typescript-eslint/no-explicit-any</span>
+                    <span class="s2">resolve</span><span class="s1">(</span><span class="s2">err</span><span class="s1">); </span><span
+    class="s5">// Resolves pending promise (prevents memory leaks).</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s2">reject</span><span class="s1">(</span><span class="s2">err</span><span class="s1">);</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+        <span class="s1">}));</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Creates a SOCKS UDP Frame.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">options</span>
+     <span class="s6">*/</span>
+    <span class="s3">static </span><span class="s2">createUDPFrame</span><span class="s1">(</span><span class="s2">options</span><span
+    class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">buff </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">smart_buffer_1</span><span class="s1">.</span><span
+    class="s2">SmartBuffer</span><span class="s1">();</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt16BE</span><span
+    class="s1">(</span><span class="s4">0</span><span class="s1">);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">frameNumber </span><span
+    class="s1">|| </span><span class="s4">0</span><span class="s1">);</span>
+        <span class="s5">// IPv4/IPv6/Hostname</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">net</span><span class="s1">.</span><span
+    class="s2">isIPv4</span><span class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">remoteHost</span><span class="s1">.</span><span class="s2">host</span><span class="s1">)) {</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv4</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt32BE</span><span class="s1">((</span><span
+    class="s4">0</span><span class="s1">, </span><span class="s2">helpers_1</span><span class="s1">.</span><span
+    class="s2">ipv4ToInt32</span><span class="s1">)(</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">remoteHost</span><span class="s1">.</span><span class="s2">host</span><span class="s1">));</span>
+        <span class="s1">}</span>
+        <span class="s3">else if </span><span class="s1">(</span><span class="s2">net</span><span
+    class="s1">.</span><span class="s2">isIPv6</span><span class="s1">(</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">remoteHost</span><span class="s1">.</span><span class="s2">host</span><span
+    class="s1">)) {</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv6</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeBuffer</span><span
+    class="s1">((</span><span class="s4">0</span><span class="s1">, </span><span class="s2">helpers_1</span><span
+    class="s1">.</span><span class="s2">ipToBuffer</span><span class="s1">)(</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">remoteHost</span><span class="s1">.</span><span class="s2">host</span><span
+    class="s1">));</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">Hostname</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s2">Buffer</span><span class="s1">.</span><span class="s2">byteLength</span><span
+    class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span class="s2">remoteHost</span><span
+    class="s1">.</span><span class="s2">host</span><span class="s1">));</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeString</span><span
+    class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span class="s2">remoteHost</span><span
+    class="s1">.</span><span class="s2">host</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s5">// Port</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt16BE</span><span
+    class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span class="s2">remoteHost</span><span
+    class="s1">.</span><span class="s2">port</span><span class="s1">);</span>
+        <span class="s5">// Data</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeBuffer</span><span
+    class="s1">(</span><span class="s2">options</span><span class="s1">.</span><span class="s2">data</span><span
+    class="s1">);</span>
+        <span class="s3">return </span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">toBuffer</span><span class="s1">();</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Parses a SOCKS UDP frame.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">data</span>
+     <span class="s6">*/</span>
+    <span class="s3">static </span><span class="s2">parseUDPFrame</span><span class="s1">(</span><span
+    class="s2">data</span><span class="s1">) {</span>
+        <span class="s3">const </span><span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">readOffset </span><span
+    class="s1">= </span><span class="s4">2</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">frameNumber </span><span class="s1">= </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt8</span><span class="s1">();</span>
+        <span class="s3">const </span><span class="s2">hostType </span><span class="s1">= </span><span
+    class="s2">buff</span><span class="s1">.</span><span class="s2">readUInt8</span><span class="s1">();</span>
+        <span class="s3">let </span><span class="s2">remoteHost</span><span class="s1">;</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">hostType </span><span
+    class="s1">=== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv4</span><span class="s1">) {</span>
+            <span class="s2">remoteHost </span><span class="s1">= (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">helpers_1</span><span class="s1">.</span><span
+    class="s2">int32ToIpv4</span><span class="s1">)(</span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">readUInt32BE</span><span class="s1">());</span>
+        <span class="s1">}</span>
+        <span class="s3">else if </span><span class="s1">(</span><span class="s2">hostType </span><span
+    class="s1">=== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv6</span><span class="s1">) {</span>
+            <span class="s2">remoteHost </span><span class="s1">= </span><span class="s2">ip_address_1</span><span
+    class="s1">.</span><span class="s2">Address6</span><span class="s1">.</span><span
+    class="s2">fromByteArray</span><span class="s1">(</span><span class="s2">Array</span><span class="s1">.</span><span
+    class="s2">from</span><span class="s1">(</span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">readBuffer</span><span class="s1">(</span><span class="s4">16</span><span class="s1">))).</span><span
+    class="s2">canonicalForm</span><span class="s1">();</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s2">remoteHost </span><span class="s1">= </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readString</span><span class="s1">(</span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt8</span><span class="s1">());</span>
+        <span class="s1">}</span>
+        <span class="s3">const </span><span class="s2">remotePort </span><span class="s1">= </span><span
+    class="s2">buff</span><span class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">();</span>
+        <span class="s3">return </span><span class="s1">{</span>
+            <span class="s2">frameNumber</span><span class="s1">,</span>
+            <span class="s2">remoteHost</span><span class="s1">: {</span>
+                <span class="s2">host</span><span class="s1">: </span><span class="s2">remoteHost</span><span
+    class="s1">,</span>
+                <span class="s2">port</span><span class="s1">: </span><span class="s2">remotePort</span><span
+    class="s1">,</span>
+            <span class="s1">},</span>
+            <span class="s2">data</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readBuffer</span><span class="s1">(),</span>
+        <span class="s1">};</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Internal state setter. If the SocksClient is in an error state, it cannot be changed to a non error state.</span>
+     <span class="s6">*/</span>
+    <span class="s2">setState</span><span class="s1">(</span><span class="s2">newState</span><span class="s1">) {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">state </span><span class="s1">!== </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">SocksClientState</span><span class="s1">.</span><span
+    class="s2">Error</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">state </span><span
+    class="s1">= </span><span class="s2">newState</span><span class="s1">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Starts the connection establishment to the proxy and destination.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">existingSocket Connected socket to use instead of creating a new one (internal use).</span>
+     <span class="s6">*/</span>
+    <span class="s2">connect</span><span class="s1">(</span><span class="s2">existingSocket</span><span
+    class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">onDataReceived </span><span
+    class="s1">= (</span><span class="s2">data</span><span class="s1">) =&gt; </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">onDataReceivedHandler</span><span class="s1">(</span><span
+    class="s2">data</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">onClose </span><span
+    class="s1">= () =&gt; </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">onCloseHandler</span><span class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">onError </span><span class="s1">= (</span><span
+    class="s2">err</span><span class="s1">) =&gt; </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">onErrorHandler</span><span class="s1">(</span><span class="s2">err</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">onConnect </span><span class="s1">= () =&gt; </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">onConnectHandler</span><span class="s1">();</span>
+        <span class="s5">// Start timeout timer (defaults to 30 seconds)</span>
+        <span class="s3">const </span><span class="s2">timer </span><span class="s1">= </span><span class="s2">setTimeout</span><span
+    class="s1">(() =&gt; </span><span class="s3">this</span><span class="s1">.</span><span class="s2">onEstablishedTimeout</span><span
+    class="s1">(), </span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">timeout </span><span class="s1">|| </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">DEFAULT_TIMEOUT</span><span
+    class="s1">);</span>
+        <span class="s5">// check whether unref is available as it differs from browser to NodeJS (#33)</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">timer</span><span class="s1">.</span><span
+    class="s2">unref </span><span class="s1">&amp;&amp; </span><span class="s3">typeof </span><span
+    class="s2">timer</span><span class="s1">.</span><span class="s2">unref </span><span class="s1">=== </span><span
+    class="s0">'function'</span><span class="s1">) {</span>
+            <span class="s2">timer</span><span class="s1">.</span><span class="s2">unref</span><span
+    class="s1">();</span>
+        <span class="s1">}</span>
+        <span class="s5">// If an existing socket is provided, use it to negotiate SOCKS handshake. Otherwise create a new Socket.</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">existingSocket</span><span
+    class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">socket </span><span
+    class="s1">= </span><span class="s2">existingSocket</span><span class="s1">;</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">socket </span><span
+    class="s1">= </span><span class="s3">new </span><span class="s2">net</span><span class="s1">.</span><span
+    class="s2">Socket</span><span class="s1">();</span>
+        <span class="s1">}</span>
+        <span class="s5">// Attach Socket error handlers.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">once</span><span class="s1">(</span><span class="s0">'close'</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span class="s2">onClose</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">once</span><span class="s1">(</span><span class="s0">'error'</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span class="s2">onError</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">once</span><span class="s1">(</span><span class="s0">'connect'</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span class="s2">onConnect</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">on</span><span class="s1">(</span><span class="s0">'data'</span><span
+    class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span class="s2">onDataReceived</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Connecting</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer </span><span
+    class="s1">= </span><span class="s3">new </span><span class="s2">receivebuffer_1</span><span
+    class="s1">.</span><span class="s2">ReceiveBuffer</span><span class="s1">();</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">existingSocket</span><span
+    class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span class="s1">.</span><span
+    class="s2">emit</span><span class="s1">(</span><span class="s0">'connect'</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span class="s1">.</span><span
+    class="s2">connect</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">getSocketOptions</span><span class="s1">());</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">set_tcp_nodelay </span><span class="s1">!== </span><span class="s2">undefined </span><span class="s1">&amp;&amp;</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">set_tcp_nodelay </span><span class="s1">!== </span><span
+    class="s3">null</span><span class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">setNoDelay</span><span class="s1">(!!</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">set_tcp_nodelay</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+        <span
+          class="s5">// Listen for established event so we can re-emit any excess data received during handshakes.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">prependOnceListener</span><span
+    class="s1">(</span><span class="s0">'established'</span><span class="s1">, (</span><span class="s2">info</span><span
+    class="s1">) =&gt; {</span>
+            <span class="s2">setImmediate</span><span class="s1">(() =&gt; {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&gt; </span><span class="s4">0</span><span class="s1">) {</span>
+                    <span class="s3">const </span><span class="s2">excessData </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">get</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span
+    class="s1">.</span><span class="s2">length</span><span class="s1">);</span>
+                    <span class="s2">info</span><span class="s1">.</span><span class="s2">socket</span><span class="s1">.</span><span
+    class="s2">emit</span><span class="s1">(</span><span class="s0">'data'</span><span class="s1">, </span><span
+    class="s2">excessData</span><span class="s1">);</span>
+                <span class="s1">}</span>
+                <span class="s2">info</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">resume</span><span class="s1">();</span>
+            <span class="s1">});</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s5">// Socket options (defaults host/port to options.proxy.host/options.proxy.port)</span>
+    <span class="s2">getSocketOptions</span><span class="s1">() {</span>
+        <span class="s3">return </span><span class="s2">Object</span><span class="s1">.</span><span
+    class="s2">assign</span><span class="s1">(</span><span class="s2">Object</span><span class="s1">.</span><span
+    class="s2">assign</span><span class="s1">({}, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">socket_options</span><span
+    class="s1">), { </span><span class="s2">host</span><span class="s1">: </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span
+    class="s1">.</span><span class="s2">host </span><span class="s1">|| </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span
+    class="s1">.</span><span class="s2">ipaddress</span><span class="s1">, </span><span class="s2">port</span><span
+    class="s1">: </span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span class="s2">port </span><span
+    class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles internal Socks timeout callback.</span>
+     <span class="s6">* Note: If the Socks client is not BoundWaitingForConnection or Established, the connection will be closed.</span>
+     <span class="s6">*/</span>
+    <span class="s2">onEstablishedTimeout</span><span class="s1">() {</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">state </span><span class="s1">!== </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">SocksClientState</span><span class="s1">.</span><span
+    class="s2">Established </span><span class="s1">&amp;&amp;</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">state </span><span
+    class="s1">!== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">BoundWaitingForConnection</span><span
+    class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span class="s2">ERRORS</span><span
+    class="s1">.</span><span class="s2">ProxyConnectionTimedOut</span><span class="s1">);</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socket connect event.</span>
+     <span class="s6">*/</span>
+    <span class="s2">onConnectHandler</span><span class="s1">() {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Connected</span><span
+    class="s1">);</span>
+        <span class="s5">// Send initial handshake.</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">type </span><span class="s1">=== </span><span class="s4">4</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">sendSocks4InitialHandshake</span><span
+    class="s1">();</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">sendSocks5InitialHandshake</span><span
+    class="s1">();</span>
+        <span class="s1">}</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">SentInitialHandshake</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socket data event.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">data</span>
+     <span class="s6">*/</span>
+    <span class="s2">onDataReceivedHandler</span><span class="s1">(</span><span class="s2">data</span><span class="s1">) {</span>
+        <span class="s5">/*
+          All received data is appended to a ReceiveBuffer.
+          This makes sure that all the data we need is received before we attempt to process it.
+        */</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span
+    class="s1">.</span><span class="s2">append</span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">);</span>
+        <span class="s5">// Process data that we have.</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">processData</span><span
+    class="s1">();</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles processing of the data we have received.</span>
+     <span class="s6">*/</span>
+    <span class="s2">processData</span><span class="s1">() {</span>
+        <span class="s5">// If we have enough data to process the next step in the SOCKS handshake, proceed.</span>
+        <span class="s3">while </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">state </span><span class="s1">!== </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SocksClientState</span><span
+    class="s1">.</span><span class="s2">Established </span><span class="s1">&amp;&amp;</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">state </span><span
+    class="s1">!== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Error </span><span
+    class="s1">&amp;&amp;</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span
+    class="s1">.</span><span class="s2">length </span><span class="s1">&gt;= </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">nextRequiredPacketBufferSize</span><span class="s1">) {</span>
+            <span class="s5">// Sent initial handshake, waiting for response.</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">state </span><span class="s1">=== </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SocksClientState</span><span
+    class="s1">.</span><span class="s2">SentInitialHandshake</span><span class="s1">) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span
+    class="s1">.</span><span class="s2">type </span><span class="s1">=== </span><span class="s4">4</span><span
+    class="s1">) {</span>
+                    <span class="s5">// Socks v4 only has one handshake response.</span>
+                    <span class="s3">this</span><span class="s1">.</span><span class="s2">handleSocks4FinalHandshakeResponse</span><span
+    class="s1">();</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s5">// Socks v5 has two handshakes, handle initial one here.</span>
+                    <span class="s3">this</span><span class="s1">.</span><span class="s2">handleInitialSocks5HandshakeResponse</span><span
+    class="s1">();</span>
+                <span class="s1">}</span>
+                <span class="s5">// Sent auth request for Socks v5, waiting for response.</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">state </span><span class="s1">=== </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SocksClientState</span><span
+    class="s1">.</span><span class="s2">SentAuthentication</span><span class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">handleInitialSocks5AuthenticationHandshakeResponse</span><span
+    class="s1">();</span>
+                <span class="s5">// Sent final Socks v5 handshake, waiting for final response.</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">state </span><span class="s1">=== </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SocksClientState</span><span
+    class="s1">.</span><span class="s2">SentFinalHandshake</span><span class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">handleSocks5FinalHandshakeResponse</span><span class="s1">();</span>
+                <span class="s5">// Socks BIND established. Waiting for remote connection via proxy.</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">state </span><span class="s1">=== </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SocksClientState</span><span
+    class="s1">.</span><span class="s2">BoundWaitingForConnection</span><span class="s1">) {</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span
+    class="s1">.</span><span class="s2">type </span><span class="s1">=== </span><span class="s4">4</span><span
+    class="s1">) {</span>
+                    <span class="s3">this</span><span class="s1">.</span><span class="s2">handleSocks4IncomingConnectionResponse</span><span
+    class="s1">();</span>
+                <span class="s1">}</span>
+                <span class="s3">else </span><span class="s1">{</span>
+                    <span class="s3">this</span><span class="s1">.</span><span class="s2">handleSocks5IncomingConnectionResponse</span><span
+    class="s1">();</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span class="s2">ERRORS</span><span
+    class="s1">.</span><span class="s2">InternalError</span><span class="s1">);</span>
+                <span class="s3">break</span><span class="s1">;</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socket close event.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">had_error</span>
+     <span class="s6">*/</span>
+    <span class="s2">onCloseHandler</span><span class="s1">() {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span class="s2">ERRORS</span><span
+    class="s1">.</span><span class="s2">SocketClosed</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socket error event.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">err</span>
+     <span class="s6">*/</span>
+    <span class="s2">onErrorHandler</span><span class="s1">(</span><span class="s2">err</span><span
+    class="s1">) {</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s2">err</span><span class="s1">.</span><span class="s2">message</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Removes internal event listeners on the underlying Socket.</span>
+     <span class="s6">*/</span>
+    <span class="s2">removeInternalSocketHandlers</span><span class="s1">() {</span>
+        <span
+          class="s5">// Pauses data flow of the socket (this is internally resumed after 'established' is emitted)</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">pause</span><span class="s1">();</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">removeListener</span><span class="s1">(</span><span
+    class="s0">'data'</span><span class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">onDataReceived</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">removeListener</span><span class="s1">(</span><span
+    class="s0">'close'</span><span class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">onClose</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">removeListener</span><span class="s1">(</span><span
+    class="s0">'error'</span><span class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">onError</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">removeListener</span><span class="s1">(</span><span
+    class="s0">'connect'</span><span class="s1">, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">onConnect</span><span class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Closes and destroys the underlying Socket. Emits an error event.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">err { String } An error string to include in error event.</span>
+     <span class="s6">*/</span>
+    <span class="s2">closeSocket</span><span class="s1">(</span><span class="s2">err</span><span class="s1">) {</span>
+        <span
+          class="s5">// Make sure only one 'error' event is fired for the lifetime of this SocksClient instance.</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">state </span><span class="s1">!== </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">SocksClientState</span><span class="s1">.</span><span
+    class="s2">Error</span><span class="s1">) {</span>
+            <span class="s5">// Set internal state to Error.</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Error</span><span class="s1">);</span>
+            <span class="s5">// Destroy Socket</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span class="s1">.</span><span
+    class="s2">destroy</span><span class="s1">();</span>
+            <span class="s5">// Remove internal listeners</span>
+            <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">removeInternalSocketHandlers</span><span class="s1">();</span>
+            <span class="s5">// Fire 'error' event.</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'error'</span><span class="s1">, </span><span class="s3">new </span><span
+    class="s2">util_1</span><span class="s1">.</span><span class="s2">SocksClientError</span><span
+    class="s1">(</span><span class="s2">err</span><span class="s1">, </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">));</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Sends initial Socks v4 handshake request.</span>
+     <span class="s6">*/</span>
+    <span class="s2">sendSocks4InitialHandshake</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">userId </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">proxy</span><span class="s1">.</span><span class="s2">userId </span><span class="s1">|| </span><span
+    class="s0">''</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">buff </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">smart_buffer_1</span><span class="s1">.</span><span
+    class="s2">SmartBuffer</span><span class="s1">();</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s4">0x04</span><span class="s1">);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SocksCommand</span><span
+    class="s1">[</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">command</span><span class="s1">]);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt16BE</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">destination</span><span class="s1">.</span><span class="s2">port</span><span
+    class="s1">);</span>
+        <span class="s5">// Socks 4 (IPv4)</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">net</span><span class="s1">.</span><span
+    class="s2">isIPv4</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">destination</span><span class="s1">.</span><span
+    class="s2">host</span><span class="s1">)) {</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeBuffer</span><span
+    class="s1">((</span><span class="s4">0</span><span class="s1">, </span><span class="s2">helpers_1</span><span
+    class="s1">.</span><span class="s2">ipToBuffer</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">destination</span><span
+    class="s1">.</span><span class="s2">host</span><span class="s1">));</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeStringNT</span><span
+    class="s1">(</span><span class="s2">userId</span><span class="s1">);</span>
+            <span class="s5">// Socks 4a (hostname)</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s4">0x00</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s4">0x00</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s4">0x00</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s4">0x01</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeStringNT</span><span
+    class="s1">(</span><span class="s2">userId</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeStringNT</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">destination</span><span class="s1">.</span><span class="s2">host</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">nextRequiredPacketBufferSize </span><span
+    class="s1">=</span>
+            <span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span class="s1">.</span><span class="s2">Socks4Response</span><span
+    class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">write</span><span class="s1">(</span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">toBuffer</span><span class="s1">());</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socks v4 handshake response.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">data</span>
+     <span class="s6">*/</span>
+    <span class="s2">handleSocks4FinalHandshakeResponse</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">data </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">get</span><span class="s1">(</span><span class="s4">8</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">data</span><span class="s1">[</span><span
+    class="s4">1</span><span class="s1">] !== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks4Response</span><span class="s1">.</span><span class="s2">Granted</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">ERRORS</span><span class="s1">.</span><span class="s2">Socks4ProxyRejectedConnection</span><span
+    class="s1">} </span><span class="s0">- (</span><span class="s2">$</span><span class="s1">{</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">Socks4Response</span><span class="s1">[</span><span class="s2">data</span><span
+    class="s1">[</span><span class="s4">1</span><span class="s1">]]}</span><span class="s0">)`</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s5">// Bind response</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">SocksCommand</span><span class="s1">[</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">command</span><span
+    class="s1">] === </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksCommand</span><span class="s1">.</span><span class="s2">bind</span><span class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+                <span class="s2">buff</span><span class="s1">.</span><span class="s2">readOffset </span><span
+    class="s1">= </span><span class="s4">2</span><span class="s1">;</span>
+                <span class="s3">const </span><span class="s2">remoteHost </span><span class="s1">= {</span>
+                    <span class="s2">port</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">(),</span>
+                    <span class="s2">host</span><span class="s1">: (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">helpers_1</span><span class="s1">.</span><span
+    class="s2">int32ToIpv4</span><span class="s1">)(</span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">readUInt32BE</span><span class="s1">()),</span>
+                <span class="s1">};</span>
+                <span class="s5">// If host is 0.0.0.0, set to proxy host.</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">remoteHost</span><span
+    class="s1">.</span><span class="s2">host </span><span class="s1">=== </span><span class="s0">'0.0.0.0'</span><span
+    class="s1">) {</span>
+                    <span class="s2">remoteHost</span><span class="s1">.</span><span class="s2">host </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span class="s2">ipaddress</span><span
+    class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">BoundWaitingForConnection</span><span
+    class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'bound'</span><span class="s1">, { </span><span
+    class="s2">remoteHost</span><span class="s1">, </span><span class="s2">socket</span><span class="s1">: </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">socket </span><span class="s1">});</span>
+                <span class="s5">// Connect response</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Established</span><span
+    class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">removeInternalSocketHandlers</span><span class="s1">();</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'established'</span><span class="s1">, { </span><span
+    class="s2">socket</span><span class="s1">: </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">socket </span><span class="s1">});</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socks v4 incoming connection request (BIND)</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">data</span>
+     <span class="s6">*/</span>
+    <span class="s2">handleSocks4IncomingConnectionResponse</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">data </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">get</span><span class="s1">(</span><span class="s4">8</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">data</span><span class="s1">[</span><span
+    class="s4">1</span><span class="s1">] !== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks4Response</span><span class="s1">.</span><span class="s2">Granted</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">ERRORS</span><span class="s1">.</span><span class="s2">Socks4ProxyRejectedIncomingBoundConnection</span><span
+    class="s1">} </span><span class="s0">- (</span><span class="s2">$</span><span class="s1">{</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">Socks4Response</span><span class="s1">[</span><span class="s2">data</span><span
+    class="s1">[</span><span class="s4">1</span><span class="s1">]]}</span><span class="s0">)`</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s3">const </span><span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">readOffset </span><span
+    class="s1">= </span><span class="s4">2</span><span class="s1">;</span>
+            <span class="s3">const </span><span class="s2">remoteHost </span><span class="s1">= {</span>
+                <span class="s2">port</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">(),</span>
+                <span class="s2">host</span><span class="s1">: (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">helpers_1</span><span class="s1">.</span><span
+    class="s2">int32ToIpv4</span><span class="s1">)(</span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">readUInt32BE</span><span class="s1">()),</span>
+            <span class="s1">};</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Established</span><span
+    class="s1">);</span>
+            <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">removeInternalSocketHandlers</span><span class="s1">();</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'established'</span><span class="s1">, { </span><span
+    class="s2">remoteHost</span><span class="s1">, </span><span class="s2">socket</span><span class="s1">: </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">socket </span><span class="s1">});</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Sends initial Socks v5 handshake request.</span>
+     <span class="s6">*/</span>
+    <span class="s2">sendSocks5InitialHandshake</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">buff </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">smart_buffer_1</span><span class="s1">.</span><span
+    class="s2">SmartBuffer</span><span class="s1">();</span>
+        <span class="s5">// By default we always support no auth.</span>
+        <span class="s3">const </span><span class="s2">supportedAuthMethods </span><span class="s1">= [</span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">Socks5Auth</span><span
+    class="s1">.</span><span class="s2">NoAuth</span><span class="s1">];</span>
+        <span
+          class="s5">// We should only tell the proxy we support user/pass auth if auth info is actually provided.</span>
+        <span class="s5">// Note: As of Tor v0.3.5.7+, if user/pass auth is an option from the client, by default it will always take priority.</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">userId </span><span class="s1">|| </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">password</span><span class="s1">) {</span>
+            <span class="s2">supportedAuthMethods</span><span class="s1">.</span><span class="s2">push</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5Auth</span><span class="s1">.</span><span class="s2">UserPass</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s5">// Custom auth method?</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">custom_auth_method </span><span class="s1">!== </span><span class="s2">undefined</span><span class="s1">) {</span>
+            <span class="s2">supportedAuthMethods</span><span class="s1">.</span><span class="s2">push</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">custom_auth_method</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s5">// Build handshake packet</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s4">0x05</span><span class="s1">);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s2">supportedAuthMethods</span><span class="s1">.</span><span class="s2">length</span><span
+    class="s1">);</span>
+        <span class="s3">for </span><span class="s1">(</span><span class="s3">const </span><span class="s2">authMethod of supportedAuthMethods</span><span
+    class="s1">) {</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s2">authMethod</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">nextRequiredPacketBufferSize </span><span
+    class="s1">=</span>
+            <span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span class="s1">.</span><span class="s2">Socks5InitialHandshakeResponse</span><span
+    class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">write</span><span class="s1">(</span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">toBuffer</span><span class="s1">());</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">SentInitialHandshake</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles initial Socks v5 handshake response.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">data</span>
+     <span class="s6">*/</span>
+    <span class="s2">handleInitialSocks5HandshakeResponse</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">data </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">get</span><span class="s1">(</span><span class="s4">2</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">data</span><span class="s1">[</span><span
+    class="s4">0</span><span class="s1">] !== </span><span class="s4">0x05</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span class="s2">ERRORS</span><span
+    class="s1">.</span><span class="s2">InvalidSocks5IntiailHandshakeSocksVersion</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">else if </span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">[</span><span class="s4">1</span><span class="s1">] === </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">SOCKS5_NO_ACCEPTABLE_AUTH</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span class="s2">ERRORS</span><span
+    class="s1">.</span><span class="s2">InvalidSocks5InitialHandshakeNoAcceptedAuthType</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s5">// If selected Socks v5 auth method is no auth, send final handshake request.</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">[</span><span class="s4">1</span><span class="s1">] === </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">Socks5Auth</span><span class="s1">.</span><span class="s2">NoAuth</span><span
+    class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">socks5ChosenAuthType </span><span
+    class="s1">= </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5Auth</span><span class="s1">.</span><span class="s2">NoAuth</span><span class="s1">;</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">sendSocks5CommandRequest</span><span class="s1">();</span>
+                <span class="s5">// If selected Socks v5 auth method is user/password, send auth handshake.</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">[</span><span class="s4">1</span><span class="s1">] === </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">Socks5Auth</span><span class="s1">.</span><span class="s2">UserPass</span><span
+    class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">socks5ChosenAuthType </span><span
+    class="s1">= </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5Auth</span><span class="s1">.</span><span class="s2">UserPass</span><span class="s1">;</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">sendSocks5UserPassAuthentication</span><span class="s1">();</span>
+                <span
+                  class="s5">// If selected Socks v5 auth method is the custom_auth_method, send custom handshake.</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">[</span><span class="s4">1</span><span class="s1">] === </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span
+    class="s1">.</span><span class="s2">custom_auth_method</span><span class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">socks5ChosenAuthType </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">custom_auth_method</span><span class="s1">;</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">sendSocks5CustomAuthentication</span><span class="s1">();</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span class="s2">ERRORS</span><span
+    class="s1">.</span><span class="s2">InvalidSocks5InitialHandshakeUnknownAuthType</span><span class="s1">);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Sends Socks v5 user &amp; password auth handshake.</span>
+     <span class="s6">*</span>
+     <span class="s6">* Note: No auth and user/pass are currently supported.</span>
+     <span class="s6">*/</span>
+    <span class="s2">sendSocks5UserPassAuthentication</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">userId </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">proxy</span><span class="s1">.</span><span class="s2">userId </span><span class="s1">|| </span><span
+    class="s0">''</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">password </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">proxy</span><span class="s1">.</span><span class="s2">password </span><span class="s1">|| </span><span
+    class="s0">''</span><span class="s1">;</span>
+        <span class="s3">const </span><span class="s2">buff </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">smart_buffer_1</span><span class="s1">.</span><span
+    class="s2">SmartBuffer</span><span class="s1">();</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s4">0x01</span><span class="s1">);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s2">Buffer</span><span class="s1">.</span><span class="s2">byteLength</span><span class="s1">(</span><span
+    class="s2">userId</span><span class="s1">));</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeString</span><span
+    class="s1">(</span><span class="s2">userId</span><span class="s1">);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s2">Buffer</span><span class="s1">.</span><span class="s2">byteLength</span><span class="s1">(</span><span
+    class="s2">password</span><span class="s1">));</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeString</span><span
+    class="s1">(</span><span class="s2">password</span><span class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">nextRequiredPacketBufferSize </span><span
+    class="s1">=</span>
+            <span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span class="s1">.</span><span class="s2">Socks5UserPassAuthenticationResponse</span><span
+    class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">write</span><span class="s1">(</span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">toBuffer</span><span class="s1">());</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">SentAuthentication</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s2">sendSocks5CustomAuthentication</span><span class="s1">() {</span>
+        <span class="s3">return </span><span class="s2">__awaiter</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span
+    class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span class="s1">, </span><span
+    class="s3">function</span><span class="s1">* () {</span>
+            <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">nextRequiredPacketBufferSize </span><span class="s1">=</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">custom_auth_response_size</span><span class="s1">;</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span class="s1">.</span><span
+    class="s2">write</span><span class="s1">(</span><span class="s3">yield this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">custom_auth_request_handler</span><span class="s1">());</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">SentAuthentication</span><span
+    class="s1">);</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">handleSocks5CustomAuthHandshakeResponse</span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">) {</span>
+        <span class="s3">return </span><span class="s2">__awaiter</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span
+    class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span class="s1">, </span><span
+    class="s3">function</span><span class="s1">* () {</span>
+            <span class="s3">return yield this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span class="s2">custom_auth_response_handler</span><span
+    class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">handleSocks5AuthenticationNoAuthHandshakeResponse</span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">) {</span>
+        <span class="s3">return </span><span class="s2">__awaiter</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span
+    class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span class="s1">, </span><span
+    class="s3">function</span><span class="s1">* () {</span>
+            <span class="s3">return </span><span class="s2">data</span><span class="s1">[</span><span
+    class="s4">1</span><span class="s1">] === </span><span class="s4">0x00</span><span class="s1">;</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s2">handleSocks5AuthenticationUserPassHandshakeResponse</span><span class="s1">(</span><span
+    class="s2">data</span><span class="s1">) {</span>
+        <span class="s3">return </span><span class="s2">__awaiter</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span
+    class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span class="s1">, </span><span
+    class="s3">function</span><span class="s1">* () {</span>
+            <span class="s3">return </span><span class="s2">data</span><span class="s1">[</span><span
+    class="s4">1</span><span class="s1">] === </span><span class="s4">0x00</span><span class="s1">;</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socks v5 auth handshake response.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">data</span>
+     <span class="s6">*/</span>
+    <span class="s2">handleInitialSocks5AuthenticationHandshakeResponse</span><span class="s1">() {</span>
+        <span class="s3">return </span><span class="s2">__awaiter</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span
+    class="s1">, </span><span class="s3">void </span><span class="s4">0</span><span class="s1">, </span><span
+    class="s3">function</span><span class="s1">* () {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span
+    class="s2">ReceivedAuthenticationResponse</span><span class="s1">);</span>
+            <span class="s3">let </span><span class="s2">authResult </span><span class="s1">= </span><span class="s3">false</span><span
+    class="s1">;</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">socks5ChosenAuthType </span><span class="s1">=== </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">Socks5Auth</span><span class="s1">.</span><span class="s2">NoAuth</span><span
+    class="s1">) {</span>
+                <span class="s2">authResult </span><span class="s1">= </span><span class="s3">yield this</span><span
+    class="s1">.</span><span class="s2">handleSocks5AuthenticationNoAuthHandshakeResponse</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span
+    class="s1">.</span><span class="s2">get</span><span class="s1">(</span><span class="s4">2</span><span
+    class="s1">));</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">socks5ChosenAuthType </span><span class="s1">=== </span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">Socks5Auth</span><span class="s1">.</span><span class="s2">UserPass</span><span
+    class="s1">) {</span>
+                <span class="s2">authResult </span><span class="s1">=</span>
+                    <span class="s3">yield this</span><span class="s1">.</span><span class="s2">handleSocks5AuthenticationUserPassHandshakeResponse</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span
+    class="s1">.</span><span class="s2">get</span><span class="s1">(</span><span class="s4">2</span><span
+    class="s1">));</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">socks5ChosenAuthType </span><span class="s1">=== </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span
+    class="s2">proxy</span><span class="s1">.</span><span class="s2">custom_auth_method</span><span
+    class="s1">) {</span>
+                <span class="s2">authResult </span><span class="s1">= </span><span class="s3">yield this</span><span
+    class="s1">.</span><span class="s2">handleSocks5CustomAuthHandshakeResponse</span><span class="s1">(</span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">get</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span
+    class="s2">custom_auth_response_size</span><span class="s1">));</span>
+            <span class="s1">}</span>
+            <span class="s3">if </span><span class="s1">(!</span><span class="s2">authResult</span><span
+    class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span class="s2">ERRORS</span><span
+    class="s1">.</span><span class="s2">Socks5AuthenticationFailed</span><span class="s1">);</span>
+            <span class="s1">}</span>
+            <span class="s3">else </span><span class="s1">{</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">sendSocks5CommandRequest</span><span class="s1">();</span>
+            <span class="s1">}</span>
+        <span class="s1">});</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Sends Socks v5 final handshake request.</span>
+     <span class="s6">*/</span>
+    <span class="s2">sendSocks5CommandRequest</span><span class="s1">() {</span>
+        <span class="s3">const </span><span class="s2">buff </span><span class="s1">= </span><span
+    class="s3">new </span><span class="s2">smart_buffer_1</span><span class="s1">.</span><span
+    class="s2">SmartBuffer</span><span class="s1">();</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s4">0x05</span><span class="s1">);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SocksCommand</span><span
+    class="s1">[</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">command</span><span class="s1">]);</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span class="s1">(</span><span
+    class="s4">0x00</span><span class="s1">);</span>
+        <span class="s5">// ipv4, ipv6, domain?</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">net</span><span class="s1">.</span><span
+    class="s2">isIPv4</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">.</span><span class="s2">destination</span><span class="s1">.</span><span
+    class="s2">host</span><span class="s1">)) {</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv4</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeBuffer</span><span
+    class="s1">((</span><span class="s4">0</span><span class="s1">, </span><span class="s2">helpers_1</span><span
+    class="s1">.</span><span class="s2">ipToBuffer</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">destination</span><span
+    class="s1">.</span><span class="s2">host</span><span class="s1">));</span>
+        <span class="s1">}</span>
+        <span class="s3">else if </span><span class="s1">(</span><span class="s2">net</span><span
+    class="s1">.</span><span class="s2">isIPv6</span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">destination</span><span
+    class="s1">.</span><span class="s2">host</span><span class="s1">)) {</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv6</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeBuffer</span><span
+    class="s1">((</span><span class="s4">0</span><span class="s1">, </span><span class="s2">helpers_1</span><span
+    class="s1">.</span><span class="s2">ipToBuffer</span><span class="s1">)(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">destination</span><span
+    class="s1">.</span><span class="s2">host</span><span class="s1">));</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">Hostname</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt8</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">destination</span><span class="s1">.</span><span class="s2">host</span><span
+    class="s1">.</span><span class="s2">length</span><span class="s1">);</span>
+            <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeString</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">destination</span><span class="s1">.</span><span class="s2">host</span><span
+    class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s2">buff</span><span class="s1">.</span><span class="s2">writeUInt16BE</span><span
+    class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">destination</span><span class="s1">.</span><span class="s2">port</span><span
+    class="s1">);</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">nextRequiredPacketBufferSize </span><span
+    class="s1">=</span>
+            <span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span class="s1">.</span><span
+    class="s2">Socks5ResponseHeader</span><span class="s1">;</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">socket</span><span
+    class="s1">.</span><span class="s2">write</span><span class="s1">(</span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">toBuffer</span><span class="s1">());</span>
+        <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">SentFinalHandshake</span><span
+    class="s1">);</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socks v5 final handshake response.</span>
+     <span class="s6">* </span><span class="s7">@param </span><span class="s6">data</span>
+     <span class="s6">*/</span>
+    <span class="s2">handleSocks5FinalHandshakeResponse</span><span class="s1">() {</span>
+        <span class="s5">// Peek at available data (we need at least 5 bytes to get the hostname length)</span>
+        <span class="s3">const </span><span class="s2">header </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">peek</span><span class="s1">(</span><span class="s4">5</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">header</span><span class="s1">[</span><span
+    class="s4">0</span><span class="s1">] !== </span><span class="s4">0x05 </span><span class="s1">|| </span><span
+    class="s2">header</span><span class="s1">[</span><span class="s4">1</span><span class="s1">] !== </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">Socks5Response</span><span
+    class="s1">.</span><span class="s2">Granted</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">ERRORS</span><span class="s1">.</span><span class="s2">InvalidSocks5FinalHandshakeRejected</span><span
+    class="s1">} </span><span class="s0">- </span><span class="s2">$</span><span class="s1">{</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">Socks5Response</span><span class="s1">[</span><span
+    class="s2">header</span><span class="s1">[</span><span class="s4">1</span><span class="s1">]]}</span><span
+    class="s0">`</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s5">// Read address type</span>
+            <span class="s3">const </span><span class="s2">addressType </span><span class="s1">= </span><span
+    class="s2">header</span><span class="s1">[</span><span class="s4">3</span><span class="s1">];</span>
+            <span class="s3">let </span><span class="s2">remoteHost</span><span class="s1">;</span>
+            <span class="s3">let </span><span class="s2">buff</span><span class="s1">;</span>
+            <span class="s5">// IPv4</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">addressType </span><span
+    class="s1">=== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv4</span><span class="s1">) {</span>
+                <span class="s5">// Check if data is available.</span>
+                <span class="s3">const </span><span class="s2">dataNeeded </span><span class="s1">= </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span
+    class="s1">.</span><span class="s2">Socks5ResponseIPv4</span><span class="s1">;</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&lt; </span><span class="s2">dataNeeded</span><span class="s1">) {</span>
+                    <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">nextRequiredPacketBufferSize </span><span class="s1">= </span><span class="s2">dataNeeded</span><span
+    class="s1">;</span>
+                    <span class="s3">return</span><span class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">receiveBuffer</span><span class="s1">.</span><span class="s2">get</span><span class="s1">(</span><span
+    class="s2">dataNeeded</span><span class="s1">).</span><span class="s2">slice</span><span class="s1">(</span><span
+    class="s4">4</span><span class="s1">));</span>
+                <span class="s2">remoteHost </span><span class="s1">= {</span>
+                    <span class="s2">host</span><span class="s1">: (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">helpers_1</span><span class="s1">.</span><span
+    class="s2">int32ToIpv4</span><span class="s1">)(</span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">readUInt32BE</span><span class="s1">()),</span>
+                    <span class="s2">port</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">(),</span>
+                <span class="s1">};</span>
+                <span class="s5">// If given host is 0.0.0.0, assume remote proxy ip instead.</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">remoteHost</span><span
+    class="s1">.</span><span class="s2">host </span><span class="s1">=== </span><span class="s0">'0.0.0.0'</span><span
+    class="s1">) {</span>
+                    <span class="s2">remoteHost</span><span class="s1">.</span><span class="s2">host </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span class="s2">ipaddress</span><span
+    class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s5">// Hostname</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">addressType </span><span
+    class="s1">=== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">Hostname</span><span class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">hostLength </span><span class="s1">= </span><span
+    class="s2">header</span><span class="s1">[</span><span class="s4">4</span><span class="s1">];</span>
+                <span class="s3">const </span><span class="s2">dataNeeded </span><span class="s1">= </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span
+    class="s1">.</span><span class="s2">Socks5ResponseHostname</span><span class="s1">(</span><span class="s2">hostLength</span><span
+    class="s1">); </span><span class="s5">// header + host length + host + port</span>
+                <span class="s5">// Check if data is available.</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&lt; </span><span class="s2">dataNeeded</span><span class="s1">) {</span>
+                    <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">nextRequiredPacketBufferSize </span><span class="s1">= </span><span class="s2">dataNeeded</span><span
+    class="s1">;</span>
+                    <span class="s3">return</span><span class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">receiveBuffer</span><span class="s1">.</span><span class="s2">get</span><span class="s1">(</span><span
+    class="s2">dataNeeded</span><span class="s1">).</span><span class="s2">slice</span><span class="s1">(</span><span
+    class="s4">5</span><span class="s1">));</span>
+                <span class="s2">remoteHost </span><span class="s1">= {</span>
+                    <span class="s2">host</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readString</span><span class="s1">(</span><span
+    class="s2">hostLength</span><span class="s1">),</span>
+                    <span class="s2">port</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">(),</span>
+                <span class="s1">};</span>
+                <span class="s5">// IPv6</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">addressType </span><span
+    class="s1">=== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv6</span><span class="s1">) {</span>
+                <span class="s5">// Check if data is available.</span>
+                <span class="s3">const </span><span class="s2">dataNeeded </span><span class="s1">= </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span
+    class="s1">.</span><span class="s2">Socks5ResponseIPv6</span><span class="s1">;</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&lt; </span><span class="s2">dataNeeded</span><span class="s1">) {</span>
+                    <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">nextRequiredPacketBufferSize </span><span class="s1">= </span><span class="s2">dataNeeded</span><span
+    class="s1">;</span>
+                    <span class="s3">return</span><span class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">receiveBuffer</span><span class="s1">.</span><span class="s2">get</span><span class="s1">(</span><span
+    class="s2">dataNeeded</span><span class="s1">).</span><span class="s2">slice</span><span class="s1">(</span><span
+    class="s4">4</span><span class="s1">));</span>
+                <span class="s2">remoteHost </span><span class="s1">= {</span>
+                    <span class="s2">host</span><span class="s1">: </span><span class="s2">ip_address_1</span><span
+    class="s1">.</span><span class="s2">Address6</span><span class="s1">.</span><span
+    class="s2">fromByteArray</span><span class="s1">(</span><span class="s2">Array</span><span class="s1">.</span><span
+    class="s2">from</span><span class="s1">(</span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">readBuffer</span><span class="s1">(</span><span class="s4">16</span><span class="s1">))).</span><span
+    class="s2">canonicalForm</span><span class="s1">(),</span>
+                    <span class="s2">port</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">(),</span>
+                <span class="s1">};</span>
+            <span class="s1">}</span>
+            <span class="s5">// We have everything we need</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">ReceivedFinalResponse</span><span
+    class="s1">);</span>
+            <span class="s5">// If using CONNECT, the client is now in the established state.</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">SocksCommand</span><span class="s1">[</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">command</span><span
+    class="s1">] === </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksCommand</span><span class="s1">.</span><span class="s2">connect</span><span class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Established</span><span
+    class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">removeInternalSocketHandlers</span><span class="s1">();</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'established'</span><span class="s1">, { </span><span
+    class="s2">remoteHost</span><span class="s1">, </span><span class="s2">socket</span><span class="s1">: </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">socket </span><span class="s1">});</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">SocksCommand</span><span class="s1">[</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">command</span><span
+    class="s1">] === </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksCommand</span><span class="s1">.</span><span class="s2">bind</span><span class="s1">) {</span>
+                <span class="s5">/* If using BIND, the Socks client is now in BoundWaitingForConnection state.
+                   This means that the remote proxy server is waiting for a remote connection to the bound port. */</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">BoundWaitingForConnection</span><span
+    class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">nextRequiredPacketBufferSize </span><span class="s1">=</span>
+                    <span class="s2">constants_1</span><span class="s1">.</span><span class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span
+    class="s1">.</span><span class="s2">Socks5ResponseHeader</span><span class="s1">;</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'bound'</span><span class="s1">, { </span><span
+    class="s2">remoteHost</span><span class="s1">, </span><span class="s2">socket</span><span class="s1">: </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">socket </span><span class="s1">});</span>
+                <span class="s5">/*
+                  If using Associate, the Socks client is now Established. And the proxy server is now accepting UDP packets at the
+                  given bound port. This initial Socks TCP connection must remain open for the UDP relay to continue to work.
+                */</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">SocksCommand</span><span class="s1">[</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">options</span><span class="s1">.</span><span class="s2">command</span><span
+    class="s1">] === </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksCommand</span><span class="s1">.</span><span class="s2">associate</span><span class="s1">) {</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Established</span><span
+    class="s1">);</span>
+                <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">removeInternalSocketHandlers</span><span class="s1">();</span>
+                <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'established'</span><span class="s1">, {</span>
+                    <span class="s2">remoteHost</span><span class="s1">,</span>
+                    <span class="s2">socket</span><span class="s1">: </span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">socket</span><span class="s1">,</span>
+                <span class="s1">});</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s6">/**</span>
+     <span class="s6">* Handles Socks v5 incoming connection request (BIND).</span>
+     <span class="s6">*/</span>
+    <span class="s2">handleSocks5IncomingConnectionResponse</span><span class="s1">() {</span>
+        <span class="s5">// Peek at available data (we need at least 5 bytes to get the hostname length)</span>
+        <span class="s3">const </span><span class="s2">header </span><span class="s1">= </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">peek</span><span class="s1">(</span><span class="s4">5</span><span class="s1">);</span>
+        <span class="s3">if </span><span class="s1">(</span><span class="s2">header</span><span class="s1">[</span><span
+    class="s4">0</span><span class="s1">] !== </span><span class="s4">0x05 </span><span class="s1">|| </span><span
+    class="s2">header</span><span class="s1">[</span><span class="s4">1</span><span class="s1">] !== </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">Socks5Response</span><span
+    class="s1">.</span><span class="s2">Granted</span><span class="s1">) {</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">closeSocket</span><span
+    class="s1">(</span><span class="s0">`</span><span class="s2">$</span><span class="s1">{</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">ERRORS</span><span class="s1">.</span><span class="s2">Socks5ProxyRejectedIncomingBoundConnection</span><span
+    class="s1">} </span><span class="s0">- </span><span class="s2">$</span><span class="s1">{</span><span class="s2">constants_1</span><span
+    class="s1">.</span><span class="s2">Socks5Response</span><span class="s1">[</span><span
+    class="s2">header</span><span class="s1">[</span><span class="s4">1</span><span class="s1">]]}</span><span
+    class="s0">`</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s3">else </span><span class="s1">{</span>
+            <span class="s5">// Read address type</span>
+            <span class="s3">const </span><span class="s2">addressType </span><span class="s1">= </span><span
+    class="s2">header</span><span class="s1">[</span><span class="s4">3</span><span class="s1">];</span>
+            <span class="s3">let </span><span class="s2">remoteHost</span><span class="s1">;</span>
+            <span class="s3">let </span><span class="s2">buff</span><span class="s1">;</span>
+            <span class="s5">// IPv4</span>
+            <span class="s3">if </span><span class="s1">(</span><span class="s2">addressType </span><span
+    class="s1">=== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv4</span><span class="s1">) {</span>
+                <span class="s5">// Check if data is available.</span>
+                <span class="s3">const </span><span class="s2">dataNeeded </span><span class="s1">= </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span
+    class="s1">.</span><span class="s2">Socks5ResponseIPv4</span><span class="s1">;</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&lt; </span><span class="s2">dataNeeded</span><span class="s1">) {</span>
+                    <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">nextRequiredPacketBufferSize </span><span class="s1">= </span><span class="s2">dataNeeded</span><span
+    class="s1">;</span>
+                    <span class="s3">return</span><span class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">receiveBuffer</span><span class="s1">.</span><span class="s2">get</span><span class="s1">(</span><span
+    class="s2">dataNeeded</span><span class="s1">).</span><span class="s2">slice</span><span class="s1">(</span><span
+    class="s4">4</span><span class="s1">));</span>
+                <span class="s2">remoteHost </span><span class="s1">= {</span>
+                    <span class="s2">host</span><span class="s1">: (</span><span class="s4">0</span><span
+    class="s1">, </span><span class="s2">helpers_1</span><span class="s1">.</span><span
+    class="s2">int32ToIpv4</span><span class="s1">)(</span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">readUInt32BE</span><span class="s1">()),</span>
+                    <span class="s2">port</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">(),</span>
+                <span class="s1">};</span>
+                <span class="s5">// If given host is 0.0.0.0, assume remote proxy ip instead.</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s2">remoteHost</span><span
+    class="s1">.</span><span class="s2">host </span><span class="s1">=== </span><span class="s0">'0.0.0.0'</span><span
+    class="s1">) {</span>
+                    <span class="s2">remoteHost</span><span class="s1">.</span><span class="s2">host </span><span
+    class="s1">= </span><span class="s3">this</span><span class="s1">.</span><span class="s2">options</span><span
+    class="s1">.</span><span class="s2">proxy</span><span class="s1">.</span><span class="s2">ipaddress</span><span
+    class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s5">// Hostname</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">addressType </span><span
+    class="s1">=== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">Hostname</span><span class="s1">) {</span>
+                <span class="s3">const </span><span class="s2">hostLength </span><span class="s1">= </span><span
+    class="s2">header</span><span class="s1">[</span><span class="s4">4</span><span class="s1">];</span>
+                <span class="s3">const </span><span class="s2">dataNeeded </span><span class="s1">= </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span
+    class="s1">.</span><span class="s2">Socks5ResponseHostname</span><span class="s1">(</span><span class="s2">hostLength</span><span
+    class="s1">); </span><span class="s5">// header + host length + port</span>
+                <span class="s5">// Check if data is available.</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&lt; </span><span class="s2">dataNeeded</span><span class="s1">) {</span>
+                    <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">nextRequiredPacketBufferSize </span><span class="s1">= </span><span class="s2">dataNeeded</span><span
+    class="s1">;</span>
+                    <span class="s3">return</span><span class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">receiveBuffer</span><span class="s1">.</span><span class="s2">get</span><span class="s1">(</span><span
+    class="s2">dataNeeded</span><span class="s1">).</span><span class="s2">slice</span><span class="s1">(</span><span
+    class="s4">5</span><span class="s1">));</span>
+                <span class="s2">remoteHost </span><span class="s1">= {</span>
+                    <span class="s2">host</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readString</span><span class="s1">(</span><span
+    class="s2">hostLength</span><span class="s1">),</span>
+                    <span class="s2">port</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">(),</span>
+                <span class="s1">};</span>
+                <span class="s5">// IPv6</span>
+            <span class="s1">}</span>
+            <span class="s3">else if </span><span class="s1">(</span><span class="s2">addressType </span><span
+    class="s1">=== </span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">Socks5HostType</span><span class="s1">.</span><span class="s2">IPv6</span><span class="s1">) {</span>
+                <span class="s5">// Check if data is available.</span>
+                <span class="s3">const </span><span class="s2">dataNeeded </span><span class="s1">= </span><span
+    class="s2">constants_1</span><span class="s1">.</span><span class="s2">SOCKS_INCOMING_PACKET_SIZES</span><span
+    class="s1">.</span><span class="s2">Socks5ResponseIPv6</span><span class="s1">;</span>
+                <span class="s3">if </span><span class="s1">(</span><span class="s3">this</span><span
+    class="s1">.</span><span class="s2">receiveBuffer</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&lt; </span><span class="s2">dataNeeded</span><span class="s1">) {</span>
+                    <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">nextRequiredPacketBufferSize </span><span class="s1">= </span><span class="s2">dataNeeded</span><span
+    class="s1">;</span>
+                    <span class="s3">return</span><span class="s1">;</span>
+                <span class="s1">}</span>
+                <span class="s2">buff </span><span class="s1">= </span><span class="s2">smart_buffer_1</span><span
+    class="s1">.</span><span class="s2">SmartBuffer</span><span class="s1">.</span><span
+    class="s2">fromBuffer</span><span class="s1">(</span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">receiveBuffer</span><span class="s1">.</span><span class="s2">get</span><span class="s1">(</span><span
+    class="s2">dataNeeded</span><span class="s1">).</span><span class="s2">slice</span><span class="s1">(</span><span
+    class="s4">4</span><span class="s1">));</span>
+                <span class="s2">remoteHost </span><span class="s1">= {</span>
+                    <span class="s2">host</span><span class="s1">: </span><span class="s2">ip_address_1</span><span
+    class="s1">.</span><span class="s2">Address6</span><span class="s1">.</span><span
+    class="s2">fromByteArray</span><span class="s1">(</span><span class="s2">Array</span><span class="s1">.</span><span
+    class="s2">from</span><span class="s1">(</span><span class="s2">buff</span><span class="s1">.</span><span
+    class="s2">readBuffer</span><span class="s1">(</span><span class="s4">16</span><span class="s1">))).</span><span
+    class="s2">canonicalForm</span><span class="s1">(),</span>
+                    <span class="s2">port</span><span class="s1">: </span><span class="s2">buff</span><span
+    class="s1">.</span><span class="s2">readUInt16BE</span><span class="s1">(),</span>
+                <span class="s1">};</span>
+            <span class="s1">}</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">setState</span><span
+    class="s1">(</span><span class="s2">constants_1</span><span class="s1">.</span><span
+    class="s2">SocksClientState</span><span class="s1">.</span><span class="s2">Established</span><span
+    class="s1">);</span>
+            <span class="s3">this</span><span class="s1">.</span><span
+    class="s2">removeInternalSocketHandlers</span><span class="s1">();</span>
+            <span class="s3">this</span><span class="s1">.</span><span class="s2">emit</span><span
+    class="s1">(</span><span class="s0">'established'</span><span class="s1">, { </span><span
+    class="s2">remoteHost</span><span class="s1">, </span><span class="s2">socket</span><span class="s1">: </span><span
+    class="s3">this</span><span class="s1">.</span><span class="s2">socket </span><span class="s1">});</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+    <span class="s2">get socksClientOptions</span><span class="s1">() {</span>
+        <span class="s3">return </span><span class="s2">Object</span><span class="s1">.</span><span
+    class="s2">assign</span><span class="s1">({}, </span><span class="s3">this</span><span class="s1">.</span><span
+    class="s2">options</span><span class="s1">);</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+<span class="s2">exports</span><span class="s1">.</span><span class="s2">SocksClient </span><span
+    class="s1">= </span><span class="s2">SocksClient</span><span class="s1">;</span>
+<span class="s5">//# sourceMappingURL=socksclient.js.map</span></pre>
+</body>
+</html>

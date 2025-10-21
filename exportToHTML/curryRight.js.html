@@ -1,0 +1,123 @@
+<html>
+<head>
+  <title>curryRight.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          curryRight.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">createWrap </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_createWrap'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to compose bitmasks for function metadata. */</span>
+<span class="s0">var </span><span class="s1">WRAP_CURRY_RIGHT_FLAG </span><span class="s2">= </span><span
+    class="s5">16</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* This method is like `_.curry` except that arguments are applied to `func`</span>
+ <span class="s4">* in the manner of `_.partialRight` instead of `_.partial`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* The `_.curryRight.placeholder` value, which defaults to `_` in monolithic</span>
+ <span class="s4">* builds, may be used as a placeholder for provided arguments.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This method doesn't set the &quot;length&quot; property of curried functions.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@static</span>
+ <span class="s4">* </span><span class="s6">@memberOf </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s6">@since </span><span class="s4">3.0.0</span>
+ <span class="s4">* </span><span class="s6">@category </span><span class="s4">Function</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Function} func The function to curry.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{number} [arity=func.length] The arity of `func`.</span>
+ <span class="s4">* </span><span class="s6">@param- </span><span class="s4">{Object} [guard] Enables use as an iteratee for methods like `_.map`.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{Function} Returns the new curried function.</span>
+ <span class="s4">* </span><span class="s6">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* var abc = function(a, b, c) {</span>
+ <span class="s4">*   return [a, b, c];</span>
+ <span class="s4">* };</span>
+ <span class="s4">*</span>
+ <span class="s4">* var curried = _.curryRight(abc);</span>
+ <span class="s4">*</span>
+ <span class="s4">* curried(3)(2)(1);</span>
+ <span class="s4">* // =&gt; [1, 2, 3]</span>
+ <span class="s4">*</span>
+ <span class="s4">* curried(2, 3)(1);</span>
+ <span class="s4">* // =&gt; [1, 2, 3]</span>
+ <span class="s4">*</span>
+ <span class="s4">* curried(1, 2, 3);</span>
+ <span class="s4">* // =&gt; [1, 2, 3]</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Curried with placeholders.</span>
+ <span class="s4">* curried(3)(1, _)(2);</span>
+ <span class="s4">* // =&gt; [1, 2, 3]</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">curryRight</span><span class="s2">(</span><span class="s1">func</span><span
+    class="s2">, </span><span class="s1">arity</span><span class="s2">, </span><span class="s1">guard</span><span
+    class="s2">) {</span>
+  <span class="s1">arity </span><span class="s2">= </span><span class="s1">guard </span><span class="s2">? </span><span
+    class="s1">undefined </span><span class="s2">: </span><span class="s1">arity</span><span class="s2">;</span>
+  <span class="s0">var </span><span class="s1">result </span><span class="s2">= </span><span
+    class="s1">createWrap</span><span class="s2">(</span><span class="s1">func</span><span class="s2">, </span><span
+    class="s1">WRAP_CURRY_RIGHT_FLAG</span><span class="s2">, </span><span class="s1">undefined</span><span
+    class="s2">, </span><span class="s1">undefined</span><span class="s2">, </span><span
+    class="s1">undefined</span><span class="s2">, </span><span class="s1">undefined</span><span
+    class="s2">, </span><span class="s1">undefined</span><span class="s2">, </span><span class="s1">arity</span><span
+    class="s2">);</span>
+  <span class="s1">result</span><span class="s2">.</span><span class="s1">placeholder </span><span
+    class="s2">= </span><span class="s1">curryRight</span><span class="s2">.</span><span
+    class="s1">placeholder</span><span class="s2">;</span>
+  <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s7">// Assign default placeholders.</span>
+<span class="s1">curryRight</span><span class="s2">.</span><span class="s1">placeholder </span><span
+    class="s2">= {};</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">curryRight</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<html>
+<head>
+  <title>inspector.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s1 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #bcbec4;
+    }
+
+    .s5 {
+      color: #cf8e6d;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          inspector.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">/**</span>
+ <span class="s0">* The `node:inspector` module provides an API for interacting with the V8</span>
+ <span class="s0">* inspector.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/inspector.js)</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;inspector&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s2">EventEmitter </span><span class="s4">= </span><span class="s2">require</span><span
+    class="s4">(</span><span class="s3">&quot;node:events&quot;</span><span class="s4">);</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `inspector.Session` is used for dispatching messages to the V8 inspector</span>
+     <span class="s0">* back-end and receiving message responses and notifications.</span>
+     <span class="s0">*/</span>
+    <span class="s5">class </span><span class="s2">Session </span><span class="s5">extends </span><span class="s2">EventEmitter </span><span
+    class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Create a new instance of the inspector.Session class.</span>
+         <span class="s0">* The inspector session needs to be connected through `session.connect()` before the messages can be dispatched to the inspector backend.</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">();</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Connects a session to the inspector back-end.</span>
+         <span class="s0">*/</span>
+        <span class="s2">connect</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Connects a session to the inspector back-end.</span>
+         <span class="s0">* An exception will be thrown if this API was not called on a Worker thread.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.11.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">connectToMainThread</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Immediately close the session. All pending message callbacks will be called with an error.</span>
+         <span class="s0">* `session.connect()` will need to be called to be able to send messages again.</span>
+         <span class="s0">* Reconnected session will lose all inspector state, such as enabled agents or configured breakpoints.</span>
+         <span class="s0">*/</span>
+        <span class="s2">disconnect</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Activate inspector on host and port. Equivalent to `node --inspect=[[host:]port]`, but can be done programmatically after node has</span>
+     <span class="s0">* started.</span>
+     <span class="s0">*</span>
+     <span class="s0">* If wait is `true`, will block until a client has connected to the inspect port</span>
+     <span class="s0">* and flow control has been passed to the debugger client.</span>
+     <span class="s0">*</span>
+     <span class="s0">* See the [security warning](https://nodejs.org/docs/latest-v24.x/api/cli.html#warning-binding-inspector-to-a-public-ipport-combination-is-insecure)</span>
+     <span class="s0">* regarding the `host` parameter usage.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">port Port to listen on for inspector connections. Defaults to what was specified on the CLI.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">host Host to listen on for inspector connections. Defaults to what was specified on the CLI.</span>
+     <span class="s0">* </span><span class="s1">@param </span><span class="s0">wait Block until a client has connected. Defaults to what was specified on the CLI.</span>
+     <span class="s0">* </span><span class="s1">@returns </span><span class="s0">Disposable that calls `inspector.close()`.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">open</span><span class="s4">(</span><span
+    class="s2">port</span><span class="s4">?: </span><span class="s2">number</span><span class="s4">, </span><span
+    class="s2">host</span><span class="s4">?: </span><span class="s2">string</span><span class="s4">, </span><span
+    class="s2">wait</span><span class="s4">?: </span><span class="s2">boolean</span><span class="s4">): </span><span
+    class="s2">Disposable</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Deactivate the inspector. Blocks until there are no active connections.</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">close</span><span class="s4">(): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Return the URL of the active inspector, or `undefined` if there is none.</span>
+     <span class="s0">*</span>
+     <span class="s0">* ```console</span>
+     <span class="s0">* $ node --inspect -p 'inspector.url()'</span>
+     <span class="s0">* Debugger listening on ws://127.0.0.1:9229/166e272e-7a30-4d09-97ce-f1c012b43c34</span>
+     <span class="s0">* For help, see: https://nodejs.org/en/docs/inspector</span>
+     <span class="s0">* ws://127.0.0.1:9229/166e272e-7a30-4d09-97ce-f1c012b43c34</span>
+     <span class="s0">*</span>
+     <span class="s0">* $ node --inspect=localhost:3000 -p 'inspector.url()'</span>
+     <span class="s0">* Debugger listening on ws://localhost:3000/51cf8d0e-3c36-4c59-8efd-54519839e56a</span>
+     <span class="s0">* For help, see: https://nodejs.org/en/docs/inspector</span>
+     <span class="s0">* ws://localhost:3000/51cf8d0e-3c36-4c59-8efd-54519839e56a</span>
+     <span class="s0">*</span>
+     <span class="s0">* $ node -p 'inspector.url()'</span>
+     <span class="s0">* undefined</span>
+     <span class="s0">* ```</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">url</span><span class="s4">(): </span><span
+    class="s2">string </span><span class="s4">| </span><span class="s2">undefined</span><span class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* Blocks until a client (existing or connected later) has sent `Runtime.runIfWaitingForDebugger` command.</span>
+     <span class="s0">*</span>
+     <span class="s0">* An exception will be thrown if there is no active inspector.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.7.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">function </span><span class="s2">waitForDebugger</span><span class="s4">(): </span><span
+    class="s5">void</span><span class="s4">;</span>
+    <span class="s6">// These methods are exposed by the V8 inspector console API (inspector/v8-console.h).</span>
+    <span class="s6">// The method signatures differ from those of the Node.js console, and are deliberately</span>
+    <span class="s6">// typed permissively.</span>
+    <span class="s5">interface </span><span class="s2">InspectorConsole </span><span class="s4">{</span>
+        <span class="s2">debug</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">error</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">info</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">log</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">warn</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">dir</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">dirxml</span><span class="s4">(</span><span class="s2">...data</span><span class="s4">: </span><span
+    class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">table</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">trace</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">group</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">groupCollapsed</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">groupEnd</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">clear</span><span class="s4">(</span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">count</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">countReset</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">assert</span><span class="s4">(</span><span class="s2">value</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">, </span><span class="s2">...data</span><span
+    class="s4">: </span><span class="s2">any</span><span class="s4">[]): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">profile</span><span class="s4">(</span><span class="s2">label</span><span class="s4">?: </span><span
+    class="s2">any</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">profileEnd</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">time</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s2">timeLog</span><span class="s4">(</span><span class="s2">label</span><span class="s4">?: </span><span
+    class="s2">any</span><span class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s2">timeStamp</span><span class="s4">(</span><span class="s2">label</span><span
+    class="s4">?: </span><span class="s2">any</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s0">/**</span>
+     <span class="s0">* An object to send messages to the remote inspector console.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v11.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">const </span><span class="s2">console</span><span class="s4">: </span><span class="s2">InspectorConsole</span><span
+    class="s4">;</span>
+    <span class="s6">// DevTools protocol event broadcast methods</span>
+    <span class="s2">namespace Network </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* This feature is only available with the `--experimental-network-inspection` flag enabled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Broadcasts the `Network.requestWillBeSent` event to connected frontends. This event indicates that</span>
+         <span class="s0">* the application is about to send an HTTP request.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">requestWillBeSent</span><span class="s4">(</span><span
+    class="s2">params</span><span class="s4">: </span><span class="s2">RequestWillBeSentEventDataType</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* This feature is only available with the `--experimental-network-inspection` flag enabled.</span>
+         <span class="s0">*</span>
+         <span
+           class="s0">* Broadcasts the `Network.dataReceived` event to connected frontends, or buffers the data if</span>
+         <span class="s0">* `Network.streamResourceContent` command was not invoked for the given request yet.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Also enables `Network.getResponseBody` command to retrieve the response data.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.2.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">dataReceived</span><span class="s4">(</span><span class="s2">params</span><span
+    class="s4">: </span><span class="s2">DataReceivedEventDataType</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* This feature is only available with the `--experimental-network-inspection` flag enabled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Enables `Network.getRequestPostData` command to retrieve the request data.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.3.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">dataSent</span><span class="s4">(</span><span class="s2">params</span><span
+    class="s4">: </span><span class="s2">unknown</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* This feature is only available with the `--experimental-network-inspection` flag enabled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Broadcasts the `Network.responseReceived` event to connected frontends. This event indicates that</span>
+         <span class="s0">* HTTP response is available.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">responseReceived</span><span class="s4">(</span><span
+    class="s2">params</span><span class="s4">: </span><span class="s2">ResponseReceivedEventDataType</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* This feature is only available with the `--experimental-network-inspection` flag enabled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Broadcasts the `Network.loadingFinished` event to connected frontends. This event indicates that</span>
+         <span class="s0">* HTTP request has finished loading.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.6.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">loadingFinished</span><span class="s4">(</span><span
+    class="s2">params</span><span class="s4">: </span><span class="s2">LoadingFinishedEventDataType</span><span
+    class="s4">): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* This feature is only available with the `--experimental-network-inspection` flag enabled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* Broadcasts the `Network.loadingFailed` event to connected frontends. This event indicates that</span>
+         <span class="s0">* HTTP request has failed to load.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v22.7.0</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">loadingFailed</span><span class="s4">(</span><span class="s2">params</span><span
+    class="s4">: </span><span class="s2">LoadingFailedEventDataType</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+    <span class="s2">namespace NetworkResources </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* This feature is only available with the `--experimental-inspector-network-resource` flag enabled.</span>
+         <span class="s0">*</span>
+         <span class="s0">* The inspector.NetworkResources.put method is used to provide a response for a loadNetworkResource</span>
+         <span class="s0">* request issued via the Chrome DevTools Protocol (CDP).</span>
+         <span class="s0">* This is typically triggered when a source map is specified by URL, and a DevTools frontend—such as</span>
+         <span class="s0">* Chrome—requests the resource to retrieve the source map.</span>
+         <span class="s0">*</span>
+         <span class="s0">* This method allows developers to predefine the resource content to be served in response to such CDP requests.</span>
+         <span class="s0">*</span>
+         <span class="s0">* ```js</span>
+         <span class="s0">* const inspector = require('node:inspector');</span>
+         <span
+           class="s0">* // By preemptively calling put to register the resource, a source map can be resolved when</span>
+         <span class="s0">* // a loadNetworkResource request is made from the frontend.</span>
+         <span class="s0">* async function setNetworkResources() {</span>
+         <span class="s0">*   const mapUrl = 'http://localhost:3000/dist/app.js.map';</span>
+         <span class="s0">*   const tsUrl = 'http://localhost:3000/src/app.ts';</span>
+         <span class="s0">*   const distAppJsMap = await fetch(mapUrl).then((res) =&gt; res.text());</span>
+         <span class="s0">*   const srcAppTs = await fetch(tsUrl).then((res) =&gt; res.text());</span>
+         <span class="s0">*   inspector.NetworkResources.put(mapUrl, distAppJsMap);</span>
+         <span class="s0">*   inspector.NetworkResources.put(tsUrl, srcAppTs);</span>
+         <span class="s0">* };</span>
+         <span class="s0">* setNetworkResources().then(() =&gt; {</span>
+         <span class="s0">*   require('./dist/app');</span>
+         <span class="s0">* });</span>
+         <span class="s0">* ```</span>
+         <span class="s0">*</span>
+         <span class="s0">* For more details, see the official CDP documentation: [Network.loadNetworkResource](https://chromedevtools.github.io/devtools-protocol/tot/Network/#method-loadNetworkResource)</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v24.5.0</span>
+         <span class="s0">* </span><span class="s1">@experimental</span>
+         <span class="s0">*/</span>
+        <span class="s5">function </span><span class="s2">put</span><span class="s4">(</span><span class="s2">url</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">, </span><span class="s2">data</span><span
+    class="s4">: </span><span class="s2">string</span><span class="s4">): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* The `node:inspector` module provides an API for interacting with the V8</span>
+ <span class="s0">* inspector.</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:inspector&quot; </span><span class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;inspector&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* The `node:inspector/promises` module provides an API for interacting with the V8</span>
+ <span class="s0">* inspector.</span>
+ <span class="s0">* </span><span class="s1">@see </span><span class="s0">[source](https://github.com/nodejs/node/blob/v24.x/lib/inspector/promises.js)</span>
+ <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.0.0</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;inspector/promises&quot; </span><span class="s4">{</span>
+    <span class="s5">import </span><span class="s2">EventEmitter </span><span class="s4">= </span><span class="s2">require</span><span
+    class="s4">(</span><span class="s3">&quot;node:events&quot;</span><span class="s4">);</span>
+    <span class="s5">export </span><span class="s4">{ </span><span class="s2">close</span><span
+    class="s4">, </span><span class="s2">console</span><span class="s4">, </span><span
+    class="s2">NetworkResources</span><span class="s4">, </span><span class="s2">open</span><span
+    class="s4">, </span><span class="s2">url</span><span class="s4">, </span><span
+    class="s2">waitForDebugger </span><span class="s4">} </span><span class="s2">from </span><span class="s3">&quot;inspector&quot;</span><span
+    class="s4">;</span>
+    <span class="s0">/**</span>
+     <span class="s0">* The `inspector.Session` is used for dispatching messages to the V8 inspector</span>
+     <span class="s0">* back-end and receiving message responses and notifications.</span>
+     <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.0.0</span>
+     <span class="s0">*/</span>
+    <span class="s5">export class </span><span class="s2">Session </span><span class="s5">extends </span><span
+    class="s2">EventEmitter </span><span class="s4">{</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Create a new instance of the inspector.Session class.</span>
+         <span class="s0">* The inspector session needs to be connected through `session.connect()` before the messages can be dispatched to the inspector backend.</span>
+         <span class="s0">*/</span>
+        <span class="s2">constructor</span><span class="s4">();</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Connects a session to the inspector back-end.</span>
+         <span class="s0">*/</span>
+        <span class="s2">connect</span><span class="s4">(): </span><span class="s5">void</span><span class="s4">;</span>
+        <span class="s0">/**</span>
+         <span class="s0">* Connects a session to the inspector back-end.</span>
+         <span class="s0">* An exception will be thrown if this API was not called on a Worker thread.</span>
+         <span class="s0">* </span><span class="s1">@since </span><span class="s0">v12.11.0</span>
+         <span class="s0">*/</span>
+        <span class="s2">connectToMainThread</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+        <span class="s0">/**</span>
+         <span
+           class="s0">* Immediately close the session. All pending message callbacks will be called with an error.</span>
+         <span class="s0">* `session.connect()` will need to be called to be able to send messages again.</span>
+         <span class="s0">* Reconnected session will lose all inspector state, such as enabled agents or configured breakpoints.</span>
+         <span class="s0">*/</span>
+        <span class="s2">disconnect</span><span class="s4">(): </span><span class="s5">void</span><span
+    class="s4">;</span>
+    <span class="s4">}</span>
+<span class="s4">}</span>
+
+<span class="s0">/**</span>
+ <span class="s0">* The `node:inspector/promises` module provides an API for interacting with the V8</span>
+ <span class="s0">* inspector.</span>
+ <span class="s0">* </span><span class="s1">@since </span><span class="s0">v19.0.0</span>
+ <span class="s0">*/</span>
+<span class="s2">declare module </span><span class="s3">&quot;node:inspector/promises&quot; </span><span
+    class="s4">{</span>
+    <span class="s5">export </span><span class="s4">* </span><span class="s2">from </span><span class="s3">&quot;inspector/promises&quot;</span><span
+    class="s4">;</span>
+<span class="s4">}</span>
+</pre>
+</body>
+</html>

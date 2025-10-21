@@ -1,0 +1,267 @@
+<html>
+<head>
+  <title>buffer-util.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #cf8e6d;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          buffer-util.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span><span class="s1">;</span>
+
+<span class="s3">const </span><span class="s1">{ </span><span class="s2">EMPTY_BUFFER </span><span
+    class="s1">} = </span><span class="s2">require</span><span class="s1">(</span><span
+    class="s0">'./constants'</span><span class="s1">);</span>
+
+<span class="s3">const </span><span class="s2">FastBuffer </span><span class="s1">= </span><span
+    class="s2">Buffer</span><span class="s1">[</span><span class="s2">Symbol</span><span class="s1">.</span><span
+    class="s2">species</span><span class="s1">];</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Merges an array of buffers into a new buffer.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Buffer[]} list The array of buffers to concat</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Number} totalLength The total length of buffers in the list</span>
+ <span class="s4">* </span><span class="s5">@return </span><span class="s4">{Buffer} The resulting buffer</span>
+ <span class="s4">* </span><span class="s5">@public</span>
+ <span class="s4">*/</span>
+<span class="s3">function </span><span class="s2">concat</span><span class="s1">(</span><span
+    class="s2">list</span><span class="s1">, </span><span class="s2">totalLength</span><span class="s1">) {</span>
+  <span class="s3">if </span><span class="s1">(</span><span class="s2">list</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">=== </span><span class="s6">0</span><span class="s1">) </span><span
+    class="s3">return </span><span class="s2">EMPTY_BUFFER</span><span class="s1">;</span>
+  <span class="s3">if </span><span class="s1">(</span><span class="s2">list</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">=== </span><span class="s6">1</span><span class="s1">) </span><span
+    class="s3">return </span><span class="s2">list</span><span class="s1">[</span><span class="s6">0</span><span
+    class="s1">];</span>
+
+  <span class="s3">const </span><span class="s2">target </span><span class="s1">= </span><span
+    class="s2">Buffer</span><span class="s1">.</span><span class="s2">allocUnsafe</span><span class="s1">(</span><span
+    class="s2">totalLength</span><span class="s1">);</span>
+  <span class="s3">let </span><span class="s2">offset </span><span class="s1">= </span><span class="s6">0</span><span
+    class="s1">;</span>
+
+  <span class="s3">for </span><span class="s1">(</span><span class="s3">let </span><span class="s2">i </span><span
+    class="s1">= </span><span class="s6">0</span><span class="s1">; </span><span class="s2">i </span><span class="s1">&lt; </span><span
+    class="s2">list</span><span class="s1">.</span><span class="s2">length</span><span class="s1">; </span><span
+    class="s2">i</span><span class="s1">++) {</span>
+    <span class="s3">const </span><span class="s2">buf </span><span class="s1">= </span><span
+    class="s2">list</span><span class="s1">[</span><span class="s2">i</span><span class="s1">];</span>
+    <span class="s2">target</span><span class="s1">.</span><span class="s2">set</span><span class="s1">(</span><span
+    class="s2">buf</span><span class="s1">, </span><span class="s2">offset</span><span class="s1">);</span>
+    <span class="s2">offset </span><span class="s1">+= </span><span class="s2">buf</span><span class="s1">.</span><span
+    class="s2">length</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s3">if </span><span class="s1">(</span><span class="s2">offset </span><span class="s1">&lt; </span><span
+    class="s2">totalLength</span><span class="s1">) {</span>
+    <span class="s3">return new </span><span class="s2">FastBuffer</span><span class="s1">(</span><span class="s2">target</span><span
+    class="s1">.</span><span class="s2">buffer</span><span class="s1">, </span><span class="s2">target</span><span
+    class="s1">.</span><span class="s2">byteOffset</span><span class="s1">, </span><span class="s2">offset</span><span
+    class="s1">);</span>
+  <span class="s1">}</span>
+
+  <span class="s3">return </span><span class="s2">target</span><span class="s1">;</span>
+<span class="s1">}</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Masks a buffer using the given mask.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Buffer} source The buffer to mask</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Buffer} mask The mask to use</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Buffer} output The buffer where to store the result</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Number} offset The offset at which to start writing</span>
+ <span class="s4">* </span><span class="s5">@param </span><span
+    class="s4">{Number} length The number of bytes to mask.</span>
+ <span class="s4">* </span><span class="s5">@public</span>
+ <span class="s4">*/</span>
+<span class="s3">function </span><span class="s2">_mask</span><span class="s1">(</span><span
+    class="s2">source</span><span class="s1">, </span><span class="s2">mask</span><span class="s1">, </span><span
+    class="s2">output</span><span class="s1">, </span><span class="s2">offset</span><span class="s1">, </span><span
+    class="s2">length</span><span class="s1">) {</span>
+  <span class="s3">for </span><span class="s1">(</span><span class="s3">let </span><span class="s2">i </span><span
+    class="s1">= </span><span class="s6">0</span><span class="s1">; </span><span class="s2">i </span><span class="s1">&lt; </span><span
+    class="s2">length</span><span class="s1">; </span><span class="s2">i</span><span class="s1">++) {</span>
+    <span class="s2">output</span><span class="s1">[</span><span class="s2">offset </span><span
+    class="s1">+ </span><span class="s2">i</span><span class="s1">] = </span><span class="s2">source</span><span
+    class="s1">[</span><span class="s2">i</span><span class="s1">] ^ </span><span class="s2">mask</span><span
+    class="s1">[</span><span class="s2">i </span><span class="s1">&amp; </span><span class="s6">3</span><span
+    class="s1">];</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Unmasks a buffer using the given mask.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Buffer} buffer The buffer to unmask</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Buffer} mask The mask to use</span>
+ <span class="s4">* </span><span class="s5">@public</span>
+ <span class="s4">*/</span>
+<span class="s3">function </span><span class="s2">_unmask</span><span class="s1">(</span><span
+    class="s2">buffer</span><span class="s1">, </span><span class="s2">mask</span><span class="s1">) {</span>
+  <span class="s3">for </span><span class="s1">(</span><span class="s3">let </span><span class="s2">i </span><span
+    class="s1">= </span><span class="s6">0</span><span class="s1">; </span><span class="s2">i </span><span class="s1">&lt; </span><span
+    class="s2">buffer</span><span class="s1">.</span><span class="s2">length</span><span class="s1">; </span><span
+    class="s2">i</span><span class="s1">++) {</span>
+    <span class="s2">buffer</span><span class="s1">[</span><span class="s2">i</span><span class="s1">] ^= </span><span
+    class="s2">mask</span><span class="s1">[</span><span class="s2">i </span><span class="s1">&amp; </span><span
+    class="s6">3</span><span class="s1">];</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Converts a buffer to an `ArrayBuffer`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{Buffer} buf The buffer to convert</span>
+ <span class="s4">* </span><span class="s5">@return </span><span class="s4">{ArrayBuffer} Converted buffer</span>
+ <span class="s4">* </span><span class="s5">@public</span>
+ <span class="s4">*/</span>
+<span class="s3">function </span><span class="s2">toArrayBuffer</span><span class="s1">(</span><span
+    class="s2">buf</span><span class="s1">) {</span>
+  <span class="s3">if </span><span class="s1">(</span><span class="s2">buf</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">=== </span><span class="s2">buf</span><span class="s1">.</span><span
+    class="s2">buffer</span><span class="s1">.</span><span class="s2">byteLength</span><span class="s1">) {</span>
+    <span class="s3">return </span><span class="s2">buf</span><span class="s1">.</span><span
+    class="s2">buffer</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s3">return </span><span class="s2">buf</span><span class="s1">.</span><span class="s2">buffer</span><span
+    class="s1">.</span><span class="s2">slice</span><span class="s1">(</span><span class="s2">buf</span><span
+    class="s1">.</span><span class="s2">byteOffset</span><span class="s1">, </span><span class="s2">buf</span><span
+    class="s1">.</span><span class="s2">byteOffset </span><span class="s1">+ </span><span class="s2">buf</span><span
+    class="s1">.</span><span class="s2">length</span><span class="s1">);</span>
+<span class="s1">}</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Converts `data` to a `Buffer`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{*} data The data to convert</span>
+ <span class="s4">* </span><span class="s5">@return </span><span class="s4">{Buffer} The buffer</span>
+ <span class="s4">* </span><span class="s5">@throws </span><span class="s4">{TypeError}</span>
+ <span class="s4">* </span><span class="s5">@public</span>
+ <span class="s4">*/</span>
+<span class="s3">function </span><span class="s2">toBuffer</span><span class="s1">(</span><span
+    class="s2">data</span><span class="s1">) {</span>
+  <span class="s2">toBuffer</span><span class="s1">.</span><span class="s2">readOnly </span><span
+    class="s1">= </span><span class="s3">true</span><span class="s1">;</span>
+
+  <span class="s3">if </span><span class="s1">(</span><span class="s2">Buffer</span><span class="s1">.</span><span
+    class="s2">isBuffer</span><span class="s1">(</span><span class="s2">data</span><span class="s1">)) </span><span
+    class="s3">return </span><span class="s2">data</span><span class="s1">;</span>
+
+  <span class="s3">let </span><span class="s2">buf</span><span class="s1">;</span>
+
+  <span class="s3">if </span><span class="s1">(</span><span class="s2">data </span><span
+    class="s3">instanceof </span><span class="s2">ArrayBuffer</span><span class="s1">) {</span>
+    <span class="s2">buf </span><span class="s1">= </span><span class="s3">new </span><span class="s2">FastBuffer</span><span
+    class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+  <span class="s1">} </span><span class="s3">else if </span><span class="s1">(</span><span class="s2">ArrayBuffer</span><span
+    class="s1">.</span><span class="s2">isView</span><span class="s1">(</span><span class="s2">data</span><span
+    class="s1">)) {</span>
+    <span class="s2">buf </span><span class="s1">= </span><span class="s3">new </span><span class="s2">FastBuffer</span><span
+    class="s1">(</span><span class="s2">data</span><span class="s1">.</span><span class="s2">buffer</span><span
+    class="s1">, </span><span class="s2">data</span><span class="s1">.</span><span class="s2">byteOffset</span><span
+    class="s1">, </span><span class="s2">data</span><span class="s1">.</span><span class="s2">byteLength</span><span
+    class="s1">);</span>
+  <span class="s1">} </span><span class="s3">else </span><span class="s1">{</span>
+    <span class="s2">buf </span><span class="s1">= </span><span class="s2">Buffer</span><span class="s1">.</span><span
+    class="s2">from</span><span class="s1">(</span><span class="s2">data</span><span class="s1">);</span>
+    <span class="s2">toBuffer</span><span class="s1">.</span><span class="s2">readOnly </span><span class="s1">= </span><span
+    class="s3">false</span><span class="s1">;</span>
+  <span class="s1">}</span>
+
+  <span class="s3">return </span><span class="s2">buf</span><span class="s1">;</span>
+<span class="s1">}</span>
+
+<span class="s2">module</span><span class="s1">.</span><span class="s2">exports </span><span class="s1">= {</span>
+  <span class="s2">concat</span><span class="s1">,</span>
+  <span class="s2">mask</span><span class="s1">: </span><span class="s2">_mask</span><span class="s1">,</span>
+  <span class="s2">toArrayBuffer</span><span class="s1">,</span>
+  <span class="s2">toBuffer</span><span class="s1">,</span>
+  <span class="s2">unmask</span><span class="s1">: </span><span class="s2">_unmask</span>
+<span class="s1">};</span>
+
+<span class="s7">/* istanbul ignore else  */</span>
+<span class="s3">if </span><span class="s1">(!</span><span class="s2">process</span><span class="s1">.</span><span
+    class="s2">env</span><span class="s1">.</span><span class="s2">WS_NO_BUFFER_UTIL</span><span class="s1">) {</span>
+  <span class="s3">try </span><span class="s1">{</span>
+    <span class="s3">const </span><span class="s2">bufferUtil </span><span class="s1">= </span><span
+    class="s2">require</span><span class="s1">(</span><span class="s0">'bufferutil'</span><span class="s1">);</span>
+
+    <span class="s2">module</span><span class="s1">.</span><span class="s2">exports</span><span class="s1">.</span><span
+    class="s2">mask </span><span class="s1">= </span><span class="s3">function </span><span class="s1">(</span><span
+    class="s2">source</span><span class="s1">, </span><span class="s2">mask</span><span class="s1">, </span><span
+    class="s2">output</span><span class="s1">, </span><span class="s2">offset</span><span class="s1">, </span><span
+    class="s2">length</span><span class="s1">) {</span>
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">length </span><span
+    class="s1">&lt; </span><span class="s6">48</span><span class="s1">) </span><span class="s2">_mask</span><span
+    class="s1">(</span><span class="s2">source</span><span class="s1">, </span><span class="s2">mask</span><span
+    class="s1">, </span><span class="s2">output</span><span class="s1">, </span><span class="s2">offset</span><span
+    class="s1">, </span><span class="s2">length</span><span class="s1">);</span>
+      <span class="s3">else </span><span class="s2">bufferUtil</span><span class="s1">.</span><span
+    class="s2">mask</span><span class="s1">(</span><span class="s2">source</span><span class="s1">, </span><span
+    class="s2">mask</span><span class="s1">, </span><span class="s2">output</span><span class="s1">, </span><span
+    class="s2">offset</span><span class="s1">, </span><span class="s2">length</span><span class="s1">);</span>
+    <span class="s1">};</span>
+
+    <span class="s2">module</span><span class="s1">.</span><span class="s2">exports</span><span class="s1">.</span><span
+    class="s2">unmask </span><span class="s1">= </span><span class="s3">function </span><span class="s1">(</span><span
+    class="s2">buffer</span><span class="s1">, </span><span class="s2">mask</span><span class="s1">) {</span>
+      <span class="s3">if </span><span class="s1">(</span><span class="s2">buffer</span><span class="s1">.</span><span
+    class="s2">length </span><span class="s1">&lt; </span><span class="s6">32</span><span class="s1">) </span><span
+    class="s2">_unmask</span><span class="s1">(</span><span class="s2">buffer</span><span class="s1">, </span><span
+    class="s2">mask</span><span class="s1">);</span>
+      <span class="s3">else </span><span class="s2">bufferUtil</span><span class="s1">.</span><span
+    class="s2">unmask</span><span class="s1">(</span><span class="s2">buffer</span><span class="s1">, </span><span
+    class="s2">mask</span><span class="s1">);</span>
+    <span class="s1">};</span>
+  <span class="s1">} </span><span class="s3">catch </span><span class="s1">(</span><span class="s2">e</span><span
+    class="s1">) {</span>
+    <span class="s7">// Continue regardless of the error.</span>
+  <span class="s1">}</span>
+<span class="s1">}</span>
+</pre>
+</body>
+</html>

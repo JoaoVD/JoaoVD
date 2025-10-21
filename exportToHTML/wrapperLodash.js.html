@@ -1,0 +1,218 @@
+<html>
+<head>
+  <title>wrapperLodash.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          wrapperLodash.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">LazyWrapper </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_LazyWrapper'</span><span class="s2">),</span>
+    <span class="s1">LodashWrapper </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_LodashWrapper'</span><span class="s2">),</span>
+    <span class="s1">baseLodash </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_baseLodash'</span><span class="s2">),</span>
+    <span class="s1">isArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isArray'</span><span class="s2">),</span>
+    <span class="s1">isObjectLike </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./isObjectLike'</span><span class="s2">),</span>
+    <span class="s1">wrapperClone </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_wrapperClone'</span><span class="s2">);</span>
+
+<span class="s4">/** Used for built-in method references. */</span>
+<span class="s0">var </span><span class="s1">objectProto </span><span class="s2">= </span><span class="s1">Object</span><span
+    class="s2">.</span><span class="s1">prototype</span><span class="s2">;</span>
+
+<span class="s4">/** Used to check objects for own properties. */</span>
+<span class="s0">var </span><span class="s1">hasOwnProperty </span><span class="s2">= </span><span class="s1">objectProto</span><span
+    class="s2">.</span><span class="s1">hasOwnProperty</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* Creates a `lodash` object which wraps `value` to enable implicit method</span>
+ <span class="s4">* chain sequences. Methods that operate on and return arrays, collections,</span>
+ <span class="s4">* and functions can be chained together. Methods that retrieve a single value</span>
+ <span class="s4">* or may return a primitive value will automatically end the chain sequence</span>
+ <span class="s4">* and return the unwrapped value. Otherwise, the value must be unwrapped</span>
+ <span class="s4">* with `_#value`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* Explicit chain sequences, which must be unwrapped with `_#value`, may be</span>
+ <span class="s4">* enabled using `_.chain`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* The execution of chained methods is lazy, that is, it's deferred until</span>
+ <span class="s4">* `_#value` is implicitly or explicitly called.</span>
+ <span class="s4">*</span>
+ <span class="s4">* Lazy evaluation allows several methods to support shortcut fusion.</span>
+ <span class="s4">* Shortcut fusion is an optimization to merge iteratee calls; this avoids</span>
+ <span class="s4">* the creation of intermediate arrays and can greatly reduce the number of</span>
+ <span class="s4">* iteratee executions. Sections of a chain sequence qualify for shortcut</span>
+ <span class="s4">* fusion if the section is applied to an array and iteratees accept only</span>
+ <span class="s4">* one argument. The heuristic for whether a section qualifies for shortcut</span>
+ <span class="s4">* fusion is subject to change.</span>
+ <span class="s4">*</span>
+ <span class="s4">* Chaining is supported in custom builds as long as the `_#value` method is</span>
+ <span class="s4">* directly or indirectly included in the build.</span>
+ <span class="s4">*</span>
+ <span class="s4">* In addition to lodash methods, wrappers have `Array` and `String` methods.</span>
+ <span class="s4">*</span>
+ <span class="s4">* The wrapper `Array` methods are:</span>
+ <span class="s4">* `concat`, `join`, `pop`, `push`, `shift`, `sort`, `splice`, and `unshift`</span>
+ <span class="s4">*</span>
+ <span class="s4">* The wrapper `String` methods are:</span>
+ <span class="s4">* `replace` and `split`</span>
+ <span class="s4">*</span>
+ <span class="s4">* The wrapper methods that support shortcut fusion are:</span>
+ <span class="s4">* `at`, `compact`, `drop`, `dropRight`, `dropWhile`, `filter`, `find`,</span>
+ <span class="s4">* `findLast`, `head`, `initial`, `last`, `map`, `reject`, `reverse`, `slice`,</span>
+ <span class="s4">* `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, and `toArray`</span>
+ <span class="s4">*</span>
+ <span class="s4">* The chainable wrapper methods are:</span>
+ <span class="s4">* `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`, `at`,</span>
+ <span class="s4">* `before`, `bind`, `bindAll`, `bindKey`, `castArray`, `chain`, `chunk`,</span>
+ <span class="s4">* `commit`, `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`,</span>
+ <span class="s4">* `curry`, `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`,</span>
+ <span class="s4">* `difference`, `differenceBy`, `differenceWith`, `drop`, `dropRight`,</span>
+ <span class="s4">* `dropRightWhile`, `dropWhile`, `extend`, `extendWith`, `fill`, `filter`,</span>
+ <span class="s4">* `flatMap`, `flatMapDeep`, `flatMapDepth`, `flatten`, `flattenDeep`,</span>
+ <span class="s4">* `flattenDepth`, `flip`, `flow`, `flowRight`, `fromPairs`, `functions`,</span>
+ <span class="s4">* `functionsIn`, `groupBy`, `initial`, `intersection`, `intersectionBy`,</span>
+ <span class="s4">* `intersectionWith`, `invert`, `invertBy`, `invokeMap`, `iteratee`, `keyBy`,</span>
+ <span class="s4">* `keys`, `keysIn`, `map`, `mapKeys`, `mapValues`, `matches`, `matchesProperty`,</span>
+ <span class="s4">* `memoize`, `merge`, `mergeWith`, `method`, `methodOf`, `mixin`, `negate`,</span>
+ <span class="s4">* `nthArg`, `omit`, `omitBy`, `once`, `orderBy`, `over`, `overArgs`,</span>
+ <span class="s4">* `overEvery`, `overSome`, `partial`, `partialRight`, `partition`, `pick`,</span>
+ <span class="s4">* `pickBy`, `plant`, `property`, `propertyOf`, `pull`, `pullAll`, `pullAllBy`,</span>
+ <span class="s4">* `pullAllWith`, `pullAt`, `push`, `range`, `rangeRight`, `rearg`, `reject`,</span>
+ <span class="s4">* `remove`, `rest`, `reverse`, `sampleSize`, `set`, `setWith`, `shuffle`,</span>
+ <span class="s4">* `slice`, `sort`, `sortBy`, `splice`, `spread`, `tail`, `take`, `takeRight`,</span>
+ <span class="s4">* `takeRightWhile`, `takeWhile`, `tap`, `throttle`, `thru`, `toArray`,</span>
+ <span class="s4">* `toPairs`, `toPairsIn`, `toPath`, `toPlainObject`, `transform`, `unary`,</span>
+ <span class="s4">* `union`, `unionBy`, `unionWith`, `uniq`, `uniqBy`, `uniqWith`, `unset`,</span>
+ <span class="s4">* `unshift`, `unzip`, `unzipWith`, `update`, `updateWith`, `values`,</span>
+ <span class="s4">* `valuesIn`, `without`, `wrap`, `xor`, `xorBy`, `xorWith`, `zip`,</span>
+ <span class="s4">* `zipObject`, `zipObjectDeep`, and `zipWith`</span>
+ <span class="s4">*</span>
+ <span class="s4">* The wrapper methods that are **not** chainable by default are:</span>
+ <span class="s4">* `add`, `attempt`, `camelCase`, `capitalize`, `ceil`, `clamp`, `clone`,</span>
+ <span class="s4">* `cloneDeep`, `cloneDeepWith`, `cloneWith`, `conformsTo`, `deburr`,</span>
+ <span class="s4">* `defaultTo`, `divide`, `each`, `eachRight`, `endsWith`, `eq`, `escape`,</span>
+ <span class="s4">* `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`, `findLast`,</span>
+ <span class="s4">* `findLastIndex`, `findLastKey`, `first`, `floor`, `forEach`, `forEachRight`,</span>
+ <span class="s4">* `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `get`, `gt`, `gte`, `has`,</span>
+ <span class="s4">* `hasIn`, `head`, `identity`, `includes`, `indexOf`, `inRange`, `invoke`,</span>
+ <span class="s4">* `isArguments`, `isArray`, `isArrayBuffer`, `isArrayLike`, `isArrayLikeObject`,</span>
+ <span class="s4">* `isBoolean`, `isBuffer`, `isDate`, `isElement`, `isEmpty`, `isEqual`,</span>
+ <span class="s4">* `isEqualWith`, `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`,</span>
+ <span class="s4">* `isMap`, `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`,</span>
+ <span class="s4">* `isNumber`, `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`,</span>
+ <span class="s4">* `isSafeInteger`, `isSet`, `isString`, `isUndefined`, `isTypedArray`,</span>
+ <span class="s4">* `isWeakMap`, `isWeakSet`, `join`, `kebabCase`, `last`, `lastIndexOf`,</span>
+ <span class="s4">* `lowerCase`, `lowerFirst`, `lt`, `lte`, `max`, `maxBy`, `mean`, `meanBy`,</span>
+ <span class="s4">* `min`, `minBy`, `multiply`, `noConflict`, `noop`, `now`, `nth`, `pad`,</span>
+ <span class="s4">* `padEnd`, `padStart`, `parseInt`, `pop`, `random`, `reduce`, `reduceRight`,</span>
+ <span class="s4">* `repeat`, `result`, `round`, `runInContext`, `sample`, `shift`, `size`,</span>
+ <span class="s4">* `snakeCase`, `some`, `sortedIndex`, `sortedIndexBy`, `sortedLastIndex`,</span>
+ <span class="s4">* `sortedLastIndexBy`, `startCase`, `startsWith`, `stubArray`, `stubFalse`,</span>
+ <span class="s4">* `stubObject`, `stubString`, `stubTrue`, `subtract`, `sum`, `sumBy`,</span>
+ <span class="s4">* `template`, `times`, `toFinite`, `toInteger`, `toJSON`, `toLength`,</span>
+ <span class="s4">* `toLower`, `toNumber`, `toSafeInteger`, `toString`, `toUpper`, `trim`,</span>
+ <span class="s4">* `trimEnd`, `trimStart`, `truncate`, `unescape`, `uniqueId`, `upperCase`,</span>
+ <span class="s4">* `upperFirst`, `value`, and `words`</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s5">@name </span><span class="s4">_</span>
+ <span class="s4">* </span><span class="s5">@constructor</span>
+ <span class="s4">* </span><span class="s5">@category </span><span class="s4">Seq</span>
+ <span class="s4">* </span><span class="s5">@param </span><span class="s4">{*} value The value to wrap in a `lodash` instance.</span>
+ <span class="s4">* </span><span class="s5">@returns </span><span class="s4">{Object} Returns the new `lodash` wrapper instance.</span>
+ <span class="s4">* </span><span class="s5">@example</span>
+ <span class="s4">*</span>
+ <span class="s4">* function square(n) {</span>
+ <span class="s4">*   return n * n;</span>
+ <span class="s4">* }</span>
+ <span class="s4">*</span>
+ <span class="s4">* var wrapped = _([1, 2, 3]);</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Returns an unwrapped value.</span>
+ <span class="s4">* wrapped.reduce(_.add);</span>
+ <span class="s4">* // =&gt; 6</span>
+ <span class="s4">*</span>
+ <span class="s4">* // Returns a wrapped value.</span>
+ <span class="s4">* var squares = wrapped.map(square);</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.isArray(squares);</span>
+ <span class="s4">* // =&gt; false</span>
+ <span class="s4">*</span>
+ <span class="s4">* _.isArray(squares.value());</span>
+ <span class="s4">* // =&gt; true</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">lodash</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">) {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isObjectLike</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">) &amp;&amp; !</span><span class="s1">isArray</span><span
+    class="s2">(</span><span class="s1">value</span><span class="s2">) &amp;&amp; !(</span><span
+    class="s1">value </span><span class="s0">instanceof </span><span class="s1">LazyWrapper</span><span
+    class="s2">)) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">value </span><span
+    class="s0">instanceof </span><span class="s1">LodashWrapper</span><span class="s2">) {</span>
+      <span class="s0">return </span><span class="s1">value</span><span class="s2">;</span>
+    <span class="s2">}</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">hasOwnProperty</span><span
+    class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">, </span><span class="s3">'__wrapped__'</span><span class="s2">)) {</span>
+      <span class="s0">return </span><span class="s1">wrapperClone</span><span class="s2">(</span><span
+    class="s1">value</span><span class="s2">);</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s0">return new </span><span class="s1">LodashWrapper</span><span class="s2">(</span><span class="s1">value</span><span
+    class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s6">// Ensure wrappers are instances of `baseLodash`.</span>
+<span class="s1">lodash</span><span class="s2">.</span><span class="s1">prototype </span><span class="s2">= </span><span
+    class="s1">baseLodash</span><span class="s2">.</span><span class="s1">prototype</span><span class="s2">;</span>
+<span class="s1">lodash</span><span class="s2">.</span><span class="s1">prototype</span><span class="s2">.</span><span
+    class="s1">constructor </span><span class="s2">= </span><span class="s1">lodash</span><span class="s2">;</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">lodash</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

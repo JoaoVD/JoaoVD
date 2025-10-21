@@ -1,0 +1,234 @@
+<html>
+<head>
+  <title>_equalByTag.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #7a7e85;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          _equalByTag.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">Symbol </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_Symbol'</span><span class="s2">),</span>
+    <span class="s1">Uint8Array </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_Uint8Array'</span><span class="s2">),</span>
+    <span class="s1">eq </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./eq'</span><span class="s2">),</span>
+    <span class="s1">equalArrays </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_equalArrays'</span><span class="s2">),</span>
+    <span class="s1">mapToArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_mapToArray'</span><span class="s2">),</span>
+    <span class="s1">setToArray </span><span class="s2">= </span><span class="s1">require</span><span
+    class="s2">(</span><span class="s3">'./_setToArray'</span><span class="s2">);</span>
+
+<span class="s4">/** Used to compose bitmasks for value comparisons. */</span>
+<span class="s0">var </span><span class="s1">COMPARE_PARTIAL_FLAG </span><span class="s2">= </span><span
+    class="s5">1</span><span class="s2">,</span>
+    <span class="s1">COMPARE_UNORDERED_FLAG </span><span class="s2">= </span><span class="s5">2</span><span
+    class="s2">;</span>
+
+<span class="s4">/** `Object#toString` result references. */</span>
+<span class="s0">var </span><span class="s1">boolTag </span><span class="s2">= </span><span class="s3">'[object Boolean]'</span><span
+    class="s2">,</span>
+    <span class="s1">dateTag </span><span class="s2">= </span><span class="s3">'[object Date]'</span><span
+    class="s2">,</span>
+    <span class="s1">errorTag </span><span class="s2">= </span><span class="s3">'[object Error]'</span><span class="s2">,</span>
+    <span class="s1">mapTag </span><span class="s2">= </span><span class="s3">'[object Map]'</span><span
+    class="s2">,</span>
+    <span class="s1">numberTag </span><span class="s2">= </span><span class="s3">'[object Number]'</span><span
+    class="s2">,</span>
+    <span class="s1">regexpTag </span><span class="s2">= </span><span class="s3">'[object RegExp]'</span><span
+    class="s2">,</span>
+    <span class="s1">setTag </span><span class="s2">= </span><span class="s3">'[object Set]'</span><span
+    class="s2">,</span>
+    <span class="s1">stringTag </span><span class="s2">= </span><span class="s3">'[object String]'</span><span
+    class="s2">,</span>
+    <span class="s1">symbolTag </span><span class="s2">= </span><span class="s3">'[object Symbol]'</span><span
+    class="s2">;</span>
+
+<span class="s0">var </span><span class="s1">arrayBufferTag </span><span class="s2">= </span><span class="s3">'[object ArrayBuffer]'</span><span
+    class="s2">,</span>
+    <span class="s1">dataViewTag </span><span class="s2">= </span><span class="s3">'[object DataView]'</span><span
+    class="s2">;</span>
+
+<span class="s4">/** Used to convert symbols to primitives and strings. */</span>
+<span class="s0">var </span><span class="s1">symbolProto </span><span class="s2">= </span><span
+    class="s1">Symbol </span><span class="s2">? </span><span class="s1">Symbol</span><span class="s2">.</span><span
+    class="s1">prototype </span><span class="s2">: </span><span class="s1">undefined</span><span class="s2">,</span>
+    <span class="s1">symbolValueOf </span><span class="s2">= </span><span class="s1">symbolProto </span><span
+    class="s2">? </span><span class="s1">symbolProto</span><span class="s2">.</span><span
+    class="s1">valueOf </span><span class="s2">: </span><span class="s1">undefined</span><span class="s2">;</span>
+
+<span class="s4">/**</span>
+ <span class="s4">* A specialized version of `baseIsEqualDeep` for comparing objects of</span>
+ <span class="s4">* the same `toStringTag`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* **Note:** This function only supports comparing values with tags of</span>
+ <span class="s4">* `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.</span>
+ <span class="s4">*</span>
+ <span class="s4">* </span><span class="s6">@private</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Object} object The object to compare.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span
+    class="s4">{Object} other The other object to compare.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{string} tag The `toStringTag` of the objects to compare.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{number} bitmask The bitmask flags. See `baseIsEqual` for more details.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Function} customizer The function to customize comparisons.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Function} equalFunc The function to determine equivalents of values.</span>
+ <span class="s4">* </span><span class="s6">@param </span><span class="s4">{Object} stack Tracks traversed `object` and `other` objects.</span>
+ <span class="s4">* </span><span class="s6">@returns </span><span class="s4">{boolean} Returns `true` if the objects are equivalent, else `false`.</span>
+ <span class="s4">*/</span>
+<span class="s0">function </span><span class="s1">equalByTag</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">other</span><span class="s2">, </span><span
+    class="s1">tag</span><span class="s2">, </span><span class="s1">bitmask</span><span class="s2">, </span><span
+    class="s1">customizer</span><span class="s2">, </span><span class="s1">equalFunc</span><span
+    class="s2">, </span><span class="s1">stack</span><span class="s2">) {</span>
+  <span class="s0">switch </span><span class="s2">(</span><span class="s1">tag</span><span class="s2">) {</span>
+    <span class="s0">case </span><span class="s1">dataViewTag</span><span class="s2">:</span>
+      <span class="s0">if </span><span class="s2">((</span><span class="s1">object</span><span class="s2">.</span><span
+    class="s1">byteLength </span><span class="s2">!= </span><span class="s1">other</span><span class="s2">.</span><span
+    class="s1">byteLength</span><span class="s2">) ||</span>
+          <span class="s2">(</span><span class="s1">object</span><span class="s2">.</span><span
+    class="s1">byteOffset </span><span class="s2">!= </span><span class="s1">other</span><span class="s2">.</span><span
+    class="s1">byteOffset</span><span class="s2">)) {</span>
+        <span class="s0">return false</span><span class="s2">;</span>
+      <span class="s2">}</span>
+      <span class="s1">object </span><span class="s2">= </span><span class="s1">object</span><span
+    class="s2">.</span><span class="s1">buffer</span><span class="s2">;</span>
+      <span class="s1">other </span><span class="s2">= </span><span class="s1">other</span><span
+    class="s2">.</span><span class="s1">buffer</span><span class="s2">;</span>
+
+    <span class="s0">case </span><span class="s1">arrayBufferTag</span><span class="s2">:</span>
+      <span class="s0">if </span><span class="s2">((</span><span class="s1">object</span><span class="s2">.</span><span
+    class="s1">byteLength </span><span class="s2">!= </span><span class="s1">other</span><span class="s2">.</span><span
+    class="s1">byteLength</span><span class="s2">) ||</span>
+          <span class="s2">!</span><span class="s1">equalFunc</span><span class="s2">(</span><span
+    class="s0">new </span><span class="s1">Uint8Array</span><span class="s2">(</span><span class="s1">object</span><span
+    class="s2">), </span><span class="s0">new </span><span class="s1">Uint8Array</span><span class="s2">(</span><span
+    class="s1">other</span><span class="s2">))) {</span>
+        <span class="s0">return false</span><span class="s2">;</span>
+      <span class="s2">}</span>
+      <span class="s0">return true</span><span class="s2">;</span>
+
+    <span class="s0">case </span><span class="s1">boolTag</span><span class="s2">:</span>
+    <span class="s0">case </span><span class="s1">dateTag</span><span class="s2">:</span>
+    <span class="s0">case </span><span class="s1">numberTag</span><span class="s2">:</span>
+      <span class="s7">// Coerce booleans to `1` or `0` and dates to milliseconds.</span>
+      <span class="s7">// Invalid dates are coerced to `NaN`.</span>
+      <span class="s0">return </span><span class="s1">eq</span><span class="s2">(+</span><span
+    class="s1">object</span><span class="s2">, +</span><span class="s1">other</span><span class="s2">);</span>
+
+    <span class="s0">case </span><span class="s1">errorTag</span><span class="s2">:</span>
+      <span class="s0">return </span><span class="s1">object</span><span class="s2">.</span><span
+    class="s1">name </span><span class="s2">== </span><span class="s1">other</span><span class="s2">.</span><span
+    class="s1">name </span><span class="s2">&amp;&amp; </span><span class="s1">object</span><span
+    class="s2">.</span><span class="s1">message </span><span class="s2">== </span><span class="s1">other</span><span
+    class="s2">.</span><span class="s1">message</span><span class="s2">;</span>
+
+    <span class="s0">case </span><span class="s1">regexpTag</span><span class="s2">:</span>
+    <span class="s0">case </span><span class="s1">stringTag</span><span class="s2">:</span>
+      <span class="s7">// Coerce regexes to strings and treat strings, primitives and objects,</span>
+      <span
+        class="s7">// as equal. See http://www.ecma-international.org/ecma-262/7.0/#sec-regexp.prototype.tostring</span>
+      <span class="s7">// for more details.</span>
+      <span class="s0">return </span><span class="s1">object </span><span class="s2">== (</span><span
+    class="s1">other </span><span class="s2">+ </span><span class="s3">''</span><span class="s2">);</span>
+
+    <span class="s0">case </span><span class="s1">mapTag</span><span class="s2">:</span>
+      <span class="s0">var </span><span class="s1">convert </span><span class="s2">= </span><span
+    class="s1">mapToArray</span><span class="s2">;</span>
+
+    <span class="s0">case </span><span class="s1">setTag</span><span class="s2">:</span>
+      <span class="s0">var </span><span class="s1">isPartial </span><span class="s2">= </span><span
+    class="s1">bitmask </span><span class="s2">&amp; </span><span class="s1">COMPARE_PARTIAL_FLAG</span><span
+    class="s2">;</span>
+      <span class="s1">convert </span><span class="s2">|| (</span><span class="s1">convert </span><span
+    class="s2">= </span><span class="s1">setToArray</span><span class="s2">);</span>
+
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">object</span><span class="s2">.</span><span
+    class="s1">size </span><span class="s2">!= </span><span class="s1">other</span><span class="s2">.</span><span
+    class="s1">size </span><span class="s2">&amp;&amp; !</span><span class="s1">isPartial</span><span
+    class="s2">) {</span>
+        <span class="s0">return false</span><span class="s2">;</span>
+      <span class="s2">}</span>
+      <span class="s7">// Assume cyclic values are equal.</span>
+      <span class="s0">var </span><span class="s1">stacked </span><span class="s2">= </span><span
+    class="s1">stack</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">);</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">stacked</span><span class="s2">) {</span>
+        <span class="s0">return </span><span class="s1">stacked </span><span class="s2">== </span><span
+    class="s1">other</span><span class="s2">;</span>
+      <span class="s2">}</span>
+      <span class="s1">bitmask </span><span class="s2">|= </span><span class="s1">COMPARE_UNORDERED_FLAG</span><span
+    class="s2">;</span>
+
+      <span class="s7">// Recursively compare objects (susceptible to call stack limits).</span>
+      <span class="s1">stack</span><span class="s2">.</span><span class="s1">set</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">, </span><span class="s1">other</span><span class="s2">);</span>
+      <span class="s0">var </span><span class="s1">result </span><span class="s2">= </span><span
+    class="s1">equalArrays</span><span class="s2">(</span><span class="s1">convert</span><span class="s2">(</span><span
+    class="s1">object</span><span class="s2">), </span><span class="s1">convert</span><span class="s2">(</span><span
+    class="s1">other</span><span class="s2">), </span><span class="s1">bitmask</span><span class="s2">, </span><span
+    class="s1">customizer</span><span class="s2">, </span><span class="s1">equalFunc</span><span
+    class="s2">, </span><span class="s1">stack</span><span class="s2">);</span>
+      <span class="s1">stack</span><span class="s2">[</span><span class="s3">'delete'</span><span
+    class="s2">](</span><span class="s1">object</span><span class="s2">);</span>
+      <span class="s0">return </span><span class="s1">result</span><span class="s2">;</span>
+
+    <span class="s0">case </span><span class="s1">symbolTag</span><span class="s2">:</span>
+      <span class="s0">if </span><span class="s2">(</span><span class="s1">symbolValueOf</span><span
+    class="s2">) {</span>
+        <span class="s0">return </span><span class="s1">symbolValueOf</span><span class="s2">.</span><span class="s1">call</span><span
+    class="s2">(</span><span class="s1">object</span><span class="s2">) == </span><span
+    class="s1">symbolValueOf</span><span class="s2">.</span><span class="s1">call</span><span class="s2">(</span><span
+    class="s1">other</span><span class="s2">);</span>
+      <span class="s2">}</span>
+  <span class="s2">}</span>
+  <span class="s0">return false</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">equalByTag</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

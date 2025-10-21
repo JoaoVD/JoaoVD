@@ -1,0 +1,113 @@
+<html>
+<head>
+  <title>indexOf.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          indexOf.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">var </span><span class="s1">baseIndexOf </span><span class="s2">= </span><span
+  class="s1">require</span><span class="s2">(</span><span class="s3">'./_baseIndexOf'</span><span class="s2">),</span>
+    <span class="s1">toInteger </span><span class="s2">= </span><span class="s1">require</span><span class="s2">(</span><span
+    class="s3">'./toInteger'</span><span class="s2">);</span>
+
+<span class="s4">/* Built-in method references for those with the same name as other `lodash` methods. */</span>
+<span class="s0">var </span><span class="s1">nativeMax </span><span class="s2">= </span><span
+    class="s1">Math</span><span class="s2">.</span><span class="s1">max</span><span class="s2">;</span>
+
+<span class="s5">/**</span>
+ <span class="s5">* Gets the index at which the first occurrence of `value` is found in `array`</span>
+ <span class="s5">* using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)</span>
+ <span class="s5">* for equality comparisons. If `fromIndex` is negative, it's used as the</span>
+ <span class="s5">* offset from the end of `array`.</span>
+ <span class="s5">*</span>
+ <span class="s5">* </span><span class="s6">@static</span>
+ <span class="s5">* </span><span class="s6">@memberOf </span><span class="s5">_</span>
+ <span class="s5">* </span><span class="s6">@since </span><span class="s5">0.1.0</span>
+ <span class="s5">* </span><span class="s6">@category </span><span class="s5">Array</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{Array} array The array to inspect.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{*} value The value to search for.</span>
+ <span class="s5">* </span><span class="s6">@param </span><span class="s5">{number} [fromIndex=0] The index to search from.</span>
+ <span class="s5">* </span><span class="s6">@returns </span><span class="s5">{number} Returns the index of the matched value, else `-1`.</span>
+ <span class="s5">* </span><span class="s6">@example</span>
+ <span class="s5">*</span>
+ <span class="s5">* _.indexOf([1, 2, 1, 2], 2);</span>
+ <span class="s5">* // =&gt; 1</span>
+ <span class="s5">*</span>
+ <span class="s5">* // Search from the `fromIndex`.</span>
+ <span class="s5">* _.indexOf([1, 2, 1, 2], 2, 2);</span>
+ <span class="s5">* // =&gt; 3</span>
+ <span class="s5">*/</span>
+<span class="s0">function </span><span class="s1">indexOf</span><span class="s2">(</span><span
+    class="s1">array</span><span class="s2">, </span><span class="s1">value</span><span class="s2">, </span><span
+    class="s1">fromIndex</span><span class="s2">) {</span>
+  <span class="s0">var </span><span class="s1">length </span><span class="s2">= </span><span
+    class="s1">array </span><span class="s2">== </span><span class="s0">null </span><span class="s2">? </span><span
+    class="s7">0 </span><span class="s2">: </span><span class="s1">array</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">;</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">length</span><span class="s2">) {</span>
+    <span class="s0">return </span><span class="s2">-</span><span class="s7">1</span><span class="s2">;</span>
+  <span class="s2">}</span>
+  <span class="s0">var </span><span class="s1">index </span><span class="s2">= </span><span class="s1">fromIndex </span><span
+    class="s2">== </span><span class="s0">null </span><span class="s2">? </span><span class="s7">0 </span><span
+    class="s2">: </span><span class="s1">toInteger</span><span class="s2">(</span><span class="s1">fromIndex</span><span
+    class="s2">);</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">index </span><span class="s2">&lt; </span><span
+    class="s7">0</span><span class="s2">) {</span>
+    <span class="s1">index </span><span class="s2">= </span><span class="s1">nativeMax</span><span
+    class="s2">(</span><span class="s1">length </span><span class="s2">+ </span><span class="s1">index</span><span
+    class="s2">, </span><span class="s7">0</span><span class="s2">);</span>
+  <span class="s2">}</span>
+  <span class="s0">return </span><span class="s1">baseIndexOf</span><span class="s2">(</span><span
+    class="s1">array</span><span class="s2">, </span><span class="s1">value</span><span class="s2">, </span><span
+    class="s1">index</span><span class="s2">);</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">indexOf</span><span class="s2">;</span>
+</pre>
+</body>
+</html>

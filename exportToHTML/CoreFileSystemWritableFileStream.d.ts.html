@@ -1,0 +1,96 @@
+<html>
+<head>
+  <title>CoreFileSystemWritableFileStream.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          CoreFileSystemWritableFileStream.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span class="s1">IFileSystemWritableFileStream</span><span
+  class="s2">, </span><span class="s1">FileSystemWritableFileStreamParams</span><span class="s2">, </span><span
+  class="s1">Data </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'./types'</span><span
+  class="s2">;</span>
+<span class="s0">import </span><span class="s1">type </span><span class="s2">{ </span><span
+    class="s1">Superblock </span><span class="s2">} </span><span class="s1">from </span><span class="s3">'../core/Superblock'</span><span
+    class="s2">;</span>
+<span class="s1">declare </span><span class="s0">const </span><span class="s1">WS</span><span class="s2">: </span><span
+    class="s0">typeof </span><span class="s1">WritableStream</span><span class="s2">;</span>
+<span class="s4">/**</span>
+ <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemWritableFileStream</span>
+ <span class="s4">*/</span>
+<span class="s0">export </span><span class="s1">declare </span><span class="s0">class </span><span class="s1">CoreFileSystemWritableFileStream </span><span
+    class="s0">extends </span><span class="s1">WS </span><span class="s0">implements </span><span class="s1">IFileSystemWritableFileStream </span><span
+    class="s2">{</span>
+    <span class="s0">private </span><span class="s1">_fd</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_position</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_closed</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _core</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">readonly _path</span><span class="s2">;</span>
+    <span class="s1">constructor</span><span class="s2">(</span><span class="s1">core</span><span
+    class="s2">: </span><span class="s1">Superblock</span><span class="s2">, </span><span class="s1">path</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">keepExistingData</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">);</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemWritableFileStream/seek</span>
+     <span class="s4">*/</span>
+    <span class="s1">seek</span><span class="s2">(</span><span class="s1">position</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemWritableFileStream/truncate</span>
+     <span class="s4">*/</span>
+    <span class="s1">truncate</span><span class="s2">(</span><span class="s1">size</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s4">/**</span>
+     <span class="s4">* </span><span class="s5">@see </span><span class="s4">https://developer.mozilla.org/en-US/docs/Web/API/FileSystemWritableFileStream/write</span>
+     <span class="s4">*/</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">chunk</span><span class="s2">: </span><span
+    class="s1">Data</span><span class="s2">): </span><span class="s1">Promise</span><span class="s2">&lt;</span><span
+    class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s1">write</span><span class="s2">(</span><span class="s1">params</span><span class="s2">: </span><span
+    class="s1">FileSystemWritableFileStreamParams</span><span class="s2">): </span><span class="s1">Promise</span><span
+    class="s2">&lt;</span><span class="s0">void</span><span class="s2">&gt;;</span>
+    <span class="s0">private </span><span class="s1">_write</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_isParams</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">_dataToBuffer</span><span class="s2">;</span>
+<span class="s2">}</span>
+<span class="s0">export </span><span class="s2">{};</span>
+</pre>
+</body>
+</html>

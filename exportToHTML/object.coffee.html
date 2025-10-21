@@ -1,0 +1,371 @@
+<html>
+<head>
+  <title>object.coffee</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #bcbec4;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #6aab73;
+    }
+
+    .s3 {
+      color: #56a8f5;
+    }
+
+    .s4 {
+      color: #cf8e6d;
+    }
+
+    .s5 {
+      color: #c77dbb;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+      font-style: italic;
+    }
+
+    .s7 {
+      color: #42c3d4;
+    }
+
+    .s8 {
+      color: #bcbec4;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          object.coffee</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">require '</span><span class="s2">./_prepare</span><span class="s0">'</span>
+
+<span class="s0">object = </span><span class="s3">mod </span><span class="s0">'</span><span
+    class="s2">object</span><span class="s0">'</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">isBareObject</span><span
+    class="s0">', </span><span class="s4">-&gt;</span>
+
+	<span class="s0">object.</span><span class="s3">isBareObject</span><span class="s0">('</span><span class="s2">a</span><span
+    class="s0">').should.</span><span class="s3">equal </span><span class="s5">false</span>
+
+	<span class="s0">object.</span><span class="s3">isBareObject</span><span class="s0">(</span><span
+    class="s1">{</span><span class="s0">'</span><span class="s2">a</span><span class="s0">': '</span><span
+    class="s2">a</span><span class="s0">'</span><span class="s1">}</span><span class="s0">).should.</span><span
+    class="s3">equal </span><span class="s5">true</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">typeOf</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">object.</span><span class="s3">typeOf</span><span class="s0">('</span><span class="s2">s</span><span
+    class="s0">').should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">string</span><span class="s0">'</span>
+	<span class="s0">object.</span><span class="s3">typeOf</span><span class="s0">(</span><span class="s6">0</span><span
+    class="s0">).should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">number</span><span class="s0">'</span>
+	<span class="s0">object.</span><span class="s3">typeOf</span><span class="s0">(</span><span
+    class="s5">false</span><span class="s0">).should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">boolean</span><span class="s0">'</span>
+	<span class="s0">object.</span><span class="s3">typeOf</span><span class="s0">(</span><span class="s1">{}</span><span
+    class="s0">).should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">object</span><span class="s0">'</span>
+	<span class="s0">object.</span><span class="s3">typeOf</span><span class="s0">(arguments).should.</span><span
+    class="s3">equal </span><span class="s0">'</span><span class="s2">arguments</span><span class="s0">'</span>
+	<span class="s0">object.</span><span class="s3">typeOf</span><span class="s0">([]).should.</span><span class="s3">equal </span><span
+    class="s0">'</span><span class="s2">array</span><span class="s0">'</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">empty</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">o =</span>
+
+		<span class="s0">a: </span><span class="s6">1</span>
+		<span class="s0">b: </span><span class="s6">2</span>
+
+
+	<span class="s0">object.</span><span class="s3">empty </span><span class="s1">o</span>
+
+	<span class="s0">o.should.not.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">a</span><span class="s0">'</span>
+	<span class="s0">o.should.not.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">b</span><span class="s0">'</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">fastEmpty</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">o =</span>
+		<span class="s0">a: </span><span class="s6">1</span>
+		<span class="s0">b: </span><span class="s6">2</span>
+
+
+	<span class="s0">object.</span><span class="s3">fastEmpty </span><span class="s1">o</span>
+
+	<span class="s0">o.should.not.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">a</span><span class="s0">'</span>
+	<span class="s0">o.should.not.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">b</span><span class="s0">'</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">clone</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">object.</span><span class="s3">clone</span><span class="s0">([</span><span class="s6">1</span><span
+    class="s0">])[</span><span class="s6">0</span><span class="s0">].should.</span><span class="s3">equal </span><span
+    class="s6">1</span>
+	<span class="s0">object.</span><span class="s3">clone</span><span class="s0">(</span><span class="s1">{</span><span
+    class="s0">a:</span><span class="s6">1</span><span class="s1">}</span><span class="s0">).a.should.</span><span
+    class="s3">equal </span><span class="s6">1</span>
+
+	<span class="s0">o = </span><span class="s1">{</span><span class="s0">a: </span><span class="s6">1</span><span
+    class="s1">}</span>
+
+	<span class="s0">object.</span><span class="s3">clone</span><span class="s0">(</span><span class="s1">o</span><span
+    class="s0">).should.not.</span><span class="s3">equal </span><span class="s1">o</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">clone [include prototype]</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s4">class </span><span class="s0">C</span>
+
+		<span class="s3">constructor</span><span class="s0">: (@a) </span><span class="s4">-&gt;</span>
+
+		<span class="s3">sayA</span><span class="s0">: </span><span class="s4">-&gt; </span><span
+    class="s0">@a + '</span><span class="s2">a</span><span class="s0">'</span>
+
+	<span class="s0">a = new C '</span><span class="s2">a</span><span class="s0">'</span>
+
+	<span class="s0">a.</span><span class="s3">sayA</span><span class="s0">().should.</span><span class="s3">equal </span><span
+    class="s0">'</span><span class="s2">aa</span><span class="s0">'</span>
+
+	<span class="s0">b = object.</span><span class="s3">clone </span><span class="s1">a</span><span
+    class="s0">, </span><span class="s5">yes</span>
+
+	<span class="s0">b.should.not.</span><span class="s3">equal </span><span class="s1">a</span>
+
+	<span class="s0">b.constructor.should.</span><span class="s3">equal </span><span class="s1">C</span>
+
+	<span class="s0">b.a.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">a</span><span class="s0">'</span>
+
+	<span class="s0">b.a = '</span><span class="s2">a2</span><span class="s0">'</span>
+
+	<span class="s0">b.</span><span class="s3">sayA</span><span class="s0">().should.</span><span class="s3">equal </span><span
+    class="s0">'</span><span class="s2">a2a</span><span class="s0">'</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">clone [without prototype]</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s4">class </span><span class="s0">C</span>
+
+		<span class="s3">constructor</span><span class="s0">: (@a) </span><span class="s4">-&gt;</span>
+
+		<span class="s3">sayA</span><span class="s0">: </span><span class="s4">-&gt; </span><span
+    class="s0">@a + '</span><span class="s2">a</span><span class="s0">'</span>
+
+	<span class="s0">a = new C '</span><span class="s2">a</span><span class="s0">'</span>
+
+	<span class="s0">a.</span><span class="s3">sayA</span><span class="s0">().should.</span><span class="s3">equal </span><span
+    class="s0">'</span><span class="s2">aa</span><span class="s0">'</span>
+
+	<span class="s0">b = object.</span><span class="s3">clone </span><span class="s1">a</span><span
+    class="s0">, </span><span class="s5">no</span>
+
+	<span class="s0">b.should.</span><span class="s3">equal </span><span class="s1">a</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">overrideOnto [basic]</span><span
+    class="s0">', </span><span class="s4">-&gt;</span>
+
+	<span class="s0">onto =</span>
+		<span class="s0">a: '</span><span class="s2">a</span><span class="s0">'</span>
+		<span class="s0">b:</span>
+			<span class="s0">c: '</span><span class="s2">c</span><span class="s0">'</span>
+			<span class="s0">d:</span>
+				<span class="s0">e: '</span><span class="s2">e</span><span class="s0">'</span>
+
+	<span class="s0">what =</span>
+		<span class="s0">a: '</span><span class="s2">a2</span><span class="s0">'</span>
+		<span class="s0">b:</span>
+			<span class="s0">c: '</span><span class="s2">c2</span><span class="s0">'</span>
+			<span class="s0">d:</span>
+				<span class="s0">f: '</span><span class="s2">f2</span><span class="s0">'</span>
+
+	<span class="s0">object.</span><span class="s3">overrideOnto </span><span class="s1">onto</span><span
+    class="s0">, </span><span class="s1">what</span>
+
+	<span class="s0">onto.a.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">a2</span><span class="s0">'</span>
+	<span class="s0">onto.b.should.have.</span><span class="s3">property </span><span class="s0">'</span><span class="s2">c</span><span
+    class="s0">'</span>
+	<span class="s0">onto.b.c.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">c2</span><span class="s0">'</span>
+	<span class="s0">onto.b.d.should.not.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">f</span><span class="s0">'</span>
+	<span class="s0">onto.b.d.e.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">e</span><span class="s0">'</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">override</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">onto =</span>
+
+		<span class="s0">a: '</span><span class="s2">a</span><span class="s0">'</span>
+
+		<span class="s0">b:</span>
+
+			<span class="s0">c: '</span><span class="s2">c</span><span class="s0">'</span>
+
+			<span class="s0">d:</span>
+
+				<span class="s0">e: '</span><span class="s2">e</span><span class="s0">'</span>
+
+	<span class="s0">what =</span>
+
+		<span class="s0">a: '</span><span class="s2">a2</span><span class="s0">'</span>
+
+		<span class="s0">b:</span>
+
+			<span class="s0">c: '</span><span class="s2">c2</span><span class="s0">'</span>
+
+			<span class="s0">d:</span>
+
+				<span class="s0">f: '</span><span class="s2">f2</span><span class="s0">'</span>
+
+
+	<span class="s0">onto2 = object.</span><span class="s3">override </span><span class="s1">onto</span><span
+    class="s0">, </span><span class="s1">what</span>
+
+	<span class="s0">onto2.a.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">a2</span><span class="s0">'</span>
+	<span class="s0">onto2.b.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">c</span><span class="s0">'</span>
+	<span class="s0">onto2.b.c.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">c2</span><span class="s0">'</span>
+	<span class="s0">onto2.b.d.should.not.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">f</span><span class="s0">'</span>
+	<span class="s0">onto2.b.d.e.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">e</span><span class="s0">'</span>
+
+	<span class="s0">onto.should.not.</span><span class="s3">equal </span><span class="s1">onto2</span>
+
+<span class="s4">do -&gt;</span>
+
+	<span class="s0">what =</span>
+
+		<span class="s0">a: '</span><span class="s2">a2</span><span class="s0">'</span>
+
+		<span class="s3">c</span><span class="s0">: </span><span class="s4">-&gt;</span>
+
+		<span class="s0">z: '</span><span class="s2">z</span><span class="s0">'</span>
+
+		<span class="s0">y:</span>
+
+			<span class="s0">a: '</span><span class="s2">a</span><span class="s0">'</span>
+
+	<span class="s0">onto =</span>
+
+		<span class="s0">a: '</span><span class="s2">a</span><span class="s0">'</span>
+
+		<span class="s0">b: '</span><span class="s2">b</span><span class="s0">'</span>
+
+	<span class="s3">test </span><span class="s0">'</span><span class="s2">appendOnto [basic]</span><span
+    class="s0">', </span><span class="s4">-&gt;</span>
+
+		<span class="s0">object.</span><span class="s3">appendOnto </span><span class="s1">onto</span><span
+    class="s0">, </span><span class="s1">what</span>
+
+		<span class="s0">onto.a.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">a2</span><span class="s0">'</span>
+		<span class="s0">onto.b.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">b</span><span class="s0">'</span>
+		<span class="s0">onto.z.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">z</span><span class="s0">'</span>
+
+	<span class="s3">test </span><span class="s0">&quot;</span><span
+    class="s2">appendOnto [shallow copies instances]</span><span class="s0">&quot;, </span><span class="s4">-&gt;</span>
+
+		<span class="s0">onto.c.should.be.</span><span class="s3">instanceof </span><span class="s1">Function</span>
+		<span class="s0">onto.c.should.</span><span class="s3">equal </span><span class="s0">what.c</span>
+
+
+	<span class="s3">test </span><span class="s0">&quot;</span><span class="s2">appendOnto [clones objects]</span><span
+    class="s0">&quot;, </span><span class="s4">-&gt;</span>
+
+		<span class="s0">onto.should.have.</span><span class="s3">property </span><span class="s0">'</span><span class="s2">y</span><span
+    class="s0">'</span>
+		<span class="s0">onto.y.a.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">a</span><span class="s0">'</span>
+		<span class="s0">onto.y.should.not.</span><span class="s3">equal </span><span class="s0">what.y</span>
+
+<span class="s3">test </span><span class="s0">'</span><span class="s2">groupProps</span><span class="s0">', </span><span
+    class="s4">-&gt;</span>
+
+	<span class="s0">obj =</span>
+
+		<span class="s0">a1: '</span><span class="s2">1</span><span class="s0">'</span>
+		<span class="s0">a2: '</span><span class="s2">2</span><span class="s0">'</span>
+
+		<span class="s0">b1: '</span><span class="s2">1</span><span class="s0">'</span>
+		<span class="s0">b2: '</span><span class="s2">2</span><span class="s0">'</span>
+
+		<span class="s0">c1: '</span><span class="s2">1</span><span class="s0">'</span>
+		<span class="s0">c2: '</span><span class="s2">2</span><span class="s0">'</span>
+
+		<span class="s0">rest1: '</span><span class="s2">1</span><span class="s0">'</span>
+		<span class="s0">rest2: '</span><span class="s2">2</span><span class="s0">'</span>
+
+	<span class="s0">groups = object.</span><span class="s3">groupProps </span><span class="s1">obj</span><span
+    class="s0">,</span>
+
+		<span class="s0">a: ['</span><span class="s2">a1</span><span class="s0">', '</span><span class="s2">a2</span><span
+    class="s0">']</span>
+
+		<span class="s0">b: [/</span><span class="s4">^</span><span class="s7">b</span><span class="s8">[</span><span
+    class="s5">0-9</span><span class="s8">]</span><span class="s0">+</span><span class="s4">$</span><span
+    class="s0">/]</span>
+
+		<span class="s3">c</span><span class="s0">: (key) </span><span class="s4">-&gt; </span><span
+    class="s1">key</span><span class="s0">[</span><span class="s6">0</span><span class="s0">] is '</span><span
+    class="s2">c</span><span class="s0">'</span>
+
+	<span class="s0">groups.a.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">a1</span><span class="s0">'</span>
+	<span class="s0">groups.a.a1.should.</span><span class="s3">equal </span><span class="s0">'</span><span
+    class="s2">1</span><span class="s0">'</span>
+
+	<span class="s0">groups.a.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">a2</span><span class="s0">'</span>
+
+	<span class="s0">groups.b.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">b1</span><span class="s0">'</span>
+	<span class="s0">groups.b.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">b2</span><span class="s0">'</span>
+
+	<span class="s0">groups.c.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">c1</span><span class="s0">'</span>
+	<span class="s0">groups.c.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">c2</span><span class="s0">'</span>
+
+	<span class="s0">groups.rest.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">rest1</span><span class="s0">'</span>
+	<span class="s0">groups.rest.should.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">rest1</span><span class="s0">'</span>
+
+	<span class="s0">groups.rest.should.not.have.</span><span class="s3">property </span><span class="s0">'</span><span
+    class="s2">c1</span><span class="s0">'</span></pre>
+</body>
+</html>

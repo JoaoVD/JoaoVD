@@ -1,0 +1,1210 @@
+<html>
+<head>
+  <title>acorn.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #5f826b;
+      font-style: italic;
+    }
+
+    .s4 {
+      color: #6aab73;
+    }
+
+    .s5 {
+      color: #67a37c;
+      font-style: italic;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          acorn.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">export interface </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">start</span><span class="s2">: </span><span class="s1">number</span>
+  <span class="s1">end</span><span class="s2">: </span><span class="s1">number</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">range</span><span class="s2">?: [</span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">number</span><span class="s2">]</span>
+  <span class="s1">loc</span><span class="s2">?: </span><span class="s1">SourceLocation </span><span
+    class="s2">| </span><span class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">SourceLocation </span><span class="s2">{</span>
+  <span class="s1">source</span><span class="s2">?: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">start</span><span class="s2">: </span><span class="s1">Position</span>
+  <span class="s1">end</span><span class="s2">: </span><span class="s1">Position</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Position </span><span class="s2">{</span>
+  <span class="s3">/** 1-based */</span>
+  <span class="s1">line</span><span class="s2">: </span><span class="s1">number</span>
+  <span class="s3">/** 0-based */</span>
+  <span class="s1">column</span><span class="s2">: </span><span class="s1">number</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Identifier </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;Identifier&quot;</span>
+  <span class="s1">name</span><span class="s2">: </span><span class="s1">string</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Literal </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;Literal&quot;</span>
+  <span class="s1">value</span><span class="s2">?: </span><span class="s1">string </span><span class="s2">| </span><span
+    class="s1">boolean </span><span class="s2">| </span><span class="s0">null </span><span class="s2">| </span><span
+    class="s1">number </span><span class="s2">| </span><span class="s1">RegExp </span><span class="s2">| </span><span
+    class="s1">bigint</span>
+  <span class="s1">raw</span><span class="s2">?: </span><span class="s1">string</span>
+  <span class="s1">regex</span><span class="s2">?: {</span>
+    <span class="s1">pattern</span><span class="s2">: </span><span class="s1">string</span>
+    <span class="s1">flags</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s2">}</span>
+  <span class="s1">bigint</span><span class="s2">?: </span><span class="s1">string</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Program </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;Program&quot;</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">Statement </span><span class="s2">| </span><span class="s1">ModuleDeclaration</span><span
+    class="s2">&gt;</span>
+  <span class="s1">sourceType</span><span class="s2">: </span><span class="s4">&quot;script&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;module&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Function </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">id</span><span class="s2">?: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">params</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">Pattern</span><span class="s2">&gt;</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">BlockStatement </span><span
+    class="s2">| </span><span class="s1">Expression</span>
+  <span class="s1">generator</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">expression</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">async</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ExpressionStatement </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ExpressionStatement&quot;</span>
+  <span class="s1">expression</span><span class="s2">: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s1">Literal</span>
+  <span class="s1">directive</span><span class="s2">?: </span><span class="s1">string</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">BlockStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;BlockStatement&quot;</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">Statement</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">EmptyStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;EmptyStatement&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">DebuggerStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;DebuggerStatement&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">WithStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;WithStatement&quot;</span>
+  <span class="s1">object</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Statement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ReturnStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ReturnStatement&quot;</span>
+  <span class="s1">argument</span><span class="s2">?: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">LabeledStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;LabeledStatement&quot;</span>
+  <span class="s1">label</span><span class="s2">: </span><span class="s1">Identifier</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Statement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">BreakStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;BreakStatement&quot;</span>
+  <span class="s1">label</span><span class="s2">?: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ContinueStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ContinueStatement&quot;</span>
+  <span class="s1">label</span><span class="s2">?: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">IfStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;IfStatement&quot;</span>
+  <span class="s1">test</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">consequent</span><span class="s2">: </span><span class="s1">Statement</span>
+  <span class="s1">alternate</span><span class="s2">?: </span><span class="s1">Statement </span><span
+    class="s2">| </span><span class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">SwitchStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;SwitchStatement&quot;</span>
+  <span class="s1">discriminant</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">cases</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">SwitchCase</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">SwitchCase </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;SwitchCase&quot;</span>
+  <span class="s1">test</span><span class="s2">?: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">consequent</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">Statement</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ThrowStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ThrowStatement&quot;</span>
+  <span class="s1">argument</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">TryStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;TryStatement&quot;</span>
+  <span class="s1">block</span><span class="s2">: </span><span class="s1">BlockStatement</span>
+  <span class="s1">handler</span><span class="s2">?: </span><span class="s1">CatchClause </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">finalizer</span><span class="s2">?: </span><span class="s1">BlockStatement </span><span
+    class="s2">| </span><span class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">CatchClause </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;CatchClause&quot;</span>
+  <span class="s1">param</span><span class="s2">?: </span><span class="s1">Pattern </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">BlockStatement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">WhileStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;WhileStatement&quot;</span>
+  <span class="s1">test</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Statement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">DoWhileStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;DoWhileStatement&quot;</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Statement</span>
+  <span class="s1">test</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ForStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ForStatement&quot;</span>
+  <span class="s1">init</span><span class="s2">?: </span><span class="s1">VariableDeclaration </span><span
+    class="s2">| </span><span class="s1">Expression </span><span class="s2">| </span><span class="s0">null</span>
+  <span class="s1">test</span><span class="s2">?: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">update</span><span class="s2">?: </span><span class="s1">Expression </span><span class="s2">| </span><span
+    class="s0">null</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Statement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ForInStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ForInStatement&quot;</span>
+  <span class="s1">left</span><span class="s2">: </span><span class="s1">VariableDeclaration </span><span
+    class="s2">| </span><span class="s1">Pattern</span>
+  <span class="s1">right</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Statement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">FunctionDeclaration </span><span
+    class="s0">extends </span><span class="s1">Function </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;FunctionDeclaration&quot;</span>
+  <span class="s1">id</span><span class="s2">: </span><span class="s1">Identifier</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">BlockStatement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">VariableDeclaration </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;VariableDeclaration&quot;</span>
+  <span class="s1">declarations</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">VariableDeclarator</span><span class="s2">&gt;</span>
+  <span class="s1">kind</span><span class="s2">: </span><span class="s4">&quot;var&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;let&quot; </span><span class="s2">| </span><span class="s4">&quot;const&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;using&quot; </span><span class="s2">| </span><span class="s4">&quot;await using&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">VariableDeclarator </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;VariableDeclarator&quot;</span>
+  <span class="s1">id</span><span class="s2">: </span><span class="s1">Pattern</span>
+  <span class="s1">init</span><span class="s2">?: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ThisExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ThisExpression&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ArrayExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ArrayExpression&quot;</span>
+  <span class="s1">elements</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">Expression </span><span class="s2">| </span><span
+    class="s1">SpreadElement </span><span class="s2">| </span><span class="s0">null</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ObjectExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ObjectExpression&quot;</span>
+  <span class="s1">properties</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">Property </span><span class="s2">| </span><span
+    class="s1">SpreadElement</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Property </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;Property&quot;</span>
+  <span class="s1">key</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">value</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">kind</span><span class="s2">: </span><span class="s4">&quot;init&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;get&quot; </span><span class="s2">| </span><span class="s4">&quot;set&quot;</span>
+  <span class="s1">method</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">shorthand</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">computed</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">FunctionExpression </span><span
+    class="s0">extends </span><span class="s1">Function </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;FunctionExpression&quot;</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">BlockStatement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">UnaryExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;UnaryExpression&quot;</span>
+  <span class="s1">operator</span><span class="s2">: </span><span class="s1">UnaryOperator</span>
+  <span class="s1">prefix</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">argument</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type UnaryOperator </span><span class="s2">= </span><span class="s4">&quot;-&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;+&quot; </span><span class="s2">| </span><span
+    class="s4">&quot;!&quot; </span><span class="s2">| </span><span class="s4">&quot;~&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;typeof&quot; </span><span class="s2">| </span><span class="s4">&quot;void&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;delete&quot;</span>
+
+<span class="s0">export interface </span><span class="s1">UpdateExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;UpdateExpression&quot;</span>
+  <span class="s1">operator</span><span class="s2">: </span><span class="s1">UpdateOperator</span>
+  <span class="s1">argument</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">prefix</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type UpdateOperator </span><span class="s2">= </span><span class="s4">&quot;++&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;--&quot;</span>
+
+<span class="s0">export interface </span><span class="s1">BinaryExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;BinaryExpression&quot;</span>
+  <span class="s1">operator</span><span class="s2">: </span><span class="s1">BinaryOperator</span>
+  <span class="s1">left</span><span class="s2">: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s1">PrivateIdentifier</span>
+  <span class="s1">right</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type BinaryOperator </span><span class="s2">= </span><span class="s4">&quot;==&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;!=&quot; </span><span class="s2">| </span><span class="s4">&quot;===&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;!==&quot; </span><span class="s2">| </span><span class="s4">&quot;&lt;&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;&lt;=&quot; </span><span class="s2">| </span><span class="s4">&quot;&gt;&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;&gt;=&quot; </span><span class="s2">| </span><span class="s4">&quot;&lt;&lt;&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;&gt;&gt;&quot; </span><span class="s2">| </span><span class="s4">&quot;&gt;&gt;&gt;&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;+&quot; </span><span class="s2">| </span><span
+    class="s4">&quot;-&quot; </span><span class="s2">| </span><span class="s4">&quot;*&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;/&quot; </span><span class="s2">| </span><span
+    class="s4">&quot;%&quot; </span><span class="s2">| </span><span class="s4">&quot;|&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;^&quot; </span><span class="s2">| </span><span class="s4">&quot;&amp;&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;in&quot; </span><span class="s2">| </span><span class="s4">&quot;instanceof&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;**&quot;</span>
+
+<span class="s0">export interface </span><span class="s1">AssignmentExpression </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;AssignmentExpression&quot;</span>
+  <span class="s1">operator</span><span class="s2">: </span><span class="s1">AssignmentOperator</span>
+  <span class="s1">left</span><span class="s2">: </span><span class="s1">Pattern</span>
+  <span class="s1">right</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type AssignmentOperator </span><span class="s2">= </span><span
+    class="s4">&quot;=&quot; </span><span class="s2">| </span><span class="s4">&quot;+=&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;-=&quot; </span><span class="s2">| </span><span
+    class="s4">&quot;*=&quot; </span><span class="s2">| </span><span class="s4">&quot;/=&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;%=&quot; </span><span class="s2">| </span><span class="s4">&quot;&lt;&lt;=&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;&gt;&gt;=&quot; </span><span class="s2">| </span><span class="s4">&quot;&gt;&gt;&gt;=&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;|=&quot; </span><span class="s2">| </span><span
+    class="s4">&quot;^=&quot; </span><span class="s2">| </span><span class="s4">&quot;&amp;=&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;**=&quot; </span><span class="s2">| </span><span class="s4">&quot;||=&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;&amp;&amp;=&quot; </span><span class="s2">| </span><span class="s4">&quot;??=&quot;</span>
+
+<span class="s0">export interface </span><span class="s1">LogicalExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;LogicalExpression&quot;</span>
+  <span class="s1">operator</span><span class="s2">: </span><span class="s1">LogicalOperator</span>
+  <span class="s1">left</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">right</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type LogicalOperator </span><span class="s2">= </span><span class="s4">&quot;||&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;&amp;&amp;&quot; </span><span class="s2">| </span><span class="s4">&quot;??&quot;</span>
+
+<span class="s0">export interface </span><span class="s1">MemberExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;MemberExpression&quot;</span>
+  <span class="s1">object</span><span class="s2">: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s1">Super</span>
+  <span class="s1">property</span><span class="s2">: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s1">PrivateIdentifier</span>
+  <span class="s1">computed</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">optional</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ConditionalExpression </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ConditionalExpression&quot;</span>
+  <span class="s1">test</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">alternate</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">consequent</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">CallExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;CallExpression&quot;</span>
+  <span class="s1">callee</span><span class="s2">: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s1">Super</span>
+  <span class="s1">arguments</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">Expression </span><span class="s2">| </span><span
+    class="s1">SpreadElement</span><span class="s2">&gt;</span>
+  <span class="s1">optional</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">NewExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;NewExpression&quot;</span>
+  <span class="s1">callee</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">arguments</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">Expression </span><span class="s2">| </span><span
+    class="s1">SpreadElement</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">SequenceExpression </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;SequenceExpression&quot;</span>
+  <span class="s1">expressions</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">Expression</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ForOfStatement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ForOfStatement&quot;</span>
+  <span class="s1">left</span><span class="s2">: </span><span class="s1">VariableDeclaration </span><span
+    class="s2">| </span><span class="s1">Pattern</span>
+  <span class="s1">right</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Statement</span>
+  <span class="s0">await</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Super </span><span class="s0">extends </span><span class="s1">Node </span><span
+    class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;Super&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">SpreadElement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;SpreadElement&quot;</span>
+  <span class="s1">argument</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ArrowFunctionExpression </span><span
+    class="s0">extends </span><span class="s1">Function </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ArrowFunctionExpression&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">YieldExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;YieldExpression&quot;</span>
+  <span class="s1">argument</span><span class="s2">?: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">delegate</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">TemplateLiteral </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;TemplateLiteral&quot;</span>
+  <span class="s1">quasis</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">TemplateElement</span><span class="s2">&gt;</span>
+  <span class="s1">expressions</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">Expression</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">TaggedTemplateExpression </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;TaggedTemplateExpression&quot;</span>
+  <span class="s1">tag</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">quasi</span><span class="s2">: </span><span class="s1">TemplateLiteral</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">TemplateElement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;TemplateElement&quot;</span>
+  <span class="s1">tail</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">value</span><span class="s2">: {</span>
+    <span class="s1">cooked</span><span class="s2">?: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s0">null</span>
+    <span class="s1">raw</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">AssignmentProperty </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;Property&quot;</span>
+  <span class="s1">key</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">value</span><span class="s2">: </span><span class="s1">Pattern</span>
+  <span class="s1">kind</span><span class="s2">: </span><span class="s4">&quot;init&quot;</span>
+  <span class="s1">method</span><span class="s2">: </span><span class="s0">false</span>
+  <span class="s1">shorthand</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s1">computed</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ObjectPattern </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ObjectPattern&quot;</span>
+  <span class="s1">properties</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">AssignmentProperty </span><span class="s2">| </span><span class="s1">RestElement</span><span
+    class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ArrayPattern </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ArrayPattern&quot;</span>
+  <span class="s1">elements</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">Pattern </span><span class="s2">| </span><span class="s0">null</span><span
+    class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">RestElement </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;RestElement&quot;</span>
+  <span class="s1">argument</span><span class="s2">: </span><span class="s1">Pattern</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">AssignmentPattern </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;AssignmentPattern&quot;</span>
+  <span class="s1">left</span><span class="s2">: </span><span class="s1">Pattern</span>
+  <span class="s1">right</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Class </span><span class="s0">extends </span><span class="s1">Node </span><span
+    class="s2">{</span>
+  <span class="s1">id</span><span class="s2">?: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">superClass</span><span class="s2">?: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">ClassBody</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ClassBody </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ClassBody&quot;</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">MethodDefinition </span><span class="s2">| </span><span class="s1">PropertyDefinition </span><span
+    class="s2">| </span><span class="s1">StaticBlock</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">MethodDefinition </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;MethodDefinition&quot;</span>
+  <span class="s1">key</span><span class="s2">: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s1">PrivateIdentifier</span>
+  <span class="s1">value</span><span class="s2">: </span><span class="s1">FunctionExpression</span>
+  <span class="s1">kind</span><span class="s2">: </span><span class="s4">&quot;constructor&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;method&quot; </span><span class="s2">| </span><span class="s4">&quot;get&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;set&quot;</span>
+  <span class="s1">computed</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s0">static</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ClassDeclaration </span><span class="s0">extends </span><span
+    class="s1">Class </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ClassDeclaration&quot;</span>
+  <span class="s1">id</span><span class="s2">: </span><span class="s1">Identifier</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ClassExpression </span><span class="s0">extends </span><span
+    class="s1">Class </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ClassExpression&quot;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">MetaProperty </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;MetaProperty&quot;</span>
+  <span class="s1">meta</span><span class="s2">: </span><span class="s1">Identifier</span>
+  <span class="s1">property</span><span class="s2">: </span><span class="s1">Identifier</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ImportDeclaration </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ImportDeclaration&quot;</span>
+  <span class="s1">specifiers</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">ImportSpecifier </span><span class="s2">| </span><span class="s1">ImportDefaultSpecifier </span><span
+    class="s2">| </span><span class="s1">ImportNamespaceSpecifier</span><span class="s2">&gt;</span>
+  <span class="s1">source</span><span class="s2">: </span><span class="s1">Literal</span>
+  <span class="s1">attributes</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">ImportAttribute</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ImportSpecifier </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ImportSpecifier&quot;</span>
+  <span class="s1">imported</span><span class="s2">: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s1">Literal</span>
+  <span class="s1">local</span><span class="s2">: </span><span class="s1">Identifier</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ImportDefaultSpecifier </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ImportDefaultSpecifier&quot;</span>
+  <span class="s1">local</span><span class="s2">: </span><span class="s1">Identifier</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ImportNamespaceSpecifier </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ImportNamespaceSpecifier&quot;</span>
+  <span class="s1">local</span><span class="s2">: </span><span class="s1">Identifier</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ImportAttribute </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ImportAttribute&quot;</span>
+  <span class="s1">key</span><span class="s2">: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s1">Literal</span>
+  <span class="s1">value</span><span class="s2">: </span><span class="s1">Literal</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ExportNamedDeclaration </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ExportNamedDeclaration&quot;</span>
+  <span class="s1">declaration</span><span class="s2">?: </span><span class="s1">Declaration </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">specifiers</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">ExportSpecifier</span><span class="s2">&gt;</span>
+  <span class="s1">source</span><span class="s2">?: </span><span class="s1">Literal </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">attributes</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">ImportAttribute</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ExportSpecifier </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ExportSpecifier&quot;</span>
+  <span class="s1">exported</span><span class="s2">: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s1">Literal</span>
+  <span class="s1">local</span><span class="s2">: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s1">Literal</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">AnonymousFunctionDeclaration </span><span
+    class="s0">extends </span><span class="s1">Function </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;FunctionDeclaration&quot;</span>
+  <span class="s1">id</span><span class="s2">: </span><span class="s0">null</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">BlockStatement</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">AnonymousClassDeclaration </span><span
+    class="s0">extends </span><span class="s1">Class </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ClassDeclaration&quot;</span>
+  <span class="s1">id</span><span class="s2">: </span><span class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ExportDefaultDeclaration </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ExportDefaultDeclaration&quot;</span>
+  <span class="s1">declaration</span><span class="s2">: </span><span
+    class="s1">AnonymousFunctionDeclaration </span><span class="s2">| </span><span
+    class="s1">FunctionDeclaration </span><span class="s2">| </span><span
+    class="s1">AnonymousClassDeclaration </span><span class="s2">| </span><span class="s1">ClassDeclaration </span><span
+    class="s2">| </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ExportAllDeclaration </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ExportAllDeclaration&quot;</span>
+  <span class="s1">source</span><span class="s2">: </span><span class="s1">Literal</span>
+  <span class="s1">exported</span><span class="s2">?: </span><span class="s1">Identifier </span><span
+    class="s2">| </span><span class="s1">Literal </span><span class="s2">| </span><span class="s0">null</span>
+  <span class="s1">attributes</span><span class="s2">: </span><span class="s1">Array</span><span
+    class="s2">&lt;</span><span class="s1">ImportAttribute</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">AwaitExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;AwaitExpression&quot;</span>
+  <span class="s1">argument</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ChainExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ChainExpression&quot;</span>
+  <span class="s1">expression</span><span class="s2">: </span><span class="s1">MemberExpression </span><span class="s2">| </span><span
+    class="s1">CallExpression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ImportExpression </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ImportExpression&quot;</span>
+  <span class="s1">source</span><span class="s2">: </span><span class="s1">Expression</span>
+  <span class="s1">options</span><span class="s2">: </span><span class="s1">Expression </span><span class="s2">| </span><span
+    class="s0">null</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">ParenthesizedExpression </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;ParenthesizedExpression&quot;</span>
+  <span class="s1">expression</span><span class="s2">: </span><span class="s1">Expression</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">PropertyDefinition </span><span
+    class="s0">extends </span><span class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;PropertyDefinition&quot;</span>
+  <span class="s1">key</span><span class="s2">: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s1">PrivateIdentifier</span>
+  <span class="s1">value</span><span class="s2">?: </span><span class="s1">Expression </span><span
+    class="s2">| </span><span class="s0">null</span>
+  <span class="s1">computed</span><span class="s2">: </span><span class="s1">boolean</span>
+  <span class="s0">static</span><span class="s2">: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">PrivateIdentifier </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;PrivateIdentifier&quot;</span>
+  <span class="s1">name</span><span class="s2">: </span><span class="s1">string</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">StaticBlock </span><span class="s0">extends </span><span
+    class="s1">Node </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;StaticBlock&quot;</span>
+  <span class="s1">body</span><span class="s2">: </span><span class="s1">Array</span><span class="s2">&lt;</span><span
+    class="s1">Statement</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type Statement </span><span class="s2">= </span>
+<span class="s2">| </span><span class="s1">ExpressionStatement</span>
+<span class="s2">| </span><span class="s1">BlockStatement</span>
+<span class="s2">| </span><span class="s1">EmptyStatement</span>
+<span class="s2">| </span><span class="s1">DebuggerStatement</span>
+<span class="s2">| </span><span class="s1">WithStatement</span>
+<span class="s2">| </span><span class="s1">ReturnStatement</span>
+<span class="s2">| </span><span class="s1">LabeledStatement</span>
+<span class="s2">| </span><span class="s1">BreakStatement</span>
+<span class="s2">| </span><span class="s1">ContinueStatement</span>
+<span class="s2">| </span><span class="s1">IfStatement</span>
+<span class="s2">| </span><span class="s1">SwitchStatement</span>
+<span class="s2">| </span><span class="s1">ThrowStatement</span>
+<span class="s2">| </span><span class="s1">TryStatement</span>
+<span class="s2">| </span><span class="s1">WhileStatement</span>
+<span class="s2">| </span><span class="s1">DoWhileStatement</span>
+<span class="s2">| </span><span class="s1">ForStatement</span>
+<span class="s2">| </span><span class="s1">ForInStatement</span>
+<span class="s2">| </span><span class="s1">ForOfStatement</span>
+<span class="s2">| </span><span class="s1">Declaration</span>
+
+<span class="s0">export </span><span class="s1">type Declaration </span><span class="s2">= </span>
+<span class="s2">| </span><span class="s1">FunctionDeclaration</span>
+<span class="s2">| </span><span class="s1">VariableDeclaration</span>
+<span class="s2">| </span><span class="s1">ClassDeclaration</span>
+
+<span class="s0">export </span><span class="s1">type Expression </span><span class="s2">= </span>
+<span class="s2">| </span><span class="s1">Identifier</span>
+<span class="s2">| </span><span class="s1">Literal</span>
+<span class="s2">| </span><span class="s1">ThisExpression</span>
+<span class="s2">| </span><span class="s1">ArrayExpression</span>
+<span class="s2">| </span><span class="s1">ObjectExpression</span>
+<span class="s2">| </span><span class="s1">FunctionExpression</span>
+<span class="s2">| </span><span class="s1">UnaryExpression</span>
+<span class="s2">| </span><span class="s1">UpdateExpression</span>
+<span class="s2">| </span><span class="s1">BinaryExpression</span>
+<span class="s2">| </span><span class="s1">AssignmentExpression</span>
+<span class="s2">| </span><span class="s1">LogicalExpression</span>
+<span class="s2">| </span><span class="s1">MemberExpression</span>
+<span class="s2">| </span><span class="s1">ConditionalExpression</span>
+<span class="s2">| </span><span class="s1">CallExpression</span>
+<span class="s2">| </span><span class="s1">NewExpression</span>
+<span class="s2">| </span><span class="s1">SequenceExpression</span>
+<span class="s2">| </span><span class="s1">ArrowFunctionExpression</span>
+<span class="s2">| </span><span class="s1">YieldExpression</span>
+<span class="s2">| </span><span class="s1">TemplateLiteral</span>
+<span class="s2">| </span><span class="s1">TaggedTemplateExpression</span>
+<span class="s2">| </span><span class="s1">ClassExpression</span>
+<span class="s2">| </span><span class="s1">MetaProperty</span>
+<span class="s2">| </span><span class="s1">AwaitExpression</span>
+<span class="s2">| </span><span class="s1">ChainExpression</span>
+<span class="s2">| </span><span class="s1">ImportExpression</span>
+<span class="s2">| </span><span class="s1">ParenthesizedExpression</span>
+
+<span class="s0">export </span><span class="s1">type Pattern </span><span class="s2">= </span>
+<span class="s2">| </span><span class="s1">Identifier</span>
+<span class="s2">| </span><span class="s1">MemberExpression</span>
+<span class="s2">| </span><span class="s1">ObjectPattern</span>
+<span class="s2">| </span><span class="s1">ArrayPattern</span>
+<span class="s2">| </span><span class="s1">RestElement</span>
+<span class="s2">| </span><span class="s1">AssignmentPattern</span>
+
+<span class="s0">export </span><span class="s1">type ModuleDeclaration </span><span class="s2">= </span>
+<span class="s2">| </span><span class="s1">ImportDeclaration</span>
+<span class="s2">| </span><span class="s1">ExportNamedDeclaration</span>
+<span class="s2">| </span><span class="s1">ExportDefaultDeclaration</span>
+<span class="s2">| </span><span class="s1">ExportAllDeclaration</span>
+
+<span class="s3">/**</span>
+  <span class="s3">* This interface is only used for defining {</span><span class="s5">@link </span><span class="s3">AnyNode}.</span>
+  <span class="s3">* It exists so that it can be extended by plugins:</span>
+  <span class="s3">*</span>
+  <span class="s3">* </span><span class="s5">@example</span>
+  <span class="s3">* ```typescript</span>
+  <span class="s3">* declare module 'acorn' {</span>
+  <span class="s3">*   interface NodeTypes {</span>
+  <span class="s3">*     pluginName: FirstNode | SecondNode | ThirdNode | ... | LastNode</span>
+  <span class="s3">*   }</span>
+  <span class="s3">* }</span>
+  <span class="s3">* ```</span>
+  <span class="s3">*/</span>
+<span class="s0">interface </span><span class="s1">NodeTypes </span><span class="s2">{</span>
+  <span class="s1">core</span><span class="s2">: </span><span class="s1">Statement </span><span
+    class="s2">| </span><span class="s1">Expression </span><span class="s2">| </span><span
+    class="s1">Declaration </span><span class="s2">| </span><span class="s1">ModuleDeclaration </span><span
+    class="s2">| </span><span class="s1">Literal </span><span class="s2">| </span><span class="s1">Program </span><span
+    class="s2">| </span><span class="s1">SwitchCase </span><span class="s2">| </span><span
+    class="s1">CatchClause </span><span class="s2">| </span><span class="s1">Property </span><span
+    class="s2">| </span><span class="s1">Super </span><span class="s2">| </span><span
+    class="s1">SpreadElement </span><span class="s2">| </span><span class="s1">TemplateElement </span><span
+    class="s2">| </span><span class="s1">AssignmentProperty </span><span class="s2">| </span><span class="s1">ObjectPattern </span><span
+    class="s2">| </span><span class="s1">ArrayPattern </span><span class="s2">| </span><span
+    class="s1">RestElement </span><span class="s2">| </span><span class="s1">AssignmentPattern </span><span
+    class="s2">| </span><span class="s1">ClassBody </span><span class="s2">| </span><span
+    class="s1">MethodDefinition </span><span class="s2">| </span><span class="s1">MetaProperty </span><span
+    class="s2">| </span><span class="s1">ImportAttribute </span><span class="s2">| </span><span class="s1">ImportSpecifier </span><span
+    class="s2">| </span><span class="s1">ImportDefaultSpecifier </span><span class="s2">| </span><span class="s1">ImportNamespaceSpecifier </span><span
+    class="s2">| </span><span class="s1">ExportSpecifier </span><span class="s2">| </span><span class="s1">AnonymousFunctionDeclaration </span><span
+    class="s2">| </span><span class="s1">AnonymousClassDeclaration </span><span class="s2">| </span><span class="s1">PropertyDefinition </span><span
+    class="s2">| </span><span class="s1">PrivateIdentifier </span><span class="s2">| </span><span
+    class="s1">StaticBlock </span><span class="s2">| </span><span class="s1">VariableDeclarator</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type AnyNode </span><span class="s2">= </span><span
+    class="s1">NodeTypes</span><span class="s2">[</span><span class="s1">keyof NodeTypes</span><span class="s2">]</span>
+
+<span class="s0">export function </span><span class="s1">parse</span><span class="s2">(</span><span
+    class="s1">input</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">: </span><span class="s1">Options</span><span class="s2">): </span><span
+    class="s1">Program</span>
+
+<span class="s0">export function </span><span class="s1">parseExpressionAt</span><span class="s2">(</span><span
+    class="s1">input</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">pos</span><span class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">: </span><span class="s1">Options</span><span class="s2">): </span><span
+    class="s1">Expression</span>
+
+<span class="s0">export function </span><span class="s1">tokenizer</span><span class="s2">(</span><span
+    class="s1">input</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">: </span><span class="s1">Options</span><span class="s2">): {</span>
+  <span class="s1">getToken</span><span class="s2">(): </span><span class="s1">Token</span>
+  <span class="s2">[</span><span class="s1">Symbol</span><span class="s2">.</span><span class="s1">iterator</span><span
+    class="s2">](): </span><span class="s1">Iterator</span><span class="s2">&lt;</span><span
+    class="s1">Token</span><span class="s2">&gt;</span>
+<span class="s2">}</span>
+
+<span class="s0">export </span><span class="s1">type ecmaVersion </span><span class="s2">= </span><span
+    class="s6">3 </span><span class="s2">| </span><span class="s6">5 </span><span class="s2">| </span><span
+    class="s6">6 </span><span class="s2">| </span><span class="s6">7 </span><span class="s2">| </span><span
+    class="s6">8 </span><span class="s2">| </span><span class="s6">9 </span><span class="s2">| </span><span class="s6">10 </span><span
+    class="s2">| </span><span class="s6">11 </span><span class="s2">| </span><span class="s6">12 </span><span
+    class="s2">| </span><span class="s6">13 </span><span class="s2">| </span><span class="s6">14 </span><span
+    class="s2">| </span><span class="s6">15 </span><span class="s2">| </span><span class="s6">16 </span><span
+    class="s2">| </span><span class="s6">17 </span><span class="s2">| </span><span class="s6">2015 </span><span
+    class="s2">| </span><span class="s6">2016 </span><span class="s2">| </span><span class="s6">2017 </span><span
+    class="s2">| </span><span class="s6">2018 </span><span class="s2">| </span><span class="s6">2019 </span><span
+    class="s2">| </span><span class="s6">2020 </span><span class="s2">| </span><span class="s6">2021 </span><span
+    class="s2">| </span><span class="s6">2022 </span><span class="s2">| </span><span class="s6">2023 </span><span
+    class="s2">| </span><span class="s6">2024 </span><span class="s2">| </span><span class="s6">2025 </span><span
+    class="s2">| </span><span class="s6">2026 </span><span class="s2">| </span><span
+    class="s4">&quot;latest&quot;</span>
+
+<span class="s0">export interface </span><span class="s1">Options </span><span class="s2">{</span>
+  <span class="s3">/**</span>
+   <span class="s3">* `ecmaVersion` indicates the ECMAScript version to parse. Can be a</span>
+   <span class="s3">* number, either in year (`2022`) or plain version number (`6`) form,</span>
+   <span class="s3">* or `&quot;latest&quot;` (the latest the library supports). This influences</span>
+   <span class="s3">* support for strict mode, the set of reserved words, and support for</span>
+   <span class="s3">* new syntax features.</span>
+   <span class="s3">*/</span>
+  <span class="s1">ecmaVersion</span><span class="s2">: </span><span class="s1">ecmaVersion</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* `sourceType` indicates the mode the code should be parsed in.</span>
+   <span class="s3">* Can be either `&quot;script&quot;` or `&quot;module&quot;`. This influences global</span>
+   <span class="s3">* strict mode and parsing of `import` and `export` declarations.</span>
+   <span class="s3">*/</span>
+  <span class="s1">sourceType</span><span class="s2">?: </span><span class="s4">&quot;script&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;module&quot;</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* a callback that will be called when a semicolon is automatically inserted.</span>
+   <span class="s3">* </span><span class="s5">@param </span><span class="s3">lastTokEnd the position of the comma as an offset</span>
+   <span class="s3">* </span><span class="s5">@param </span><span class="s3">lastTokEndLoc location if {</span><span
+    class="s5">@link </span><span class="s3">locations} is enabled</span>
+   <span class="s3">*/</span>
+  <span class="s1">onInsertedSemicolon</span><span class="s2">?: (</span><span class="s1">lastTokEnd</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">lastTokEndLoc</span><span class="s2">?: </span><span class="s1">Position</span><span
+    class="s2">) =&gt; </span><span class="s0">void</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* similar to `onInsertedSemicolon`, but for trailing commas</span>
+   <span class="s3">* </span><span class="s5">@param </span><span class="s3">lastTokEnd the position of the comma as an offset</span>
+   <span class="s3">* </span><span class="s5">@param </span><span class="s3">lastTokEndLoc location if `locations` is enabled</span>
+   <span class="s3">*/</span>
+  <span class="s1">onTrailingComma</span><span class="s2">?: (</span><span class="s1">lastTokEnd</span><span class="s2">: </span><span
+    class="s1">number</span><span class="s2">, </span><span class="s1">lastTokEndLoc</span><span
+    class="s2">?: </span><span class="s1">Position</span><span class="s2">) =&gt; </span><span class="s0">void</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* By default, reserved words are only enforced if ecmaVersion &gt;= 5.</span>
+   <span class="s3">* Set `allowReserved` to a boolean value to explicitly turn this on</span>
+   <span class="s3">* an off. When this option has the value &quot;never&quot;, reserved words</span>
+   <span class="s3">* and keywords can also not be used as property names.</span>
+   <span class="s3">*/</span>
+  <span class="s1">allowReserved</span><span class="s2">?: </span><span class="s1">boolean </span><span
+    class="s2">| </span><span class="s4">&quot;never&quot;</span>
+
+  <span class="s3">/** </span>
+   <span class="s3">* When enabled, a return at the top level is not considered an error.</span>
+   <span class="s3">*/</span>
+  <span class="s1">allowReturnOutsideFunction</span><span class="s2">?: </span><span class="s1">boolean</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* When enabled, import/export statements are not constrained to</span>
+   <span class="s3">* appearing at the top of the program, and an import.meta expression</span>
+   <span class="s3">* in a script isn't considered an error.</span>
+   <span class="s3">*/</span>
+  <span class="s1">allowImportExportEverywhere</span><span class="s2">?: </span><span class="s1">boolean</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* By default, `await` identifiers are allowed to appear at the top-level scope only if {</span><span
+    class="s5">@link </span><span class="s3">ecmaVersion} &gt;= 2022.</span>
+   <span class="s3">* When enabled, await identifiers are allowed to appear at the top-level scope,</span>
+   <span class="s3">* but they are still not allowed in non-async functions.</span>
+   <span class="s3">*/</span>
+  <span class="s1">allowAwaitOutsideFunction</span><span class="s2">?: </span><span class="s1">boolean</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* When enabled, super identifiers are not constrained to</span>
+   <span class="s3">* appearing in methods and do not raise an error when they appear elsewhere.</span>
+   <span class="s3">*/</span>
+  <span class="s1">allowSuperOutsideMethod</span><span class="s2">?: </span><span class="s1">boolean</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* When enabled, hashbang directive in the beginning of file is</span>
+   <span class="s3">* allowed and treated as a line comment. Enabled by default when</span>
+   <span class="s3">* {</span><span class="s5">@link </span><span class="s3">ecmaVersion} &gt;= 2023.</span>
+   <span class="s3">*/</span>
+  <span class="s1">allowHashBang</span><span class="s2">?: </span><span class="s1">boolean</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* By default, the parser will verify that private properties are</span>
+   <span class="s3">* only used in places where they are valid and have been declared.</span>
+   <span class="s3">* Set this to false to turn such checks off.</span>
+   <span class="s3">*/</span>
+  <span class="s1">checkPrivateFields</span><span class="s2">?: </span><span class="s1">boolean</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* When `locations` is on, `loc` properties holding objects with</span>
+   <span class="s3">* `start` and `end` properties as {</span><span class="s5">@link </span><span class="s3">Position} objects will be attached to the</span>
+   <span class="s3">* nodes.</span>
+   <span class="s3">*/</span>
+  <span class="s1">locations</span><span class="s2">?: </span><span class="s1">boolean</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* a callback that will cause Acorn to call that export function with object in the same</span>
+   <span class="s3">* format as tokens returned from `tokenizer().getToken()`. Note</span>
+   <span class="s3">* that you are not allowed to call the parser from the</span>
+   <span class="s3">* callback—that will corrupt its internal state.</span>
+   <span class="s3">*/</span>
+  <span class="s1">onToken</span><span class="s2">?: ((</span><span class="s1">token</span><span
+    class="s2">: </span><span class="s1">Token</span><span class="s2">) =&gt; </span><span class="s0">void</span><span
+    class="s2">) | </span><span class="s1">Token</span><span class="s2">[]</span>
+
+
+  <span class="s3">/**</span>
+   <span class="s3">* This takes a export function or an array.</span>
+   <span class="s3">* </span>
+   <span
+     class="s3">* When a export function is passed, Acorn will call that export function with `(block, text, start,</span>
+   <span class="s3">* end)` parameters whenever a comment is skipped. `block` is a</span>
+   <span class="s3">* boolean indicating whether this is a block (`/* *\/`) comment,</span>
+   <span class="s3">* `text` is the content of the comment, and `start` and `end` are</span>
+   <span class="s3">* character offsets that denote the start and end of the comment.</span>
+   <span class="s3">* When the {</span><span class="s5">@link </span><span class="s3">locations} option is on, two more parameters are</span>
+   <span class="s3">* passed, the full locations of {</span><span class="s5">@link </span><span class="s3">Position} export type of the start and</span>
+   <span class="s3">* end of the comments.</span>
+   <span class="s3">* </span>
+   <span class="s3">* When a array is passed, each found comment of {</span><span class="s5">@link </span><span
+    class="s3">Comment} export type is pushed to the array.</span>
+   <span class="s3">* </span>
+   <span class="s3">* Note that you are not allowed to call the</span>
+   <span class="s3">* parser from the callback—that will corrupt its internal state.</span>
+   <span class="s3">*/</span>
+  <span class="s1">onComment</span><span class="s2">?: ((</span>
+    <span class="s1">isBlock</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">, </span><span class="s1">text</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">start</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">end</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">, </span><span class="s1">startLoc</span><span class="s2">?: </span><span class="s1">Position</span><span
+    class="s2">,</span>
+    <span class="s1">endLoc</span><span class="s2">?: </span><span class="s1">Position</span>
+  <span class="s2">) =&gt; </span><span class="s0">void</span><span class="s2">) | </span><span
+    class="s1">Comment</span><span class="s2">[]</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* Nodes have their start and end characters offsets recorded in</span>
+   <span class="s3">* `start` and `end` properties (directly on the node, rather than</span>
+   <span class="s3">* the `loc` object, which holds line/column data. To also add a</span>
+   <span class="s3">* [semi-standardized][range] `range` property holding a `[start,</span>
+   <span class="s3">* end]` array with the same numbers, set the `ranges` option to</span>
+   <span class="s3">* `true`.</span>
+   <span class="s3">*/</span>
+  <span class="s1">ranges</span><span class="s2">?: </span><span class="s1">boolean</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* It is possible to parse multiple files into a single AST by</span>
+   <span class="s3">* passing the tree produced by parsing the first file as</span>
+   <span class="s3">* `program` option in subsequent parses. This will add the</span>
+   <span class="s3">* toplevel forms of the parsed file to the `Program` (top) node</span>
+   <span class="s3">* of an existing parse tree.</span>
+   <span class="s3">*/</span>
+  <span class="s1">program</span><span class="s2">?: </span><span class="s1">Node</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* When {</span><span class="s5">@link </span><span class="s3">locations} is on, you can pass this to record the source</span>
+   <span class="s3">* file in every node's `loc` object.</span>
+   <span class="s3">*/</span>
+  <span class="s1">sourceFile</span><span class="s2">?: </span><span class="s1">string</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* This value, if given, is stored in every node, whether {</span><span class="s5">@link </span><span
+    class="s3">locations} is on or off.</span>
+   <span class="s3">*/</span>
+  <span class="s1">directSourceFile</span><span class="s2">?: </span><span class="s1">string</span>
+
+  <span class="s3">/**</span>
+   <span class="s3">* When enabled, parenthesized expressions are represented by</span>
+   <span class="s3">* (non-standard) ParenthesizedExpression nodes</span>
+   <span class="s3">*/</span>
+  <span class="s1">preserveParens</span><span class="s2">?: </span><span class="s1">boolean</span>
+<span class="s2">}</span>
+
+<span class="s0">export class </span><span class="s1">Parser </span><span class="s2">{</span>
+  <span class="s1">options</span><span class="s2">: </span><span class="s1">Options</span>
+  <span class="s1">input</span><span class="s2">: </span><span class="s1">string</span>
+
+  <span class="s0">protected </span><span class="s1">constructor</span><span class="s2">(</span><span
+    class="s1">options</span><span class="s2">: </span><span class="s1">Options</span><span class="s2">, </span><span
+    class="s1">input</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">startPos</span><span class="s2">?: </span><span class="s1">number</span><span class="s2">)</span>
+  <span class="s1">parse</span><span class="s2">(): </span><span class="s1">Program</span>
+
+  <span class="s0">static </span><span class="s1">parse</span><span class="s2">(</span><span
+    class="s1">input</span><span class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">options</span><span class="s2">: </span><span class="s1">Options</span><span class="s2">): </span><span
+    class="s1">Program</span>
+  <span class="s0">static </span><span class="s1">parseExpressionAt</span><span class="s2">(</span><span class="s1">input</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">pos</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">: </span><span class="s1">Options</span><span class="s2">): </span><span class="s1">Expression</span>
+  <span class="s0">static </span><span class="s1">tokenizer</span><span class="s2">(</span><span class="s1">input</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">options</span><span
+    class="s2">: </span><span class="s1">Options</span><span class="s2">): {</span>
+    <span class="s1">getToken</span><span class="s2">(): </span><span class="s1">Token</span>
+    <span class="s2">[</span><span class="s1">Symbol</span><span class="s2">.</span><span
+    class="s1">iterator</span><span class="s2">](): </span><span class="s1">Iterator</span><span
+    class="s2">&lt;</span><span class="s1">Token</span><span class="s2">&gt;</span>
+  <span class="s2">}</span>
+  <span class="s0">static </span><span class="s1">extend</span><span class="s2">(</span><span
+    class="s1">...plugins</span><span class="s2">: ((</span><span class="s1">BaseParser</span><span class="s2">: </span><span
+    class="s0">typeof </span><span class="s1">Parser</span><span class="s2">) =&gt; </span><span
+    class="s0">typeof </span><span class="s1">Parser</span><span class="s2">)[]): </span><span class="s0">typeof </span><span
+    class="s1">Parser</span>
+<span class="s2">}</span>
+
+<span class="s0">export const </span><span class="s1">defaultOptions</span><span class="s2">: </span><span class="s1">Options</span>
+
+<span class="s0">export function </span><span class="s1">getLineInfo</span><span class="s2">(</span><span class="s1">input</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">offset</span><span
+    class="s2">: </span><span class="s1">number</span><span class="s2">): </span><span class="s1">Position</span>
+
+<span class="s0">export class </span><span class="s1">TokenType </span><span class="s2">{</span>
+  <span class="s1">label</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">keyword</span><span class="s2">: </span><span class="s1">string </span><span
+    class="s2">| </span><span class="s1">undefined</span>
+<span class="s2">}</span>
+
+<span class="s0">export const </span><span class="s1">tokTypes</span><span class="s2">: {</span>
+  <span class="s1">num</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">regexp</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">string</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">name</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">privateId</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">eof</span><span class="s2">: </span><span class="s1">TokenType</span>
+
+  <span class="s1">bracketL</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">bracketR</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">braceL</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">braceR</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">parenL</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">parenR</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">comma</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">semi</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">colon</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">dot</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">question</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">questionDot</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">arrow</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">template</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">invalidTemplate</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">ellipsis</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">backQuote</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">dollarBraceL</span><span class="s2">: </span><span class="s1">TokenType</span>
+
+  <span class="s1">eq</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">assign</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">incDec</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">prefix</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">logicalOR</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">logicalAND</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">bitwiseOR</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">bitwiseXOR</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">bitwiseAND</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">equality</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">relational</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">bitShift</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">plusMin</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">modulo</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">star</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">slash</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">starstar</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">coalesce</span><span class="s2">: </span><span class="s1">TokenType</span>
+
+  <span class="s1">_break</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_case</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_catch</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_continue</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_debugger</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_default</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_do</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_else</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_finally</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_for</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_function</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_if</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_return</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_switch</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_throw</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_try</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_var</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_const</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_while</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_with</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_new</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_this</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_super</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_class</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_extends</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_export</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_import</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_null</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_true</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_false</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_in</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_instanceof</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_typeof</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_void</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">_delete</span><span class="s2">: </span><span class="s1">TokenType</span>
+<span class="s2">}</span>
+
+<span class="s0">export interface </span><span class="s1">Comment </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s4">&quot;Line&quot; </span><span
+    class="s2">| </span><span class="s4">&quot;Block&quot;</span>
+  <span class="s1">value</span><span class="s2">: </span><span class="s1">string</span>
+  <span class="s1">start</span><span class="s2">: </span><span class="s1">number</span>
+  <span class="s1">end</span><span class="s2">: </span><span class="s1">number</span>
+  <span class="s1">loc</span><span class="s2">?: </span><span class="s1">SourceLocation</span>
+  <span class="s1">range</span><span class="s2">?: [</span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">number</span><span class="s2">]</span>
+<span class="s2">}</span>
+
+<span class="s0">export class </span><span class="s1">Token </span><span class="s2">{</span>
+  <span class="s1">type</span><span class="s2">: </span><span class="s1">TokenType</span>
+  <span class="s1">start</span><span class="s2">: </span><span class="s1">number</span>
+  <span class="s1">end</span><span class="s2">: </span><span class="s1">number</span>
+  <span class="s1">loc</span><span class="s2">?: </span><span class="s1">SourceLocation</span>
+  <span class="s1">range</span><span class="s2">?: [</span><span class="s1">number</span><span class="s2">, </span><span
+    class="s1">number</span><span class="s2">]</span>
+<span class="s2">}</span>
+
+<span class="s0">export const </span><span class="s1">version</span><span class="s2">: </span><span
+    class="s1">string</span>
+</pre>
+</body>
+</html>

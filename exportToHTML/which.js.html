@@ -1,0 +1,292 @@
+<html>
+<head>
+  <title>which.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #6aab73;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #42c3d4;
+    }
+
+    .s6 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          which.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">const </span><span class="s1">isWindows </span><span class="s2">= </span><span
+  class="s1">process</span><span class="s2">.</span><span class="s1">platform </span><span class="s2">=== </span><span
+  class="s3">'win32' </span><span class="s2">||</span>
+    <span class="s1">process</span><span class="s2">.</span><span class="s1">env</span><span class="s2">.</span><span
+    class="s1">OSTYPE </span><span class="s2">=== </span><span class="s3">'cygwin' </span><span class="s2">||</span>
+    <span class="s1">process</span><span class="s2">.</span><span class="s1">env</span><span class="s2">.</span><span
+    class="s1">OSTYPE </span><span class="s2">=== </span><span class="s3">'msys'</span>
+
+<span class="s0">const </span><span class="s1">path </span><span class="s2">= </span><span
+    class="s1">require</span><span class="s2">(</span><span class="s3">'path'</span><span class="s2">)</span>
+<span class="s0">const </span><span class="s1">COLON </span><span class="s2">= </span><span class="s1">isWindows </span><span
+    class="s2">? </span><span class="s3">';' </span><span class="s2">: </span><span class="s3">':'</span>
+<span class="s0">const </span><span class="s1">isexe </span><span class="s2">= </span><span
+    class="s1">require</span><span class="s2">(</span><span class="s3">'isexe'</span><span class="s2">)</span>
+
+<span class="s0">const </span><span class="s1">getNotFoundError </span><span class="s2">= (</span><span
+    class="s1">cmd</span><span class="s2">) =&gt;</span>
+  <span class="s1">Object</span><span class="s2">.</span><span class="s1">assign</span><span class="s2">(</span><span
+    class="s0">new </span><span class="s1">Error</span><span class="s2">(</span><span
+    class="s3">`not found: </span><span class="s1">$</span><span class="s2">{</span><span class="s1">cmd</span><span
+    class="s2">}</span><span class="s3">`</span><span class="s2">), { </span><span class="s1">code</span><span
+    class="s2">: </span><span class="s3">'ENOENT' </span><span class="s2">})</span>
+
+<span class="s0">const </span><span class="s1">getPathInfo </span><span class="s2">= (</span><span class="s1">cmd</span><span
+    class="s2">, </span><span class="s1">opt</span><span class="s2">) =&gt; {</span>
+  <span class="s0">const </span><span class="s1">colon </span><span class="s2">= </span><span class="s1">opt</span><span
+    class="s2">.</span><span class="s1">colon </span><span class="s2">|| </span><span class="s1">COLON</span>
+
+  <span class="s4">// If it has a slash, then we don't bother searching the pathenv.</span>
+  <span class="s4">// just check the file itself, and that's it.</span>
+  <span class="s0">const </span><span class="s1">pathEnv </span><span class="s2">= </span><span
+    class="s1">cmd</span><span class="s2">.</span><span class="s1">match</span><span class="s2">(</span><span
+    class="s5">/\//</span><span class="s2">) || </span><span class="s1">isWindows </span><span
+    class="s2">&amp;&amp; </span><span class="s1">cmd</span><span class="s2">.</span><span class="s1">match</span><span
+    class="s2">(</span><span class="s5">/\\/</span><span class="s2">) ? [</span><span class="s3">''</span><span
+    class="s2">]</span>
+    <span class="s2">: (</span>
+      <span class="s2">[</span>
+        <span class="s4">// windows always checks the cwd first</span>
+        <span class="s1">...</span><span class="s2">(</span><span class="s1">isWindows </span><span
+    class="s2">? [</span><span class="s1">process</span><span class="s2">.</span><span class="s1">cwd</span><span
+    class="s2">()] : []),</span>
+        <span class="s1">...</span><span class="s2">(</span><span class="s1">opt</span><span class="s2">.</span><span
+    class="s1">path </span><span class="s2">|| </span><span class="s1">process</span><span class="s2">.</span><span
+    class="s1">env</span><span class="s2">.</span><span class="s1">PATH </span><span class="s2">||</span>
+          <span class="s4">/* istanbul ignore next: very unusual */ </span><span class="s3">''</span><span
+    class="s2">).</span><span class="s1">split</span><span class="s2">(</span><span class="s1">colon</span><span
+    class="s2">),</span>
+      <span class="s2">]</span>
+    <span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">pathExtExe </span><span class="s2">= </span><span
+    class="s1">isWindows</span>
+    <span class="s2">? </span><span class="s1">opt</span><span class="s2">.</span><span class="s1">pathExt </span><span
+    class="s2">|| </span><span class="s1">process</span><span class="s2">.</span><span class="s1">env</span><span
+    class="s2">.</span><span class="s1">PATHEXT </span><span class="s2">|| </span><span
+    class="s3">'.EXE;.CMD;.BAT;.COM'</span>
+    <span class="s2">: </span><span class="s3">''</span>
+  <span class="s0">const </span><span class="s1">pathExt </span><span class="s2">= </span><span
+    class="s1">isWindows </span><span class="s2">? </span><span class="s1">pathExtExe</span><span
+    class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s1">colon</span><span
+    class="s2">) : [</span><span class="s3">''</span><span class="s2">]</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">isWindows</span><span class="s2">) {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">cmd</span><span class="s2">.</span><span
+    class="s1">indexOf</span><span class="s2">(</span><span class="s3">'.'</span><span class="s2">) !== -</span><span
+    class="s6">1 </span><span class="s2">&amp;&amp; </span><span class="s1">pathExt</span><span class="s2">[</span><span
+    class="s6">0</span><span class="s2">] !== </span><span class="s3">''</span><span class="s2">)</span>
+      <span class="s1">pathExt</span><span class="s2">.</span><span class="s1">unshift</span><span
+    class="s2">(</span><span class="s3">''</span><span class="s2">)</span>
+  <span class="s2">}</span>
+
+  <span class="s0">return </span><span class="s2">{</span>
+    <span class="s1">pathEnv</span><span class="s2">,</span>
+    <span class="s1">pathExt</span><span class="s2">,</span>
+    <span class="s1">pathExtExe</span><span class="s2">,</span>
+  <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">which </span><span class="s2">= (</span><span class="s1">cmd</span><span
+    class="s2">, </span><span class="s1">opt</span><span class="s2">, </span><span class="s1">cb</span><span class="s2">) =&gt; {</span>
+  <span class="s0">if </span><span class="s2">(</span><span class="s0">typeof </span><span class="s1">opt </span><span
+    class="s2">=== </span><span class="s3">'function'</span><span class="s2">) {</span>
+    <span class="s1">cb </span><span class="s2">= </span><span class="s1">opt</span>
+    <span class="s1">opt </span><span class="s2">= {}</span>
+  <span class="s2">}</span>
+  <span class="s0">if </span><span class="s2">(!</span><span class="s1">opt</span><span class="s2">)</span>
+    <span class="s1">opt </span><span class="s2">= {}</span>
+
+  <span class="s0">const </span><span class="s2">{ </span><span class="s1">pathEnv</span><span class="s2">, </span><span
+    class="s1">pathExt</span><span class="s2">, </span><span class="s1">pathExtExe </span><span
+    class="s2">} = </span><span class="s1">getPathInfo</span><span class="s2">(</span><span class="s1">cmd</span><span
+    class="s2">, </span><span class="s1">opt</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">found </span><span class="s2">= []</span>
+
+  <span class="s0">const </span><span class="s1">step </span><span class="s2">= </span><span class="s1">i </span><span
+    class="s2">=&gt; </span><span class="s0">new </span><span class="s1">Promise</span><span class="s2">((</span><span
+    class="s1">resolve</span><span class="s2">, </span><span class="s1">reject</span><span class="s2">) =&gt; {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">i </span><span class="s2">=== </span><span
+    class="s1">pathEnv</span><span class="s2">.</span><span class="s1">length</span><span class="s2">)</span>
+      <span class="s0">return </span><span class="s1">opt</span><span class="s2">.</span><span
+    class="s1">all </span><span class="s2">&amp;&amp; </span><span class="s1">found</span><span class="s2">.</span><span
+    class="s1">length </span><span class="s2">? </span><span class="s1">resolve</span><span class="s2">(</span><span
+    class="s1">found</span><span class="s2">)</span>
+        <span class="s2">: </span><span class="s1">reject</span><span class="s2">(</span><span class="s1">getNotFoundError</span><span
+    class="s2">(</span><span class="s1">cmd</span><span class="s2">))</span>
+
+    <span class="s0">const </span><span class="s1">ppRaw </span><span class="s2">= </span><span
+    class="s1">pathEnv</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+    <span class="s0">const </span><span class="s1">pathPart </span><span class="s2">= </span><span class="s5">/^&quot;.*&quot;$/</span><span
+    class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s1">ppRaw</span><span
+    class="s2">) ? </span><span class="s1">ppRaw</span><span class="s2">.</span><span class="s1">slice</span><span
+    class="s2">(</span><span class="s6">1</span><span class="s2">, -</span><span class="s6">1</span><span
+    class="s2">) : </span><span class="s1">ppRaw</span>
+
+    <span class="s0">const </span><span class="s1">pCmd </span><span class="s2">= </span><span
+    class="s1">path</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span
+    class="s1">pathPart</span><span class="s2">, </span><span class="s1">cmd</span><span class="s2">)</span>
+    <span class="s0">const </span><span class="s1">p </span><span class="s2">= !</span><span class="s1">pathPart </span><span
+    class="s2">&amp;&amp; </span><span class="s5">/^\.[\\\/]/</span><span class="s2">.</span><span
+    class="s1">test</span><span class="s2">(</span><span class="s1">cmd</span><span class="s2">) ? </span><span
+    class="s1">cmd</span><span class="s2">.</span><span class="s1">slice</span><span class="s2">(</span><span
+    class="s6">0</span><span class="s2">, </span><span class="s6">2</span><span class="s2">) + </span><span class="s1">pCmd</span>
+      <span class="s2">: </span><span class="s1">pCmd</span>
+
+    <span class="s1">resolve</span><span class="s2">(</span><span class="s1">subStep</span><span
+    class="s2">(</span><span class="s1">p</span><span class="s2">, </span><span class="s1">i</span><span
+    class="s2">, </span><span class="s6">0</span><span class="s2">))</span>
+  <span class="s2">})</span>
+
+  <span class="s0">const </span><span class="s1">subStep </span><span class="s2">= (</span><span
+    class="s1">p</span><span class="s2">, </span><span class="s1">i</span><span class="s2">, </span><span
+    class="s1">ii</span><span class="s2">) =&gt; </span><span class="s0">new </span><span class="s1">Promise</span><span
+    class="s2">((</span><span class="s1">resolve</span><span class="s2">, </span><span class="s1">reject</span><span
+    class="s2">) =&gt; {</span>
+    <span class="s0">if </span><span class="s2">(</span><span class="s1">ii </span><span class="s2">=== </span><span
+    class="s1">pathExt</span><span class="s2">.</span><span class="s1">length</span><span class="s2">)</span>
+      <span class="s0">return </span><span class="s1">resolve</span><span class="s2">(</span><span
+    class="s1">step</span><span class="s2">(</span><span class="s1">i </span><span class="s2">+ </span><span class="s6">1</span><span
+    class="s2">))</span>
+    <span class="s0">const </span><span class="s1">ext </span><span class="s2">= </span><span
+    class="s1">pathExt</span><span class="s2">[</span><span class="s1">ii</span><span class="s2">]</span>
+    <span class="s1">isexe</span><span class="s2">(</span><span class="s1">p </span><span class="s2">+ </span><span
+    class="s1">ext</span><span class="s2">, { </span><span class="s1">pathExt</span><span class="s2">: </span><span
+    class="s1">pathExtExe </span><span class="s2">}, (</span><span class="s1">er</span><span class="s2">, </span><span
+    class="s1">is</span><span class="s2">) =&gt; {</span>
+      <span class="s0">if </span><span class="s2">(!</span><span class="s1">er </span><span
+    class="s2">&amp;&amp; </span><span class="s1">is</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">opt</span><span class="s2">.</span><span
+    class="s1">all</span><span class="s2">)</span>
+          <span class="s1">found</span><span class="s2">.</span><span class="s1">push</span><span
+    class="s2">(</span><span class="s1">p </span><span class="s2">+ </span><span class="s1">ext</span><span
+    class="s2">)</span>
+        <span class="s0">else</span>
+          <span class="s0">return </span><span class="s1">resolve</span><span class="s2">(</span><span
+    class="s1">p </span><span class="s2">+ </span><span class="s1">ext</span><span class="s2">)</span>
+      <span class="s2">}</span>
+      <span class="s0">return </span><span class="s1">resolve</span><span class="s2">(</span><span
+    class="s1">subStep</span><span class="s2">(</span><span class="s1">p</span><span class="s2">, </span><span
+    class="s1">i</span><span class="s2">, </span><span class="s1">ii </span><span class="s2">+ </span><span
+    class="s6">1</span><span class="s2">))</span>
+    <span class="s2">})</span>
+  <span class="s2">})</span>
+
+  <span class="s0">return </span><span class="s1">cb </span><span class="s2">? </span><span class="s1">step</span><span
+    class="s2">(</span><span class="s6">0</span><span class="s2">).</span><span class="s1">then</span><span
+    class="s2">(</span><span class="s1">res </span><span class="s2">=&gt; </span><span class="s1">cb</span><span
+    class="s2">(</span><span class="s0">null</span><span class="s2">, </span><span class="s1">res</span><span
+    class="s2">), </span><span class="s1">cb</span><span class="s2">) : </span><span class="s1">step</span><span
+    class="s2">(</span><span class="s6">0</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s0">const </span><span class="s1">whichSync </span><span class="s2">= (</span><span
+    class="s1">cmd</span><span class="s2">, </span><span class="s1">opt</span><span class="s2">) =&gt; {</span>
+  <span class="s1">opt </span><span class="s2">= </span><span class="s1">opt </span><span class="s2">|| {}</span>
+
+  <span class="s0">const </span><span class="s2">{ </span><span class="s1">pathEnv</span><span class="s2">, </span><span
+    class="s1">pathExt</span><span class="s2">, </span><span class="s1">pathExtExe </span><span
+    class="s2">} = </span><span class="s1">getPathInfo</span><span class="s2">(</span><span class="s1">cmd</span><span
+    class="s2">, </span><span class="s1">opt</span><span class="s2">)</span>
+  <span class="s0">const </span><span class="s1">found </span><span class="s2">= []</span>
+
+  <span class="s0">for </span><span class="s2">(</span><span class="s0">let </span><span class="s1">i </span><span
+    class="s2">= </span><span class="s6">0</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&lt; </span><span
+    class="s1">pathEnv</span><span class="s2">.</span><span class="s1">length</span><span class="s2">; </span><span
+    class="s1">i </span><span class="s2">++) {</span>
+    <span class="s0">const </span><span class="s1">ppRaw </span><span class="s2">= </span><span
+    class="s1">pathEnv</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+    <span class="s0">const </span><span class="s1">pathPart </span><span class="s2">= </span><span class="s5">/^&quot;.*&quot;$/</span><span
+    class="s2">.</span><span class="s1">test</span><span class="s2">(</span><span class="s1">ppRaw</span><span
+    class="s2">) ? </span><span class="s1">ppRaw</span><span class="s2">.</span><span class="s1">slice</span><span
+    class="s2">(</span><span class="s6">1</span><span class="s2">, -</span><span class="s6">1</span><span
+    class="s2">) : </span><span class="s1">ppRaw</span>
+
+    <span class="s0">const </span><span class="s1">pCmd </span><span class="s2">= </span><span
+    class="s1">path</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span
+    class="s1">pathPart</span><span class="s2">, </span><span class="s1">cmd</span><span class="s2">)</span>
+    <span class="s0">const </span><span class="s1">p </span><span class="s2">= !</span><span class="s1">pathPart </span><span
+    class="s2">&amp;&amp; </span><span class="s5">/^\.[\\\/]/</span><span class="s2">.</span><span
+    class="s1">test</span><span class="s2">(</span><span class="s1">cmd</span><span class="s2">) ? </span><span
+    class="s1">cmd</span><span class="s2">.</span><span class="s1">slice</span><span class="s2">(</span><span
+    class="s6">0</span><span class="s2">, </span><span class="s6">2</span><span class="s2">) + </span><span class="s1">pCmd</span>
+      <span class="s2">: </span><span class="s1">pCmd</span>
+
+    <span class="s0">for </span><span class="s2">(</span><span class="s0">let </span><span class="s1">j </span><span
+    class="s2">= </span><span class="s6">0</span><span class="s2">; </span><span class="s1">j </span><span class="s2">&lt; </span><span
+    class="s1">pathExt</span><span class="s2">.</span><span class="s1">length</span><span class="s2">; </span><span
+    class="s1">j </span><span class="s2">++) {</span>
+      <span class="s0">const </span><span class="s1">cur </span><span class="s2">= </span><span
+    class="s1">p </span><span class="s2">+ </span><span class="s1">pathExt</span><span class="s2">[</span><span
+    class="s1">j</span><span class="s2">]</span>
+      <span class="s0">try </span><span class="s2">{</span>
+        <span class="s0">const </span><span class="s1">is </span><span class="s2">= </span><span class="s1">isexe</span><span
+    class="s2">.</span><span class="s1">sync</span><span class="s2">(</span><span class="s1">cur</span><span class="s2">, { </span><span
+    class="s1">pathExt</span><span class="s2">: </span><span class="s1">pathExtExe </span><span class="s2">})</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">is</span><span class="s2">) {</span>
+          <span class="s0">if </span><span class="s2">(</span><span class="s1">opt</span><span class="s2">.</span><span
+    class="s1">all</span><span class="s2">)</span>
+            <span class="s1">found</span><span class="s2">.</span><span class="s1">push</span><span
+    class="s2">(</span><span class="s1">cur</span><span class="s2">)</span>
+          <span class="s0">else</span>
+            <span class="s0">return </span><span class="s1">cur</span>
+        <span class="s2">}</span>
+      <span class="s2">} </span><span class="s0">catch </span><span class="s2">(</span><span class="s1">ex</span><span
+    class="s2">) {}</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">opt</span><span class="s2">.</span><span
+    class="s1">all </span><span class="s2">&amp;&amp; </span><span class="s1">found</span><span class="s2">.</span><span
+    class="s1">length</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s1">found</span>
+
+  <span class="s0">if </span><span class="s2">(</span><span class="s1">opt</span><span class="s2">.</span><span
+    class="s1">nothrow</span><span class="s2">)</span>
+    <span class="s0">return null</span>
+
+  <span class="s0">throw </span><span class="s1">getNotFoundError</span><span class="s2">(</span><span
+    class="s1">cmd</span><span class="s2">)</span>
+<span class="s2">}</span>
+
+<span class="s1">module</span><span class="s2">.</span><span class="s1">exports </span><span class="s2">= </span><span
+    class="s1">which</span>
+<span class="s1">which</span><span class="s2">.</span><span class="s1">sync </span><span class="s2">= </span><span
+    class="s1">whichSync</span>
+</pre>
+</body>
+</html>

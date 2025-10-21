@@ -1,0 +1,578 @@
+<html>
+<head>
+  <title>server.js</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #6aab73;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #cf8e6d;
+    }
+
+    .s3 {
+      color: #bcbec4;
+    }
+
+    .s4 {
+      color: #7a7e85;
+    }
+
+    .s5 {
+      color: #2aacb8;
+    }
+
+    .s6 {
+      color: #42c3d4;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          server.js</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">'use strict'</span>
+
+<span class="s2">var </span><span class="s1">assert </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'assert'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">https </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'https'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">http </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'http'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">tls </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'tls'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">net </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'net'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">util </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'util'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">selectHose </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'select-hose'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">transport </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'spdy-transport'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">debug </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'debug'</span><span class="s3">)(</span><span
+    class="s0">'spdy:server'</span><span class="s3">)</span>
+<span class="s2">var </span><span class="s1">EventEmitter </span><span class="s3">= </span><span
+    class="s1">require</span><span class="s3">(</span><span class="s0">'events'</span><span class="s3">).</span><span
+    class="s1">EventEmitter</span>
+
+<span class="s4">// Node.js 0.8, 0.10 and 0.12 support</span>
+<span class="s1">Object</span><span class="s3">.</span><span class="s1">assign </span><span class="s3">= </span><span
+    class="s1">process</span><span class="s3">.</span><span class="s1">versions</span><span class="s3">.</span><span
+    class="s1">modules </span><span class="s3">&gt;= </span><span class="s5">46</span>
+  <span class="s3">? </span><span class="s1">Object</span><span class="s3">.</span><span class="s1">assign </span><span
+    class="s4">// eslint-disable-next-line</span>
+  <span class="s3">: </span><span class="s1">util</span><span class="s3">.</span><span class="s1">_extend</span>
+
+<span class="s2">var </span><span class="s1">spdy </span><span class="s3">= </span><span class="s1">require</span><span
+    class="s3">(</span><span class="s0">'../spdy'</span><span class="s3">)</span>
+
+<span class="s2">var </span><span class="s1">proto </span><span class="s3">= {}</span>
+
+<span class="s2">function </span><span class="s1">instantiate </span><span class="s3">(</span><span
+    class="s1">base</span><span class="s3">) {</span>
+  <span class="s2">function </span><span class="s1">Server </span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">handler</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">_init</span><span class="s3">(</span><span
+    class="s1">base</span><span class="s3">, </span><span class="s1">options</span><span class="s3">, </span><span
+    class="s1">handler</span><span class="s3">)</span>
+  <span class="s3">}</span>
+  <span class="s1">util</span><span class="s3">.</span><span class="s1">inherits</span><span class="s3">(</span><span
+    class="s1">Server</span><span class="s3">, </span><span class="s1">base</span><span class="s3">)</span>
+
+  <span class="s1">Server</span><span class="s3">.</span><span class="s1">create </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">create </span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">handler</span><span class="s3">) {</span>
+    <span class="s2">return new </span><span class="s1">Server</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">handler</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">Object</span><span class="s3">.</span><span class="s1">keys</span><span class="s3">(</span><span
+    class="s1">proto</span><span class="s3">).</span><span class="s1">forEach</span><span class="s3">(</span><span
+    class="s2">function </span><span class="s3">(</span><span class="s1">key</span><span class="s3">) {</span>
+    <span class="s1">Server</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">[</span><span class="s1">key</span><span class="s3">] = </span><span class="s1">proto</span><span
+    class="s3">[</span><span class="s1">key</span><span class="s3">]</span>
+  <span class="s3">})</span>
+
+  <span class="s2">return </span><span class="s1">Server</span>
+<span class="s3">}</span>
+
+<span class="s1">proto</span><span class="s3">.</span><span class="s1">_init </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">_init </span><span class="s3">(</span><span class="s1">base</span><span
+    class="s3">, </span><span class="s1">options</span><span class="s3">, </span><span class="s1">handler</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= {}</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">_spdyState </span><span
+    class="s3">= </span><span class="s1">state</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">options </span><span class="s3">= </span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">spdy </span><span class="s3">|| {}</span>
+
+  <span class="s2">var </span><span class="s1">protocols </span><span class="s3">= </span><span
+    class="s1">state</span><span class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">protocols </span><span class="s3">|| [</span>
+    <span class="s0">'h2'</span><span class="s3">,</span>
+    <span class="s0">'spdy/3.1'</span><span class="s3">, </span><span class="s0">'spdy/3'</span><span
+    class="s3">, </span><span class="s0">'spdy/2'</span><span class="s3">,</span>
+    <span class="s0">'http/1.1'</span><span class="s3">, </span><span class="s0">'http/1.0'</span>
+  <span class="s3">]</span>
+
+  <span class="s2">var </span><span class="s1">actualOptions </span><span class="s3">= </span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">assign</span><span class="s3">({</span>
+    <span class="s1">NPNProtocols</span><span class="s3">: </span><span class="s1">protocols</span><span
+    class="s3">,</span>
+
+    <span class="s4">// Future-proof</span>
+    <span class="s1">ALPNProtocols</span><span class="s3">: </span><span class="s1">protocols</span>
+  <span class="s3">}, </span><span class="s1">options</span><span class="s3">)</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">secure </span><span class="s3">= </span><span
+    class="s2">this instanceof </span><span class="s1">tls</span><span class="s3">.</span><span class="s1">Server</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">secure</span><span class="s3">) {</span>
+    <span class="s1">base</span><span class="s3">.</span><span class="s1">call</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">, </span><span class="s1">actualOptions</span><span class="s3">)</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+    <span class="s1">base</span><span class="s3">.</span><span class="s1">call</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// Support HEADERS+FIN</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">httpAllowHalfOpen </span><span
+    class="s3">= </span><span class="s2">true</span>
+
+  <span class="s2">var </span><span class="s1">event </span><span class="s3">= </span><span class="s1">state</span><span
+    class="s3">.</span><span class="s1">secure </span><span class="s3">? </span><span
+    class="s0">'secureConnection' </span><span class="s3">: </span><span class="s0">'connection'</span>
+
+  <span class="s1">state</span><span class="s3">.</span><span class="s1">listeners </span><span
+    class="s3">= </span><span class="s2">this</span><span class="s3">.</span><span class="s1">listeners</span><span
+    class="s3">(</span><span class="s1">event</span><span class="s3">).</span><span class="s1">slice</span><span
+    class="s3">()</span>
+  <span class="s1">assert</span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">listeners</span><span class="s3">.</span><span class="s1">length </span><span
+    class="s3">&gt; </span><span class="s5">0</span><span class="s3">, </span><span class="s0">'Server does not have default listeners'</span><span
+    class="s3">)</span>
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">removeAllListeners</span><span
+    class="s3">(</span><span class="s1">event</span><span class="s3">)</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">options</span><span class="s3">.</span><span class="s1">plain</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s1">event</span><span class="s3">, </span><span class="s2">this</span><span class="s3">.</span><span
+    class="s1">_onPlainConnection</span><span class="s3">)</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s3">{ </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span class="s1">event</span><span class="s3">, </span><span
+    class="s2">this</span><span class="s3">.</span><span class="s1">_onConnection</span><span class="s3">) }</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">handler</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'request'</span><span class="s3">, </span><span class="s1">handler</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">debug</span><span class="s3">(</span><span class="s0">'server init secure=%d'</span><span class="s3">, </span><span
+    class="s1">state</span><span class="s3">.</span><span class="s1">secure</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s1">proto</span><span class="s3">.</span><span class="s1">_onConnection </span><span
+    class="s3">= </span><span class="s2">function </span><span class="s1">_onConnection </span><span class="s3">(</span><span
+    class="s1">socket</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s2">var </span><span class="s1">protocol</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">secure</span><span class="s3">) {</span>
+    <span class="s1">protocol </span><span class="s3">= </span><span class="s1">socket</span><span
+    class="s3">.</span><span class="s1">npnProtocol </span><span class="s3">|| </span><span
+    class="s1">socket</span><span class="s3">.</span><span class="s1">alpnProtocol</span>
+  <span class="s3">}</span>
+
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">_handleConnection</span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">, </span><span class="s1">protocol</span><span
+    class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s1">proto</span><span class="s3">.</span><span class="s1">_handleConnection </span><span
+    class="s3">= </span><span class="s2">function </span><span class="s1">_handleConnection </span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">, </span><span class="s1">protocol</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">protocol</span><span class="s3">) {</span>
+    <span class="s1">protocol </span><span class="s3">= </span><span class="s1">state</span><span
+    class="s3">.</span><span class="s1">options</span><span class="s3">.</span><span class="s1">protocol</span>
+  <span class="s3">}</span>
+
+  <span class="s1">debug</span><span class="s3">(</span><span class="s0">'incoming socket protocol=%j'</span><span
+    class="s3">, </span><span class="s1">protocol</span><span class="s3">)</span>
+
+  <span class="s4">// No way we can do anything with the socket</span>
+  <span class="s2">if </span><span class="s3">(!</span><span class="s1">protocol </span><span class="s3">|| </span><span
+    class="s1">protocol </span><span class="s3">=== </span><span class="s0">'http/1.1' </span><span
+    class="s3">|| </span><span class="s1">protocol </span><span class="s3">=== </span><span class="s0">'http/1.0'</span><span
+    class="s3">) {</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s0">'to default handler it goes'</span><span
+    class="s3">)</span>
+    <span class="s2">return this</span><span class="s3">.</span><span class="s1">_invokeDefault</span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">socket</span><span class="s3">.</span><span class="s1">setNoDelay</span><span
+    class="s3">(</span><span class="s2">true</span><span class="s3">)</span>
+
+  <span class="s2">var </span><span class="s1">connection </span><span class="s3">= </span><span
+    class="s1">transport</span><span class="s3">.</span><span class="s1">connection</span><span class="s3">.</span><span
+    class="s1">create</span><span class="s3">(</span><span class="s1">socket</span><span class="s3">, </span><span
+    class="s1">Object</span><span class="s3">.</span><span class="s1">assign</span><span class="s3">({</span>
+    <span class="s1">protocol</span><span class="s3">: </span><span class="s6">/spdy/</span><span
+    class="s3">.</span><span class="s1">test</span><span class="s3">(</span><span class="s1">protocol</span><span
+    class="s3">) ? </span><span class="s0">'spdy' </span><span class="s3">: </span><span class="s0">'http2'</span><span
+    class="s3">,</span>
+    <span class="s1">isServer</span><span class="s3">: </span><span class="s2">true</span>
+  <span class="s3">}, </span><span class="s1">state</span><span class="s3">.</span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">connection </span><span class="s3">|| {}))</span>
+
+  <span class="s4">// Set version when we are certain</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">protocol </span><span class="s3">=== </span><span
+    class="s0">'http2'</span><span class="s3">) { </span><span class="s1">connection</span><span
+    class="s3">.</span><span class="s1">start</span><span class="s3">(</span><span class="s5">4</span><span class="s3">) } </span><span
+    class="s2">else if </span><span class="s3">(</span><span class="s1">protocol </span><span
+    class="s3">=== </span><span class="s0">'spdy/3.1'</span><span class="s3">) {</span>
+    <span class="s1">connection</span><span class="s3">.</span><span class="s1">start</span><span
+    class="s3">(</span><span class="s5">3.1</span><span class="s3">)</span>
+  <span class="s3">} </span><span class="s2">else if </span><span class="s3">(</span><span
+    class="s1">protocol </span><span class="s3">=== </span><span class="s0">'spdy/3'</span><span
+    class="s3">) { </span><span class="s1">connection</span><span class="s3">.</span><span class="s1">start</span><span
+    class="s3">(</span><span class="s5">3</span><span class="s3">) } </span><span class="s2">else if </span><span
+    class="s3">(</span><span class="s1">protocol </span><span class="s3">=== </span><span
+    class="s0">'spdy/2'</span><span class="s3">) {</span>
+    <span class="s1">connection</span><span class="s3">.</span><span class="s1">start</span><span
+    class="s3">(</span><span class="s5">2</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s1">connection</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">() {</span>
+    <span class="s1">socket</span><span class="s3">.</span><span class="s1">destroy</span><span class="s3">()</span>
+  <span class="s3">})</span>
+
+  <span class="s2">var </span><span class="s1">self </span><span class="s3">= </span><span class="s2">this</span>
+  <span class="s1">connection</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'stream'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">stream</span><span class="s3">) {</span>
+    <span class="s1">self</span><span class="s3">.</span><span class="s1">_onStream</span><span class="s3">(</span><span
+    class="s1">stream</span><span class="s3">)</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s4">// HTTP2 preface</span>
+<span class="s2">var </span><span class="s1">PREFACE </span><span class="s3">= </span><span
+    class="s0">'PRI * HTTP/2.0</span><span class="s2">\r\n\r\n</span><span class="s0">SM</span><span
+    class="s2">\r\n\r\n</span><span class="s0">'</span>
+<span class="s2">var </span><span class="s1">PREFACE_BUFFER </span><span class="s3">= </span><span
+    class="s1">Buffer</span><span class="s3">.</span><span class="s1">from</span><span class="s3">(</span><span
+    class="s1">PREFACE</span><span class="s3">)</span>
+
+<span class="s2">function </span><span class="s1">hoseFilter </span><span class="s3">(</span><span
+    class="s1">data</span><span class="s3">, </span><span class="s1">callback</span><span class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">data</span><span class="s3">.</span><span
+    class="s1">length </span><span class="s3">&lt; </span><span class="s5">1</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">callback</span><span class="s3">(</span><span class="s2">null</span><span
+    class="s3">, </span><span class="s2">null</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// SPDY!</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">data</span><span class="s3">[</span><span
+    class="s5">0</span><span class="s3">] === </span><span class="s5">0x80</span><span class="s3">) { </span><span
+    class="s2">return </span><span class="s1">callback</span><span class="s3">(</span><span class="s2">null</span><span
+    class="s3">, </span><span class="s0">'spdy'</span><span class="s3">) }</span>
+
+  <span class="s2">var </span><span class="s1">avail </span><span class="s3">= </span><span class="s1">Math</span><span
+    class="s3">.</span><span class="s1">min</span><span class="s3">(</span><span class="s1">data</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">, </span><span class="s1">PREFACE_BUFFER</span><span
+    class="s3">.</span><span class="s1">length</span><span class="s3">)</span>
+  <span class="s2">for </span><span class="s3">(</span><span class="s2">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">avail</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+    <span class="s2">if </span><span class="s3">(</span><span class="s1">data</span><span class="s3">[</span><span
+    class="s1">i</span><span class="s3">] !== </span><span class="s1">PREFACE_BUFFER</span><span
+    class="s3">[</span><span class="s1">i</span><span class="s3">]) { </span><span class="s2">return </span><span
+    class="s1">callback</span><span class="s3">(</span><span class="s2">null</span><span class="s3">, </span><span
+    class="s0">'http/1.1'</span><span class="s3">) }</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// Not enough bytes to be sure about HTTP2</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">avail </span><span class="s3">!== </span><span
+    class="s1">PREFACE_BUFFER</span><span class="s3">.</span><span class="s1">length</span><span
+    class="s3">) { </span><span class="s2">return </span><span class="s1">callback</span><span class="s3">(</span><span
+    class="s2">null</span><span class="s3">, </span><span class="s2">null</span><span class="s3">) }</span>
+
+  <span class="s2">return </span><span class="s1">callback</span><span class="s3">(</span><span
+    class="s2">null</span><span class="s3">, </span><span class="s0">'h2'</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s1">proto</span><span class="s3">.</span><span class="s1">_onPlainConnection </span><span
+    class="s3">= </span><span class="s2">function </span><span class="s1">_onPlainConnection </span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">hose </span><span class="s3">= </span><span
+    class="s1">selectHose</span><span class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s1">socket</span><span class="s3">, {}, </span><span class="s1">hoseFilter</span><span class="s3">)</span>
+
+  <span class="s2">var </span><span class="s1">self </span><span class="s3">= </span><span class="s2">this</span>
+  <span class="s1">hose</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'select'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">protocol</span><span class="s3">, </span><span class="s1">socket</span><span class="s3">) {</span>
+    <span class="s1">self</span><span class="s3">.</span><span class="s1">_handleConnection</span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">, </span><span class="s1">protocol</span><span
+    class="s3">)</span>
+  <span class="s3">})</span>
+
+  <span class="s1">hose</span><span class="s3">.</span><span class="s1">on</span><span class="s3">(</span><span
+    class="s0">'error'</span><span class="s3">, </span><span class="s2">function </span><span class="s3">(</span><span
+    class="s1">err</span><span class="s3">) {</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s0">'hose error %j'</span><span
+    class="s3">, </span><span class="s1">err</span><span class="s3">.</span><span class="s1">message</span><span
+    class="s3">)</span>
+    <span class="s1">socket</span><span class="s3">.</span><span class="s1">destroy</span><span class="s3">()</span>
+  <span class="s3">})</span>
+<span class="s3">}</span>
+
+<span class="s1">proto</span><span class="s3">.</span><span class="s1">_invokeDefault </span><span
+    class="s3">= </span><span class="s2">function </span><span class="s1">_invokeDefault </span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s2">for </span><span class="s3">(</span><span class="s2">var </span><span class="s1">i </span><span
+    class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span
+    class="s1">state</span><span class="s3">.</span><span class="s1">listeners</span><span class="s3">.</span><span
+    class="s1">length</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) { </span><span
+    class="s1">state</span><span class="s3">.</span><span class="s1">listeners</span><span class="s3">[</span><span
+    class="s1">i</span><span class="s3">].</span><span class="s1">call</span><span class="s3">(</span><span class="s2">this</span><span
+    class="s3">, </span><span class="s1">socket</span><span class="s3">) }</span>
+<span class="s3">}</span>
+
+<span class="s1">proto</span><span class="s3">.</span><span class="s1">_onStream </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">_onStream </span><span class="s3">(</span><span class="s1">stream</span><span
+    class="s3">) {</span>
+  <span class="s2">var </span><span class="s1">state </span><span class="s3">= </span><span class="s2">this</span><span
+    class="s3">.</span><span class="s1">_spdyState</span>
+
+  <span class="s2">var </span><span class="s1">handle </span><span class="s3">= </span><span class="s1">spdy</span><span
+    class="s3">.</span><span class="s1">handle</span><span class="s3">.</span><span class="s1">create</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">.</span><span class="s1">_spdyState</span><span
+    class="s3">.</span><span class="s1">options</span><span class="s3">, </span><span class="s1">stream</span><span
+    class="s3">)</span>
+
+  <span class="s2">var </span><span class="s1">socketOptions </span><span class="s3">= {</span>
+    <span class="s1">handle</span><span class="s3">: </span><span class="s1">handle</span><span class="s3">,</span>
+    <span class="s1">allowHalfOpen</span><span class="s3">: </span><span class="s2">true</span>
+  <span class="s3">}</span>
+
+  <span class="s2">var </span><span class="s1">socket</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">state</span><span class="s3">.</span><span
+    class="s1">secure</span><span class="s3">) {</span>
+    <span class="s1">socket </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">spdy</span><span class="s3">.</span><span class="s1">Socket</span><span class="s3">(</span><span
+    class="s1">stream</span><span class="s3">.</span><span class="s1">connection</span><span class="s3">.</span><span
+    class="s1">socket</span><span class="s3">, </span><span class="s1">socketOptions</span><span class="s3">)</span>
+  <span class="s3">} </span><span class="s2">else </span><span class="s3">{</span>
+    <span class="s1">socket </span><span class="s3">= </span><span class="s2">new </span><span
+    class="s1">net</span><span class="s3">.</span><span class="s1">Socket</span><span class="s3">(</span><span
+    class="s1">socketOptions</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// This is needed because the `error` listener, added by the default</span>
+  <span class="s4">// `connection` listener, no longer has bound arguments. It relies instead</span>
+  <span class="s4">// on the `server` property of the socket. See https://github.com/nodejs/node/pull/11926</span>
+  <span class="s4">// for more details.</span>
+  <span class="s4">// This is only done for Node.js &gt;= 4 in order to not break compatibility</span>
+  <span class="s4">// with older versions of the platform.</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">process</span><span class="s3">.</span><span
+    class="s1">versions</span><span class="s3">.</span><span class="s1">modules </span><span
+    class="s3">&gt;= </span><span class="s5">46</span><span class="s3">) { </span><span class="s1">socket</span><span
+    class="s3">.</span><span class="s1">server </span><span class="s3">= </span><span class="s2">this </span><span
+    class="s3">}</span>
+
+  <span class="s1">handle</span><span class="s3">.</span><span class="s1">assignSocket</span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">)</span>
+
+  <span class="s4">// For v0.8</span>
+  <span class="s1">socket</span><span class="s3">.</span><span class="s1">readable </span><span
+    class="s3">= </span><span class="s2">true</span>
+  <span class="s1">socket</span><span class="s3">.</span><span class="s1">writable </span><span
+    class="s3">= </span><span class="s2">true</span>
+
+  <span class="s2">this</span><span class="s3">.</span><span class="s1">_invokeDefault</span><span
+    class="s3">(</span><span class="s1">socket</span><span class="s3">)</span>
+
+  <span class="s4">// For v0.8, 0.10 and 0.12</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">process</span><span class="s3">.</span><span
+    class="s1">versions</span><span class="s3">.</span><span class="s1">modules </span><span
+    class="s3">&lt; </span><span class="s5">46</span><span class="s3">) {</span>
+    <span class="s4">// eslint-disable-next-line</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">listenerCount </span><span
+    class="s3">= </span><span class="s1">EventEmitter</span><span class="s3">.</span><span
+    class="s1">listenerCount</span><span class="s3">.</span><span class="s1">bind</span><span class="s3">(</span><span
+    class="s2">this</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s4">// Add lazy `checkContinue` listener, otherwise `res.writeContinue` will be</span>
+  <span class="s4">// called before the response object was patched by us.</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">stream</span><span class="s3">.</span><span
+    class="s1">headers</span><span class="s3">.</span><span class="s1">expect </span><span class="s3">!== </span><span
+    class="s1">undefined </span><span class="s3">&amp;&amp;</span>
+      <span class="s6">/100-continue/i</span><span class="s3">.</span><span class="s1">test</span><span
+    class="s3">(</span><span class="s1">stream</span><span class="s3">.</span><span class="s1">headers</span><span
+    class="s3">.</span><span class="s1">expect</span><span class="s3">) &amp;&amp;</span>
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">listenerCount</span><span
+    class="s3">(</span><span class="s0">'checkContinue'</span><span class="s3">) === </span><span
+    class="s5">0</span><span class="s3">) {</span>
+    <span class="s2">this</span><span class="s3">.</span><span class="s1">once</span><span class="s3">(</span><span
+    class="s0">'checkContinue'</span><span class="s3">, </span><span class="s2">function </span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span class="s3">) {</span>
+      <span class="s1">res</span><span class="s3">.</span><span class="s1">writeContinue</span><span
+    class="s3">()</span>
+
+      <span class="s2">this</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">(</span><span
+    class="s0">'request'</span><span class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span
+    class="s1">res</span><span class="s3">)</span>
+    <span class="s3">})</span>
+  <span class="s3">}</span>
+
+  <span class="s1">handle</span><span class="s3">.</span><span class="s1">emitRequest</span><span class="s3">()</span>
+<span class="s3">}</span>
+
+<span class="s1">proto</span><span class="s3">.</span><span class="s1">emit </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">emit </span><span class="s3">(</span><span class="s1">event</span><span
+    class="s3">, </span><span class="s1">req</span><span class="s3">, </span><span class="s1">res</span><span
+    class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">event </span><span class="s3">!== </span><span
+    class="s0">'request' </span><span class="s3">&amp;&amp; </span><span class="s1">event </span><span
+    class="s3">!== </span><span class="s0">'checkContinue'</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">emit</span><span class="s3">.</span><span class="s1">apply</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span class="s1">arguments</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s2">if </span><span class="s3">(!(</span><span class="s1">req</span><span class="s3">.</span><span
+    class="s1">socket</span><span class="s3">.</span><span class="s1">_handle </span><span class="s2">instanceof </span><span
+    class="s1">spdy</span><span class="s3">.</span><span class="s1">handle</span><span class="s3">)) {</span>
+    <span class="s1">debug</span><span class="s3">(</span><span class="s0">'not spdy req/res'</span><span
+    class="s3">)</span>
+    <span class="s1">req</span><span class="s3">.</span><span class="s1">isSpdy </span><span class="s3">= </span><span
+    class="s2">false</span>
+    <span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion </span><span
+    class="s3">= </span><span class="s5">1</span>
+    <span class="s1">res</span><span class="s3">.</span><span class="s1">isSpdy </span><span class="s3">= </span><span
+    class="s2">false</span>
+    <span class="s1">res</span><span class="s3">.</span><span class="s1">spdyVersion </span><span
+    class="s3">= </span><span class="s5">1</span>
+    <span class="s2">return </span><span class="s1">EventEmitter</span><span class="s3">.</span><span class="s1">prototype</span><span
+    class="s3">.</span><span class="s1">emit</span><span class="s3">.</span><span class="s1">apply</span><span
+    class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span class="s1">arguments</span><span
+    class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s2">var </span><span class="s1">handle </span><span class="s3">= </span><span class="s1">req</span><span
+    class="s3">.</span><span class="s1">connection</span><span class="s3">.</span><span class="s1">_handle</span>
+
+  <span class="s1">req</span><span class="s3">.</span><span class="s1">isSpdy </span><span class="s3">= </span><span
+    class="s2">true</span>
+  <span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion </span><span
+    class="s3">= </span><span class="s1">handle</span><span class="s3">.</span><span class="s1">getStream</span><span
+    class="s3">().</span><span class="s1">connection</span><span class="s3">.</span><span
+    class="s1">getVersion</span><span class="s3">()</span>
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">isSpdy </span><span class="s3">= </span><span
+    class="s2">true</span>
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">spdyVersion </span><span
+    class="s3">= </span><span class="s1">req</span><span class="s3">.</span><span class="s1">spdyVersion</span>
+  <span class="s1">req</span><span class="s3">.</span><span class="s1">spdyStream </span><span class="s3">= </span><span
+    class="s1">handle</span><span class="s3">.</span><span class="s1">getStream</span><span class="s3">()</span>
+
+  <span class="s1">debug</span><span class="s3">(</span><span class="s0">'override req/res'</span><span
+    class="s3">)</span>
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">writeHead </span><span class="s3">= </span><span
+    class="s1">spdy</span><span class="s3">.</span><span class="s1">response</span><span class="s3">.</span><span
+    class="s1">writeHead</span>
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">end </span><span class="s3">= </span><span
+    class="s1">spdy</span><span class="s3">.</span><span class="s1">response</span><span class="s3">.</span><span
+    class="s1">end</span>
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">push </span><span class="s3">= </span><span
+    class="s1">spdy</span><span class="s3">.</span><span class="s1">response</span><span class="s3">.</span><span
+    class="s1">push</span>
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">writeContinue </span><span
+    class="s3">= </span><span class="s1">spdy</span><span class="s3">.</span><span class="s1">response</span><span
+    class="s3">.</span><span class="s1">writeContinue</span>
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">spdyStream </span><span class="s3">= </span><span
+    class="s1">handle</span><span class="s3">.</span><span class="s1">getStream</span><span class="s3">()</span>
+
+  <span class="s1">res</span><span class="s3">.</span><span class="s1">_req </span><span class="s3">= </span><span
+    class="s1">req</span>
+
+  <span class="s1">handle</span><span class="s3">.</span><span class="s1">assignRequest</span><span
+    class="s3">(</span><span class="s1">req</span><span class="s3">)</span>
+  <span class="s1">handle</span><span class="s3">.</span><span class="s1">assignResponse</span><span class="s3">(</span><span
+    class="s1">res</span><span class="s3">)</span>
+
+  <span class="s2">return </span><span class="s1">EventEmitter</span><span class="s3">.</span><span
+    class="s1">prototype</span><span class="s3">.</span><span class="s1">emit</span><span class="s3">.</span><span
+    class="s1">apply</span><span class="s3">(</span><span class="s2">this</span><span class="s3">, </span><span
+    class="s1">arguments</span><span class="s3">)</span>
+<span class="s3">}</span>
+
+<span class="s1">exports</span><span class="s3">.</span><span class="s1">Server </span><span class="s3">= </span><span
+    class="s1">instantiate</span><span class="s3">(</span><span class="s1">https</span><span class="s3">.</span><span
+    class="s1">Server</span><span class="s3">)</span>
+<span class="s1">exports</span><span class="s3">.</span><span class="s1">PlainServer </span><span
+    class="s3">= </span><span class="s1">instantiate</span><span class="s3">(</span><span class="s1">http</span><span
+    class="s3">.</span><span class="s1">Server</span><span class="s3">)</span>
+
+<span class="s1">exports</span><span class="s3">.</span><span class="s1">create </span><span class="s3">= </span><span
+    class="s2">function </span><span class="s1">create </span><span class="s3">(</span><span class="s1">base</span><span
+    class="s3">, </span><span class="s1">options</span><span class="s3">, </span><span class="s1">handler</span><span
+    class="s3">) {</span>
+  <span class="s2">if </span><span class="s3">(</span><span class="s2">typeof </span><span class="s1">base </span><span
+    class="s3">=== </span><span class="s0">'object'</span><span class="s3">) {</span>
+    <span class="s1">handler </span><span class="s3">= </span><span class="s1">options</span>
+    <span class="s1">options </span><span class="s3">= </span><span class="s1">base</span>
+    <span class="s1">base </span><span class="s3">= </span><span class="s2">null</span>
+  <span class="s3">}</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">base</span><span class="s3">) {</span>
+    <span class="s2">return </span><span class="s1">instantiate</span><span class="s3">(</span><span
+    class="s1">base</span><span class="s3">).</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">handler</span><span class="s3">)</span>
+  <span class="s3">}</span>
+
+  <span class="s2">if </span><span class="s3">(</span><span class="s1">options</span><span class="s3">.</span><span
+    class="s1">spdy </span><span class="s3">&amp;&amp; </span><span class="s1">options</span><span
+    class="s3">.</span><span class="s1">spdy</span><span class="s3">.</span><span class="s1">plain</span><span
+    class="s3">) { </span><span class="s2">return </span><span class="s1">exports</span><span class="s3">.</span><span
+    class="s1">PlainServer</span><span class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">handler</span><span class="s3">) } </span><span
+    class="s2">else </span><span class="s3">{</span>
+    <span class="s2">return </span><span class="s1">exports</span><span class="s3">.</span><span
+    class="s1">Server</span><span class="s3">.</span><span class="s1">create</span><span class="s3">(</span><span
+    class="s1">options</span><span class="s3">, </span><span class="s1">handler</span><span class="s3">)</span>
+  <span class="s3">}</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>

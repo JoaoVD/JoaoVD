@@ -1,0 +1,211 @@
+<html>
+<head>
+  <title>events.d.ts</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    .s0 {
+      color: #cf8e6d;
+    }
+
+    .s1 {
+      color: #bcbec4;
+    }
+
+    .s2 {
+      color: #bcbec4;
+    }
+
+    .s3 {
+      color: #2aacb8;
+    }
+  </style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060">
+  <tr>
+    <td>
+      <center>
+        <font face="Arial, Helvetica" color="#000000">
+          events.d.ts</font>
+      </center>
+    </td>
+  </tr>
+</table>
+<pre><span class="s0">export </span><span class="s2">{};</span>
+
+<span class="s0">interface </span><span class="s1">AddEventListenerOptions </span><span class="s0">extends </span><span
+    class="s1">EventListenerOptions </span><span class="s2">{</span>
+    <span class="s1">once</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">passive</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">signal</span><span class="s2">?: </span><span class="s1">AbortSignal</span><span
+    class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">type _CustomEvent</span><span class="s2">&lt;</span><span class="s1">T </span><span
+    class="s2">= </span><span class="s1">any</span><span class="s2">&gt; = </span><span class="s0">typeof </span><span
+    class="s1">globalThis </span><span class="s0">extends </span><span class="s2">{ </span><span
+    class="s1">onmessage</span><span class="s2">: </span><span class="s1">any </span><span
+    class="s2">} ? {} : </span><span class="s1">CustomEvent</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt;;</span>
+<span class="s0">interface </span><span class="s1">CustomEvent</span><span class="s2">&lt;</span><span
+    class="s1">T </span><span class="s2">= </span><span class="s1">any</span><span class="s2">&gt; </span><span
+    class="s0">extends </span><span class="s1">Event </span><span class="s2">{</span>
+    <span class="s1">readonly detail</span><span class="s2">: </span><span class="s1">T</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">CustomEventInit</span><span class="s2">&lt;</span><span
+    class="s1">T </span><span class="s2">= </span><span class="s1">any</span><span class="s2">&gt; </span><span
+    class="s0">extends </span><span class="s1">EventInit </span><span class="s2">{</span>
+    <span class="s1">detail</span><span class="s2">?: </span><span class="s1">T</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">type _Event </span><span class="s2">= </span><span class="s0">typeof </span><span
+    class="s1">globalThis </span><span class="s0">extends </span><span class="s2">{ </span><span
+    class="s1">onmessage</span><span class="s2">: </span><span class="s1">any </span><span
+    class="s2">} ? {} : </span><span class="s1">Event</span><span class="s2">;</span>
+<span class="s0">interface </span><span class="s1">Event </span><span class="s2">{</span>
+    <span class="s1">readonly bubbles</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">cancelBubble</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">readonly cancelable</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">readonly composed</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">readonly currentTarget</span><span class="s2">: </span><span class="s1">EventTarget </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">;</span>
+    <span class="s1">readonly defaultPrevented</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">readonly eventPhase</span><span class="s2">: </span><span class="s3">0 </span><span
+    class="s2">| </span><span class="s3">2</span><span class="s2">;</span>
+    <span class="s1">readonly isTrusted</span><span class="s2">: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">returnValue</span><span class="s2">: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">readonly srcElement</span><span class="s2">: </span><span class="s1">EventTarget </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">;</span>
+    <span class="s1">readonly target</span><span class="s2">: </span><span class="s1">EventTarget </span><span
+    class="s2">| </span><span class="s0">null</span><span class="s2">;</span>
+    <span class="s1">readonly timeStamp</span><span class="s2">: </span><span class="s1">number</span><span
+    class="s2">;</span>
+    <span class="s1">readonly type</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">;</span>
+    <span class="s1">composedPath</span><span class="s2">(): [</span><span class="s1">EventTarget</span><span
+    class="s2">?];</span>
+    <span class="s1">initEvent</span><span class="s2">(</span><span class="s1">type</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span class="s1">bubbles</span><span
+    class="s2">?: </span><span class="s1">boolean</span><span class="s2">, </span><span
+    class="s1">cancelable</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">preventDefault</span><span class="s2">(): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">stopImmediatePropagation</span><span class="s2">(): </span><span class="s0">void</span><span
+    class="s2">;</span>
+    <span class="s1">stopPropagation</span><span class="s2">(): </span><span class="s0">void</span><span
+    class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">EventInit </span><span class="s2">{</span>
+    <span class="s1">bubbles</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+    <span class="s1">cancelable</span><span class="s2">?: </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">composed</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">EventListener </span><span class="s2">{</span>
+    <span class="s2">(</span><span class="s1">evt</span><span class="s2">: </span><span class="s1">Event</span><span
+    class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s0">interface </span><span class="s1">EventListenerObject </span><span class="s2">{</span>
+    <span class="s1">handleEvent</span><span class="s2">(</span><span class="s1">object</span><span class="s2">: </span><span
+    class="s1">Event</span><span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">type _EventListenerOptions </span><span class="s2">= </span><span class="s0">typeof </span><span
+    class="s1">globalThis </span><span class="s0">extends </span><span class="s2">{ </span><span
+    class="s1">onmessage</span><span class="s2">: </span><span class="s1">any </span><span
+    class="s2">} ? {} : </span><span class="s1">EventListenerOptions</span><span class="s2">;</span>
+<span class="s0">interface </span><span class="s1">EventListenerOptions </span><span class="s2">{</span>
+    <span class="s1">capture</span><span class="s2">?: </span><span class="s1">boolean</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">type _EventTarget </span><span class="s2">= </span><span class="s0">typeof </span><span class="s1">globalThis </span><span
+    class="s0">extends </span><span class="s2">{ </span><span class="s1">onmessage</span><span class="s2">: </span><span
+    class="s1">any </span><span class="s2">} ? {} : </span><span class="s1">EventTarget</span><span class="s2">;</span>
+<span class="s0">interface </span><span class="s1">EventTarget </span><span class="s2">{</span>
+    <span class="s1">addEventListener</span><span class="s2">(</span>
+        <span class="s1">type</span><span class="s2">: </span><span class="s1">string</span><span class="s2">,</span>
+        <span class="s1">listener</span><span class="s2">: </span><span class="s1">EventListener </span><span
+    class="s2">| </span><span class="s1">EventListenerObject</span><span class="s2">,</span>
+        <span class="s1">options</span><span class="s2">?: </span><span class="s1">AddEventListenerOptions </span><span
+    class="s2">| </span><span class="s1">boolean</span><span class="s2">,</span>
+    <span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+    <span class="s1">dispatchEvent</span><span class="s2">(</span><span class="s1">event</span><span
+    class="s2">: </span><span class="s1">Event</span><span class="s2">): </span><span class="s1">boolean</span><span
+    class="s2">;</span>
+    <span class="s1">removeEventListener</span><span class="s2">(</span>
+        <span class="s1">type</span><span class="s2">: </span><span class="s1">string</span><span class="s2">,</span>
+        <span class="s1">listener</span><span class="s2">: </span><span class="s1">EventListener </span><span
+    class="s2">| </span><span class="s1">EventListenerObject</span><span class="s2">,</span>
+        <span class="s1">options</span><span class="s2">?: </span><span class="s1">EventListenerOptions </span><span
+    class="s2">| </span><span class="s1">boolean</span><span class="s2">,</span>
+    <span class="s2">): </span><span class="s0">void</span><span class="s2">;</span>
+<span class="s2">}</span>
+
+<span class="s1">declare global </span><span class="s2">{</span>
+    <span class="s0">interface </span><span class="s1">CustomEvent</span><span class="s2">&lt;</span><span
+    class="s1">T </span><span class="s2">= </span><span class="s1">any</span><span class="s2">&gt; </span><span
+    class="s0">extends </span><span class="s1">_CustomEvent</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt; {}</span>
+    <span class="s0">var </span><span class="s1">CustomEvent</span><span class="s2">: </span><span
+    class="s0">typeof </span><span class="s1">globalThis </span><span class="s0">extends </span><span
+    class="s2">{ </span><span class="s1">onmessage</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">; </span><span class="s1">CustomEvent</span><span class="s2">: </span><span
+    class="s1">infer T </span><span class="s2">} ? </span><span class="s1">T</span>
+        <span class="s2">: {</span>
+            <span class="s1">prototype</span><span class="s2">: </span><span class="s1">CustomEvent</span><span
+    class="s2">;</span>
+            <span class="s0">new</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;(</span><span class="s1">type</span><span class="s2">: </span><span class="s1">string</span><span
+    class="s2">, </span><span class="s1">eventInitDict</span><span class="s2">?: </span><span
+    class="s1">CustomEventInit</span><span class="s2">&lt;</span><span class="s1">T</span><span
+    class="s2">&gt;): </span><span class="s1">CustomEvent</span><span class="s2">&lt;</span><span
+    class="s1">T</span><span class="s2">&gt;;</span>
+        <span class="s2">};</span>
+
+    <span class="s0">interface </span><span class="s1">Event </span><span class="s0">extends </span><span class="s1">_Event </span><span
+    class="s2">{}</span>
+    <span class="s0">var </span><span class="s1">Event</span><span class="s2">: </span><span
+    class="s0">typeof </span><span class="s1">globalThis </span><span class="s0">extends </span><span
+    class="s2">{ </span><span class="s1">onmessage</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">; </span><span class="s1">Event</span><span class="s2">: </span><span class="s1">infer T </span><span
+    class="s2">} ? </span><span class="s1">T</span>
+        <span class="s2">: {</span>
+            <span class="s1">prototype</span><span class="s2">: </span><span class="s1">Event</span><span
+    class="s2">;</span>
+            <span class="s0">new</span><span class="s2">(</span><span class="s1">type</span><span
+    class="s2">: </span><span class="s1">string</span><span class="s2">, </span><span
+    class="s1">eventInitDict</span><span class="s2">?: </span><span class="s1">EventInit</span><span
+    class="s2">): </span><span class="s1">Event</span><span class="s2">;</span>
+        <span class="s2">};</span>
+
+    <span class="s0">interface </span><span class="s1">EventListenerOptions </span><span class="s0">extends </span><span
+    class="s1">_EventListenerOptions </span><span class="s2">{}</span>
+
+    <span class="s0">interface </span><span class="s1">EventTarget </span><span class="s0">extends </span><span
+    class="s1">_EventTarget </span><span class="s2">{}</span>
+    <span class="s0">var </span><span class="s1">EventTarget</span><span class="s2">: </span><span
+    class="s0">typeof </span><span class="s1">globalThis </span><span class="s0">extends </span><span
+    class="s2">{ </span><span class="s1">onmessage</span><span class="s2">: </span><span class="s1">any</span><span
+    class="s2">; </span><span class="s1">EventTarget</span><span class="s2">: </span><span
+    class="s1">infer T </span><span class="s2">} ? </span><span class="s1">T</span>
+        <span class="s2">: {</span>
+            <span class="s1">prototype</span><span class="s2">: </span><span class="s1">EventTarget</span><span
+    class="s2">;</span>
+            <span class="s0">new</span><span class="s2">(): </span><span class="s1">EventTarget</span><span
+    class="s2">;</span>
+        <span class="s2">};</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>
