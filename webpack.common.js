@@ -1,4 +1,4 @@
-// webpack.common.js - VERSÃO CORRIGIDA PARA NW.js
+// webpack.common.js - VERSÃO FINAL E CORRIGIDA
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -28,7 +28,6 @@ module.exports = {
         // Copia a pasta 'views' (com caixa.html, etc.)
         {from: './views', to: './views'},
 
-        // --- ADIÇÃO CRÍTICA AQUI ---
         // Copia a pasta 'css' (com style.css)
         {from: './css', to: './css'}
       ]

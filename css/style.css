@@ -305,6 +305,52 @@ button, input, select {
   background-color: #c82333;
 }
 
+/* --- ESTILOS PARA ABAS DE CATEGORIA --- */
+
+.categoria-nav {
+  display: flex;
+  gap: 5px; /* Espaço entre as abas */
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--primary-color); /* Linha abaixo das abas */
+  padding-bottom: 5px;
+}
+
+.categoria-tab-btn {
+  padding: 8px 20px;
+  background-color: #e2e6ea; /* Cor inativa */
+  color: var(--secondary-color);
+  border: 1px solid var(--border-color);
+  border-bottom: none; /* Remove borda inferior */
+  border-radius: 5px 5px 0 0; /* Arredonda cantos superiores */
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.categoria-tab-btn:hover {
+  background-color: #ced4da;
+}
+
+.categoria-tab-btn.active {
+  background-color: var(--primary-color); /* Cor ativa */
+  color: var(--white-color);
+  border-color: var(--primary-color);
+}
+
+/* Garante que a grid de exibição ocupe o espaço */
+#produtos-exibicao-grid {
+  margin-top: 0; /* Remove margem superior se houver */
+}
+
+/* Adapta a mensagem de 'carregando/vazio' */
+#produtos-exibicao-grid p {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--secondary-color);
+  font-style: italic;
+  padding: 20px 0;
+}
 
 /* --- Estilos do Modal de Pagamento --- */
 .modal-overlay {
@@ -711,6 +757,55 @@ h2 {
   background-color: #1c5e3a;
 }
 
+/* --- ESTILOS DA ZONA DE PERIGO E MODAL DE RESET --- */
+
+.danger-zone {
+  margin-top: 50px;
+  padding: 20px;
+  border: 2px solid var(--danger-color); /* Borda vermelha */
+  border-radius: 8px;
+  background-color: #f8d7da; /* Fundo avermelhado claro */
+  text-align: center;
+}
+
+.danger-zone h3 {
+  color: var(--danger-color); /* Título em vermelho */
+  margin-top: 0;
+}
+
+.btn-reset {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--danger-color); /* Fundo vermelho */
+  color: var(--white-color); /* Texto branco */
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-reset:hover {
+  background-color: #c82333; /* Vermelho mais escuro no hover */
+}
+
+/* Estilo para o botão de confirmação final quando desabilitado */
+#btn-confirmar-reset-final:disabled {
+  background-color: var(--secondary-color); /* Cinza quando desabilitado */
+  cursor: not-allowed;
+}
+
+/* Ajuste no título do modal de reset */
+#modal-reset .modal-conteudo h2 {
+  color: var(--danger-color); /* Título do modal em vermelho */
+}
+
+/* Ajuste no botão de logout para usar o mesmo estilo */
+#btn-logout {
+  padding: 8px 15px; /* Ajuste o padding se necessário */
+  font-size: 0.9rem; /* Ajuste o tamanho da fonte se necessário */
+  /* Herda o estilo .btn-reset */
+}
+
 /* --- ESTILOS PARA IMPRESSÃO DO RECIBO --- */
 
 /* Esconde a área do recibo na visualização normal da tela */
@@ -757,7 +852,7 @@ h2 {
   /* Estilos de fonte e espaçamento para o recibo */
   #recibo-content {
     font-family: 'Consolas', 'Courier New', monospace; /* Fonte monoespaçada */
-    font-size: 8pt; /* Tamanho pequeno comum em recibos */
+    font-size: 16pt; /* Tamanho pequeno comum em recibos */
     color: #000;
     line-height: 1.4;
   }
@@ -786,17 +881,14 @@ h2 {
     border-collapse: collapse;
     margin: 5px 0;
   }
-
   .recibo-table thead {
     border-top: 1px dashed #000;
     border-bottom: 1px dashed #000;
   }
-
   .recibo-table th, .recibo-table td {
     padding: 3px 1px; /* Espaçamento interno das células */
     vertical-align: top; /* Alinha texto no topo se quebrar linha */
   }
-
   /* Alinhamentos específicos das colunas */
   .recibo-table th:first-child, .recibo-table td:first-child {
     text-align: left;
@@ -818,15 +910,15 @@ h2 {
   }
 
   /* Total */
+
   /* Estilos dos totais */
   .recibo-totais {
     margin-top: 10px;
   }
-
   .total-linha {
     display: flex;
     justify-content: space-between;
-    font-size: 9pt;
+    font-size: 12pt;
     margin: 2px 0;
   }
 
